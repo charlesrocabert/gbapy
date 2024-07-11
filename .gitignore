@@ -1,5 +1,8 @@
-# Macos polluting files
-*.DS_store
+# Macos polluting files and home scripts
+*.DS_Store
+*.Rhistory
+*.Rapp.history
+clean_folders.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
