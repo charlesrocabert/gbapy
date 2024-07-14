@@ -27,20 +27,6 @@ def parse_arguments():
     args = parser.parse_args()
     return(vars(args))
 
-### Dump the model in a binary file ###
-def dump_model( gba_model, model_name ):
-    filename = "./binary_models/"+model_name+".gba"
-    ofile = open(filename, "wb")
-    dill.dump(gba_model, ofile)
-    ofile.close()
-    assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
-
-### Load a model and dump the binary backup ###
-def load_and_backup_model( model_name ):
-    model = GBA_model()
-    model.load_model("./csv_models/", model_name)
-    dump_model(model, model_name)
-
 
 ##################
 #      MAIN      #
