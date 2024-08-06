@@ -675,7 +675,10 @@ class GBA_model:
             print("    • Positive c: " + str(test2))
             print("    • Positive p: " + str(test3))
             self.consistent = False
-
+    ######################
+    #   Export methods   #
+    ######################
+    
     ######################
     #   Export methods   #
     ######################
