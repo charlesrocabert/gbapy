@@ -36,12 +36,12 @@ def saveValues(model,condition,nameOfCSV=None):
   }
   dict_arrays_str = {k: [str(v)] for k, v in dict_arrays.items()}
 
-  # Erstellen des DataFrames
-  df = pd.DataFrame(dict_arrays_str)
+  df = pd.DataFrame(dict_arrays_str)                                                           # Erstellen des DataFrames
 
-  # Speichern des DataFrames als CSV
-  df.to_csv("Values_at_Max "+model.model_name+" "+condition+".csv", sep=',', index=False)
-
+  if(nameOfCSV is None):
+    df.to_csv("Values_at_Max "+model.model_name+" "+condition+".csv", sep=',', index=False)   # Save CSV with autom. File name
+  else:
+    df.to_csv( nameOfCSVcsv , sep=',', index=False)                                           # Save CSV with own File name
   print(df)
 
  
@@ -112,17 +112,17 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
     #print("no Mu alterations: ",mu_alterationCounter)
     print("current gradient :", model.GCC_f)
     print("current protein",model.p)
-    print("current Biomassfraction b ", model.b)
     print("current Fluxvector ", model.v)
+    print("current Tau for protein calc" , model.tau_j)
 
     #print("current Metabolite :",model.c)
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
     model.set_f(next_f)
+    model.calculate()
     model.v[ model.v < 0 ] = 1e-10                           # enforce positive flux
     model.p[ model.p < 0 ] = 1e-10                           # enforce positive protein
-    model.calculate()
 
 
                                                              #calculate everything
@@ -153,6 +153,6 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
   print ("Maximum was found, Model is consistent")
   return
 
-trajectory(model_name="D",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
+trajectory(model_name="A",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
 
 
