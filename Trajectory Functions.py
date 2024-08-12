@@ -17,6 +17,12 @@ def load_model( model_name ):
     ifile.close()
     return model
 
+### draw a random normaldistributed number
+def drawNoise():
+    noise = np.random.normal(0,1)
+    return noise
+
+### save Values of model in CSV-Files
 def saveValues(model,condition,nameOfCSV=None):
   dict_arrays = {
     "Max_growthrate": model.mu,
@@ -59,7 +65,7 @@ def plotTrajectory(timestamps, muRates):
   print(np.max(mu))
   return 
 
-######
+###### Trajectory without Noise
 def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_changeRate=0.1,nameOfCSV=None):
   model = load_model(model_name)      #load and run model
   model.set_condition(condition)      #set condition of model
@@ -70,7 +76,7 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
   t = 0                              # time
   previous_mu = model.mu
   mu_alterationCounter = 0              #setup counter for error criteria
-  consistent_f = np.copy(model.f_trunc) # safes consistent_f
+  consistent_f = np.copy(model.f_trunc) # saves consistent_f
   next_f = np.copy(model.f_trunc)     # the f_trunc, that we are going to change
   allGCC_F = [model.GCC_f[1:]]       # to collect all previous GCC_f (just for checking the change of GCC_f)
 
@@ -103,15 +109,23 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
        next_f[next_f < 0] = 1e-10
        #print("next_f after neg.correction:", next_f)
 
-    print("no Mu alterations: ",mu_alterationCounter)
-    #print("current gradient :", model.GCC_f)
+    #print("no Mu alterations: ",mu_alterationCounter)
+    print("current gradient :", model.GCC_f)
     print("current protein",model.p)
+    print("current Biomassfraction b ", model.b)
+    print("current Fluxvector ", model.v)
+
     #print("current Metabolite :",model.c)
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
     model.set_f(next_f)
-    model.calculate()                                                             #calculate everything
+    model.v[ model.v < 0 ] = 1e-10                           # enforce positive flux
+    model.p[ model.p < 0 ] = 1e-10                           # enforce positive protein
+    model.calculate()
+
+
+                                                             #calculate everything
     model.check_model_consistency()                                               #check consistency
 
     if (model.consistent):
@@ -137,7 +151,8 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
   saveValues(model,condition)
   
   print ("Maximum was found, Model is consistent")
-  return 
+  return
 
-trajectory(model_name="EC12b",condition="2",max_time=5,first_dt = 0.01,dt_changeRate=0.1)
+trajectory(model_name="D",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
+
 
