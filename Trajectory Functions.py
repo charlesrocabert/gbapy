@@ -17,10 +17,6 @@ def load_model( model_name ):
     ifile.close()
     return model
 
-### draw a random normaldistributed number
-def drawNoise():
-    noise = np.random.normal(0,1)
-    return noise
 
 ### save Values of model in CSV-Files
 def saveValues(model,condition,nameOfCSV=None):
@@ -39,22 +35,16 @@ def saveValues(model,condition,nameOfCSV=None):
   df = pd.DataFrame(dict_arrays_str)                                                           # Erstellen des DataFrames
 
   if(nameOfCSV is None):
-    df.to_csv("Values_at_Max "+model.model_name+" "+condition+".csv", sep=',', index=False)   # Save CSV with autom. File name
+      df.to_csv(model.model_name +" "+ condition + " Values_at_Max.csv", sep=',', index=False)       # Save CSV with autom. File name
   else:
-    df.to_csv( nameOfCSVcsv , sep=',', index=False)                                           # Save CSV with own File name
+    df.to_csv( nameOfCSV , sep=',', index=False)                                           # Save CSV with own File name
   print(df)
 
  
 def plotTrajectory(timestamps, muRates):
-  # Daten für die Zeitachse
-  t = timestamps  # 100 Zeitpunkte von 0 bis 10
-
-  # Daten für die Y-Achse (Beispiel: Sinusfunktion)
-  mu = muRates
-
   # Erstellung des Plots
   plt.figure(figsize=(8, 6))  # Größe des Diagramms festlegen
-  plt.plot(t, mu, label='mu(t)')  # Plot der Daten
+  plt.plot(timestamps, muRates, label='mu(t)')  # Plot der Daten
   plt.xlabel('Time')  # Beschriftung der X-Achse
   plt.ylabel('mu')    # Beschriftung der Y-Achse
   plt.title('Plot of mu against Time')  # Titel des Diagramms
@@ -62,7 +52,7 @@ def plotTrajectory(timestamps, muRates):
   plt.legend()        # Legende hinzufügen
   plt.show()          # Diagramm anzeigen
   print("max μ rate :")
-  print(np.max(mu))
+  print(np.max(muRates))
   return 
 
 ###### Trajectory without Noise
@@ -97,12 +87,10 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
     else:
         mu_alterationCounter = 0
 
-    if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT):
+    if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):
         plotTrajectory(timestamps, y_muRates)
         saveValues(model,condition,nameOfCSV)
-        raise AssertionError("trajectory was stopped, because the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
-
-        break
+        raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
     if np.any(next_f < 0):                                                            #negative value correction
        #print("next_f before neg.correction:", next_f)
@@ -153,6 +141,6 @@ def trajectory(model_name="A",condition="1",max_time=5,first_dt = 0.01,dt_change
   print ("Maximum was found, Model is consistent")
   return
 
-trajectory(model_name="A",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
+trajectory(model_name="B",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
 
 

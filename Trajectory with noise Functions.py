@@ -146,6 +146,6 @@ def trajectoryWithNoise(model_name="A",condition="1",max_time=5,first_dt = 0.01,
   print ("Maximum was found, Model is consistent")
   return 
 
-trajectoryWithNoise(model_name="A",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
+trajectoryWithNoise(model_name="EC12b",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
 
 
