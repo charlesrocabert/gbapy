@@ -679,48 +679,6 @@ class GBA_model:
     ######################
     # Trajectory Methods #
     ######################
-
-    ### Save values at max. growthrate
-    def saveValues(model,condition):
-        dict_arrays = {
-        "Max_growthrate": model.mu,
-        "F-Vector": model.f,
-        "Protein_concentrations vector" : model.p,
-        "GCC_F": model.GCC_f,
-        "Fluxes_vector" : model.v,
-        "Internal_Metabolite_concentrations": model.c,
-        "External_metabolite_concentrations": model.x,
-        "Metabolite_concentrations": model.xc,
-        }
-        dict_arrays_str = {k: [str(v)] for k, v in dict_arrays.items()}
-        # Erstellen des DataFrames
-        df = pd.DataFrame(dict_arrays_str)
-        # Speichern des DataFrames als CSV
-        df.to_csv("Values_at_Max"+model.model_name+condition+".csv", sep=',', index=False)
-        print(df)
-
-    ### Plot Trajectory
-    def plotTrajectory(timestamps, muRates):
-        # Daten für die Zeitachse
-        t = timestamps  # 100 Zeitpunkte von 0 bis 10
-
-        # Daten für die Y-Achse (Beispiel: Sinusfunktion)
-        mu = muRates
-
-        # Erstellung des Plots
-        plt.figure(figsize=(8, 6))  # Größe des Diagramms festlegen
-        plt.plot(t, mu, label='mu(t)')  # Plot der Daten
-        plt.xlabel('Time')  # Beschriftung der X-Achse
-        plt.ylabel('mu')    # Beschriftung der Y-Achse
-        plt.title('Plot of mu against Time')  # Titel des Diagramms
-        plt.grid(True)      # Gitterlinien aktivieren
-        plt.legend()        # Legende hinzufügen
-        plt.show()          # Diagramm anzeigen
-        print("max μ rate :")
-        print(np.max(mu))
-        return
-    
-    ### Gradient Ascend Trajectory without noise
     
     ######################
     #   Export methods   #
