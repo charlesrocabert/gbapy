@@ -725,7 +725,11 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write metabolite names #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open("./output/"+self.model_name+"_metabolite_ids.csv", "w")
+        f = open("./output/"+self.model_name+"_external_metabolite_ids.csv", "w")
+        for id in self.x_ids:
+            f.write(id+"\n")
+        f.close()
+        f = open("./output/"+self.model_name+"_internal_metabolite_ids.csv", "w")
         for id in self.c_ids:
             f.write(id+"\n")
         f.close()
