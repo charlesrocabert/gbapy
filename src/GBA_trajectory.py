@@ -41,7 +41,7 @@ def saveValues(model,condition,nameOfCSV=None):
       df.to_csv(model.model_name +" "+ condition + " Values_at_Max.csv", sep=',', index=False)       # save CSV with autom. File name
   else:
     df.to_csv( nameOfCSV , sep=',', index=False)                                           # save CSV with own File name
-  print(df)
+  #print(df)
   return
 
 ###### Plot trajectory mu to time #########
@@ -80,7 +80,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
   while (t < max_time):                                                                 # end loop if time is up
     print(" current mu-Rate",model.mu)
-    print("time :",t)
+    #print("time :",t)
     previous_mu = model.mu
     if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
       
@@ -88,7 +88,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
-      #print(mu_alterationCounter)
+      #print("mu_alterationCounter: ", mu_alterationCounter)
     else:
         mu_alterationCounter = 0
 
@@ -106,7 +106,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     print("current gradient :", model.GCC_f)
     print("current protein",model.p)
     print("current Fluxvector ", model.v)
-    print("current Tau for protein calc" , model.tau_j)
+    #print("current Tau for protein calc" , model.tau_j)
 
     #print("current Metabolite :",model.c)
 
@@ -173,7 +173,7 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
-      #print(mu_alterationCounter)
+      #print("mu_alterationCounter: ", mu_alterationCounter)
     else:
         mu_alterationCounter = 0
 
@@ -224,9 +224,5 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
   
   print ("Maximum was found, Model is consistent")
   return 
-
-
-
-trajectory(model_name="B",condition="2",max_time=2000,first_dt = 0.01,dt_changeRate=0.1)
 
 
