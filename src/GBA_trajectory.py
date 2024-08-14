@@ -31,7 +31,7 @@ def saveValues(model,condition,nameOfCSV=None):
     "GCC_F ": model.GCC_f,
     "Fluxes_vector " : model.v,
     "Internal_Metabolite_concentrations ": model.c,
-    "Tauj ": model.tau_j,
+    #"Tauj ": model.tau_j,
     #"External_metabolite_concentrations": model.x,
     #"Metabolite_concentrations": model.xc,
   }
@@ -105,21 +105,15 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     print("current protein",model.p)
     print("current v ", model.v)
     print("current f", model.f)
-    #print("current Tau for protein calc" , model.tau_j)
-
-    #print("current Metabolite :",model.c)
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
     if np.any(next_f < 0):                                                            #negative value correction
-       #print("next_f before neg.correction:", next_f)
+       
        next_f[next_f < 0] = MIN_FLUXFRACTION
-       #print("next_f after neg.correction:", next_f)
 
     model.set_f(next_f)
     model.calculate()
-    #model.v[ model.v < 0 ] = 1e-10                                                # enforce positive flux
-    #model.p[ model.p < 0 ] = 1e-10                                               # enforce positive protein
     model.check_model_consistency()                                               # check consistency
 
     if (model.consistent):
@@ -177,7 +171,7 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
-      #print("mu_alterationCounter: ", mu_alterationCounter)
+
     else:
         mu_alterationCounter = 0
 
@@ -186,22 +180,18 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
         saveValues(model, condition, model_name + condition + " noise")
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
-    if np.any(next_f < 0):                                                            #negative value correction
-       #print("next_f before neg.correction:", next_f)
-       next_f[next_f < 0] = 1e-10
-       #print("next_f after neg.correction:", next_f)
 
     print("no Mu alterations: ",mu_alterationCounter)
-    #print("current gradient :", model.GCC_f)
     print("current protein",model.p)
-    #print("current Metabolite :",model.c)
 
     next_f = np.add(next_f, (model.GCC_f[1:] + epsilon) * dt)                                      # add without first index of GCC_f and noise epsilon
 
+    if np.any(next_f < 0):                                                            #negative value correction
+       
+       next_f[next_f < 0] = MIN_FLUXFRACTION
+
     model.set_f(next_f)
     model.calculate()                                                             #calculate everything
-    model.v[ model.v < 0 ] = 1e-10                           # enforce positive flux
-    model.p[ model.p < 0 ] = 1e-10                           # enforce positive protein
     model.check_model_consistency()                                               #check consistency
 
     if (model.consistent):
