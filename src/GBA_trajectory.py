@@ -25,14 +25,15 @@ def drawNoise():
 ####### save Values of model in CSV-Files #######
 def saveValues(model,condition,nameOfCSV=None):
   dict_arrays = {
-    "Max_growthrate": model.mu,
-    "F-Vector": model.f,
-    "Protein_concentrations vector" : model.p,
-    "GCC_F": model.GCC_f,
-    "Fluxes_vector" : model.v,
-    "Internal_Metabolite_concentrations": model.c,
-    "External_metabolite_concentrations": model.x,
-    "Metabolite_concentrations": model.xc,
+    "Max_growthrate ": model.mu,
+    "F-Vector ": model.f,
+    "Protein_concentrations vector " : model.p,
+    "GCC_F ": model.GCC_f,
+    "Fluxes_vector " : model.v,
+    "Internal_Metabolite_concentrations ": model.c,
+    "Tauj ": model.tau_j,
+    #"External_metabolite_concentrations": model.x,
+    #"Metabolite_concentrations": model.xc,
   }
   dict_arrays_str = {k: [str(v)] for k, v in dict_arrays.items()}
   df = pd.DataFrame(dict_arrays_str)                                                           # create dataframe
@@ -97,24 +98,27 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
         saveValues(model,condition,nameOfCSV)
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
-    if np.any(next_f < 0):                                                            #negative value correction
-       #print("next_f before neg.correction:", next_f)
-       next_f[next_f < 0] = 1e-10
-       #print("next_f after neg.correction:", next_f)
+    
 
     #print("no Mu alterations: ",mu_alterationCounter)
-    print("current gradient :", model.GCC_f)
+    print("current Gcc_F :", model.GCC_f)
     print("current protein",model.p)
-    print("current Fluxvector ", model.v)
+    print("current v ", model.v)
+    print("current f", model.f)
     #print("current Tau for protein calc" , model.tau_j)
 
     #print("current Metabolite :",model.c)
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
+    if np.any(next_f < 0):                                                            #negative value correction
+       #print("next_f before neg.correction:", next_f)
+       next_f[next_f < 0] = MIN_FLUXFRACTION
+       #print("next_f after neg.correction:", next_f)
+
     model.set_f(next_f)
     model.calculate()
-    model.v[ model.v < 0 ] = 1e-10                                                # enforce positive flux
+    #model.v[ model.v < 0 ] = 1e-10                                                # enforce positive flux
     #model.p[ model.p < 0 ] = 1e-10                                               # enforce positive protein
     model.check_model_consistency()                                               # check consistency
 
@@ -128,7 +132,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     else:
       next_f = consistent_f                                                       #resets next_f to last consistent_f
       model.set_f(consistent_f)
-
+      
       if (dt > 1e-100):                                                           # make sure dt is not too small
        dt = dt * dt_changeRate
        t = t + dt                                                                 # calc. new t
