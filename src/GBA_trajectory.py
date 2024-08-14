@@ -177,11 +177,12 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):                         # terminate if mu doesnt change anymore and model is consistent
         plotTrajectory(timestamps, y_muRates)
         saveValues(model, condition, model_name + condition + " noise.csv")
+        print("epsilon", epsilon)
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
 
-    print("no Mu alterations: ",mu_alterationCounter)
-    print("current protein",model.p)
+    #print("no Mu alterations: ",mu_alterationCounter)
+    #print("current protein",model.p)
 
     next_f = np.add(next_f, (model.GCC_f[1:] + epsilon) * dt)                                      # add without first index of GCC_f and noise epsilon
 
@@ -196,9 +197,13 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     if (model.consistent):
       timestamps = np.append(timestamps, t)
       y_muRates = np.append(y_muRates, model.mu)
-
-      t = t + dt                                                                  # calc. new t
       consistent_f = next_f                                                       # saves new f as the consistent f
+
+      if(mu_alterationCounter >= POSSIBLY_STABLE_MU_ATTEMPTS):                     # if mu doesnt change it might mean, that the optimum is reached. So to terminate this function more quickly by time we increase t by 1.
+        t = t + 1
+      else:
+        t = t + dt                                                                  # else we add dt, which allows us to figure out the optimum.
+     
 
     else:
       next_f = consistent_f                                                       #resets next_f to last consistent_f
