@@ -108,9 +108,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
-    if np.any(next_f < 0):                                                            #negative value correction
-       
-       next_f[next_f < 0] = MIN_FLUXFRACTION
+    next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
 
     model.v[model.v < 0] = MIN_FLUXFRACTION
     model.set_f(next_f)
@@ -187,9 +185,9 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
     next_f = np.add(next_f, (model.GCC_f[1:] + epsilon) * dt)                                      # add without first index of GCC_f and noise epsilon
 
-    if np.any(next_f < 0):                                                            #negative value correction
+                                                                
        
-       next_f[next_f < 0] = MIN_FLUXFRACTION
+    next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
 
     model.set_f(next_f)
     model.calculate()                                                             #calculate everything
