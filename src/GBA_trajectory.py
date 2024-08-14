@@ -112,6 +112,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
        
        next_f[next_f < 0] = MIN_FLUXFRACTION
 
+    model.v[model.v < 0] = MIN_FLUXFRACTION
     model.set_f(next_f)
     model.calculate()
     model.check_model_consistency()                                               # check consistency
@@ -177,7 +178,7 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
     if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):                         # terminate if mu doesnt change anymore and model is consistent
         plotTrajectory(timestamps, y_muRates)
-        saveValues(model, condition, model_name + condition + " noise")
+        saveValues(model, condition, model_name + condition + " noise.csv")
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
 
