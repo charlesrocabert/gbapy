@@ -20,8 +20,8 @@ TRAJECTORY_CONVERGENCE_TOL = 1e-5  # Analytical trajectory convergence tolerance
 MCMC_CONVERGENCE_TOL       = 1e-5  # MCMC trajectory convergence tolerance
 POPLEVEL_CONVERGENCE_TOL   = 1e-5  # Population-level trajectory convergence tolerance
 EFM_TOL                    = 1e-5  # Tolerance threshold below which EFM values are considered to be zero
-MIN_FLUXFRACTION           = 1e-10
-
+MIN_FLUXFRACTION           = 1e-10 # Fluxfraction to correct slightly negative values
+POSSIBLY_STABLE_MU_ATTEMPTS = TRAJECTORY_STABLE_MU_COUNT * (5/6) # Attempts after which mu is possibly stable
 ##################
 #      MAIN      #
 ##################
