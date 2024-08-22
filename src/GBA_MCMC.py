@@ -22,7 +22,7 @@ def draw_Mutation():
   mu_log = np.log(3/2)
   sigma_log = 0.3  
 
-  alpha = np.random.lognormal(mean=mu_log, sigma=sigma_log)
+  alpha = np.random.lognormal(mean = mu_log, sigma = sigma_log)
 
   return alpha
 
@@ -52,7 +52,7 @@ def simulate_fixation(pi):
         return False
 
 
-def MCMC(model_name = "A", condition = "1", max_time=3, population_N = 2.5e735 ):
+def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e735 ):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
   model.solve_local_linear_problem()  # solve first linear problem
