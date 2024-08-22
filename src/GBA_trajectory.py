@@ -164,9 +164,9 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     print(" current mu-Rate",model.mu)
     print("time :",t)
     previous_mu = model.mu
-    if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
+    #if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
       
-      break
+     # break
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
