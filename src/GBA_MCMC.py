@@ -27,16 +27,14 @@ def draw_Mutation():
   return alpha
 
 #calculates the mutated Kcat for each reaction
-def mutate_kcat(model, index):
-  last_kcat_f = model.kcat_f[index] # save non mutated kcat at index
-  last_kcat_b = model.kcat_b[index] # save non mutated kcat at index
+def mutate_f(model, index):
+  last_f = model.f[index] # save non mutated kcat at index
 
   alpha = draw_Mutation()
 
-  model.kcat_f[index] = model.kcat_f[index] * alpha #mutate_kcat
-  model.kcat_b[index] = model.kcat_b[index] * alpha #mutate_kcat
-  print(model.kcat_f)
-  return last_kcat_f, last_kcat_b
+  model.f[index] = model.f[index] * alpha #mutate_kcat
+  print(model.f)
+  return last_f 
 
 #calculates the selection coefficient
 def calc_selection_coefficient(mu, mutated_mu):
@@ -61,10 +59,10 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
-      reaction_index = np.random.randint(len(model.kcat_f))                # generate index to draw kcat of a random reaction
+      reaction_index = np.random.randint(len(model.kcat_f))                # generate index to draw f of a random reaction
       print("choose enzyme: ", reaction_index + 1)
-      last_kcat_f, last_kcat_b = mutate_kcat(model,reaction_index) # mutates kcat temporarily and saves backed up kcat, for the case if it doesnt fixate.
-      model.calculate()                               # calculate mu with mutated kcats
+      last_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
+      model.calculate()                                            # calculate mu with mutated f
       mutated_mu = model.mu                 
       s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
       print("selection coefficient for this mutation: ", s)
@@ -75,9 +73,8 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
 
       if ( simulate_fixation(pi) == False ):
          print("for pi = "+ str(pi) +" the mutation is not fixated")
-         model.kcat_f[reaction_index] = last_kcat_f # undo  mutated kcat at index
-         model.kcat_b[reaction_index] = last_kcat_b  # undo  mutated kcat at index
+         model.f[reaction_index] = last_f # undo  mutated f at index
       else :
          print("for pi = "+ str(pi) +" the mutation is fixated")
-      print("Kcat after fixation :", model.kcat_f)
+      print("Kcat after fixation :", model.f)
   return
