@@ -17,7 +17,7 @@ def load_model( model_name ):
     ifile.close()
     return model
 
-#draws mutation coefficient for mutating Kcat(f and b)
+#draws mutation coefficient for mutating f
 def draw_Mutation():
   mu_log = np.log(3/2)
   sigma_log = 0.3  
@@ -26,14 +26,16 @@ def draw_Mutation():
 
   return alpha
 
-#calculates the mutated Kcat for each reaction
+#calculates the mutated f for each reaction
 def mutate_f(model, index):
-  last_f = model.f[index] # save non mutated kcat at index
+  last_f = model.f_trunc[index] # save non mutated f at index
 
   alpha = draw_Mutation()
 
-  model.f[index] = model.f[index] * alpha #mutate_kcat
+  mutated_f = model.f_trunc[index] * alpha #mutate_f
   print(model.f)
+
+  model.set_f(mutated_f)
   return last_f 
 
 #calculates the selection coefficient
@@ -46,7 +48,7 @@ def simulate_fixation(pi):
         # Fixation occurs
         return True
   else:
-        # No fixation, keep last kcat
+        # No fixation, keep last f
         return False
 
 
@@ -59,7 +61,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
-      reaction_index = np.random.randint(len(model.kcat_f))                # generate index to draw f of a random reaction
+      reaction_index = np.random.randint(len(model.f))                # generate index to draw f of a random reaction
       print("choose enzyme: ", reaction_index + 1)
       last_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
       model.calculate()                                            # calculate mu with mutated f
@@ -73,8 +75,8 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
 
       if ( simulate_fixation(pi) == False ):
          print("for pi = "+ str(pi) +" the mutation is not fixated")
-         model.f[reaction_index] = last_f # undo  mutated f at index
+         model.set_f(last_f) # undo  mutated f at index
       else :
          print("for pi = "+ str(pi) +" the mutation is fixated")
-      print("Kcat after fixation :", model.f)
+      print("f after fixation :", model.f)
   return
