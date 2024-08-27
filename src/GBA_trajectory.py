@@ -18,8 +18,8 @@ def load_model( model_name ):
     return model
 
 ####### draw a random normaldistributed number #######
-def drawNoise(sigma):
-    noise = np.random.normal(0,sigma)
+def drawNoise(sigma , f_trunc_len):
+    noise = np.random.normal(0,sigma, size = f_trunc_len)
     return noise
 
 ####### save Values of model in CSV-Files #######
@@ -31,9 +31,6 @@ def saveValues(model,condition,nameOfCSV=None):
     "GCC_F ": model.GCC_f,
     "Fluxes_vector " : model.v,
     "Internal_Metabolite_concentrations ": model.c,
-    #"Tauj ": model.tau_j,
-    #"External_metabolite_concentrations": model.x,
-    #"Metabolite_concentrations": model.xc,
   }
   dict_arrays_str = {k: [str(v)] for k, v in dict_arrays.items()}
   df = pd.DataFrame(dict_arrays_str)                                                           # create dataframe
@@ -74,7 +71,6 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
   mu_alterationCounter = 0              # setup counter for error criteria
   consistent_f = np.copy(model.f_trunc) # saves consistent_f
   next_f = np.copy(model.f_trunc)     # the f_trunc, that we are going to change
-  allGCC_F = [model.GCC_f[1:]]       # to collect all previous GCC_f (just for checking the change of GCC_f)
 
   y_muRates = []                      # save muRates for plotting
   timestamps = []                     # save timeStamps for plotting
@@ -83,11 +79,10 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     print(" current mu-Rate",model.mu)
     #print("time :",t)
     previous_mu = model.mu
-    if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
-      plotTrajectory(timestamps, y_muRates)
-      saveValues(model,condition,nameOfCSV)
-      raise AssertionError(" trajectory stopped because the gradient gcc_f was 0 ")
-      break
+    #if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
+      #plotTrajectory(timestamps, y_muRates)
+      #saveValues(model,condition,nameOfCSV)
+      #raise AssertionError(" trajectory stopped because the gradient gcc_f was 0 ")
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
@@ -102,17 +97,10 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     
     
 
-    #print("no Mu alterations: ",mu_alterationCounter)
-    print("current Gcc_F :", model.GCC_f)
-    print("current protein",model.p)
-    print("current v ", model.v)
-    print("current f", model.f)
-
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
     next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
 
-    #model.v[model.v < 0] = MIN_FLUXFRACTION
     model.set_f(next_f)
     model.calculate()
     model.check_model_consistency()                                               # check consistency
@@ -150,12 +138,11 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
   dt = first_dt
   t = 0                              # time
-  epsilon = drawNoise(sigma)
   previous_mu = model.mu
   mu_alterationCounter = 0              # setup counter for error criteria
   consistent_f = np.copy(model.f_trunc) # saves consistent_f
   next_f = np.copy(model.f_trunc)     # the f_trunc, that we are going to change
-  allGCC_F = [model.GCC_f[1:]]       # to collect all previous GCC_f (just for checking the change of GCC_f)
+  epsilon = drawNoise(sigma, len(next_f) )
 
   y_muRates = []                      # save muRates for plotting
   timestamps = []                     # save timeStamps for plotting
@@ -164,9 +151,6 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     print(" current mu-Rate",model.mu)
     print("time :",t)
     previous_mu = model.mu
-    #if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
-      
-     # break
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
@@ -176,16 +160,13 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
     if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):                         # terminate if mu doesnt change anymore and model is consistent
         plotTrajectory(timestamps, y_muRates)
-        saveValues(model, condition, model_name + condition + " noise.csv")
+        saveValues(model, condition, model_name + condition + " with noise.csv")
         print("epsilon", epsilon)
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
+        
     
-
-    #print("no Mu alterations: ",mu_alterationCounter)
-    #print("current protein",model.p)
-
-    next_f = np.add(next_f, (model.GCC_f[1:] + epsilon) * dt)                                      # add without first index of GCC_f and noise epsilon
-
+    next_f = np.add(next_f, (np.add(model.GCC_f[1:] ,epsilon) * dt))                                      # add next_f with noisy Gcc_f
+    
                                                                 
        
     next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
@@ -197,7 +178,9 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
     if (model.consistent):
       timestamps = np.append(timestamps, t)
       y_muRates = np.append(y_muRates, model.mu)
-      consistent_f = next_f                                                       # saves new f as the consistent f
+      consistent_f = next_f
+      epsilon = drawNoise(sigma, len(next_f) )
+                                                       # saves new f as the consistent f
 
       if(mu_alterationCounter >= POSSIBLY_STABLE_MU_ATTEMPTS):                     # if mu doesnt change it might mean, that the optimum is reached. So to terminate this function more quickly by time we increase t by 1.
         t = t + 1
@@ -214,12 +197,9 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
        t = t + dt                                                                 # calc. new t
 
       else:
-          epsilon = drawNoise()
           consistent_f = next_f
-      
   plotTrajectory(timestamps, y_muRates)
-  saveValues(model, condition, model_name +condition+ " noise")
-  
+  saveValues(model, condition, model_name + condition + " with noise.csv")
   print ("Maximum was found, Model is consistent")
   return 
 
