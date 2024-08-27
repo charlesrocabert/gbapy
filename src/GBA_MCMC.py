@@ -28,14 +28,14 @@ def draw_Mutation():
 
 #calculates the mutated f for each reaction
 def mutate_f(model, index):
-  last_f = np.copy(model.f_trunc) # save non mutated f at index
+  non_mutated_f = np.copy(model.f_trunc) # save non mutated f at index
   mutated_f = np.copy(model.f_trunc) #save copy to of f to mutate.
 
   alpha = draw_Mutation()
 
   mutated_f *= alpha #mutate_f
   model.set_f(mutated_f)
-  return last_f 
+  return non_mutated_f 
 
 #calculates the selection coefficient
 def calc_selection_coefficient(mu, mutated_mu):
@@ -62,7 +62,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
   for t in range(max_time):
       reaction_index = np.random.randint(len(model.f_trunc))                # generate index to draw f of a random reaction
       print("choose enzyme: ", reaction_index + 1)
-      last_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
+      non_mutated_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
       model.calculate()                                            # calculate mu with mutated f
       mutated_mu = model.mu                 
       s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
@@ -74,7 +74,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
 
       if ( simulate_fixation(pi) == False ):
          print("for pi = "+ str(pi) +" the mutation is not fixated")
-         model.set_f(last_f) # undo  mutated f at index
+         model.set_f(non_mutated_f) # undo  mutated f at index
       else :
          print("for pi = "+ str(pi) +" the mutation is fixated")
       print("f after fixation :", model.f)
