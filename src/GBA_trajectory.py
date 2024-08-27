@@ -18,8 +18,8 @@ def load_model( model_name ):
     return model
 
 ####### draw a random normaldistributed number #######
-def drawNoise():
-    noise = np.random.normal(0,1)
+def drawNoise(sigma):
+    noise = np.random.normal(0,sigma)
     return noise
 
 ####### save Values of model in CSV-Files #######
@@ -84,7 +84,9 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     #print("time :",t)
     previous_mu = model.mu
     if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
-      
+      plotTrajectory(timestamps, y_muRates)
+      saveValues(model,condition,nameOfCSV)
+      raise AssertionError(" trajectory stopped because the gradient gcc_f was 0 ")
       break
     
     if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
@@ -110,7 +112,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
     next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
 
-    model.v[model.v < 0] = MIN_FLUXFRACTION
+    #model.v[model.v < 0] = MIN_FLUXFRACTION
     model.set_f(next_f)
     model.calculate()
     model.check_model_consistency()                                               # check consistency
@@ -133,16 +135,14 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
       else:
         raise AssertionError("trajectory was stopped, because dt got too small")
         
-      
-  plotTrajectory(timestamps, y_muRates)
-  saveValues(model,condition)
+
   
   print ("Maximum was found, Model is consistent")
-  return
+  return 
 
 
 ###### Trajectory with Noise #################
-def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_dt = 0.01, dt_changeRate = 0.1, nameOfCSV=None):
+def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_dt = 0.01, dt_changeRate = 0.1, sigma = 0.1, nameOfCSV=None):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
   model.solve_local_linear_problem()  # solve first linear problem
@@ -150,7 +150,7 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
   dt = first_dt
   t = 0                              # time
-  epsilon = drawNoise()
+  epsilon = drawNoise(sigma)
   previous_mu = model.mu
   mu_alterationCounter = 0              # setup counter for error criteria
   consistent_f = np.copy(model.f_trunc) # saves consistent_f
