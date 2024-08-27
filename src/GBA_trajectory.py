@@ -130,7 +130,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
 
 ###### Trajectory with Noise #################
-def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_dt = 0.01, dt_changeRate = 0.1, sigma = 0.1, nameOfCSV=None):
+def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 10000, first_dt = 0.01, dt_changeRate = 0.1, sigma = 0.1, nameOfCSV=None):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
   model.solve_local_linear_problem()  # solve first linear problem
@@ -198,9 +198,11 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 5, first_d
 
       else:
           consistent_f = next_f
+
   plotTrajectory(timestamps, y_muRates)
   saveValues(model, condition, model_name + condition + " with noise.csv")
-  print ("Maximum was found, Model is consistent")
+  if(model.consistent == True):
+    AssertionError("The trajecory stopped, because the model is consistent but max time ran out.")
   return 
 
 

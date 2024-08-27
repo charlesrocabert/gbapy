@@ -75,7 +75,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
 
       if ( simulate_fixation(pi) == False ):
          print("for pi = "+ str(pi) +" the mutation is not fixated")
-         model.set_f(non_mutated_f) # undo  mutated f at index
+         model.set_f(non_mutated_f) # undo  mutated f
       else :
          print("for pi = "+ str(pi) +" the mutation is fixated")
       print("f after fixation :", model.f)
