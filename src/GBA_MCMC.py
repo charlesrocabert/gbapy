@@ -33,7 +33,7 @@ def mutate_f(model, index):
 
   alpha = draw_Mutation()
 
-  mutated_f *= alpha #mutate_f
+  mutated_f[index] *= alpha #mutate_f
   model.set_f(mutated_f)
   return non_mutated_f 
 
@@ -67,6 +67,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
       mutated_mu = model.mu                 
       s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
       print("selection coefficient for this mutation: ", s)
+
       if (s == 0):
          pi = 1/N_e
       else:
