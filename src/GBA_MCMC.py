@@ -28,13 +28,12 @@ def draw_Mutation():
 
 #calculates the mutated f for each reaction
 def mutate_f(model, index):
-  last_f = model.f_trunc[index] # save non mutated f at index
+  last_f = np.copy(model.f_trunc) # save non mutated f at index
+  mutated_f = np.copy(model.f_trunc) #save copy to of f to mutate.
 
   alpha = draw_Mutation()
 
-  mutated_f = model.f_trunc[index] * alpha #mutate_f
-  print(model.f)
-
+  mutated_f *= alpha #mutate_f
   model.set_f(mutated_f)
   return last_f 
 
@@ -61,7 +60,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e7
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
-      reaction_index = np.random.randint(len(model.f))                # generate index to draw f of a random reaction
+      reaction_index = np.random.randint(len(model.f_trunc))                # generate index to draw f of a random reaction
       print("choose enzyme: ", reaction_index + 1)
       last_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
       model.calculate()                                            # calculate mu with mutated f
