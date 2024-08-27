@@ -748,6 +748,14 @@ class GBA_model:
             f.write("protein_"+id+"\n")
         f.close()
 
+    ### Write f0 vector in a file ###
+    def write_f0( self ):
+        ### Add the reaction name as header ###
+        f = open("./csv_models/"+self.model_name+"/f0.csv", "w")
+        f.write("reaction;f0\n")
+        for i in range(self.nj):
+            f.write(self.reaction_ids[i]+";"+str(self.f0[i])+"\n")
+        f.close()
 
 ##################
 #      MAIN      #

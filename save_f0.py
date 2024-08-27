@@ -5,9 +5,9 @@
 # Copyright © 2023-2024 Charles Rocabert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
-# csv_to_binary.py
-# ----------------
-# Load the GBA model from CSV files and save it in binary format.
+# save_f0.py
+# ----------
+# Load the model and save the f0 vector.
 # (LOCAL SCRIPT)
 #***************************************************************************
 
@@ -37,20 +37,21 @@ if __name__ == "__main__":
     print("# Copyright © 2023-2024 Charles Rocabert")
     print("# Web: https://github.com/charlesrocabert/GBA_PredictiveEvolution")
     print("#")
-    print("# csv_to_binary.py")
-    print("# ----------------")
-    print("# Load the GBA model from CSV files and save it in binary format.")
+    print("# save_f0.py")
+    print("# ----------")
+    print("# Load the model and save the f0 vector.")
     print("# (LOCAL SCRIPT)")
     print("#***************************************************************************")
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 1) Parse command line arguments #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 1) Parse command line arguments             #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     config = parse_arguments()
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 2) Generate the binary model    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    print("> Export CSV model "+config["model_name"]+" to binary format (./binary_models/"+config["model_name"]+".gba)")
-    load_and_backup_model(config["model_name"])
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 2) Load the model, calculate f0 and save it #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    model = load_model(config["model_name"])
+    model.solve_local_linear_problem()
+    model.write_f0()
 
