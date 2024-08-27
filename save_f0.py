@@ -37,9 +37,9 @@ if __name__ == "__main__":
     print("# Copyright © 2023-2024 Charles Rocabert")
     print("# Web: https://github.com/charlesrocabert/GBA_PredictiveEvolution")
     print("#")
-    print("# load_model.py")
-    print("# -------------")
-    print("# Load the GBA model from CSV files and save it in binary format.")
+    print("# save_f0.py")
+    print("# ----------")
+    print("# Load the model and save the f0 vector.")
     print("# (LOCAL SCRIPT)")
     print("#***************************************************************************")
 
