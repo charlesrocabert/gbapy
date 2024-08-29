@@ -27,7 +27,7 @@ def draw_Mutation(sigma):
 #calculates the mutated f for each reaction
 def mutate_f(model, index, sigma):
   non_mutated_f = np.copy(model.f_trunc) # save non mutated f at index
-  mutated_f = np.copy(model.f_trunc) #save copy to of f to mutate.
+  mutated_f = np.copy(model.f_trunc) #save copy of f to mutate.
 
   alpha = draw_Mutation(sigma)
 
@@ -70,28 +70,42 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
-      reaction_index = np.random.randint(len(model.f_trunc))                # generate index to draw f of a random reaction
+      reaction_index = np.random.randint(len(model.f_trunc))                # generate index to draw a random reaction to mutate
       #print("choose enzyme: ", reaction_index + 1)
-      non_mutated_f = mutate_f(model, reaction_index, sigma) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
+      current_mu = model.mu
+      non_mutated_f = mutate_f(model, reaction_index, sigma) # mutates f temporarily and saves non_mutated f, for no fixation or inconsistency.
       model.calculate()                                      # calculate mu with mutated f
       model.check_model_consistency()                                               #check consistency
 
       if (model.consistent):
-         print("consistent")
+         #print("consistent")
          mutated_mu = model.mu                 
          s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
-         print("selection coefficient for this mutation: ", s)
+         #print("selection coefficient for this mutation: ", s)
 
-         pi = calc_pi(s,N_e)                                          # calculate fixation-propability
+         pi = calc_pi(s,N_e)                                          # calculate fixation-propability pi
 
          if ( simulate_fixation(pi) == False ):
-            print("for pi = "+ str(pi) +" the mutation is not fixated")
+            #print("for pi = "+ str(pi) +" the mutation is not fixated")
             model.set_f(non_mutated_f) # undo  mutated f
+            y_muRates = np.append(y_muRates, current_mu)
+            timestamps = np.append(timestamps, t)
+
          else :
             timestamps = np.append(timestamps, t)
-            y_muRates = np.append(y_muRates, model.mu)
+            y_muRates = np.append(y_muRates, mutated_mu)
       else:
          model.set_f(non_mutated_f)
-  #plotTrajectory(timestamps, y_muRates)
-  print("y_muRates: ", y_muRates )
+         y_muRates = np.append(y_muRates, current_mu)
+         timestamps = np.append(timestamps, t)
+
+      model.calculate()                                              #calculate muRate again , if f didn't fixate
+  if(len(y_muRates)> 1):
+
+   plotTrajectory(timestamps, y_muRates)
+
+  else:
+      AssertionError("no Mutation got fixated")
+
+  #print("y_muRates: ", y_muRates )
   return 
