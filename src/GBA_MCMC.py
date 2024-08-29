@@ -7,6 +7,7 @@ sys.path.append('./src/')
 
 # Load the GBA_model class
 from GBA_model import *
+from GBA_trajectory import *
 
 ####### Load the model from a binary file #######
 def load_model( model_name ):
@@ -18,22 +19,21 @@ def load_model( model_name ):
     return model
 
 #draws mutation coefficient for mutating f
-def draw_Mutation():
-  mu_log = np.log(3/2)
-  sigma_log = 0.3  
+def draw_Mutation(sigma):
+   alpha =  np.random.normal(0,sigma)
+   return alpha
 
-  alpha = np.random.lognormal(mean = mu_log, sigma = sigma_log)
-
-  return alpha
 
 #calculates the mutated f for each reaction
-def mutate_f(model, index):
+def mutate_f(model, index, sigma):
   non_mutated_f = np.copy(model.f_trunc) # save non mutated f at index
   mutated_f = np.copy(model.f_trunc) #save copy to of f to mutate.
 
-  alpha = draw_Mutation()
+  alpha = draw_Mutation(sigma)
 
   mutated_f[index] *= alpha #mutate_f
+  mutated_f[mutated_f < 0] = MIN_FLUXFRACTION
+
   model.set_f(mutated_f)
   return non_mutated_f 
 
@@ -50,33 +50,48 @@ def simulate_fixation(pi):
         # No fixation, keep last f
         return False
 
+def calc_pi (selection_coefficient,N_e):
+   if (selection_coefficient == 0):
+            return 1/N_e
+   else:
+            return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
 
-def MCMC(model_name = "A", condition = "1", max_time = 1e8, population_N = 2.5e735 ):
+
+def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735 ):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
   model.solve_local_linear_problem()  # solve first linear problem
   model.calculate()                   # calc for the first time (maybe not needed)
   N_e = population_N
+
+  timestamps = []                     # save timeStamps for plotting
+  y_muRates = []                      # save muRates for plotting
+  
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
       reaction_index = np.random.randint(len(model.f_trunc))                # generate index to draw f of a random reaction
-      print("choose enzyme: ", reaction_index + 1)
-      non_mutated_f = mutate_f(model,reaction_index) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
-      model.calculate()                                            # calculate mu with mutated f
-      mutated_mu = model.mu                 
-      s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
-      print("selection coefficient for this mutation: ", s)
+      #print("choose enzyme: ", reaction_index + 1)
+      non_mutated_f = mutate_f(model, reaction_index, sigma) # mutates f temporarily and saves backed up f, for the case if it doesnt fixate.
+      model.calculate()                                      # calculate mu with mutated f
+      model.check_model_consistency()                                               #check consistency
 
-      if (s == 0):
-         pi = 1/N_e
+      if (model.consistent):
+         print("consistent")
+         mutated_mu = model.mu                 
+         s = calc_selection_coefficient(current_mu, mutated_mu)       # calculate selectioncoefficient s
+         print("selection coefficient for this mutation: ", s)
+
+         pi = calc_pi(s,N_e)                                          # calculate fixation-propability
+
+         if ( simulate_fixation(pi) == False ):
+            print("for pi = "+ str(pi) +" the mutation is not fixated")
+            model.set_f(non_mutated_f) # undo  mutated f
+         else :
+            timestamps = np.append(timestamps, t)
+            y_muRates = np.append(y_muRates, model.mu)
       else:
-         pi = (1-np.exp(-2*s)) / (1-np.exp(-2*N_e*s))
-
-      if ( simulate_fixation(pi) == False ):
-         print("for pi = "+ str(pi) +" the mutation is not fixated")
-         model.set_f(non_mutated_f) # undo  mutated f
-      else :
-         print("for pi = "+ str(pi) +" the mutation is fixated")
-      print("f after fixation :", model.f)
-  return
+         model.set_f(non_mutated_f)
+  #plotTrajectory(timestamps, y_muRates)
+  print("y_muRates: ", y_muRates )
+  return 
