@@ -92,7 +92,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
   fluxFractions = np.copy(model.f)    # save fluxfractions for plotting
   timestamps = [0]                     # save timeStamps for plotting
   fixationstamps = []               # save timestamps of fixation for highlighting Mutation in plots
-  muRates = []                      # save muRates for plotting
+  muRates = [model.mu]                      # save muRates for plotting
   print(len(fluxFractions))
   print(len(model.f))
   current_mu = model.mu               # save current mu
@@ -136,7 +136,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
 
   if(len(muRates)> 1):
    #fluxFractions = fluxFractions.T
-   #plotTrajectory(timestamps, y_muRates)
+   plotTrajectory(timestamps, muRates)
    plot_MCMC_Fluxfractions(fluxFractions, timestamps, fixationstamps)
    saveValues(model,condition,nameOfCSV)
 
