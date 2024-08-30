@@ -18,6 +18,31 @@ def load_model( model_name ):
     ifile.close()
     return model
 
+def plot_MCMC_Fluxfractions(f_stamps, time_stamps, fixation_stamps ):
+    plt.figure(figsize=(10, 10))
+    num_fluxes = len(f_stamps[0])
+    #print(f_stamps)
+    # Plot each flux rate curve as a line graph
+    for i in range(num_fluxes):
+        flux_rate = [row[i] for row in f_stamps]
+        #print(flux_rate)
+        plt.plot(time_stamps, flux_rate)
+
+        # Highlight the specific timestamps with vertical lines
+        for fixation in fixation_stamps:
+            plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
+
+    # Add labels, title, and legend
+    plt.xlabel('Time')
+    plt.ylabel('Fluxfraction Rate')
+    plt.title('Fluxfraction Rate over Time with Highlighted Mutations')
+    plt.legend()
+    plt.grid(False)
+    return
+
+
+
+
 #draws mutation coefficient for mutating f
 def draw_Mutation(sigma):
    alpha =  np.random.normal(0,sigma)
@@ -57,16 +82,19 @@ def calc_pi (selection_coefficient,N_e):
             return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
 
 
-def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735 ):
+def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735, nameOfCSV = None ):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
   model.solve_local_linear_problem()  # solve first linear problem
   model.calculate()                   # calc for the first time (maybe not needed)
   N_e = population_N
 
-  timestamps = []                     # save timeStamps for plotting
-  y_muRates = []                      # save muRates for plotting
-  
+  fluxFractions = np.copy(model.f)    # save fluxfractions for plotting
+  timestamps = [0]                     # save timeStamps for plotting
+  fixationstamps = []               # save timestamps of fixation for highlighting Mutation in plots
+  muRates = []                      # save muRates for plotting
+  print(len(fluxFractions))
+  print(len(model.f))
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
@@ -88,21 +116,29 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
          if ( simulate_fixation(pi) == False ):
             #print("for pi = "+ str(pi) +" the mutation is not fixated")
             model.set_f(non_mutated_f) # undo  mutated f
-            y_muRates = np.append(y_muRates, current_mu)
+            muRates = np.append(muRates, current_mu)
             timestamps = np.append(timestamps, t)
 
          else :
             timestamps = np.append(timestamps, t)
-            y_muRates = np.append(y_muRates, mutated_mu)
+            muRates = np.append(muRates, mutated_mu)
+            fixationstamps = np.append(fixationstamps, t)
       else:
          model.set_f(non_mutated_f)
-         y_muRates = np.append(y_muRates, current_mu)
+         muRates = np.append(muRates, current_mu)
          timestamps = np.append(timestamps, t)
 
       model.calculate()                                              #calculate muRate again , if f didn't fixate
-  if(len(y_muRates)> 1):
+      fluxFractions = np.vstack((fluxFractions, model.f))   #save fluxfractions for plotting
+      #print('Timestampscount',len(timestamps))
+      #print('Fluxfractioncount',len(fluxFractions))
 
-   plotTrajectory(timestamps, y_muRates)
+
+  if(len(muRates)> 1):
+   #fluxFractions = fluxFractions.T
+   #plotTrajectory(timestamps, y_muRates)
+   plot_MCMC_Fluxfractions(fluxFractions, timestamps, fixationstamps)
+   saveValues(model,condition,nameOfCSV)
 
   else:
       AssertionError("no Mutation got fixated")
