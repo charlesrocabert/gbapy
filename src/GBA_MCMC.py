@@ -18,15 +18,15 @@ def load_model( model_name ):
     ifile.close()
     return model
 
-def plot_MCMC_Fluxfractions(f_stamps, time_stamps, fixation_stamps ):
-    plt.figure(figsize=(10, 10))
+def plot_MCMC_Fluxfractions(model, f_stamps, time_stamps, fixation_stamps ):
+    plt.figure(figsize=(8, 6))
     num_fluxes = len(f_stamps[0])
-    #print(f_stamps)
+
     # Plot each flux rate curve as a line graph
     for i in range(num_fluxes):
         flux_rate = [row[i] for row in f_stamps]
         #print(flux_rate)
-        plt.plot(time_stamps, flux_rate)
+        plt.plot(time_stamps, flux_rate, label = model.reaction_ids[i])
 
         # Highlight the specific timestamps with vertical lines
         for fixation in fixation_stamps:
@@ -93,8 +93,7 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
   timestamps = [0]                     # save timeStamps for plotting
   fixationstamps = []               # save timestamps of fixation for highlighting Mutation in plots
   muRates = [model.mu]                      # save muRates for plotting
-  print(len(fluxFractions))
-  print(len(model.f))
+  
   current_mu = model.mu               # save current mu
 
   for t in range(max_time):
@@ -134,10 +133,10 @@ def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, popula
       #print('Fluxfractioncount',len(fluxFractions))
 
 
-  if(len(muRates)> 1):
+  if(len(fixationstamps)> 1):
    #fluxFractions = fluxFractions.T
    plotTrajectory(timestamps, muRates)
-   plot_MCMC_Fluxfractions(fluxFractions, timestamps, fixationstamps)
+   plot_MCMC_Fluxfractions(model, fluxFractions, timestamps, fixationstamps)
    saveValues(model,condition,nameOfCSV)
 
   else:
