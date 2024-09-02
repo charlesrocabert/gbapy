@@ -669,11 +669,11 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.consistent = True
         if not (test1 and test2 and test3):
-            print(">>> Model state is not consistent:")
-            print("    ------------------------------")
-            print("    • Density constraint: " + str(test1))
-            print("    • Positive c: " + str(test2))
-            print("    • Positive p: " + str(test3))
+            #print(">>> Model state is not consistent:")
+            #print("    ------------------------------")
+            #print("    • Density constraint: " + str(test1))
+            #print("    • Positive c: " + str(test2))
+            #print("    • Positive p: " + str(test3))
             self.consistent = False
             
     ######################
