@@ -1,7 +1,9 @@
 import os
 import sys
 import dill
+from matplotlib.pylab import f
 import matplotlib.pyplot as plt
+import time
 # Add the local src directory to the path
 sys.path.append('./src/')
 
@@ -57,11 +59,38 @@ def plotTrajectory(timestamps, muRates):
   print(np.max(muRates))
   return 
 
+def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_changeRate = 0.1, nameOfCSV = None):
+  model = load_model(model_name)
+
+  overview_columns = ['Cond.', 'mu','density','converged?', 'time_to_execute']
+  overview_columns = overview_columns[:3] + model.reaction_ids + overview_columns[3:]
+  overview_df = pd.DataFrame(columns = overview_columns)
+
+  for condition in model.condition_ids :
+    condition , max_mu, density, fluxfractions, converged, time_to_execute  = trajectory(model_name = model_name , condition = condition, max_time=5, first_dt = 0.01, dt_changeRate=0.1, nameOfCSV = None)
+    overview_dict ={
+      "Cond.": condition,
+      "mu": max_mu,
+      "density": density,
+      "converged?": converged,
+      "time_to_execute": time_to_execute
+    }
+    for reaction_id, fluxfraction in zip(model.reaction_ids, fluxfractions):
+      overview_dict[reaction_id] = fluxfraction
+
+    overview_row = pd.Series(data = overview_dict)
+    overview_df = pd.concat([overview_df, overview_row.to_frame().T], ignore_index=True)
+
+  print(overview_df)
+  overview_df.to_csv(model.model_name + " All conditions.csv", sep=',', index = False)
+  return
 
 ###### Trajectory without Noise ###########
 def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, dt_changeRate=0.1, nameOfCSV = None):
+  start_time = time.time()
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
+
   model.solve_local_linear_problem()  # solve first linear problem
   model.calculate()                   # calc for the first time (maybe not needed)
 
@@ -76,7 +105,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
   timestamps = []                     # save timeStamps for plotting
 
   while (t < max_time):                                                                 # end loop if time is up
-    print(" current mu-Rate",model.mu)
+    #print(" current mu-Rate",model.mu)
     #print("time :",t)
     previous_mu = model.mu
     #if( ( np.abs(model.GCC_f) <= TRAJECTORY_CONVERGENCE_TOL ).all() and model.consistent):               # check if GCC_f = 0 and model consistent
@@ -93,6 +122,8 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
     if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):                         # terminate if mu doesnt change anymore and model is consistent
         plotTrajectory(timestamps, y_muRates)
         saveValues(model,condition,nameOfCSV)
+        converged = False
+
         raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
     
@@ -124,9 +155,12 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
         raise AssertionError("trajectory was stopped, because dt got too small")
         
 
-  
-  print ("Maximum was found, Model is consistent")
-  return 
+  end_time = time.time()
+  time_to_exexute = end_time - start_time #calculate time to execute
+  converged = True
+
+  #print ("Maximum was found, Model is consistent")
+  return (condition , np.max(y_muRates), model.density, model.f, converged, time_to_exexute)
 
 
 ###### Trajectory with Noise #################
@@ -200,9 +234,10 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 10000, fir
           consistent_f = next_f
 
   plotTrajectory(timestamps, y_muRates)
-  saveValues(model, condition, model_name + condition + " with noise.csv")
+  #saveValues(model, condition, model_name + condition + " with noise.csv")
   if(model.consistent == True):
     AssertionError("The trajecory stopped, because the model is consistent but max time ran out.")
+
   return 
 
 
