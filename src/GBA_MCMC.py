@@ -56,7 +56,7 @@ def mutate_f(model, index, sigma):
 
   alpha = draw_Mutation(sigma)
 
-  mutated_f[index] *= alpha #mutate_f
+  mutated_f[index] += alpha #mutate_f
   mutated_f[mutated_f < 0] = MIN_FLUXFRACTION
 
   model.set_f(mutated_f)
@@ -85,7 +85,7 @@ def calc_pi (selection_coefficient,N_e):
 def MCMC(model_name = "A", condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735, nameOfCSV = None ):
   model = load_model(model_name)      # load and run model
   model.set_condition(condition)      # set condition of model
-  model.solve_local_linear_problem()  # solve first linear problem
+  model.solve_local_linear_problem()  # solve first linear problem+
   model.calculate()                   # calc for the first time (maybe not needed)
   N_e = population_N
 
