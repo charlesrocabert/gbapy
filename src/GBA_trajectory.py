@@ -57,7 +57,22 @@ def plotTrajectory(timestamps, muRates):
   plt.show()          
   print("max μ rate :")
   print(np.max(muRates))
-  return 
+  return
+
+def plot_FluxFractions_to_condition(model ,conditions, mu, reactions):
+  plt.figure(figsize=(8, 6))
+
+  # Plot each flux rate curve as a line graph
+  for i in range(len(reactions)):
+      flux_rate = [row[i] for row in flux_rate]
+      #print(flux_rate)
+      plt.plot(conditions, flux_rate, label = model.reaction_ids[i])
+  plt.xlabel('conditions')
+  plt.ylabel('Fluxfraction Rate')
+  plt.title('Fluxfraction Rates over different conditions')
+  plt.legend()
+  plt.grid(False)
+  return
 
 def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_changeRate = 0.1, nameOfCSV = None):
   model = load_model(model_name)
@@ -77,9 +92,10 @@ def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_
     }
     for reaction_id, fluxfraction in zip(model.reaction_ids, fluxfractions):
       overview_dict[reaction_id] = fluxfraction
-
     overview_row = pd.Series(data = overview_dict)
     overview_df = pd.concat([overview_df, overview_row.to_frame().T], ignore_index=True)
+    plot_FluxFractions_to_condition()
+
 
   print(overview_df)
   overview_df.to_csv(model.model_name + " All conditions.csv", sep=',', index = False)
@@ -103,6 +119,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
   y_muRates = []                      # save muRates for plotting
   timestamps = []                     # save timeStamps for plotting
+  fluxfractions_over_time = []        #save fluxfractions over time for plotting
 
   while (t < max_time):                                                                 # end loop if time is up
     #print(" current mu-Rate",model.mu)
@@ -113,7 +130,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
       #saveValues(model,condition,nameOfCSV)
       #raise AssertionError(" trajectory stopped because the gradient gcc_f was 0 ")
     
-    if(model.mu - previous_mu <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
+    if(np.abs(model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL):                                            # check if mu changes significantly
       mu_alterationCounter = mu_alterationCounter + 1
       #print("mu_alterationCounter: ", mu_alterationCounter)
     else:
