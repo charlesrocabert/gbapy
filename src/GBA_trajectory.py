@@ -140,11 +140,10 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
         mu_alterationCounter = 0
 
     if(mu_alterationCounter >= TRAJECTORY_STABLE_MU_COUNT and model.consistent):                         # terminate if mu doesnt change anymore and model is consistent
-        plotTrajectory(timestamps, y_muRates)
-        saveValues(model,condition,nameOfCSV)
+        #plotTrajectory(timestamps, y_muRates)
         converged = False
-
-        raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
+        break
+        #raise AssertionError("trajectory was stopped, because the model is consistent and the growthrate did not increase significantly for " + str(TRAJECTORY_STABLE_MU_COUNT) + " tries. ")
     
     
 
@@ -179,7 +178,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
   time_to_exexute = end_time - start_time #calculate time to execute
   converged = True
 
-  #print ("Maximum was found, Model is consistent")
+  print ("Maximum was found, Model is consistent for condition: ",condition)
   return (condition , np.max(y_muRates), model.density, model.f, converged, time_to_exexute)
 
 
