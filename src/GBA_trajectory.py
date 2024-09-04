@@ -59,14 +59,16 @@ def plotTrajectory(timestamps, muRates):
   print(np.max(muRates))
   return
 
-def plot_FluxFractions_to_condition(model ,conditions, mu, reactions):
+def plot_FluxFractions_to_condition(overview, reaction_ids):
   plt.figure(figsize=(8, 6))
-
+  n_reactions = len(reaction_ids)
+  fluxfractions_to_condition = overview.iloc[:, 3:3+ n_reactions].to_numpy()
+  conditions = overview['Cond.'].to_numpy()
+  for i in range(n_reactions):
+        #print(flux_rate)
+        plt.plot(conditions, fluxfractions_to_condition[:, i], label = reaction_ids[i])
   # Plot each flux rate curve as a line graph
-  for i in range(len(reactions)):
-      flux_rate = [row[i] for row in flux_rate]
-      #print(flux_rate)
-      plt.plot(conditions, flux_rate, label = model.reaction_ids[i])
+  
   plt.xlabel('conditions')
   plt.ylabel('Fluxfraction Rate')
   plt.title('Fluxfraction Rates over different conditions')
@@ -92,9 +94,10 @@ def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_
     }
     for reaction_id, fluxfraction in zip(model.reaction_ids, fluxfractions):
       overview_dict[reaction_id] = fluxfraction
+
     overview_row = pd.Series(data = overview_dict)
     overview_df = pd.concat([overview_df, overview_row.to_frame().T], ignore_index=True)
-    plot_FluxFractions_to_condition()
+  plot_FluxFractions_to_condition(overview_df, model.reaction_ids)
 
 
   print(overview_df)
