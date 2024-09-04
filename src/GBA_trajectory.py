@@ -76,6 +76,15 @@ def plot_FluxFractions_to_condition(overview, reaction_ids):
   plt.grid(False)
   return
 
+def plot_Mu_to_condition(overview_df):
+  plt.plot(overview_df['Cond.'], overview_df['mu'], label = 'MaxGrowthrate at condition')
+  plt.xlabel('conditions')
+  plt.ylabel('Max-Grotwthrate')
+  plt.title('Max-Growthrates over different conditions')
+  plt.legend()
+  plt.grid(False)
+  return
+
 def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_changeRate = 0.1, nameOfCSV = None):
   model = load_model(model_name)
 
@@ -98,6 +107,7 @@ def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_
     overview_row = pd.Series(data = overview_dict)
     overview_df = pd.concat([overview_df, overview_row.to_frame().T], ignore_index=True)
   plot_FluxFractions_to_condition(overview_df, model.reaction_ids)
+  plot_Mu_to_condition(overview_df)
 
 
   print(overview_df)
