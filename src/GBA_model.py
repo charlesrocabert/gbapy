@@ -460,7 +460,7 @@ class GBA_model:
 
     ### Compute internal concentrations ###
     def compute_c( self ):
-        self.c  = self.current_rho*self.M.dot(self.f)
+        self.c = self.current_rho*self.M.dot(self.f)
         self.c[self.c < MIN_CONCENTRATION] = MIN_CONCENTRATION
         self.xc = np.concatenate([self.x, self.c])
         
