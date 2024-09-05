@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-#***************************************************************************
-# Copyright © 2023-2024 Charles Rocabert
+#***********************************************************************
+# Copyright © 2023-2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
 # csv_to_binary.py
 # ----------------
 # Load the GBA model from CSV files and save it in binary format.
 # (LOCAL SCRIPT)
-#***************************************************************************
+#***********************************************************************
 
 import os
 import sys
@@ -33,15 +33,15 @@ def parse_arguments():
 ##################
 
 if __name__ == "__main__":
-    print("#***************************************************************************")
-    print("# Copyright © 2023-2024 Charles Rocabert")
+    print("#***********************************************************************")
+    print("# Copyright © 2023-2024 Charles Rocabert, Furkan Mert")
     print("# Web: https://github.com/charlesrocabert/GBA_PredictiveEvolution")
     print("#")
     print("# csv_to_binary.py")
     print("# ----------------")
     print("# Load the GBA model from CSV files and save it in binary format.")
     print("# (LOCAL SCRIPT)")
-    print("#***************************************************************************")
+    print("#***********************************************************************")
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Parse command line arguments #
