@@ -360,30 +360,6 @@ class GBA_model:
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
 
-    # ### Get number of external metabolites ###
-    # def get_nb_external_metabolites( self ):
-    #     return self.nx
-
-    # ### Get number of internal metabolites ###
-    # def get_nb_internal_metabolites( self ):
-    #     return self.nc
-
-    # ### Get total number of metabolites ###
-    # def get_nb_metabolites( self ):
-    #     return self.ni
-
-    # ### Get number of reactions ###
-    # def get_nb_reactions( self ):
-    #     return self.nj
-
-    # ### Get number of enzymatic reactions ###
-    # def get_nb_enzymatic_reactions( self ):
-    #     return self.ne
-    
-    # ### Get number of transport reactions ###
-    # def get_nb_transport_reactions( self ):
-    #     return self.ns
-
     ###################
     #   Print model   #
     ###################
