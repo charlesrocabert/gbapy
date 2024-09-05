@@ -43,7 +43,6 @@ class GBA_algorithms:
         self.run_time   = 0.0
         self.optimums   = None
 
-    
     ### Plot trajectory ###
     def plot_trajectory( self, t_vec, dt_vec, mu_vec, mu_diff_vec ):
         plt.figure(figsize=(8, 6))
@@ -80,7 +79,6 @@ class GBA_algorithms:
         plt.title('Max-Growthrates over different conditions')
         plt.legend()
         plt.grid(False)
-        plt.show()
 
     ### Plot f to condition ###
     def plot_f_to_condition( self ):
@@ -93,10 +91,9 @@ class GBA_algorithms:
         plt.title('Flux fractions over different conditions')
         plt.legend()
         plt.grid(False)
-        plt.show()
 
     ### Compute the gradient ascent without noise ###
-    def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, nameOfCSV = None ):
+    def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -185,7 +182,7 @@ class GBA_algorithms:
         self.run_time = end_time-start_time
 
     ### Compute the optimum for all conditions ###
-    def compute_optimum_for_all_conditions( self, max_time = 5, initial_dt = 0.01, nameOfCSV = None ):
+    def compute_optimum_for_all_conditions( self, max_time = 5, initial_dt = 0.01 ):
         overview_columns = ['condition', 'mu','density','converged', 'run_time']
         overview_columns = overview_columns[:3] + self.gba_model.reaction_ids + overview_columns[3:]
         self.optimums    = pd.DataFrame(columns=overview_columns)
@@ -202,6 +199,7 @@ class GBA_algorithms:
                 overview_dict[reaction_id] = fluxfraction
             overview_row  = pd.Series(data=overview_dict)
             self.optimums = pd.concat([self.optimums, overview_row.to_frame().T], ignore_index=True)
+        self.optimums.to_csv("./output/"+self.model_name+"_optimum.csv", sep=';', index=False)
     
     ### Draw a random normal vector with std 'sigma' and length 'n' ###
     def draw_noise( self, sigma ):
