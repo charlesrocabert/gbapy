@@ -43,6 +43,21 @@ class GBA_algorithms:
         self.run_time  = 0.0
         self.optimum_f = {}
 
+    ### Load optimums for all conditions ###
+    def load_optimums( self ):
+        optimum_df     = pd.read_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';')
+        self.optimum_f = {}
+        for i in range(optimum_df.shape[0]):
+            condition = optimum_df.iloc[i]['condition']
+            self.optimum_f[str(condition)] = optimum_df.iloc[i][3:3+self.gba_model.nj].to_numpy()
+    
+    ### Initialize the model vector f0 ###
+    def initialize_f0( self, condition ):
+        if condition == "LP":
+            self.gba_model.solve_local_linear_problem()
+        else:
+            self.gba_model.set_f0(self.optimum_f[condition])
+        
     ### Plot trajectory ###
     def plot_trajectory( self, t_vec, dt_vec, mu_vec, mu_diff_vec ):
         plt.figure(figsize=(8, 6))
@@ -98,7 +113,6 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.gba_model.solve_local_linear_problem()
         self.gba_model.set_condition(condition)
         self.gba_model.calculate()
         self.gba_model.check_model_consistency()
@@ -173,7 +187,7 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        #self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
+        self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
         if (t>=max_time):
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
@@ -225,7 +239,6 @@ class GBA_algorithms:
         self.gba_model.calculate()
         self.gba_model.check_model_consistency()
         assert self.gba_model.consistent, "> Initial model is not consistent"
-        print(self.gba_model.mu)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -305,25 +318,4 @@ class GBA_algorithms:
             print("> Maximum was found, Model is consistent for condition: ",condition)
         end_time      = time.time()
         self.run_time = end_time-start_time
-
-
-# ####### save Values of model in CSV-Files #######
-# def saveValues(model,condition,nameOfCSV=None):
-#   dict_arrays = {
-#     "Max_growthrate ": model.mu,
-#     "F-Vector ": model.f,
-#     "Protein_concentrations vector " : model.p,
-#     "GCC_F ": model.GCC_f,
-#     "Fluxes_vector " : model.v,
-#     "Internal_Metabolite_concentrations ": model.c,
-#   }
-#   dict_arrays_str = {k: [str(v)] for k, v in dict_arrays.items()}
-#   df = pd.DataFrame(dict_arrays_str)                                                           # create dataframe
-
-#   if(nameOfCSV is None):
-#       df.to_csv(model.model_name +" "+ condition + " Values_at_Max.csv", sep=',', index=False)       # save CSV with autom. File name
-#   else:
-#     df.to_csv( nameOfCSV , sep=',', index=False)                                           # save CSV with own File name
-#   #print(df)
-#   return
 
