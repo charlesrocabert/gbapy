@@ -39,9 +39,9 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Gradient ascent parameters #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.converged  = False
-        self.run_time   = 0.0
-        self.optimums   = None
+        self.converged = False
+        self.run_time  = 0.0
+        self.optimum_f = {}
 
     ### Plot trajectory ###
     def plot_trajectory( self, t_vec, dt_vec, mu_vec, mu_diff_vec ):
@@ -72,8 +72,8 @@ class GBA_algorithms:
         plt.show()
     
     ### Plot mu to condition ###
-    def plot_mu_to_condition(self ):
-        plt.plot(self.optimums['condition'], self.optimums['mu'], label='MaxGrowthrate at condition')
+    def plot_mu_to_condition( self, optimum_df ):
+        plt.plot(optimum_df['condition'], optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
         plt.title('Max-Growthrates over different conditions')
@@ -81,9 +81,9 @@ class GBA_algorithms:
         plt.grid(False)
 
     ### Plot f to condition ###
-    def plot_f_to_condition( self ):
-        f_to_condition = self.optimums.iloc[:, 3:3+self.gba_model.nj].to_numpy()
-        conditions = self.optimums['condition'].to_numpy()
+    def plot_f_to_condition( self, optimum_df ):
+        f_to_condition = optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
+        conditions     = optimum_df['condition'].to_numpy()
         for i in range(self.gba_model.nj):
             plt.plot(conditions, f_to_condition[:, i], label = self.gba_model.reaction_ids[i])
         plt.xlabel('Conditions')
@@ -185,7 +185,8 @@ class GBA_algorithms:
     def compute_optimum_for_all_conditions( self, max_time = 5, initial_dt = 0.01 ):
         overview_columns = ['condition', 'mu','density','converged', 'run_time']
         overview_columns = overview_columns[:3] + self.gba_model.reaction_ids + overview_columns[3:]
-        self.optimums    = pd.DataFrame(columns=overview_columns)
+        optimum_df       = pd.DataFrame(columns=overview_columns)
+        self.optimum_f   = {}
         for condition in self.gba_model.condition_ids:
             self.compute_gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
             overview_dict = {
@@ -197,9 +198,16 @@ class GBA_algorithms:
             }
             for reaction_id, fluxfraction in zip(self.gba_model.reaction_ids, self.gba_model.f):
                 overview_dict[reaction_id] = fluxfraction
-            overview_row  = pd.Series(data=overview_dict)
-            self.optimums = pd.concat([self.optimums, overview_row.to_frame().T], ignore_index=True)
-        self.optimums.to_csv("./output/"+self.model_name+"_optimum.csv", sep=';', index=False)
+            overview_row              = pd.Series(data=overview_dict)
+            optimum_df                = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
+            self.optimum_f[condition] = np.copy(self.gba_model.f)
+        optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
+        plt.figure()
+        plt.subplot(2,1,1)
+        self.plot_mu_to_condition(optimum_df)
+        plt.subplot(2,1,2)
+        self.plot_f_to_condition(optimum_df)
+        plt.show()
     
     ### Draw a random normal vector with std 'sigma' and length 'n' ###
     def draw_noise( self, sigma ):
