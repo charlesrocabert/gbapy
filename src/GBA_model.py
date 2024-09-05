@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-#***************************************************************************
-# Copyright © 2023-2024 Charles Rocabert
+#***********************************************************************
+# Copyright © 2023-2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
 # GBA_model.py
 # ------------
 # Implementation of the GBA analytical formalism for a given model.
 # (LOCAL SCRIPT)
-#***************************************************************************
+#***********************************************************************
 
 import os
 import sys
@@ -17,7 +17,6 @@ import dill
 import numpy as np
 import pandas as pd
 import gurobipy as gp
-import scipy.sparse as sparse
 
 env = gp.Env(empty=True)
 env.setParam("OutputFlag", 0)
@@ -50,6 +49,7 @@ def load_model( model_name ):
     model = dill.load(ifile)
     ifile.close()
     return model
+
 
 class GBA_model:
 
@@ -84,8 +84,9 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Model path and name ###
-        self.model_path  = "" # Model path
-        self.model_name  = "" # Model name
+        self.model_path     = "" # Model path
+        self.model_name     = "" # Model name
+        self.model_kinetics = "" # Kinetics model
 
         ### Identifier lists ###
         self.metabolite_ids   = [] # List of all metabolite ids 
@@ -289,6 +290,21 @@ class GBA_model:
         ### Indices: m (metabolite), a (all proteins) ###
         self.m = list(range(self.nc-1))
         self.a = self.nc-1
+        ### GBA model dynamical variables ###
+        self.tau_j   = np.zeros(self.nj)
+        self.ditau_j = np.zeros((self.nj, self.nc))
+        self.x       = np.zeros(self.nx)
+        self.c       = np.zeros(self.nc)
+        self.xc      = np.zeros(self.ni)
+        self.v       = np.zeros(self.nj)
+        self.p       = np.zeros(self.nj)
+        self.b       = np.zeros(self.nc)
+        ### Evolutionary variables ###
+        self.f0      = np.zeros(self.nj)
+        self.dmu_f   = np.zeros(self.nj)
+        self.GCC_f   = np.zeros(self.nj)
+        self.f_trunc = np.zeros(self.nj-1)
+        self.f       = np.zeros(self.nj)
     
     ### Load the GBA model (M, K and kcat matrices) ###
     def load_model( self, model_path, model_name ):
@@ -314,12 +330,29 @@ class GBA_model:
         # 4) Initialize model mathematical variables                #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.initialize_model_mathematical_variables()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Define the kinetics model to be used                   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.model_kinetics = ""
+        if (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0 and np.sum(self.KA) == 0):
+            self.model_kinetics = "iMM"
+        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) == 0):
+            self.model_kinetics = "iMMi"
+        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0  and np.sum(self.KA) > 0):
+            self.model_kinetics = "iMMa"
+        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) > 0):
+            self.model_kinetics = "iMMia"
+        elif (np.sum(self.kcat_b) > 0):
+            assert np.sum(self.KI) == 0
+            assert np.sum(self.KA) == 0
+            self.model_kinetics = "rMM"
+        assert self.model_kinetics != "", "> ERROR: load_model: kinetics model not found."
 
     ###############
     #   Getters   #
     ###############
     
-    ### Get a condition parameter value ###
+    # ### Get a condition parameter value ###
     def get_condition( self, condition_id, condition_param ):
         assert condition_id in self.condition_ids
         assert condition_param in self.condition_params
@@ -327,29 +360,29 @@ class GBA_model:
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
 
-    ### Get number of external metabolites ###
-    def get_nb_external_metabolites( self ):
-        return self.nx
+    # ### Get number of external metabolites ###
+    # def get_nb_external_metabolites( self ):
+    #     return self.nx
 
-    ### Get number of internal metabolites ###
-    def get_nb_internal_metabolites( self ):
-        return self.nc
+    # ### Get number of internal metabolites ###
+    # def get_nb_internal_metabolites( self ):
+    #     return self.nc
 
-    ### Get total number of metabolites ###
-    def get_nb_metabolites( self ):
-        return self.ni
+    # ### Get total number of metabolites ###
+    # def get_nb_metabolites( self ):
+    #     return self.ni
 
-    ### Get number of reactions ###
-    def get_nb_reactions( self ):
-        return self.nj
+    # ### Get number of reactions ###
+    # def get_nb_reactions( self ):
+    #     return self.nj
 
-    ### Get number of enzymatic reactions ###
-    def get_nb_enzymatic_reactions( self ):
-        return self.ne
+    # ### Get number of enzymatic reactions ###
+    # def get_nb_enzymatic_reactions( self ):
+    #     return self.ne
     
-    ### Get number of transport reactions ###
-    def get_nb_transport_reactions( self ):
-        return self.ns
+    # ### Get number of transport reactions ###
+    # def get_nb_transport_reactions( self ):
+    #     return self.ns
 
     ###################
     #   Print model   #
@@ -370,6 +403,9 @@ class GBA_model:
         report += "| • Nb internal reactions = " + str(self.ne) + "\n"
         report += " " + "".join(["-"]*(len(header)-2))
         report += "\n"
+        report += "| • Model kinetics = " + self.model_kinetics + "\n"
+        report += " " + "".join(["-"]*(len(header)-2))
+        report += "\n"
         return report
 
     ### Model print report function ###
@@ -380,7 +416,8 @@ class GBA_model:
     #   Analytical methods   #
     ##########################
 
-    ### Set external conditions ###
+    ### Set external conditions                       ###
+    ### (Minimal values bounded to MIN_CONCENTRATION) ###
     def set_condition( self, condition ):
         assert condition in self.condition_ids
         self.current_condition = condition
@@ -399,7 +436,7 @@ class GBA_model:
         self.f_trunc = np.copy(self.f0[1:self.nj])
         self.f       = np.copy(self.f0)
     
-    ### Compute f from reduced f_trunc ###
+    ### Compute f from truncated vector f_trunc ###
     def set_f( self, f_trunc ):
         self.f_trunc = np.copy(f_trunc)
         term1        = (1-self.sM[1:self.nj].dot(self.f_trunc))/self.sM[0]
@@ -409,9 +446,10 @@ class GBA_model:
     ### ribosome flux fraction f^r, with a minimal production of each ###
     ### metabolite. The constraints are mass conservation (M*f = b)   ###
     ### and surface flux balance (sM*f = 1).                          ###
+    ### WARNING: this method assumes full irreversibility             ###
     def solve_local_linear_problem( self ):
         gpmodel = gp.Model(env=env)
-        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=2.0)
+        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=FLUX_BOUNDARY)
         min_b   = 1/self.nc/10
         rhs     = np.repeat(min_b, self.nc)
         gpmodel.setObjective(x[-1], gp.GRB.MAXIMIZE)
@@ -419,18 +457,15 @@ class GBA_model:
         gpmodel.addConstr(self.sM @ x == 1, name="c2")
         gpmodel.optimize()
         self.set_f0(x.X)
-        # df = pd.DataFrame(data=self.f0, index=self.reaction_ids, columns=["f0"])
-        # print(df.to_string())
 
     ### Compute internal concentrations ###
-    ### Depends on rho and f.           ###
     def compute_c( self ):
         self.c  = self.current_rho*self.M.dot(self.f)
+        self.c[self.c < MIN_CONCENTRATION] = MIN_CONCENTRATION
         self.xc = np.concatenate([self.x, self.c])
         
     ### Irreversible Michaelis-Menten kinetics ###
     def iMM( self ):
-        self.tau_j = np.zeros(self.nj)
         for j in range(self.nj):
             self.tau_j[j] = np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
 
@@ -438,13 +473,11 @@ class GBA_model:
     def iMMi( self ):
         rKI                = 1/self.KI
         rKI[np.isinf(rKI)] = 0.0
-        self.tau_j         = np.zeros(self.nj)
         for j in range(self.nj):
             self.tau_j[j] = np.prod(1+self.xc*rKI[:,j])*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
     
     ### Irreversible Michaelis-Menten kinetics + activation (only one activator per reaction) ###
     def iMMa( self ):
-        self.tau_j = np.zeros(self.nj)
         for j in range(self.nj):
             term1 = np.prod(1+self.KA[:,j]/self.xc)
             term2 = np.prod(1+self.KM_f[:,j]/self.xc)
@@ -455,13 +488,11 @@ class GBA_model:
     def iMMia( self ):
         rKI                = 1/self.KI
         rKI[np.isinf(rKI)] = 0
-        self.tau_j         = np.zeros(self.nj)
         for j in range(self.nj):
             self.tau_j[j] = np.prod(1+self.xc*rKI[:,j])*np.prod(1+self.KA[:,j]/self.xc)*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
 
     ### Reversible Michaelis-Menten kinetics ###
     def rMM( self ):
-        self.tau_j = np.zeros(self.nj)
         for j in range(self.nj):
             forward_term  = self.kcat_f[j]/np.prod(1+self.KM_f[:,j]/self.xc)
             backward_term = self.kcat_b[j]/np.prod(1+self.KM_b[:,j]/self.xc)
@@ -469,39 +500,19 @@ class GBA_model:
     
     ### Compute tau ###
     def compute_tau( self ):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) irreversible MM kinetics                           #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0 and np.sum(self.KA) == 0):
+        if self.model_kinetics == "iMM":
             self.iMM()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) irreversible MM kinetics + inhibition              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) == 0):
+        elif self.model_kinetics == "iMMi":
             self.iMMi()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) irreversible MM kinetics + activation              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0  and np.sum(self.KA) > 0):
+        elif self.model_kinetics == "iMMa":
             self.iMMa()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) irreversible MM kinetics + inhibition + activation #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) > 0):
+        elif self.model_kinetics == "iMMia":
             self.iMMia()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Reversible MM kinetics                             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # For now, inhibition/activation is impossible for
-        # reversible MM cases.
-        elif (np.sum(self.kcat_b) > 0):
-            assert np.sum(self.KI) == 0
-            assert np.sum(self.KA) == 0
+        elif self.model_kinetics == "rMM":
             self.rMM()
     
     ### derivative of iMM with respect to metabolite concentrations ###
     def diMM( self ):
-        self.ditau_j = np.zeros((self.nj, self.nc))
         for j in range(self.nj):
             for i in range(self.nc):
                 y       = i+self.nx
@@ -515,7 +526,6 @@ class GBA_model:
     def diMMi( self ):
         rKI                = 1/self.KI
         rKI[np.isinf(rKI)] = 0
-        self.ditau_j       = np.zeros((self.nj, self.nc))
         for j in range(self.nj):
             for i in range(self.nc):
                 y                 = i+self.nx
@@ -528,7 +538,6 @@ class GBA_model:
     
     ### derivative of iMMa with respect to metabolite concentrations ###
     def diMMa( self ):
-        self.ditau_j = np.zeros((self.nj, self.nc))
         for j in range(self.nj):
             for i in range(self.nc):
                 y     = i+self.nx
@@ -544,7 +553,6 @@ class GBA_model:
     def diMMia( self ):
         rKI                = 1/self.KI
         rKI[np.isinf(rKI)] = 0
-        self.ditau_j       = np.zeros((self.nj, self.nc))
         for j in range(self.nj):
             for i in range(self.nc):
                 y                 = i+self.nx
@@ -561,48 +569,28 @@ class GBA_model:
 
     ### Derivative of rMM with respect to metabolite concentrations ###
     def drMM( self ):
-        self.ditau_j = np.zeros((self.nj, self.nc))
         for j in range(self.nj):
             for i in range(self.nc):
                 y       = i+self.nx
                 indices = np.arange(self.ni) != y
-                term1 = (self.kcat_f[j]/np.prod(1 + self.KM_f[indices,j]/self.xc[indices]))
-                term2 = self.KM_f[y,j]/((self.c[i] + self.KM_f[y,j])**2)
-                term3 = (self.kcat_b[j]/np.prod(1 + self.KM_b[indices,j]/self.xc[indices]))
-                term4 = self.KM_b[y,j]/((self.c[i] + self.KM_b[y,j])**2)
+                term1   = (self.kcat_f[j]/np.prod(1 + self.KM_f[indices,j]/self.xc[indices]))
+                term2   = self.KM_f[y,j]/((self.c[i] + self.KM_f[y,j])**2)
+                term3   = (self.kcat_b[j]/np.prod(1 + self.KM_b[indices,j]/self.xc[indices]))
+                term4   = self.KM_b[y,j]/((self.c[i] + self.KM_b[y,j])**2)
                 self.ditau_j[j,i] = term1*term2-term3*term4
             self.ditau_j[j,:] *= -self.tau_j[j]
     
     ### Compute dtau ###
     def compute_dtau( self ):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) irreversible MM kinetics                           #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if (np.sum(self.KI) == 0 and np.sum(self.KA) == 0):
+        if self.model_kinetics == "iMM":
             self.diMM()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) irreversible MM kinetics + inhibition              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) == 0):
+        elif self.model_kinetics == "iMMi":
             self.diMMi()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) irreversible MM kinetics + activation              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0  and np.sum(self.KA) > 0):
+        elif self.model_kinetics == "iMMa":
             self.diMMa()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) irreversible MM kinetics + inhibition + activation #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) > 0):
+        elif self.model_kinetics == "iMMia":
             self.diMMia()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Reversible MM kinetics                             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # For now, inhibition/activation is impossible for
-        # reversible MM cases.
-        elif (np.sum(self.kcat_b) > 0):
-            assert np.sum(self.KI) == 0
-            assert np.sum(self.KA) == 0
+        elif self.model_kinetics == "rMM":
             self.drMM()
     
     ### Compute the growth rate ###
@@ -669,11 +657,6 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.consistent = True
         if not (test1 and test2 and test3):
-            #print(">>> Model state is not consistent:")
-            #print("    ------------------------------")
-            #print("    • Density constraint: " + str(test1))
-            #print("    • Positive c: " + str(test2))
-            #print("    • Positive p: " + str(test3))
             self.consistent = False
             
     ######################
@@ -756,19 +739,4 @@ class GBA_model:
         for i in range(self.nj):
             f.write(self.reaction_ids[i]+";"+str(self.f0[i])+"\n")
         f.close()
-
-##################
-#      MAIN      #
-##################
-
-if __name__ == "__main__":
-    print("#***************************************************************************")
-    print("# Copyright © 2023-2024 Charles Rocabert")
-    print("# Web: https://github.com/charlesrocabert/GBA_Evolution")
-    print("#")
-    print("# GBA_model.py")
-    print("# ------------")
-    print("# Implementation of the GBA analytical formalism for a given model.")
-    print("# (LOCAL SCRIPT)")
-    print("#***************************************************************************")
 
