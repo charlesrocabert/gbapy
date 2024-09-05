@@ -57,7 +57,7 @@ def mutate_f(model, index, sigma):
   alpha = draw_Mutation(sigma)
 
   mutated_f[index] += alpha #mutate_f
-  mutated_f[mutated_f < 0] = MIN_FLUXFRACTION
+  mutated_f[mutated_f < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
 
   model.set_f(mutated_f)
   return non_mutated_f 

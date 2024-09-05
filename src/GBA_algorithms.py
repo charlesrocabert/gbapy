@@ -21,7 +21,7 @@ import time
 # Add the local src directory to the path
 sys.path.append('./src/')
 
-# Load the GBA_model class
+from GBA_tol import *
 from GBA_model import *
 
 
@@ -30,11 +30,19 @@ class GBA_algorithms:
     ### Class constructor ###
     def __init__( self, model_name ):
         assert os.path.exists("./binary_models/"+model_name+".gba"), "> Model not found"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Main model parameters      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.model_name = model_name
         self.gba_model  = load_model(self.model_name)
         self.condition  = ""
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Gradient ascent parameters #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.converged  = False
         self.run_time   = 0.0
+        self.optimums   = None
+
     
     ### Plot trajectory ###
     def plot_trajectory( self, t_vec, dt_vec, mu_vec, mu_diff_vec ):
@@ -64,8 +72,31 @@ class GBA_algorithms:
         plt.legend()
         plt.show()
     
+    ### Plot mu to condition ###
+    def plot_mu_to_condition(self ):
+        plt.plot(self.optimums['condition'], self.optimums['mu'], label='MaxGrowthrate at condition')
+        plt.xlabel('conditions')
+        plt.ylabel('Max-Grotwthrate')
+        plt.title('Max-Growthrates over different conditions')
+        plt.legend()
+        plt.grid(False)
+        plt.show()
+
+    ### Plot f to condition ###
+    def plot_f_to_condition( self ):
+        f_to_condition = self.optimums.iloc[:, 3:3+self.gba_model.nj].to_numpy()
+        conditions = self.optimums['condition'].to_numpy()
+        for i in range(self.gba_model.nj):
+            plt.plot(conditions, f_to_condition[:, i], label = self.gba_model.reaction_ids[i])
+        plt.xlabel('Conditions')
+        plt.ylabel('Flux fraction')
+        plt.title('Flux fractions over different conditions')
+        plt.legend()
+        plt.grid(False)
+        plt.show()
+
     ### Compute the gradient ascent without noise ###
-    def compute_gradient_ascent( self, condition = "1", max_time = 5, initial_dt = 0.01, dt_changeRate = 0.1, nameOfCSV = None ):
+    def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, nameOfCSV = None ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -75,7 +106,6 @@ class GBA_algorithms:
         self.gba_model.calculate()
         self.gba_model.check_model_consistency()
         assert self.gba_model.consistent, "> Initial model is not consistent"
-        print(self.gba_model.mu)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -100,8 +130,8 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
-            if (nb_iterations % 100 == 0):
-                print("> Iteration: ", nb_iterations, " mu: ", mu_vec[-1], "mu diff: ", (mu_diff_vec[-1]), "dt: ", dt_vec[-1])
+            #if (nb_iterations % 100 == 0):
+            #    print("> Iteration: ", nb_iterations, " mu: ", mu_vec[-1], "mu diff: ", (mu_diff_vec[-1]), "dt: ", dt_vec[-1])
             ### 4.1) Test trajectory convergence ###
             if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
                 self.converged = True
@@ -129,8 +159,8 @@ class GBA_algorithms:
                     mu_alteration_counter = 0
                 ### Check if dt is never changing, and possibly increase it ###
                 if dt_counter == 1000:
+                    dt         = dt*INCREASING_DT_FACTOR
                     dt_counter = 0
-                    dt = dt *2.0
             ### 4.4) If the model is inconsistent: ###
             else:
                 next_f = np.copy(previous_f)
@@ -139,14 +169,14 @@ class GBA_algorithms:
                 self.gba_model.check_model_consistency()
                 assert self.gba_model.consistent, "> Previous model is not consistent"
                 if (dt > 1e-100):
-                    dt = dt / 5.0
+                    dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
                 else:
                     raise AssertionError("trajectory was stopped, because dt got too small")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
+        #self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
         if (t>=max_time):
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
@@ -154,13 +184,32 @@ class GBA_algorithms:
         end_time      = time.time()
         self.run_time = end_time-start_time
 
+    ### Compute the optimum for all conditions ###
+    def compute_optimum_for_all_conditions( self, max_time = 5, initial_dt = 0.01, nameOfCSV = None ):
+        overview_columns = ['condition', 'mu','density','converged', 'run_time']
+        overview_columns = overview_columns[:3] + self.gba_model.reaction_ids + overview_columns[3:]
+        self.optimums    = pd.DataFrame(columns=overview_columns)
+        for condition in self.gba_model.condition_ids:
+            self.compute_gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
+            overview_dict = {
+                "condition": condition,
+                "mu": self.gba_model.mu,
+                "density": self.gba_model.density,
+                "converged": self.converged,
+                "run_time": self.run_time
+            }
+            for reaction_id, fluxfraction in zip(self.gba_model.reaction_ids, self.gba_model.f):
+                overview_dict[reaction_id] = fluxfraction
+            overview_row  = pd.Series(data=overview_dict)
+            self.optimums = pd.concat([self.optimums, overview_row.to_frame().T], ignore_index=True)
+    
     ### Draw a random normal vector with std 'sigma' and length 'n' ###
     def draw_noise( self, sigma ):
         epsilon = np.random.normal(0.0, sigma, size=self.gba_model.nj-1)
         return epsilon
 
     ### Compute the gradient ascent with noise ###
-    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, dt_changeRate = 0.1, sigma = 0.1, nameOfCSV = None ):
+    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, nameOfCSV = None ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -226,8 +275,8 @@ class GBA_algorithms:
                     mu_alteration_counter = 0
                 ### Check if dt is never changing, and possibly increase it ###
                 if dt_counter == 1000:
+                    dt         = dt*INCREASING_DT_FACTOR
                     dt_counter = 0
-                    dt = dt *2.0
             ### 4.4) If the model is inconsistent: ###
             else:
                 next_f = np.copy(previous_f)
@@ -236,7 +285,7 @@ class GBA_algorithms:
                 self.gba_model.check_model_consistency()
                 assert self.gba_model.consistent, "> Previous model is not consistent"
                 if (dt > 1e-100):
-                    dt = dt / 5.0
+                    dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
                 else:
                     raise AssertionError("trajectory was stopped, because dt got too small")
@@ -271,61 +320,4 @@ class GBA_algorithms:
 #     df.to_csv( nameOfCSV , sep=',', index=False)                                           # save CSV with own File name
 #   #print(df)
 #   return
-
-# def plot_FluxFractions_to_condition(overview, reaction_ids):
-#   plt.figure(figsize=(8, 6))
-#   n_reactions = len(reaction_ids)
-#   fluxfractions_to_condition = overview.iloc[:, 3:3+ n_reactions].to_numpy()
-#   conditions = overview['Cond.'].to_numpy()
-#   for i in range(n_reactions):
-#         #print(flux_rate)
-#         plt.plot(conditions, fluxfractions_to_condition[:, i], label = reaction_ids[i])
-#   # Plot each flux rate curve as a line graph
-  
-#   plt.xlabel('conditions')
-#   plt.ylabel('Fluxfraction Rate')
-#   plt.title('Fluxfraction Rates over different conditions')
-#   plt.legend()
-#   plt.grid(False)
-#   return
-
-# def plot_Mu_to_condition(overview_df):
-#   plt.plot(overview_df['Cond.'], overview_df['mu'], label = 'MaxGrowthrate at condition')
-#   plt.xlabel('conditions')
-#   plt.ylabel('Max-Grotwthrate')
-#   plt.title('Max-Growthrates over different conditions')
-#   plt.legend()
-#   plt.grid(False)
-#   return
-
-# def trajectory_each_condition(model_name = "A", max_time=5, first_dt = 0.01, dt_changeRate = 0.1, nameOfCSV = None):
-#   model = load_model(model_name)
-
-#   overview_columns = ['Cond.', 'mu','density','converged?', 'time_to_execute']
-#   overview_columns = overview_columns[:3] + model.reaction_ids + overview_columns[3:]
-#   overview_df = pd.DataFrame(columns = overview_columns)
-
-#   for condition in model.condition_ids :
-#     condition , max_mu, density, fluxfractions, converged, time_to_execute  = trajectory(model_name = model_name , condition = condition, max_time=5, first_dt = 0.01, dt_changeRate=0.1, nameOfCSV = None)
-#     overview_dict ={
-#       "Cond.": condition,
-#       "mu": max_mu,
-#       "density": density,
-#       "converged?": converged,
-#       "time_to_execute": time_to_execute
-#     }
-#     for reaction_id, fluxfraction in zip(model.reaction_ids, fluxfractions):
-#       overview_dict[reaction_id] = fluxfraction
-
-#     overview_row = pd.Series(data = overview_dict)
-#     overview_df = pd.concat([overview_df, overview_row.to_frame().T], ignore_index=True)
-#   plot_FluxFractions_to_condition(overview_df, model.reaction_ids)
-#   plot_Mu_to_condition(overview_df)
-
-
-#   print(overview_df)
-#   overview_df.to_csv(model.model_name + " All conditions.csv", sep=',', index = False)
-#   return
-
-
 
