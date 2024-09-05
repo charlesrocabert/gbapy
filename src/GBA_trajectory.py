@@ -1,23 +1,29 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
+#***********************************************************************
+# Copyright © 2024 Furkan Mert
+# Web: https://github.com/charlesrocabert/GBA_Evolution
+#
+# GBA_trajectory.py
+# -----------------
+# Implementation of GBA gradient ascent algorithms.
+# (LOCAL SCRIPT)
+#***********************************************************************
+
 import os
 import sys
 import dill
 from matplotlib.pylab import f
 import matplotlib.pyplot as plt
 import time
+
 # Add the local src directory to the path
 sys.path.append('./src/')
 
 # Load the GBA_model class
 from GBA_model import *
 
-####### Load the model from a binary file #######
-def load_model( model_name ):
-    filename = "./binary_models/"+model_name+".gba"
-    assert os.path.isfile(filename), "ERROR: model not found."
-    ifile = open(filename, "rb")
-    model = dill.load(ifile)
-    ifile.close()
-    return model
 
 ####### draw a random normaldistributed number #######
 def drawNoise(sigma , f_trunc_len):
@@ -159,7 +165,7 @@ def trajectory(model_name = "A", condition = "1", max_time=5, first_dt = 0.01, d
 
     next_f = np.add(next_f, model.GCC_f[1:] * dt)                                      # add without first index of GCC_f
 
-    next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
+    next_f[next_f < 0] = MIN_FLUX_FRACTION                                         #negative value correction
 
     model.set_f(next_f)
     model.calculate()
@@ -232,7 +238,7 @@ def trajectoryWithNoise(model_name = "A", condition = "1", max_time = 10000, fir
     
                                                                 
        
-    next_f[next_f < 0] = MIN_FLUXFRACTION                                         #negative value correction
+    next_f[next_f < 0] = MIN_FLUX_FRACTION                                         #negative value correction
 
     model.set_f(next_f)
     model.calculate()                                                             #calculate everything
