@@ -54,8 +54,70 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) MCMC parameters          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # TO DO
+        self.fixationTime_trajectory = []
+        self.t_trajectory = []
+        self.f_trajectory = []
+        self.mu_trajectory  = []
+        self.population_N = 2.5e735
+
+    ### Plot all fluxfractions over time and highlight fixation points ###
+    def plot_MCMC_Fluxfractions(self, f_stamps, time_stamps, fixation_stamps ):
+        plt.figure(figsize=(8, 6))
+        num_fluxes = len(f_stamps[0])
+
+        for i in range(num_fluxes):
+            flux_rate = [row[i] for row in f_stamps]
+            plt.plot(time_stamps, flux_rate, label = self.gba_model.reaction_ids[i])
+
+            for fixation in fixation_stamps:
+                plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
+
+        plt.xlabel('Time')
+        plt.ylabel('Fluxfraction Rate')
+        plt.title('Fluxfraction Rate over Time with Highlighted Mutations')
+        plt.legend()
+        plt.grid(False)
+        plt.show()
+        
     
+    ### Draw mutation coefficient for mutating a single fluxfraction ###
+    def draw_Mutation(self, sigma):
+        alpha =  np.random.normal(0,sigma)
+        return alpha
+
+    ### Calculates the mutated fluxfraction for each reaction ###
+    def mutate_f(self, index, sigma):
+        non_mutated_f = np.copy(self.gba_model.f_trunc)
+        mutated_f = np.copy(self.gba_model.f_trunc) 
+
+        alpha = self.draw_Mutation(sigma)
+
+        mutated_f[index] += alpha 
+        mutated_f[mutated_f < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
+
+        self.gba_model.set_f(mutated_f)
+        return non_mutated_f 
+    
+    ### Calculate the selection coefficient for MCMC mutation fixation ###
+    def calc_selection_coefficient(self, mu, mutated_mu):
+        return 1 - mu / mutated_mu
+    
+    ### Simulate fixation for MCMC ###
+    def simulate_fixation(self, pi):
+        if np.random.rand() < pi:
+                # Fixation occurs
+                return True
+        else:
+                # No fixation, keep last f
+                return False
+        
+    ### Calcutlate fixation probability pi for MCMC ###
+    def calc_pi (self, selection_coefficient, N_e):
+        if (selection_coefficient == 0):
+                    return 1/N_e
+        else:
+                    return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
+
     ### Load optimums for all conditions ###
     def load_optimums( self ):
         self.optimum_f.clear()
@@ -139,7 +201,7 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
-    
+
     ### Plot mu to condition ###
     def plot_mu_to_condition( self ):
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
@@ -365,3 +427,68 @@ class GBA_algorithms:
         end_time      = time.time()
         self.run_time = end_time-start_time
 
+    ### Compute Markov chain Monte Carlo ###    
+    def MCMC(self, condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735, nameOfCSV = None ):
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.gba_model.set_condition(condition)
+        self.gba_model.calculate()
+        self.gba_model.check_model_consistency()
+        assert self.gba_model.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize trackers       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        fluxFractions = np.copy(self.gba_model.f)   
+        timestamps = [0]                     
+        fixationstamps = []               
+        muRates = [self.gba_model.mu]                      
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        fluxFractions = np.copy(self.gba_model.f)   
+        N_e = population_N
+        current_mu = self.gba_model.mu
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the MCMC            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        for t in range(max_time):
+            ### 4.1 Draw reaction to mutate at random ###
+            reaction_index = np.random.randint(len(self.gba_model.f_trunc))                
+            current_mu = self.gba_model.mu
+            non_mutated_f = self.mutate_f(reaction_index, sigma) 
+            self.gba_model.calculate()                                      
+            self.gba_model.check_model_consistency()                                               
+            ### 4.2 Check model consistency and simulate fixation ###
+            if (self.gba_model.consistent):
+                mutated_mu = self.gba_model.mu                 
+                s = self.calc_selection_coefficient(current_mu, mutated_mu)       
+                pi = self.calc_pi(s,N_e)                                          
+            ### 4.3 Undo Mutation if no fixation occurs ###
+                if ( self.simulate_fixation(pi) == False ):
+                    self.gba_model.set_f(non_mutated_f) 
+                    muRates = np.append(muRates, current_mu)
+                    timestamps = np.append(timestamps, t)
+            ### 4.4 Save Mutation for trajectory if fixation occurs ###
+                else :
+                    timestamps = np.append(timestamps, t)
+                    muRates = np.append(muRates, mutated_mu)
+                    fixationstamps = np.append(fixationstamps, t)
+            ### 4.5 Undo Mutation if model is inconsistent ###
+            else:
+                self.gba_model.set_f(non_mutated_f)
+                muRates = np.append(muRates, current_mu)
+                timestamps = np.append(timestamps, t)
+
+            self.gba_model.calculate()                                              
+            fluxFractions = np.vstack((fluxFractions, self.gba_model.f))   
+           
+        if(len(fixationstamps)> 1):
+            #self.plot_trajectory()
+            self.plot_MCMC_Fluxfractions(fluxFractions, timestamps, fixationstamps)
+            #self.saveValues(self.gba_model,condition,nameOfCSV)
+
+        else:
+            AssertionError("no Mutation got fixated")
+
+         
