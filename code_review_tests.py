@@ -9,7 +9,7 @@ from GBA_tol import *
 from GBA_model import *
 from GBA_algorithms import *
 
-algo = GBA_algorithms("D")
+algo = GBA_algorithms("C")
 algo.load_optimums()
 
 ### Test random solutions generation ###
