@@ -10,20 +10,23 @@ from GBA_model import *
 from GBA_algorithms import *
 
 algo = GBA_algorithms("C")
-algo.load_optimums()
+algo.load_LP_initial_solution()
+algo.load_external_condition("1")
+plt.ion()
+algo.MCMC(condition="1", max_time = 1e8, sigma = 0.01, N_e = 2.5e7 )
 
 ### Test random solutions generation ###
-plt.ion()
-algo.generate_random_initial_solutions("1", 10)
-algo.gba_model.set_condition("1")
-for key in algo.random_f.keys():
-    print(algo.random_f[key])
-    algo.gba_model.set_f0(algo.random_f[key])
-    algo.compute_gradient_ascent(condition="1", max_time=200, initial_dt=0.01)
-    plt.clf()
-    algo.plot_trajectory()
-    plt.draw()
-    plt.pause(1)
+# plt.ion()
+# algo.generate_random_initial_solutions("1", 10)
+# algo.gba_model.set_condition("1")
+# for key in algo.random_f.keys():
+#     print(algo.random_f[key])
+#     algo.gba_model.set_f0(algo.random_f[key])
+#     algo.compute_gradient_ascent(condition="1", max_time=200, initial_dt=0.01)
+#     plt.clf()
+#     algo.plot_trajectory()
+#     plt.draw()
+#     plt.pause(1)
 
 # for key in algo.random_f.keys():
 #     plt.plot(algo.random_f[key], label=key)
