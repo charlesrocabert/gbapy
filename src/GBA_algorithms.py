@@ -61,16 +61,16 @@ class GBA_algorithms:
         self.population_N = 2.5e735
 
     ### Plot all fluxfractions over time and highlight fixation points ###
-    def plot_MCMC_Fluxfractions(self, f_stamps, time_stamps, fixation_stamps ):
+    def plot_MCMC_Fluxfractions(self):
         plt.figure(figsize=(8, 6))
-        num_fluxes = len(f_stamps[0])
+        num_fluxes = len(self.f_trajectory[0])
 
         for i in range(num_fluxes):
-            flux_rate = [row[i] for row in f_stamps]
-            plt.plot(time_stamps, flux_rate, label = self.gba_model.reaction_ids[i])
+            flux_rate = [row[i] for row in self.f_trajectory]
+            plt.plot(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i])
 
-            for fixation in fixation_stamps:
-                plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
+            #for fixation in fixation_stamps:
+                #plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
 
         plt.xlabel('Time')
         plt.ylabel('Fluxfraction Rate')
@@ -105,10 +105,8 @@ class GBA_algorithms:
     ### Simulate fixation for MCMC ###
     def simulate_fixation(self, pi):
         if np.random.rand() < pi:
-                # Fixation occurs
                 return True
         else:
-                # No fixation, keep last f
                 return False
         
     ### Calcutlate fixation probability pi for MCMC ###
@@ -173,7 +171,7 @@ class GBA_algorithms:
             "mu": self.mu_trajectory,
             "dmu": self.dmu_trajectory
         })
-        trajectory_df.to_csv(filename, sep=';', index=False)
+        trajectory_df.to_csv("./output/"+filename+".csv", sep=';', index=False)
 
     ### Plot trajectory ###
     def plot_trajectory( self ):
@@ -428,7 +426,7 @@ class GBA_algorithms:
         self.run_time = end_time-start_time
 
     ### Compute Markov chain Monte Carlo ###    
-    def MCMC(self, condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e735, nameOfCSV = None ):
+    def MCMC(self, condition = "1", max_time = 1e8, sigma = 0.01, population_N = 2.5e7, nameOfCSV = None ):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -484,9 +482,10 @@ class GBA_algorithms:
             fluxFractions = np.vstack((fluxFractions, self.gba_model.f))   
            
         if(len(fixationstamps)> 1):
-            #self.plot_trajectory()
-            self.plot_MCMC_Fluxfractions(fluxFractions, timestamps, fixationstamps)
-            #self.saveValues(self.gba_model,condition,nameOfCSV)
+            self.fixationTime_trajectory = np.copy(fixationstamps)
+            self.t_trajectory = np.copy(timestamps)
+            self.f_trajectory = np.copy(fluxFractions)
+            self.mu_trajectory  = np.copy(muRates)
 
         else:
             AssertionError("no Mutation got fixated")
