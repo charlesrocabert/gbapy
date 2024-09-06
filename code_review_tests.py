@@ -9,20 +9,29 @@ from GBA_tol import *
 from GBA_model import *
 from GBA_algorithms import *
 
-algo = GBA_algorithms("D")
+algo = GBA_algorithms("EC12b")
 algo.load_optimums()
 
+### Test random solutions generation ###
+algo.generate_random_initial_solutions("1", 100)
+# plot all random vectors in random_f dict
+for key in algo.random_f.keys():
+    plt.plot(algo.random_f[key], label=key)
+plt.legend()
+plt.show()
+
 ### Test gradient ascent ###
-algo.initialize_f0(condition="1")
-algo.compute_gradient_ascent(condition="25", max_time=200, initial_dt=0.01)
-algo.plot_trajectory()
+# algo.load_LP_initial_solution()
+# algo.compute_gradient_ascent(condition="25", max_time=200, initial_dt=0.01)
+# algo.plot_trajectory()
+# algo.save_trajectory("./output/test_trajectory.csv")
 
 ### Test trajectory with noise ###
-# algo.initialize_f0(condition="1")
+# algo.load_LP_initial_solution()
 # algo.compute_gradient_ascent_with_noise(condition="1", max_time=200, initial_dt=0.01, sigma=0.1)
 
 ### Test optimum over all conditions ###
-# algo.initialize_f0(condition="LP")
+# algo.load_LP_initial_solution()
 # algo.compute_optimum_for_all_conditions(max_time=200, initial_dt=0.01)
 # plt.figure()
 # plt.subplot(2,1,1)

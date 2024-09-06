@@ -30,24 +30,32 @@ class GBA_algorithms:
     ### Class constructor ###
     def __init__( self, model_name ):
         assert os.path.exists("./binary_models/"+model_name+".gba"), "> Model not found"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Main model parameters      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Main model parameters    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.model_name = model_name
         self.gba_model  = load_model(self.model_name)
         self.condition  = ""
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Gradient ascent parameters #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.optimum_df = None
+        self.optimum_f  = {}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Random initial solutions #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.random_f = {}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Gradient ascent          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.t_trajectory   = []
         self.dt_trajectory  = []
         self.mu_trajectory  = []
         self.dmu_trajectory = []
         self.converged      = False
         self.run_time       = 0.0
-        self.optimum_df     = None
-        self.optimum_f      = {}
-
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) MCMC parameters          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # TO DO
+    
     ### Load optimums for all conditions ###
     def load_optimums( self ):
         self.optimum_f.clear()
@@ -56,13 +64,49 @@ class GBA_algorithms:
             condition = optimum_df.iloc[i]['condition']
             self.optimum_f[str(condition)] = optimum_df.iloc[i][3:3+self.gba_model.nj].to_numpy()
     
-    ### Initialize the model vector f0 ###
-    def initialize_f0( self, condition ):
-        if condition == "LP":
-            self.gba_model.solve_local_linear_problem()
-        else:
-            self.gba_model.set_f0(self.optimum_f[condition])
-        
+    ### Generate random initial solutions ###
+    def generate_random_initial_solutions( self, condition, nb_solutions ):
+        assert condition in self.gba_model.condition_ids, "> Condition not found"
+        self.gba_model.set_condition(condition)
+        self.random_f.clear()
+        solutions  = 0
+        trials     = 0
+        max_trials = 1000
+        while solutions < nb_solutions and trials < max_trials:
+            trials += 1
+            f_trunc = np.random.uniform(0.0, FLUX_BOUNDARY, size=self.gba_model.nj-1)
+            self.gba_model.set_f(f_trunc)
+            self.gba_model.calculate()
+            self.gba_model.check_model_consistency()
+            if self.gba_model.consistent:
+                solutions += 1
+                self.random_f[solutions] = np.copy(self.gba_model.f)
+                print("> ", solutions, " solutions was found after ", trials, " trials")
+            
+    ### Initialize the model with the LP problem ###
+    def load_LP_initial_solution( self ):
+        self.gba_model.solve_local_linear_problem()
+    
+    ### Initialize the model with a random initial solution ###
+    def load_random_initial_solution( self, solution ):
+        assert solution in self.random_f.keys(), "> Solution not found"
+        self.gba_model.set_f(self.random_f[solution])
+
+    ### Initialize the model with an optimum solution ###
+    def load_optimum_solution( self, condition ):
+        assert condition in self.optimum_f.keys(), "> Optimum not found"
+        self.gba_model.set_f0(self.optimum_f[condition])
+    
+    ### Save trajectory into a csv file ###
+    def save_trajectory( self, filename ):
+        trajectory_df = pd.DataFrame({
+            "t": self.t_trajectory,
+            "dt": self.dt_trajectory,
+            "mu": self.mu_trajectory,
+            "dmu": self.dmu_trajectory
+        })
+        trajectory_df.to_csv(filename, sep=';', index=False)
+
     ### Plot trajectory ###
     def plot_trajectory( self ):
         plt.figure(figsize=(8, 6))
@@ -227,7 +271,7 @@ class GBA_algorithms:
         return epsilon
 
     ### Compute the gradient ascent with noise ###
-    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, nameOfCSV = None ):
+    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -240,10 +284,10 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t_vec       = []
-        dt_vec      = []
-        mu_vec      = []
-        mu_diff_vec = []
+        self.t_trajectory.clear()
+        self.dt_trajectory.clear()
+        self.mu_trajectory.clear()
+        self.dmu_trajectory.clear()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -281,10 +325,10 @@ class GBA_algorithms:
                 epsilon     = self.draw_noise(sigma)
                 t           = t + dt
                 dt_counter += 1
-                t_vec.append(t)
-                dt_vec.append(dt)
-                mu_vec.append(self.gba_model.mu)
-                mu_diff_vec.append(np.abs(self.gba_model.mu-previous_mu))
+                self.t_trajectory.append(t)
+                self.dt_trajectory.append(dt)
+                self.mu_trajectory.append(self.gba_model.mu)
+                self.dmu_trajectory.append(np.abs(self.gba_model.mu-previous_mu))
                 ### Check if mu changes significantly ###
                 if np.abs(self.gba_model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -309,7 +353,6 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
         if (t>=max_time):
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
