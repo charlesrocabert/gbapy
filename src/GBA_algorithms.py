@@ -58,10 +58,9 @@ class GBA_algorithms:
         self.t_trajectory = []
         self.f_trajectory = []
         self.mu_trajectory  = []
-        self.population_N = 2.5e735
 
     ### Plot all fluxfractions over time and highlight fixation points ###
-    def plot_MCMC_Fluxfractions(self):
+    def plot_MCMC_Fluxfractions(self, filename):
         plt.figure(figsize=(8, 6))
         num_fluxes = len(self.f_trajectory[0])
 
@@ -78,7 +77,7 @@ class GBA_algorithms:
         plt.legend()
         plt.grid(False)
         plt.show()
-        
+        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
     
     ### Draw mutation coefficient for mutating a single fluxfraction ###
     def draw_Mutation(self, sigma):
@@ -171,10 +170,10 @@ class GBA_algorithms:
             "mu": self.mu_trajectory,
             "dmu": self.dmu_trajectory
         })
-        trajectory_df.to_csv("./output/"+filename+".csv", sep=';', index=False)
+        trajectory_df.to_csv("./output/"+self.model_name+"/"+filename+".csv", sep=';', index=False)
 
     ### Plot trajectory ###
-    def plot_trajectory( self ):
+    def plot_trajectory( self, filename ):
         plt.figure(figsize=(8, 6))
         plt.subplot(2, 2, 1)
         plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
@@ -199,18 +198,22 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
+        plt.show()
+        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Plot mu to condition ###
-    def plot_mu_to_condition( self ):
+    def plot_mu_to_condition( self, filename ):
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
         plt.title('Max-Growthrates over different conditions')
         plt.legend()
         plt.grid(False)
+        plt.show()
+        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Plot f to condition ###
-    def plot_f_to_condition( self ):
+    def plot_f_to_condition( self, filename ):
         f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
         conditions     = self.optimum_df['condition'].to_numpy()
         for i in range(self.gba_model.nj):
@@ -220,6 +223,8 @@ class GBA_algorithms:
         plt.title('Flux fractions over different conditions')
         plt.legend()
         plt.grid(False)
+        plt.show()
+        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Compute the gradient ascent without noise ###
     def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
@@ -325,7 +330,7 @@ class GBA_algorithms:
             }
             for reaction_id, fluxfraction in zip(self.gba_model.reaction_ids, self.gba_model.f):
                 overview_dict[reaction_id] = fluxfraction
-            overview_row    = pd.Series(data=overview_dict)
+            overview_row    = pd.Series(data = overview_dict)
             self.optimum_df = pd.concat([self.optimum_df, overview_row.to_frame().T], ignore_index=True)
             self.optimum_f[condition] = np.copy(self.gba_model.f)
         self.optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
@@ -435,15 +440,19 @@ class GBA_algorithms:
         self.gba_model.check_model_consistency()
         assert self.gba_model.consistent, "> Initial model is not consistent"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize trackers       #
+        # 2) Clear trackers            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        fluxFractions = np.copy(self.gba_model.f)   
-        timestamps = [0]                     
-        fixationstamps = []               
-        muRates = [self.gba_model.mu]                      
+        self.fixationTime_trajectory.clear()
+        self.t_trajectory.clear()
+        self.f_trajectory.clear()
+        self.mu_trajectory.clear()
+                            
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#   
+        timestamps = [0]                     
+        fixationstamps = []               
+        muRates = [self.gba_model.mu]  
         fluxFractions = np.copy(self.gba_model.f)   
         N_e = population_N
         current_mu = self.gba_model.mu
@@ -480,7 +489,7 @@ class GBA_algorithms:
 
             self.gba_model.calculate()                                              
             fluxFractions = np.vstack((fluxFractions, self.gba_model.f))   
-           
+        ### If MCMC caused a fixation save trajectory ###   
         if(len(fixationstamps)> 1):
             self.fixationTime_trajectory = np.copy(fixationstamps)
             self.t_trajectory = np.copy(timestamps)
