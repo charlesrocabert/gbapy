@@ -39,14 +39,19 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Gradient ascent parameters #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.converged = False
-        self.run_time  = 0.0
-        self.optimum_f = {}
+        self.t_trajectory   = []
+        self.dt_trajectory  = []
+        self.mu_trajectory  = []
+        self.dmu_trajectory = []
+        self.converged      = False
+        self.run_time       = 0.0
+        self.optimum_df     = None
+        self.optimum_f      = {}
 
     ### Load optimums for all conditions ###
     def load_optimums( self ):
-        optimum_df     = pd.read_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';')
-        self.optimum_f = {}
+        self.optimum_f.clear()
+        optimum_df = pd.read_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';')
         for i in range(optimum_df.shape[0]):
             condition = optimum_df.iloc[i]['condition']
             self.optimum_f[str(condition)] = optimum_df.iloc[i][3:3+self.gba_model.nj].to_numpy()
@@ -59,17 +64,17 @@ class GBA_algorithms:
             self.gba_model.set_f0(self.optimum_f[condition])
         
     ### Plot trajectory ###
-    def plot_trajectory( self, t_vec, dt_vec, mu_vec, mu_diff_vec ):
+    def plot_trajectory( self ):
         plt.figure(figsize=(8, 6))
         plt.subplot(2, 2, 1)
-        plt.plot(t_vec, mu_vec, label='mu(t)')
+        plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
         plt.xlabel('Time')
         plt.ylabel('mu')
         plt.title('Plot of mu against Time')
         plt.grid(True)
         plt.legend()
         plt.subplot(2, 2, 2)
-        plt.plot(dt_vec, label='dt')
+        plt.plot(self.dt_trajectory, label='dt')
         plt.yscale('log')
         plt.xlabel('Iteration')
         plt.ylabel('dt')
@@ -77,7 +82,7 @@ class GBA_algorithms:
         plt.grid(True)
         plt.legend()
         plt.subplot(2, 2, 3)
-        plt.plot(mu_diff_vec, label='mu_diff')
+        plt.plot(self.dmu_trajectory, label='mu_diff')
         plt.yscale('log')
         plt.xlabel('Iteration')
         plt.ylabel('Mu diff')
@@ -87,8 +92,8 @@ class GBA_algorithms:
         plt.show()
     
     ### Plot mu to condition ###
-    def plot_mu_to_condition( self, optimum_df ):
-        plt.plot(optimum_df['condition'], optimum_df['mu'], label='MaxGrowthrate at condition')
+    def plot_mu_to_condition( self ):
+        plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
         plt.title('Max-Growthrates over different conditions')
@@ -96,9 +101,9 @@ class GBA_algorithms:
         plt.grid(False)
 
     ### Plot f to condition ###
-    def plot_f_to_condition( self, optimum_df ):
-        f_to_condition = optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
-        conditions     = optimum_df['condition'].to_numpy()
+    def plot_f_to_condition( self ):
+        f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
+        conditions     = self.optimum_df['condition'].to_numpy()
         for i in range(self.gba_model.nj):
             plt.plot(conditions, f_to_condition[:, i], label = self.gba_model.reaction_ids[i])
         plt.xlabel('Conditions')
@@ -120,10 +125,10 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t_vec       = []
-        dt_vec      = []
-        mu_vec      = []
-        mu_diff_vec = []
+        self.t_trajectory.clear()
+        self.dt_trajectory.clear()
+        self.mu_trajectory.clear()
+        self.dmu_trajectory.clear()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -159,10 +164,10 @@ class GBA_algorithms:
                 previous_f  = np.copy(next_f)
                 t           = t + dt
                 dt_counter += 1
-                t_vec.append(t)
-                dt_vec.append(dt)
-                mu_vec.append(self.gba_model.mu)
-                mu_diff_vec.append(np.abs(self.gba_model.mu-previous_mu))
+                self.t_trajectory.append(t)
+                self.dt_trajectory.append(dt)
+                self.mu_trajectory.append(self.gba_model.mu)
+                self.dmu_trajectory.append(np.abs(self.gba_model.mu-previous_mu))
                 ### Check if mu changes significantly ###
                 if np.abs(self.gba_model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -187,7 +192,6 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.plot_trajectory(t_vec, dt_vec, mu_vec, mu_diff_vec)
         if (t>=max_time):
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
@@ -199,7 +203,7 @@ class GBA_algorithms:
     def compute_optimum_for_all_conditions( self, max_time = 5, initial_dt = 0.01 ):
         overview_columns = ['condition', 'mu','density','converged', 'run_time']
         overview_columns = overview_columns[:3] + self.gba_model.reaction_ids + overview_columns[3:]
-        optimum_df       = pd.DataFrame(columns=overview_columns)
+        self.optimum_df  = pd.DataFrame(columns=overview_columns)
         self.optimum_f   = {}
         for condition in self.gba_model.condition_ids:
             self.compute_gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
@@ -212,16 +216,10 @@ class GBA_algorithms:
             }
             for reaction_id, fluxfraction in zip(self.gba_model.reaction_ids, self.gba_model.f):
                 overview_dict[reaction_id] = fluxfraction
-            overview_row              = pd.Series(data=overview_dict)
-            optimum_df                = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
+            overview_row    = pd.Series(data=overview_dict)
+            self.optimum_df = pd.concat([self.optimum_df, overview_row.to_frame().T], ignore_index=True)
             self.optimum_f[condition] = np.copy(self.gba_model.f)
-        optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
-        plt.figure()
-        plt.subplot(2,1,1)
-        self.plot_mu_to_condition(optimum_df)
-        plt.subplot(2,1,2)
-        self.plot_f_to_condition(optimum_df)
-        plt.show()
+        self.optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ### Draw a random normal vector with std 'sigma' and length 'n' ###
     def draw_noise( self, sigma ):
