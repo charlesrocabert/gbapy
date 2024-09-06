@@ -276,11 +276,11 @@ class GBA_algorithms:
                     dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
                 else:
-                    raise AssertionError("trajectory was stopped, because dt got too small")
+                    raise AssertionError("> Trajectory was stopped, because dt got too small")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if (t>=max_time):
+        if t >= max_time:
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
             print("> Maximum was found, Model is consistent for condition: ",condition)
@@ -388,11 +388,11 @@ class GBA_algorithms:
                     dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
                 else:
-                    raise AssertionError("trajectory was stopped, because dt got too small")
+                    raise AssertionError("> Trajectory was stopped, because dt got too small")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if (t>=max_time):
+        if t >= max_time:
             print("> Max time was reached, Model is consistent for condition: ",condition)
         else:
             print("> Maximum was found, Model is consistent for condition: ",condition)
@@ -446,7 +446,7 @@ class GBA_algorithms:
             return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
 
     ### Compute Markov chain Monte Carlo ###    
-    def MCMC(self, condition = "1", max_time = 1e8, sigma = 0.01, N_e = 2.5e7 ):
+    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -478,6 +478,8 @@ class GBA_algorithms:
         t = 0
         while t < max_time:
             t += 1
+            if t%1000 == 0:
+                print("> Iteration: ", t, " mu: ", self.mu_trajectory[-1])
             ### 4.1) Draw reaction to mutate at random ###
             reaction_index = np.random.randint(len(self.gba_model.f_trunc))
             current_mu     = self.gba_model.mu
@@ -506,16 +508,13 @@ class GBA_algorithms:
                 self.mu_trajectory.append(current_mu)
             self.gba_model.calculate()
             self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
-            if t%1000 == 0:
-                plt.clf()
-                self.plot_MCMC_trajectory()
-                plt.draw()
-                plt.pause(1.0)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# 
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.fixation_stamps) == 0:
-            AssertionError("No mutation was fixed")
+            print("> MCMC simulation was completed. No mutation was fixed")
+        else:
+            print("> MCMC simulation was completed")
         end_time      = time.time()
         self.run_time = end_time-start_time
 
