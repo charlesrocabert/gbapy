@@ -60,7 +60,7 @@ class GBA_algorithms:
         self.mu_trajectory  = []
 
     ### Plot all fluxfractions over time and highlight fixation points ###
-    def plot_MCMC_Fluxfractions(self, filename):
+    def plot_MCMC_Fluxfractions(self, path = None):
         plt.figure(figsize=(8, 6))
         num_fluxes = len(self.f_trajectory[0])
 
@@ -76,8 +76,20 @@ class GBA_algorithms:
         plt.title('Fluxfraction Rate over Time with Highlighted Mutations')
         plt.legend()
         plt.grid(False)
+        ###Saving the figure##
+        auto_path = "./output/Model "+self.model_name+" output"
+        plt.gcf()
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                plt.savefig(auto_path+"/conditon"+self.condition+" fluxfractions to time.png")
+            else:
+                plt.savefig(auto_path+"/conditon"+self.condition+" fluxfractions to time.png")
+        else:
+             plt.savefig(path)
         plt.show()
-        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
+        
+
     
     ### Draw mutation coefficient for mutating a single fluxfraction ###
     def draw_Mutation(self, sigma):
@@ -163,17 +175,25 @@ class GBA_algorithms:
         self.gba_model.set_f0(self.optimum_f[condition])
     
     ### Save trajectory into a csv file ###
-    def save_trajectory( self, filename ):
+    def save_trajectory( self,  path = None ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "dt": self.dt_trajectory,
             "mu": self.mu_trajectory,
             "dmu": self.dmu_trajectory
         })
-        trajectory_df.to_csv("./output/"+self.model_name+"/"+filename+".csv", sep=';', index=False)
+        auto_path = "./output/Model "+self.model_name+" output"
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+            else:
+                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+        else:
+            trajectory_df.to_csv(path, sep=';', index=False)
 
     ### Plot trajectory ###
-    def plot_trajectory( self, filename ):
+    def plot_trajectory( self, path = None ):
         plt.figure(figsize=(8, 6))
         plt.subplot(2, 2, 1)
         plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
@@ -198,8 +218,17 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
+        auto_path = "./output/Model "+self.model_name+" output"
+        plt.gcf()
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                plt.savefig(auto_path+"/conditon"+self.condition+" trajectory.png")
+            else:
+                plt.savefig(auto_path+"/conditon"+self.condition+" trajectory.png")
+        else:
+             plt.savefig(path)
         plt.show()
-        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Plot mu to condition ###
     def plot_mu_to_condition( self, filename ):
