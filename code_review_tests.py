@@ -13,7 +13,7 @@ algo = GBA_algorithms("C")
 algo.load_LP_initial_solution()
 algo.load_external_condition("1")
 
-algo.MCMC(condition="1", max_time = 1e8, sigma = 0.01, N_e = 2.5e7 )
+algo.MCMC(condition="1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 )
 algo.plot_MCMC_trajectory()
 plt.show()
 

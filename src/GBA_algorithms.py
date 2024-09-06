@@ -120,25 +120,17 @@ class GBA_algorithms:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     ### Save trajectory into a csv file ###
-    def save_trajectory( self,  path = None ):
+    def save_trajectory( self, filename ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "dt": self.dt_trajectory,
             "mu": self.mu_trajectory,
             "dmu": self.dmu_trajectory
         })
-        auto_path = "./output/Model "+self.model_name+" output"
-        if path == None:
-            if not os.path.exists(auto_path):
-                os.makedirs(auto_path)
-                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
-            else:
-                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
-        else:
-            trajectory_df.to_csv(path, sep=';', index=False)
+        trajectory_df.to_csv(filename, sep=';', index=False)
 
     ### Plot trajectory ###
-    def plot_trajectory( self, path = None ):
+    def plot_trajectory( self ):
         plt.figure(figsize=(8, 6))
         plt.subplot(2, 2, 1)
         plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
@@ -163,31 +155,18 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
-        auto_path = "./output/Model "+self.model_name+" output"
-        plt.gcf()
-        if path == None:
-            if not os.path.exists(auto_path):
-                os.makedirs(auto_path)
-                plt.savefig(auto_path+"/conditon"+self.condition+" trajectory.png")
-            else:
-                plt.savefig(auto_path+"/conditon"+self.condition+" trajectory.png")
-        else:
-             plt.savefig(path)
-        plt.show()
 
     ### Plot mu to condition ###
-    def plot_mu_to_condition( self, filename ):
+    def plot_mu_to_condition( self ):
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
         plt.title('Max-Growthrates over different conditions')
         plt.legend()
         plt.grid(False)
-        plt.show()
-        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Plot f to condition ###
-    def plot_f_to_condition( self, filename ):
+    def plot_f_to_condition( self ):
         f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
         conditions     = self.optimum_df['condition'].to_numpy()
         for i in range(self.gba_model.nj):
@@ -197,8 +176,6 @@ class GBA_algorithms:
         plt.title('Flux fractions over different conditions')
         plt.legend()
         plt.grid(False)
-        plt.show()
-        plt.savefig("./output/"+self.model_name+"/"+filename+".png")
 
     ### Compute the gradient ascent without noise ###
     def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
@@ -304,7 +281,7 @@ class GBA_algorithms:
             }
             for reaction_id, fluxfraction in zip(self.gba_model.reaction_ids, self.gba_model.f):
                 overview_dict[reaction_id] = fluxfraction
-            overview_row    = pd.Series(data = overview_dict)
+            overview_row    = pd.Series(data=overview_dict)
             self.optimum_df = pd.concat([self.optimum_df, overview_row.to_frame().T], ignore_index=True)
             self.optimum_f[condition] = np.copy(self.gba_model.f)
         self.optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
@@ -456,13 +433,7 @@ class GBA_algorithms:
         self.gba_model.check_model_consistency()
         assert self.gba_model.consistent, "> Initial model is not consistent"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Clear trackers            #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.fixationTime_trajectory.clear()
-        self.t_trajectory.clear()
-        self.f_trajectory.clear()
-        self.mu_trajectory.clear()
-                            
+        # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.t_trajectory    = [0.0]
         self.mu_trajectory   = [self.gba_model.mu]
