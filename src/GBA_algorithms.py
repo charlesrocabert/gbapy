@@ -71,17 +71,23 @@ class GBA_algorithms:
         self.random_f.clear()
         solutions  = 0
         trials     = 0
-        max_trials = 1000
+        max_trials = 10000
         while solutions < nb_solutions and trials < max_trials:
+            if trials%100 == 0:
+                print("> ", solutions, " solutions was found after ", trials, " trials")
             trials += 1
-            f_trunc = np.random.uniform(0.0, FLUX_BOUNDARY, size=self.gba_model.nj-1)
-            self.gba_model.set_f(f_trunc)
+            negative_term = True
+            while negative_term:
+                f_trunc = np.random.rand(self.gba_model.nj-1)
+                f_trunc = f_trunc*FLUX_BOUNDARY
+                self.gba_model.set_f(f_trunc)
+                if self.gba_model.f[0] >= 0.0:
+                    negative_term = False
             self.gba_model.calculate()
             self.gba_model.check_model_consistency()
-            if self.gba_model.consistent:
+            if self.gba_model.consistent and np.isfinite(self.gba_model.mu) and self.gba_model.mu > 1e-5:
                 solutions += 1
                 self.random_f[solutions] = np.copy(self.gba_model.f)
-                print("> ", solutions, " solutions was found after ", trials, " trials")
             
     ### Initialize the model with the LP problem ###
     def load_LP_initial_solution( self ):
@@ -133,7 +139,6 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
-        plt.show()
     
     ### Plot mu to condition ###
     def plot_mu_to_condition( self ):

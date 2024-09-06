@@ -9,16 +9,26 @@ from GBA_tol import *
 from GBA_model import *
 from GBA_algorithms import *
 
-algo = GBA_algorithms("EC12b")
+algo = GBA_algorithms("D")
 algo.load_optimums()
 
 ### Test random solutions generation ###
-algo.generate_random_initial_solutions("1", 100)
-# plot all random vectors in random_f dict
+plt.ion()
+algo.generate_random_initial_solutions("1", 10)
+algo.gba_model.set_condition("1")
 for key in algo.random_f.keys():
-    plt.plot(algo.random_f[key], label=key)
-plt.legend()
-plt.show()
+    print(algo.random_f[key])
+    algo.gba_model.set_f0(algo.random_f[key])
+    algo.compute_gradient_ascent(condition="1", max_time=200, initial_dt=0.01)
+    plt.clf()
+    algo.plot_trajectory()
+    plt.draw()
+    plt.pause(1)
+
+# for key in algo.random_f.keys():
+#     plt.plot(algo.random_f[key], label=key)
+# plt.legend()
+# plt.show()
 
 ### Test gradient ascent ###
 # algo.load_LP_initial_solution()
