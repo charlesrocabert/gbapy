@@ -119,8 +119,8 @@ class GBA_algorithms:
     # 2) Gradient ascent methods     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    ### Save trajectory into a csv file ###
-    def save_trajectory( self, filename ):
+    ### Save the gradient ascent trajectory into a csv file ###
+    def save_gradient_ascent_trajectory( self, filename ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "dt": self.dt_trajectory,
@@ -129,8 +129,8 @@ class GBA_algorithms:
         })
         trajectory_df.to_csv(filename, sep=';', index=False)
 
-    ### Plot trajectory ###
-    def plot_trajectory( self ):
+    ### Plot the gradient ascent trajectory ###
+    def plot_gradient_ascent_trajectory( self ):
         plt.figure(figsize=(8, 6))
         plt.subplot(2, 2, 1)
         plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
@@ -380,12 +380,22 @@ class GBA_algorithms:
     # 3) MCMC methods                #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+    ### Save the MCMC trajectory into a csv file ###
+    def save_gradient_ascent_trajectory( self, filename ):
+        trajectory_df = pd.DataFrame({
+            "t": self.t_trajectory,
+            "mu": self.mu_trajectory
+        })
+        for i in range(self.gba_model.nj):
+            trajectory_df[self.gba_model.reaction_ids[i]] = [row[i] for row in self.f_trajectory]
+        trajectory_df.to_csv(filename, sep=';', index=False)
+
     ### Plot the MCMC trajectory and highlight fixation points ###
     def plot_MCMC_trajectory( self ):
         plt.subplot(1, 2, 1)
         for i in range(self.gba_model.nj):
             flux_rate = [row[i] for row in self.f_trajectory]
-            plt.plot(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i])
+            plt.step(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i])
 
             #for fixation in fixation_stamps:
                 #plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
@@ -395,7 +405,7 @@ class GBA_algorithms:
         plt.legend()
         plt.grid(False)
         plt.subplot(1, 2, 2)
-        plt.plot(self.t_trajectory, self.mu_trajectory, label='mu(t)')
+        plt.step(self.t_trajectory, self.mu_trajectory, label='mu(t)')
 
     ### Calculates the mutated flux fraction for each reaction ###
     def mutate_f( self, index, sigma ):
@@ -465,20 +475,16 @@ class GBA_algorithms:
             ### 4.3) Undo Mutation if no fixation occurs ###
                 if self.simulate_fixation(pi) == False:
                     self.gba_model.set_f(non_mutated_f)
-                    self.t_trajectory.append(t)
-                    self.mu_trajectory.append(current_mu)
             ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
                     self.t_trajectory.append(t)
                     self.mu_trajectory.append(mutated_mu)
+                    self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
                     self.fixation_stamps.append(t)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
                 self.gba_model.set_f(non_mutated_f)
-                self.t_trajectory.append(t)
-                self.mu_trajectory.append(current_mu)
             self.gba_model.calculate()
-            self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

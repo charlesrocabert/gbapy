@@ -9,14 +9,14 @@ from GBA_tol import *
 from GBA_model import *
 from GBA_algorithms import *
 
-algo = GBA_algorithms("C")
+algo = GBA_algorithms("A")
 algo.load_LP_initial_solution()
 algo.load_external_condition("1")
 
-algo.MCMC(condition="1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 )
+algo.MCMC(condition="1", max_time = 10000, sigma = 0.01, N_e = 2.5e7 )
 algo.plot_MCMC_trajectory()
 plt.show()
-
+algo.save_gradient_ascent_trajectory("./output/test_MCMC_trajectory.csv")
 ### Test random solutions generation ###
 # plt.ion()
 # algo.generate_random_initial_solutions("1", 10)
