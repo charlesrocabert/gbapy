@@ -53,7 +53,7 @@ if __name__ == "__main__":
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     KM            = 1.0
     max_kcat      = 10.0
-    gradient_kcat = 0.05
+    gradient_kcat = 1.0
     x_conc        = 0.1
     nb_efms       = int(config["nb_efms"])
     model_name    = "EFM"+config["nb_efms"]
@@ -134,10 +134,3 @@ if __name__ == "__main__":
     f.write(";0.0\n")
     f.close()
 
-# ;rxn1;rxn2;rxn3;rxn4;Ribosome
-# x_C1;1;0;0;0;0
-# x_C2;0;1;0;0;0
-# x_C3;0;0;1;0;0
-# x_C4;0;0;0;1;0
-# AA;0;0;0;0;8.3
-# Protein;0;0;0;0;0

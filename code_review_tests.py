@@ -10,8 +10,7 @@ from GBA_model import *
 from GBA_algorithms import *
 
 ### Convert to binary ###
-load_and_backup_model("EFM4")
-algo = GBA_algorithms("EFM4")
+algo = GBA_algorithms("EFM7")
 
 ### Calculate first optimum ###
 algo.generate_random_initial_solutions(condition="1", nb_solutions=10)

@@ -68,9 +68,7 @@ class GBA_algorithms:
         trials     = 0
         max_trials = 10000
         while solutions < nb_solutions and trials < max_trials:
-            if trials%100 == 0:
-                print("> ", solutions, " solutions was found after ", trials, " trials")
-            trials += 1
+            trials       += 1
             negative_term = True
             while negative_term:
                 f_trunc = np.random.rand(self.gba_model.nj-1)
@@ -80,7 +78,8 @@ class GBA_algorithms:
                     negative_term = False
             self.gba_model.calculate()
             self.gba_model.check_model_consistency()
-            if self.gba_model.consistent and np.isfinite(self.gba_model.mu) and self.gba_model.mu > 1e-5:
+            if self.gba_model.consistent and np.isfinite(self.gba_model.mu) and self.gba_model.mu > 1e-6:
+                print("> ", solutions, " solutions was found after ", trials, " trials")
                 solutions += 1
                 self.random_f[solutions] = np.copy(self.gba_model.f)
         print("> ", solutions, " solutions was found after ", trials, " trials")
