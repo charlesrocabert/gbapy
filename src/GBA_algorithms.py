@@ -2,7 +2,7 @@
 # coding: utf-8
 
 #***********************************************************************
-# Copyright © 2024 Furkan Mert, Charles Rocabert
+# Copyright © 2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
 # GBA_algorithms.py
