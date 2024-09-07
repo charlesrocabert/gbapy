@@ -83,7 +83,8 @@ class GBA_algorithms:
             if self.gba_model.consistent and np.isfinite(self.gba_model.mu) and self.gba_model.mu > 1e-5:
                 solutions += 1
                 self.random_f[solutions] = np.copy(self.gba_model.f)
-          
+        print("> ", solutions, " solutions was found after ", trials, " trials")
+
     ### Load optimums for all conditions ###
     def load_optimums( self ):
         self.optimum_f.clear()
@@ -99,7 +100,7 @@ class GBA_algorithms:
     ### Initialize the model with a random initial solution ###
     def load_random_initial_solution( self, solution ):
         assert solution in self.random_f.keys(), "> Solution not found"
-        self.gba_model.set_f(self.random_f[solution])
+        self.gba_model.set_f0(self.random_f[solution])
 
     ### Initialize the model with an optimum solution ###
     def load_optimum_solution( self, condition ):

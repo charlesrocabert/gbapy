@@ -9,48 +9,18 @@ from GBA_tol import *
 from GBA_model import *
 from GBA_algorithms import *
 
-algo = GBA_algorithms("EC12b")
-algo.load_LP_initial_solution()
-algo.load_external_condition("1")
+### Convert to binary ###
+load_and_backup_model("EFM2")
+algo = GBA_algorithms("EFM2")
 
-algo.MCMC(condition="1", max_time = 10000, sigma = 0.01, N_e = 2.5e7)
-algo.plot_MCMC_trajectory()
-plt.show()
-algo.save_gradient_ascent_trajectory("./output/test_MCMC_trajectory.csv")
-### Test random solutions generation ###
-# plt.ion()
-# algo.generate_random_initial_solutions("1", 10)
-# algo.gba_model.set_condition("1")
-# for key in algo.random_f.keys():
-#     print(algo.random_f[key])
-#     algo.gba_model.set_f0(algo.random_f[key])
-#     algo.compute_gradient_ascent(condition="1", max_time=200, initial_dt=0.01)
-#     plt.clf()
-#     algo.plot_trajectory()
-#     plt.draw()
-#     plt.pause(1)
-
-# for key in algo.random_f.keys():
-#     plt.plot(algo.random_f[key], label=key)
-# plt.legend()
-# plt.show()
-
-### Test gradient ascent ###
-# algo.load_LP_initial_solution()
-# algo.compute_gradient_ascent(condition="25", max_time=200, initial_dt=0.01)
-# algo.plot_trajectory()
-# algo.save_trajectory("./output/test_trajectory.csv")
-
-### Test trajectory with noise ###
-# algo.load_LP_initial_solution()
-# algo.compute_gradient_ascent_with_noise(condition="1", max_time=200, initial_dt=0.01, sigma=0.1)
-
-### Test optimum over all conditions ###
-# algo.load_LP_initial_solution()
-# algo.compute_optimum_for_all_conditions(max_time=200, initial_dt=0.01)
-# plt.figure()
-# plt.subplot(2,1,1)
-# algo.plot_mu_to_condition()
-# plt.subplot(2,1,2)
-# algo.plot_f_to_condition()
-# plt.show()
+### Calculate first optimum ###
+algo.generate_random_initial_solutions(condition="1", nb_solutions=10)
+print(algo.random_f)
+plt.ion()
+for i in range(10):
+    algo.load_random_initial_solution(i+1)
+    algo.compute_gradient_ascent()
+    plt.clf()
+    algo.plot_gradient_ascent_trajectory()
+    plt.draw()
+    plt.pause(1)
