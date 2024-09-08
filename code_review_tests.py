@@ -10,8 +10,8 @@ from GBA_model import *
 from GBA_algorithms import *
 
 ### Convert to binary ###
-load_and_backup_model("FCR_EFM5")
-algo = GBA_algorithms("FCR_EFM5")
+load_and_backup_model("NFCR_EFM2")
+algo = GBA_algorithms("NFCR_EFM2")
 
 ### Calculate first optimum ###
 algo.generate_random_initial_solutions(condition="1", nb_solutions=10)
