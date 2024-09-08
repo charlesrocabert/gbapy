@@ -120,7 +120,7 @@ class GBA_algorithms:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     ### Save the gradient ascent trajectory into a csv file ###
-    def save_gradient_ascent_trajectory( self, filename ):
+    def save_gradient_ascent_trajectory( self, save_f = False, filename = "./output/trajectory.csv" ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "dt": self.dt_trajectory,
@@ -128,6 +128,10 @@ class GBA_algorithms:
             "dmu": self.dmu_trajectory
         })
         trajectory_df.to_csv(filename, sep=';', index=False)
+        if save_f:
+            # column names are reactions
+            f_df = pd.DataFrame(self.f_trajectory, columns=self.gba_model.reaction_ids)
+            f_df.to_csv(filename.replace(".csv", "_f.csv"), sep=';', index=False)
 
     ### Plot the gradient ascent trajectory ###
     def plot_gradient_ascent_trajectory( self ):
@@ -156,6 +160,26 @@ class GBA_algorithms:
         plt.grid(True)
         plt.legend()
 
+    def plot_EFM_trajectory( self ):#, ax ):
+        for i in range(self.gba_model.nj-1):
+            #if i==2:
+            #    break
+            flux_rate = [row[i] for row in self.f_trajectory]
+            plt.step(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i])
+        plt.xlabel('Time')
+        plt.ylabel('EFM proportions')
+        plt.legend()
+        plt.grid(False)
+
+        
+        
+        # Get firt column of f_trajectory
+        # x = [row[0] for row in self.f_trajectory]
+        # y = [row[1] for row in self.f_trajectory]
+        # z = [row[2] for row in self.f_trajectory]
+        # #z = self.mu_trajectory
+        # ax.plot(x, y, z)
+    
     ### Plot mu to condition ###
     def plot_mu_to_condition( self ):
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
@@ -178,7 +202,7 @@ class GBA_algorithms:
         plt.grid(False)
 
     ### Compute the gradient ascent without noise ###
-    def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
+    def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, save_f = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -194,6 +218,8 @@ class GBA_algorithms:
         self.dt_trajectory  = [initial_dt]
         self.mu_trajectory  = [self.gba_model.mu]
         self.dmu_trajectory = [0.0]
+        if save_f:
+            self.f_trajectory   = np.copy(self.gba_model.f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -233,6 +259,8 @@ class GBA_algorithms:
                 self.dt_trajectory.append(dt)
                 self.mu_trajectory.append(self.gba_model.mu)
                 self.dmu_trajectory.append(np.abs(self.gba_model.mu-previous_mu))
+                if save_f:
+                    self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
                 ### Check if mu changes significantly ###
                 if np.abs(self.gba_model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -381,7 +409,7 @@ class GBA_algorithms:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     ### Save the MCMC trajectory into a csv file ###
-    def save_gradient_ascent_trajectory( self, filename ):
+    def save_MCMC_trajectory( self, filename ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "mu": self.mu_trajectory
