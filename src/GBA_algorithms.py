@@ -159,6 +159,7 @@ class GBA_algorithms:
         plt.title('Mu diff')
         plt.grid(True)
         plt.legend()
+        
 
     def plot_EFM_trajectory( self ):#, ax ):
         for i in range(self.gba_model.nj-1):
@@ -181,16 +182,26 @@ class GBA_algorithms:
         # ax.plot(x, y, z)
     
     ### Plot mu to condition ###
-    def plot_mu_to_condition( self ):
+    def plot_mu_to_condition( self, path = None ):
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
         plt.title('Max-Growthrates over different conditions')
         plt.legend()
         plt.grid(False)
+        plt.gcf()
+        auto_path = "./output/Model "+self.model_name+" output"
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                plt.savefig(auto_path+"/"+self.model_name+" Growthrate to all model conditions.png")
+            else:
+                plt.savefig(auto_path+"/"+self.model_name+" Growthrate to all model conditions.png")
+        else:
+                plt.savefig(path)
 
     ### Plot f to condition ###
-    def plot_f_to_condition( self ):
+    def plot_f_to_condition( self, path = None ):
         f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
         conditions     = self.optimum_df['condition'].to_numpy()
         for i in range(self.gba_model.nj):
@@ -200,6 +211,17 @@ class GBA_algorithms:
         plt.title('Flux fractions over different conditions')
         plt.legend()
         plt.grid(False)
+        plt.gcf()
+
+        auto_path = "./output/Model "+self.model_name+" output"
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                plt.savefig(auto_path+"/"+self.model_name+" Flux fractions over all model conditions.png")
+            else:
+                plt.savefig(auto_path+"/"+self.model_name+" Flux fractions over all model conditions.png")
+        else:
+                plt.savefig(path)
 
     ### Compute the gradient ascent without noise ###
     def compute_gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, save_f = False ):
@@ -410,7 +432,7 @@ class GBA_algorithms:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     ### Save the MCMC trajectory into a csv file ###
-    def save_MCMC_trajectory( self, path ):
+    def save_MCMC_trajectory( self, path = None ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "mu": self.mu_trajectory
@@ -421,28 +443,48 @@ class GBA_algorithms:
         if path == None:
             if not os.path.exists(auto_path):
                 os.makedirs(auto_path)
-                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+                trajectory_df.to_csv(auto_path+"/"+self.condition+"trajectory.csv", sep=';', index=False)
             else:
-                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+                trajectory_df.to_csv(auto_path+"/"+self.condition+"trajectory.csv", sep=';', index=False)
         else:
                 trajectory_df.to_csv(path, sep=';', index=False)
 
     ### Plot the MCMC trajectory and highlight fixation points ###
-    def plot_MCMC_trajectory( self ):
-        plt.subplot(1, 2, 1)
+    def plot_MCMC_trajectory( self, path = None ):
+        plt.figure(figsize=(10, 10))
+
+        plt.subplot(2, 1, 1)
         for i in range(self.gba_model.nj):
             flux_rate = [row[i] for row in self.f_trajectory]
-            plt.step(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i])
+            plt.step(self.t_trajectory, flux_rate, label = self.gba_model.reaction_ids[i] )
 
             #for fixation in fixation_stamps:
                 #plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
-        plt.xlabel('Time')
-        plt.ylabel('Fluxfraction Rate')
-        plt.title('Fluxfraction Rate over Time with Highlighted Mutations')
-        plt.legend()
-        plt.grid(False)
-        plt.subplot(1, 2, 2)
-        plt.step(self.t_trajectory, self.mu_trajectory, label='mu(t)')
+        plt.xlabel('Time', fontsize = 12)
+        plt.ylabel('Fluxfraction Rate', fontsize = 12)
+        plt.title('Fluxfraction Rate over time with highlighted mutations', fontsize = 14)
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
+        plt.grid(True)
+        plt.subplot(2, 1, 2)
+        plt.step(self.t_trajectory, self.mu_trajectory, label='mu(t)',linewidth = 2 )
+        
+        plt.xlabel('Time', fontsize=12)
+        plt.ylabel('Mu(t)', fontsize=12)
+        plt.title('Mu Trajectory over Time', fontsize=14)
+        plt.legend(fontsize=10)
+        plt.grid(True)
+
+        plt.gcf()
+        auto_path = "./output/Model "+self.model_name+" output"
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                plt.savefig(auto_path+"/"+"condition "+self.condition+" MCMC trajectory.png")
+            else:
+                plt.savefig(auto_path+"/"+"condition "+self.condition+" MCMC trajectory.png")
+        else:
+                plt.savefig(path)
+        
 
     ### Calculates the mutated flux fraction for each reaction ###
     def mutate_f( self, index, sigma ):
