@@ -183,6 +183,7 @@ class GBA_algorithms:
     
     ### Plot mu to condition ###
     def plot_mu_to_condition( self, path = None ):
+        plt.figure(figsize=(12, 6))
         plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
         plt.xlabel('conditions')
         plt.ylabel('Max-Grotwthrate')
@@ -204,13 +205,18 @@ class GBA_algorithms:
     def plot_f_to_condition( self, path = None ):
         f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
         conditions     = self.optimum_df['condition'].to_numpy()
+        plt.figure(figsize=(12, 6))
+        plt.suptitle("fluxfractions at optimum to conditions", fontsize=16)
+
         for i in range(self.gba_model.nj):
             plt.plot(conditions, f_to_condition[:, i], label = self.gba_model.reaction_ids[i])
+
         plt.xlabel('Conditions')
-        plt.ylabel('Flux fraction')
+        plt.ylabel('Flux fraction at optimum')
         plt.title('Flux fractions over different conditions')
-        plt.legend()
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
         plt.grid(False)
+        plt.tight_layout(rect=[0, 0, 0.85, 0.95])
         plt.gcf()
 
         auto_path = "./output/Model "+self.model_name+" output"
@@ -452,7 +458,7 @@ class GBA_algorithms:
     ### Plot the MCMC trajectory and highlight fixation points ###
     def plot_MCMC_trajectory( self, path = None ):
         plt.figure(figsize=(10, 10))
-
+        plt.suptitle("Model "+self.model_name +" condition "+ self.condition + " MCMC fluxfraction trajectory", fontsize=16)
         plt.subplot(2, 1, 1)
         for i in range(self.gba_model.nj):
             flux_rate = [row[i] for row in self.f_trajectory]
@@ -461,8 +467,8 @@ class GBA_algorithms:
             #for fixation in fixation_stamps:
                 #plt.axvline(x=fixation, color='black', linestyle='--', linewidth=0.5)
         plt.xlabel('Time', fontsize = 12)
-        plt.ylabel('Fluxfraction Rate', fontsize = 12)
-        plt.title('Fluxfraction Rate over time with highlighted mutations', fontsize = 14)
+        plt.ylabel('Fluxfraction rate', fontsize = 12)
+        plt.title('Fluxfraction rate over time with highlighted mutations', fontsize = 14)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
         plt.grid(True)
         plt.subplot(2, 1, 2)
@@ -470,7 +476,7 @@ class GBA_algorithms:
         
         plt.xlabel('Time', fontsize=12)
         plt.ylabel('Mu(t)', fontsize=12)
-        plt.title('Mu Trajectory over Time', fontsize=14)
+        plt.title('Mu trajectory over time', fontsize=14)
         plt.legend(fontsize=10)
         plt.grid(True)
 
