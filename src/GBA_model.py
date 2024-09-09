@@ -130,6 +130,9 @@ class GBA_model:
         self.m = [] # Metabolite indices
         self.a = 0  # Total proteins concentration index
 
+        ### Matrix column rank ###
+        self.column_rank = 0
+
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -305,6 +308,8 @@ class GBA_model:
         self.GCC_f   = np.zeros(self.nj)
         self.f_trunc = np.zeros(self.nj-1)
         self.f       = np.zeros(self.nj)
+        ### Matrix column rank ###
+        self.column_rank = np.linalg.matrix_rank(self.M)
     
     ### Load the GBA model (M, K and kcat matrices) ###
     def load_model( self, model_path, model_name ):
@@ -377,6 +382,7 @@ class GBA_model:
         report += "| • Nb reactions          = " + str(self.nj) + "\n"
         report += "| • Nb exchange reactions = " + str(self.ns) + "\n"
         report += "| • Nb internal reactions = " + str(self.ne) + "\n"
+        report += "| • Column rank           = " + str(self.column_rank) + "\n"
         report += " " + "".join(["-"]*(len(header)-2))
         report += "\n"
         report += "| • Model kinetics = " + self.model_kinetics + "\n"

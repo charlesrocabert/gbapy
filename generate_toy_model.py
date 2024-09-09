@@ -272,7 +272,6 @@ def generate_full_column_rank_model( model_name, nb_efms, x_conc, kcat_max, kcat
     load_and_backup_model(model_name)
     model = load_model(model_name)
     print("> Built full column rank model: "+model_name)
-    print("  --> Column rank = "+str(np.linalg.matrix_rank(model.M))+" (nb EFMs = "+str(nb_efms)+")")
     print(model)
 
 ### Generate a non-full column rank model ###
@@ -285,7 +284,6 @@ def generate_non_full_column_rank_model( model_name, nb_efms, x_conc, kcat_max, 
     load_and_backup_model(model_name)
     model = load_model(model_name)
     print("> Built non-full column rank model: "+model_name)
-    print("  --> Column rank = "+str(np.linalg.matrix_rank(model.M))+" (nb EFMs = "+str(nb_efms)+")")
     print(model)
 
 
@@ -316,7 +314,7 @@ if __name__ == "__main__":
     nb_efms       = int(config["nb_efms"])
     x_conc        = 0.1
     kcat_max      = 10.0
-    kcat_gradient = 1.0
+    kcat_gradient = 0.1
     KM            = 1.0
     FCR_name      = "FCR_EFM"+str(nb_efms)
     NFCR_name     = "NFCR_EFM"+str(nb_efms)
