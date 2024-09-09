@@ -320,6 +320,7 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.condition = condition
         self.gba_model.solve_local_linear_problem()
         self.gba_model.set_condition(condition)
         self.gba_model.calculate()
@@ -409,14 +410,22 @@ class GBA_algorithms:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     ### Save the MCMC trajectory into a csv file ###
-    def save_MCMC_trajectory( self, filename ):
+    def save_MCMC_trajectory( self, path ):
         trajectory_df = pd.DataFrame({
             "t": self.t_trajectory,
             "mu": self.mu_trajectory
         })
         for i in range(self.gba_model.nj):
             trajectory_df[self.gba_model.reaction_ids[i]] = [row[i] for row in self.f_trajectory]
-        trajectory_df.to_csv(filename, sep=';', index=False)
+        auto_path = "./output/Model "+self.model_name+" output"
+        if path == None:
+            if not os.path.exists(auto_path):
+                os.makedirs(auto_path)
+                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+            else:
+                trajectory_df.to_csv("./output/"+self.model_name+"/"+self.condition+"trajectory.csv", sep=';', index=False)
+        else:
+                trajectory_df.to_csv(path, sep=';', index=False)
 
     ### Plot the MCMC trajectory and highlight fixation points ###
     def plot_MCMC_trajectory( self ):
@@ -466,6 +475,7 @@ class GBA_algorithms:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.condition = condition
         self.gba_model.set_condition(condition)
         self.gba_model.calculate()
         self.gba_model.check_model_consistency()
