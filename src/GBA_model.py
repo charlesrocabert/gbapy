@@ -62,6 +62,10 @@ def load_and_backup_model( model_name, save_f0 = False, save_optimums = False ):
     if save_optimums:
         print("> Computing optimums for model "+model_name+"...")
         model.compute_optimums(max_time=200, initial_dt=0.01)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 4) Clean model and dump binary backup       #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    model.reset_variables()
     dump_model(model, model_name)
     del model
 
@@ -158,7 +162,14 @@ class GBA_model:
         self.column_rank = 0
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) GBA model dynamical variables #
+        # 3) Solutions                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.f0        = np.array([]) # Initial LP solution
+        self.optimum_f = {}           # Optimum f vectors for all conditions
+        self.random_f  = {}           # Random f vectors for all conditions
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j      = np.array([]) # Tau values (turnover times)
         self.ditau_j    = np.array([]) # Tau derivative values
@@ -173,21 +184,16 @@ class GBA_model:
         self.consistent = False        # Is the model consistent?
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Evolutionary variables        #
+        # 5) Evolutionary variables        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.current_condition = ""           # Current environmental condition
         self.current_rho       = 0.0          # Current total density
-        self.f0                = np.array([]) # Initial state
         self.dmu_f             = np.array([]) # Local mu derivatives with respect to f
         self.GCC_f             = np.array([]) # Local growth control coefficients with respect to f
         self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
         self.f                 = np.array([]) # Flux fractions vector
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Solutions                     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_f = {} # Optimum f vectors for all conditions
-        self.random_f  = {} # Random f vectors for all conditions
+        
     
     #############################
     #   Model loading methods   #
@@ -383,6 +389,26 @@ class GBA_model:
             self.model_kinetics = "rMM"
         assert self.model_kinetics != "", "> ERROR: load_model: kinetics model not found."
 
+    ### Reset model variables (used before binary export) ###
+    def reset_variables( self ):
+        self.tau_j             = np.array([])
+        self.ditau_j           = np.array([])
+        self.x                 = np.array([])
+        self.c                 = np.array([])
+        self.xc                = np.array([])
+        self.v                 = np.array([])
+        self.p                 = np.array([])
+        self.b                 = np.array([])
+        self.density           = 0.0
+        self.mu                = 0.0
+        self.consistent        = False
+        self.current_condition = ""
+        self.current_rho       = 0.0
+        self.dmu_f             = np.array([])
+        self.GCC_f             = np.array([])
+        self.f_trunc           = np.array([])
+        self.f                 = np.array([])
+    
     ###############
     #   Getters   #
     ###############

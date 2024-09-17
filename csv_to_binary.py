@@ -23,7 +23,9 @@ from GBA_model import *
 ### Parse command line arguments ###
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-name", "-model-name", help="Model name", required=True)
+    parser.add_argument("--model-name", "-name", help="Model name", required=True)
+    parser.add_argument("--save-f0", "-f0", action="store_true", help="Find and save the f0 vector")
+    parser.add_argument("--save-optimums", "-optimums", action="store_true", help="Find and save optimums for all conditions")
     args = parser.parse_args()
     return(vars(args))
 
@@ -52,5 +54,5 @@ if __name__ == "__main__":
     # 2) Generate the binary model    #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     print("> Export CSV model "+config["model_name"]+" to binary format (./binary_models/"+config["model_name"]+".gba)")
-    load_and_backup_model(config["model_name"])
+    load_and_backup_model(config["model_name"], config["save_f0"], config["save_optimums"])
 
