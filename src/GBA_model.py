@@ -35,9 +35,28 @@ def dump_model( gba_model, model_name ):
     assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
 
 ### Load a model and dump the binary backup ###
-def load_and_backup_model( model_name ):
+def load_and_backup_model( model_name, save_f0, save_optimums ):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 1) Create and load the model from CSV files #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model = GBA_model()
     model.load_model("./csv_models/", model_name)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 2) Compute and save f0 if requested         #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    model.solve_local_linear_problem()
+    model.set_condition("1")
+    model.calculate()
+    model.check_model_consistency()
+    if model.consistent:
+        model.write_f0()
+    else:
+        print("> ERROR: Model is inconsistent with condition 1. f0 vector cannot be saved.")
+        sys.exit(1)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 3) Compute and save optimums if requested   #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    algo.compute_optimum_for_all_conditions(max_time=200, initial_dt=0.01)
     dump_model(model, model_name)
     del model
 

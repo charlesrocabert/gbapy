@@ -2,7 +2,7 @@
 # coding: utf-8
 
 #***********************************************************************
-# Copyright © 2023-2024 Charles Rocabert, Furkan Mert
+# Copyright © 2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
 # generate_toy_model.py
@@ -12,10 +12,8 @@
 # (LOCAL SCRIPT)
 #***********************************************************************
 
-from json import load
 import os
 import sys
-import dill
 import argparse
 
 sys.path.append('./src/')
@@ -293,8 +291,8 @@ def generate_non_full_column_rank_model( model_name, nb_efms, x_conc, kcat_max, 
 
 if __name__ == "__main__":
     print("#***********************************************************************")
-    print("# Copyright © 2023-2024 Charles Rocabert, Furkan Mert")
-    print("# Web: https://github.com/charlesrocabert/GBA_PredictiveEvolution")
+    print("# Copyright © 2024 Charles Rocabert, Furkan Mert")
+    print("# Web: https://github.com/charlesrocabert/GBA_Evolution")
     print("#")
     print("# generate_toy_model.py")
     print("# ---------------------")
@@ -320,5 +318,4 @@ if __name__ == "__main__":
     NFCR_name     = "NFCR_EFM"+str(nb_efms)
     generate_full_column_rank_model(FCR_name, nb_efms, x_conc, kcat_max, kcat_gradient, KM)
     generate_non_full_column_rank_model(NFCR_name, nb_efms, x_conc, kcat_max, kcat_gradient, KM)
-    
-    
+

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 #***********************************************************************
-# Copyright © 2023-2024 Charles Rocabert, Furkan Mert
+# Copyright © 2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
 # save_f0.py
@@ -34,8 +34,8 @@ def parse_arguments():
 
 if __name__ == "__main__":
     print("#***********************************************************************")
-    print("# Copyright © 2023-2024 Charles Rocabert, Furkan Mert")
-    print("# Web: https://github.com/charlesrocabert/GBA_PredictiveEvolution")
+    print("# Copyright © 2024 Charles Rocabert, Furkan Mert")
+    print("# Web: https://github.com/charlesrocabert/GBA_Evolution")
     print("#")
     print("# save_f0.py")
     print("# ----------")
