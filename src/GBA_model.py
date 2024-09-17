@@ -193,8 +193,6 @@ class GBA_model:
         self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
         self.f                 = np.array([]) # Flux fractions vector
 
-        
-    
     #############################
     #   Model loading methods   #
     #############################
@@ -329,6 +327,8 @@ class GBA_model:
         ### Indices: m (metabolite), a (all proteins) ###
         self.m = list(range(self.nc-1))
         self.a = self.nc-1
+        ### Matrix column rank ###
+        self.column_rank = np.linalg.matrix_rank(self.M)
         ### GBA model dynamical variables ###
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
@@ -344,8 +344,6 @@ class GBA_model:
         self.GCC_f   = np.zeros(self.nj)
         self.f_trunc = np.zeros(self.nj-1)
         self.f       = np.zeros(self.nj)
-        ### Matrix column rank ###
-        self.column_rank = np.linalg.matrix_rank(self.M)
     
     ### Load the GBA model (M, K and kcat matrices) ###
     def load_model( self, model_path, model_name ):
@@ -391,23 +389,21 @@ class GBA_model:
 
     ### Reset model variables (used before binary export) ###
     def reset_variables( self ):
-        self.tau_j             = np.array([])
-        self.ditau_j           = np.array([])
-        self.x                 = np.array([])
-        self.c                 = np.array([])
-        self.xc                = np.array([])
-        self.v                 = np.array([])
-        self.p                 = np.array([])
-        self.b                 = np.array([])
-        self.density           = 0.0
-        self.mu                = 0.0
-        self.consistent        = False
-        self.current_condition = ""
-        self.current_rho       = 0.0
-        self.dmu_f             = np.array([])
-        self.GCC_f             = np.array([])
-        self.f_trunc           = np.array([])
-        self.f                 = np.array([])
+        ### GBA model dynamical variables ###
+        self.tau_j   = np.zeros(self.nj)
+        self.ditau_j = np.zeros((self.nj, self.nc))
+        self.x       = np.zeros(self.nx)
+        self.c       = np.zeros(self.nc)
+        self.xc      = np.zeros(self.ni)
+        self.v       = np.zeros(self.nj)
+        self.p       = np.zeros(self.nj)
+        self.b       = np.zeros(self.nc)
+        ### Evolutionary variables ###
+        self.f0      = np.zeros(self.nj)
+        self.dmu_f   = np.zeros(self.nj)
+        self.GCC_f   = np.zeros(self.nj)
+        self.f_trunc = np.zeros(self.nj-1)
+        self.f       = np.zeros(self.nj)
     
     ###############
     #   Getters   #
@@ -480,22 +476,6 @@ class GBA_model:
         term1        = (1-self.sM[1:self.nj].dot(self.f_trunc))/self.sM[0]
         self.f       = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
     
-    ### Initial value subproblem: linear optimization to find maximal ###
-    ### ribosome flux fraction f^r, with a minimal production of each ###
-    ### metabolite. The constraints are mass conservation (M*f = b)   ###
-    ### and surface flux balance (sM*f = 1).                          ###
-    ### WARNING: this method assumes full irreversibility             ###
-    def solve_local_linear_problem( self ):
-        gpmodel = gp.Model(env=env)
-        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=MAX_FLUX_FRACTION)
-        min_b   = 1/self.nc/10
-        rhs     = np.repeat(min_b, self.nc)
-        gpmodel.setObjective(x[-1], gp.GRB.MAXIMIZE)
-        gpmodel.addConstr(self.M @ x >= rhs, name="c1")
-        gpmodel.addConstr(self.sM @ x == 1, name="c2")
-        gpmodel.optimize()
-        self.set_f0(x.X)
-
     ### Compute internal concentrations ###
     def compute_c( self ):
         self.c = self.current_rho*self.M.dot(self.f)
@@ -696,10 +676,57 @@ class GBA_model:
         self.consistent = True
         if not (test1 and test2 and test3):
             self.consistent = False
-            
-    ######################
-    # Trajectory Methods #
-    ######################
+
+    ##################################
+    # Generation of initial solution #
+    ##################################
+
+    ### Initial value subproblem: linear optimization to find maximal ###
+    ### ribosome flux fraction f^r, with a minimal production of each ###
+    ### metabolite. The constraints are mass conservation (M*f = b)   ###
+    ### and surface flux balance (sM*f = 1).                          ###
+    ### WARNING: this method assumes full irreversibility             ###
+    def solve_local_linear_problem( self ):
+        gpmodel = gp.Model(env=env)
+        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=MAX_FLUX_FRACTION)
+        min_b   = 1/self.nc/10
+        rhs     = np.repeat(min_b, self.nc)
+        gpmodel.setObjective(x[-1], gp.GRB.MAXIMIZE)
+        gpmodel.addConstr(self.M @ x >= rhs, name="c1")
+        gpmodel.addConstr(self.sM @ x == 1, name="c2")
+        gpmodel.optimize()
+        self.set_f0(x.X)
+
+    ### Generate random initial solutions ###
+    def generate_random_initial_solutions( self, condition, nb_solutions, max_trials, min_mu ):
+        assert condition in self.condition_ids, "> Condition not found"
+        assert nb_solutions > 0, "> Number of solutions must be greater than 0"
+        assert max_trials >= nb_solutions, "> Number of trials must be greater than the number of solutions"
+        assert min_mu >= 0.0, "> Minimal growth rate must be positive"
+        self.set_condition(condition)
+        self.random_f.clear()
+        solutions = 0
+        trials    = 0
+        while solutions < nb_solutions and trials < max_trials:
+            trials       += 1
+            negative_term = True
+            while negative_term:
+                f_trunc = np.random.rand(self.nj-1)
+                f_trunc = f_trunc*MAX_FLUX_FRACTION
+                self.set_f(f_trunc)
+                if self.f[0] >= 0.0:
+                    negative_term = False
+            self.calculate()
+            self.check_model_consistency()
+            if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
+                print("> ", solutions, " solutions was found after ", trials, " trials")
+                solutions += 1
+                self.random_f[solutions] = np.copy(self.f)
+        print("> ", solutions, " solutions was found after ", trials, " trials")
+
+    ########################
+    # Optimization Methods #
+    ########################
     
     ### Compute the gradient ascent ###
     def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
