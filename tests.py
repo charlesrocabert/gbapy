@@ -17,8 +17,6 @@ from GBA_model import *
 if __name__ == "__main__":
     
     model = load_model("A")
-    print(model.condition_ids)
-    print(model.condition_params)
-    print(model.conditions)
+    print(model.optimum_solutions)
     model.generate_random_initial_solutions("1", 10, 10000, 1e-6)
-    print(model.random_f)
+    print(model.random_solutions)

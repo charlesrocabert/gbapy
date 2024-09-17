@@ -165,10 +165,9 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        
         self.LP_solution       = np.array([]) # Linear programming solution
         self.optimum_solutions = {}           # Optimum f vectors for all conditions
-        self.random__solutions = {}           # Random f vectors for all conditions
+        self.random_solutions  = {}           # Random f vectors for all conditions
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
@@ -195,6 +194,11 @@ class GBA_model:
         self.GCC_f             = np.array([]) # Local growth control coefficients with respect to f
         self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
         self.f                 = np.array([]) # Flux fractions vector
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Trajectory tracker            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.trajectory = pd.DataFrame() # Trajectory dataframe
 
     #############################
     #   Model loading methods   #
@@ -681,9 +685,9 @@ class GBA_model:
         if not (test1 and test2 and test3):
             self.consistent = False
 
-    ##################################
-    # Generation of initial solution #
-    ##################################
+    ###################################
+    # Generation of initial solutions #
+    ###################################
 
     ### Initial value subproblem: linear optimization to find maximal ###
     ### ribosome flux fraction f^r, with a minimal production of each ###
@@ -733,7 +737,7 @@ class GBA_model:
     ########################
     
     ### Compute the gradient ascent ###
-    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -742,6 +746,24 @@ class GBA_model:
         self.calculate()
         self.check_model_consistency()
         assert self.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize tracker        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if track and not add:
+            overview_columns = ['condition', 't','dt','mu', 'dmu']
+            overview_columns = overview_columns + self.reaction_ids
+            self.trajectory  = pd.DataFrame(columns=overview_columns)
+            overview_dict    = {"condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            for reaction_id, value in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = value
+            overview_row                   = pd.Series(data=overview_dict)
+            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+        elif track and add:
+            overview_dict = {"condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            for reaction_id, value in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = value
+            overview_row = pd.Series(data=overview_dict)
+            self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -775,6 +797,12 @@ class GBA_model:
                 previous_f  = np.copy(next_f)
                 t           = t + dt
                 dt_counter += 1
+                if track:
+                    overview_dict = {"condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    for reaction_id, value in zip(self.reaction_ids, self.f):
+                        overview_dict[reaction_id] = value
+                    overview_row = pd.Series(data=overview_dict)
+                    self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -816,7 +844,7 @@ class GBA_model:
         self.set_f0(self.LP_solution)
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
-            converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
+            converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
             overview_dict = {
                 "condition": condition,
                 "mu": self.mu,
@@ -831,6 +859,161 @@ class GBA_model:
             self.optimum_solutions[condition] = np.copy(self.f)
         optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
+    ### Compute the gradient ascent with noise ###
+    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1 ):
+        start_time = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.condition = condition
+        self.gba_model.solve_local_linear_problem()
+        self.gba_model.set_condition(condition)
+        self.gba_model.calculate()
+        self.gba_model.check_model_consistency()
+        assert self.gba_model.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize trackers       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.t_trajectory   = [0.0]
+        self.dt_trajectory  = [initial_dt]
+        self.mu_trajectory  = [self.gba_model.mu]
+        self.dmu_trajectory = [0.0]
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        t                     = 0.0
+        dt                    = initial_dt
+        mu_alteration_counter = 0
+        previous_f            = np.copy(self.gba_model.f_trunc)
+        next_f                = np.copy(self.gba_model.f_trunc)
+        previous_mu           = self.gba_model.mu
+        self.converged        = False
+        nb_iterations         = 0
+        dt_counter            = 0
+        epsilon               = self.draw_noise(sigma, self.gba_model.nj-1)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the gradient ascent #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        while (t < max_time):
+            nb_iterations += 1
+            # if (nb_iterations % 100 == 0):
+            #    print("> Iteration: ", nb_iterations, " mu: ", self.mu_trajectory[-1], "mu diff: ", (self.dmu_trajectory[-1]), "dt: ", self.dt_trajectory[-1])
+            ### 4.1) Test trajectory convergence ###
+            if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
+                self.converged = True
+                break
+            ### 4.2) Calculate the next step ###
+            previous_mu = self.gba_model.mu
+            next_f      = next_f+self.gba_model.GCC_f[1:]*dt+epsilon*dt
+            next_f[next_f < 0.0] = 0.0
+            self.gba_model.set_f(next_f)
+            self.gba_model.calculate()
+            self.gba_model.check_model_consistency()
+            ### 4.3) If the model is consistent: ###
+            if self.gba_model.consistent and self.gba_model.mu >= previous_mu:
+                previous_f  = np.copy(next_f)
+                epsilon     = self.draw_noise(sigma, self.gba_model.nj-1)
+                t           = t + dt
+                dt_counter += 1
+                self.t_trajectory.append(t)
+                self.dt_trajectory.append(dt)
+                self.mu_trajectory.append(self.gba_model.mu)
+                self.dmu_trajectory.append(np.abs(self.gba_model.mu-previous_mu))
+                ### Check if mu changes significantly ###
+                if np.abs(self.gba_model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
+                    mu_alteration_counter += 1
+                else:
+                    mu_alteration_counter = 0
+                ### Check if dt is never changing, and possibly increase it ###
+                if dt_counter == 1000:
+                    dt         = dt*INCREASING_DT_FACTOR
+                    dt_counter = 0
+            ### 4.4) If the model is inconsistent: ###
+            else:
+                next_f = np.copy(previous_f)
+                self.gba_model.set_f(previous_f)
+                self.gba_model.calculate()
+                self.gba_model.check_model_consistency()
+                assert self.gba_model.consistent, "> Previous model is not consistent"
+                if (dt > 1e-100):
+                    dt         = dt/DECREASING_DT_FACTOR
+                    dt_counter = 0
+                else:
+                    raise AssertionError("> Trajectory was stopped, because dt got too small")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Final algorithm steps     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if t >= max_time:
+            print("> Max time was reached, Model is consistent for condition: ",condition)
+        else:
+            print("> Maximum was found, Model is consistent for condition: ",condition)
+        end_time      = time.time()
+        self.run_time = end_time-start_time
+
+    ### Compute Markov chain Monte Carlo ###    
+    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 ):
+        start_time = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.condition = condition
+        self.gba_model.set_condition(condition)
+        self.gba_model.calculate()
+        self.gba_model.check_model_consistency()
+        assert self.gba_model.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize trackers       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.t_trajectory    = [0.0]
+        self.mu_trajectory   = [self.gba_model.mu]
+        self.f_trajectory    = np.copy(self.gba_model.f)
+        self.fixation_stamps = []
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        current_mu = self.gba_model.mu
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the MCMC            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        t = 0
+        while t < max_time:
+            t += 1
+            if t%1000 == 0:
+                print("> Iteration: ", t, " mu: ", self.mu_trajectory[-1])
+            ### 4.1) Draw reaction to mutate at random ###
+            reaction_index = np.random.randint(len(self.gba_model.f_trunc))
+            current_mu     = self.gba_model.mu
+            non_mutated_f  = self.mutate_f(reaction_index, sigma)
+            self.gba_model.calculate()
+            self.gba_model.check_model_consistency()
+            ### 4.2) Check model consistency and simulate fixation ###
+            if self.gba_model.consistent:
+                mutated_mu = self.gba_model.mu
+                s          = self.calculate_selection_coefficient(current_mu, mutated_mu)
+                pi         = self.calculate_pi(s, N_e)
+            ### 4.3) Undo Mutation if no fixation occurs ###
+                if self.simulate_fixation(pi) == False:
+                    self.gba_model.set_f(non_mutated_f)
+            ### 4.4) Save Mutation for trajectory if fixation occurs ###
+                else:
+                    self.t_trajectory.append(t)
+                    self.mu_trajectory.append(mutated_mu)
+                    self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
+                    self.fixation_stamps.append(t)
+            ### 4.5) Undo Mutation if model is inconsistent ###
+            else:
+                self.gba_model.set_f(non_mutated_f)
+            self.gba_model.calculate()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Final algorithm steps     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if len(self.fixation_stamps) == 0:
+            print("> MCMC simulation was completed. No mutation was fixed")
+        else:
+            print("> MCMC simulation was completed")
+        end_time      = time.time()
+        self.run_time = end_time-start_time
+
     ######################
     #   Export methods   #
     ######################
