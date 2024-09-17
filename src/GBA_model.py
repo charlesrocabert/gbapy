@@ -18,6 +18,7 @@ import time
 import numpy as np
 import pandas as pd
 import gurobipy as gp
+import matplotlib.pyplot as plt
 
 env = gp.Env(empty=True)
 env.setParam("OutputFlag", 0)
@@ -737,7 +738,7 @@ class GBA_model:
     ########################
     
     ### Compute the gradient ascent ###
-    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, add = False ):
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -749,23 +750,18 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if track and not add:
-            overview_columns = ['condition', 't','dt','mu', 'dmu']
-            overview_columns = overview_columns + self.reaction_ids
-            self.trajectory  = pd.DataFrame(columns=overview_columns)
-            overview_dict    = {"condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+        if track:
+            if not add or self.trajectory.empty:
+                overview_columns = ['index', 'condition', 't','dt','mu','dmu']
+                overview_columns = overview_columns + self.reaction_ids
+                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
             self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
-        elif track and add:
-            overview_dict = {"condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
-            for reaction_id, value in zip(self.reaction_ids, self.f):
-                overview_dict[reaction_id] = value
-            overview_row = pd.Series(data=overview_dict)
-            self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize the algorithm  #
+        # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         t                     = 0.0
         dt                    = initial_dt
@@ -777,7 +773,7 @@ class GBA_model:
         nb_iterations         = 0
         dt_counter            = 0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Start the gradient ascent #
+        # 4) Start the gradient ascent #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
@@ -798,7 +794,7 @@ class GBA_model:
                 t           = t + dt
                 dt_counter += 1
                 if track:
-                    overview_dict = {"condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row = pd.Series(data=overview_dict)
@@ -825,7 +821,7 @@ class GBA_model:
                 else:
                     raise AssertionError("> Trajectory was stopped, because dt got too small")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Final algorithm steps     #
+        # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
@@ -845,13 +841,7 @@ class GBA_model:
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
             converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
-            overview_dict = {
-                "condition": condition,
-                "mu": self.mu,
-                "density": self.density,
-                "converged": converged,
-                "run_time": run_time
-            }
+            overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": converged, "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
             overview_row                      = pd.Series(data=overview_dict)
@@ -860,67 +850,71 @@ class GBA_model:
         optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ### Compute the gradient ascent with noise ###
-    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1 ):
+    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.condition = condition
-        self.gba_model.solve_local_linear_problem()
-        self.gba_model.set_condition(condition)
-        self.gba_model.calculate()
-        self.gba_model.check_model_consistency()
-        assert self.gba_model.consistent, "> Initial model is not consistent"
+        self.set_condition(condition)
+        self.calculate()
+        self.check_model_consistency()
+        assert self.consistent, "> Initial model is not consistent"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize trackers       #
+        # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.t_trajectory   = [0.0]
-        self.dt_trajectory  = [initial_dt]
-        self.mu_trajectory  = [self.gba_model.mu]
-        self.dmu_trajectory = [0.0]
+        if track:
+            if not add or self.trajectory.empty:
+                overview_columns = ['index', 'condition', 't','dt','mu','dmu']
+                overview_columns = overview_columns + self.reaction_ids
+                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            for reaction_id, value in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = value
+            overview_row                   = pd.Series(data=overview_dict)
+            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         t                     = 0.0
         dt                    = initial_dt
         mu_alteration_counter = 0
-        previous_f            = np.copy(self.gba_model.f_trunc)
-        next_f                = np.copy(self.gba_model.f_trunc)
-        previous_mu           = self.gba_model.mu
+        previous_f            = np.copy(self.f_trunc)
+        next_f                = np.copy(self.f_trunc)
+        previous_mu           = self.mu
         self.converged        = False
         nb_iterations         = 0
         dt_counter            = 0
-        epsilon               = self.draw_noise(sigma, self.gba_model.nj-1)
+        epsilon               = np.random.normal(0.0, sigma, size=self.nj-1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the gradient ascent #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
-            # if (nb_iterations % 100 == 0):
-            #    print("> Iteration: ", nb_iterations, " mu: ", self.mu_trajectory[-1], "mu diff: ", (self.dmu_trajectory[-1]), "dt: ", self.dt_trajectory[-1])
             ### 4.1) Test trajectory convergence ###
             if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
                 self.converged = True
                 break
             ### 4.2) Calculate the next step ###
-            previous_mu = self.gba_model.mu
-            next_f      = next_f+self.gba_model.GCC_f[1:]*dt+epsilon*dt
+            previous_mu          = self.mu
+            next_f               = next_f+self.GCC_f[1:]*dt+epsilon*dt
             next_f[next_f < 0.0] = 0.0
-            self.gba_model.set_f(next_f)
-            self.gba_model.calculate()
-            self.gba_model.check_model_consistency()
+            self.set_f(next_f)
+            self.calculate()
+            self.check_model_consistency()
             ### 4.3) If the model is consistent: ###
-            if self.gba_model.consistent and self.gba_model.mu >= previous_mu:
+            if self.consistent and self.mu >= previous_mu:
                 previous_f  = np.copy(next_f)
-                epsilon     = self.draw_noise(sigma, self.gba_model.nj-1)
+                epsilon     = np.random.normal(0.0, sigma, size=self.nj-1)
                 t           = t + dt
                 dt_counter += 1
-                self.t_trajectory.append(t)
-                self.dt_trajectory.append(dt)
-                self.mu_trajectory.append(self.gba_model.mu)
-                self.dmu_trajectory.append(np.abs(self.gba_model.mu-previous_mu))
+                if track:
+                    overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    for reaction_id, value in zip(self.reaction_ids, self.f):
+                        overview_dict[reaction_id] = value
+                    overview_row = pd.Series(data=overview_dict)
+                    self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
-                if np.abs(self.gba_model.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
+                if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
                 else:
                     mu_alteration_counter = 0
@@ -931,10 +925,10 @@ class GBA_model:
             ### 4.4) If the model is inconsistent: ###
             else:
                 next_f = np.copy(previous_f)
-                self.gba_model.set_f(previous_f)
-                self.gba_model.calculate()
-                self.gba_model.check_model_consistency()
-                assert self.gba_model.consistent, "> Previous model is not consistent"
+                self.set_f(previous_f)
+                self.calculate()
+                self.check_model_consistency()
+                assert self.consistent, "> Previous model is not consistent"
                 if (dt > 1e-100):
                     dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
@@ -943,12 +937,14 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        end_time = time.time()
+        run_time = end_time-start_time
         if t >= max_time:
             print("> Max time was reached, Model is consistent for condition: ",condition)
+            return False, run_time
         else:
             print("> Maximum was found, Model is consistent for condition: ",condition)
-        end_time      = time.time()
-        self.run_time = end_time-start_time
+            return True, run_time
 
     ### Compute Markov chain Monte Carlo ###    
     def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 ):
@@ -1014,6 +1010,27 @@ class GBA_model:
         end_time      = time.time()
         self.run_time = end_time-start_time
 
+    ### Save trajectory to csv ###
+    def save_trajectory( self, label = "" ):
+        filename = "./output/"+self.model_name+"_"
+        if label == "":
+            filename += "trajectory.csv"
+        else:
+            filename += label+"_trajectory.csv"
+        self.trajectory.to_csv(filename, sep=';', index=False)
+
+    ### Clear trajectory ###
+    def clear_trajectory( self ):
+        self.trajectory = pd.DataFrame()
+    
+    def plot_trajectory( self ):
+        fig, ax = plt.subplots()
+        for index in self.trajectory['index'].unique():
+            ax.plot(self.trajectory[self.trajectory['index']==index]['t'], self.trajectory[self.trajectory['index']==index]['mu'], label=index)
+        ax.set(xlabel='time', ylabel='mu', title='Trajectory of mu')
+        ax.grid()
+        plt.show()
+    
     ######################
     #   Export methods   #
     ######################
