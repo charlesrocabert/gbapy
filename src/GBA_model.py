@@ -36,7 +36,7 @@ def dump_model( gba_model, model_name ):
     assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
 
 ### Load a model and dump the binary backup ###
-def load_and_backup_model( model_name, save_f0 = False, save_optimums = False ):
+def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -45,9 +45,10 @@ def load_and_backup_model( model_name, save_f0 = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if save_f0:
-        print("> Computing f0 for model "+model_name+"...")
+    if save_LP:
+        print("> Computing LP solution for model "+model_name+"...")
         model.solve_local_linear_problem()
+        model.set_f0(model.LP_solution)
         model.set_condition("1")
         model.calculate()
         model.check_model_consistency()
@@ -164,9 +165,10 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.f0        = np.array([]) # Initial LP solution
-        self.optimum_f = {}           # Optimum f vectors for all conditions
-        self.random_f  = {}           # Random f vectors for all conditions
+        
+        self.LP_solution       = np.array([]) # Linear programming solution
+        self.optimum_solutions = {}           # Optimum f vectors for all conditions
+        self.random__solutions = {}           # Random f vectors for all conditions
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
@@ -188,6 +190,7 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.current_condition = ""           # Current environmental condition
         self.current_rho       = 0.0          # Current total density
+        self.f0                = np.array([]) # Initial LP solution
         self.dmu_f             = np.array([]) # Local mu derivatives with respect to f
         self.GCC_f             = np.array([]) # Local growth control coefficients with respect to f
         self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
@@ -409,7 +412,7 @@ class GBA_model:
     #   Getters   #
     ###############
     
-    # ### Get a condition parameter value ###
+    ### Get a condition parameter value ###
     def get_condition( self, condition_id, condition_param ):
         assert condition_id in self.condition_ids
         assert condition_param in self.condition_params
@@ -417,6 +420,7 @@ class GBA_model:
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
 
+    #def get_random_initial_solution( self, condition_id ):
     ###################
     #   Print model   #
     ###################
@@ -695,7 +699,7 @@ class GBA_model:
         gpmodel.addConstr(self.M @ x >= rhs, name="c1")
         gpmodel.addConstr(self.sM @ x == 1, name="c2")
         gpmodel.optimize()
-        self.set_f0(x.X)
+        self.LP_solution = np.copy(x.X)
 
     ### Generate random initial solutions ###
     def generate_random_initial_solutions( self, condition, nb_solutions, max_trials, min_mu ):
@@ -704,7 +708,7 @@ class GBA_model:
         assert max_trials >= nb_solutions, "> Number of trials must be greater than the number of solutions"
         assert min_mu >= 0.0, "> Minimal growth rate must be positive"
         self.set_condition(condition)
-        self.random_f.clear()
+        self.random_solutions.clear()
         solutions = 0
         trials    = 0
         while solutions < nb_solutions and trials < max_trials:
@@ -721,7 +725,7 @@ class GBA_model:
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 print("> ", solutions, " solutions was found after ", trials, " trials")
                 solutions += 1
-                self.random_f[solutions] = np.copy(self.f)
+                self.random_solutions[solutions] = np.copy(self.f)
         print("> ", solutions, " solutions was found after ", trials, " trials")
 
     ########################
@@ -809,7 +813,8 @@ class GBA_model:
         overview_columns = ['condition', 'mu','density','converged', 'run_time']
         overview_columns = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
         optimum_df       = pd.DataFrame(columns=overview_columns)
-        self.optimum_f.clear()
+        self.set_f0(self.LP_solution)
+        self.optimum_solutions.clear()
         for condition in self.condition_ids:
             converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
             overview_dict = {
@@ -821,9 +826,9 @@ class GBA_model:
             }
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
-            overview_row    = pd.Series(data=overview_dict)
-            optimum_df                = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
-            self.optimum_f[condition] = np.copy(self.f)
+            overview_row                      = pd.Series(data=overview_dict)
+            optimum_df                        = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
+            self.optimum_solutions[condition] = np.copy(self.f)
         optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ######################
