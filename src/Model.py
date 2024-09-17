@@ -179,10 +179,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.LP_solution       = np.array([]) # Linear programming solution
-        self.optimum_solutions = {}           # Optimum f vectors for all conditions
-        self.random_solutions  = {}           # Random f vectors for all conditions
-
+        self.LP_solution       = np.array([])   # Linear programming solution
+        self.optimum_solutions = {}             # Optimum f vectors for all conditions
+        self.random_solutions  = {}             # Random f vectors for all conditions
+        self.optimum_data      = pd.DataFrame() # Optimum data for all conditions
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -877,9 +877,9 @@ class Model:
         
     ### Compute all the optimums ###
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
-        overview_columns = ['condition', 'mu','density','converged', 'run_time']
-        overview_columns = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
-        optimum_df       = pd.DataFrame(columns=overview_columns)
+        overview_columns  = ['condition', 'mu','density','converged', 'run_time']
+        overview_columns  = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
+        self.optimum_data = pd.DataFrame(columns=overview_columns)
         self.set_f0(self.LP_solution)
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
@@ -888,9 +888,9 @@ class Model:
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
             overview_row                      = pd.Series(data=overview_dict)
-            optimum_df                        = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
+            self.optimum_data                 = pd.concat([self.optimum_data, overview_row.to_frame().T], ignore_index=True)
             self.optimum_solutions[condition] = np.copy(self.f)
-        optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
+        self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ### Compute the gradient ascent with noise ###
     def gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):

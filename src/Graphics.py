@@ -87,50 +87,51 @@ def plot_EFM_trajectory( model ):
 ### Plot mu to condition ###
 def plot_mu_to_condition( model, path = None ):
     plt.figure(figsize=(12, 6))
-    plt.plot(self.optimum_df['condition'], self.optimum_df['mu'], label='MaxGrowthrate at condition')
+    plt.plot(model.optimum_data['condition'], model.optimum_data['mu'], label='MaxGrowthrate at condition')
     plt.xlabel('conditions')
     plt.ylabel('Max-Grotwthrate')
-    plt.title('Model  '+ self.model_name+ 'max-growthrates over different conditions')
+    plt.title('Model  '+ model.model_name+ 'max-growthrates over different conditions')
     plt.legend()
     plt.grid(False)
     plt.gcf()
-    auto_path = "./output/Model "+self.model_name+" output"
-    if path == None:
-        if not os.path.exists(auto_path):
-            os.makedirs(auto_path)
-            plt.savefig(auto_path+"/"+self.model_name+" Growthrate to all model conditions.png")
-        else:
-            plt.savefig(auto_path+"/"+self.model_name+" Growthrate to all model conditions.png")
-    else:
-            plt.savefig(path)
+    plt.show()
+    # auto_path = "./output/Model "+model.model_name+" output"
+    # if path == None:
+    #     if not os.path.exists(auto_path):
+    #         os.makedirs(auto_path)
+    #         plt.savefig(auto_path+"/"+model.model_name+" Growthrate to all model conditions.png")
+    #     else:
+    #         plt.savefig(auto_path+"/"+model.model_name+" Growthrate to all model conditions.png")
+    # else:
+    #         plt.savefig(path)
 
 ### Plot f to condition ###
 def plot_f_to_condition( model, path = None ):
-    f_to_condition = self.optimum_df.iloc[:, 3:3+self.gba_model.nj].to_numpy()
-    conditions     = self.optimum_df['condition'].to_numpy()
+    f_to_condition = model.optimum_data.iloc[:, 3:3+model.nj].to_numpy()
+    conditions     = model.optimum_data['condition'].to_numpy()
     plt.figure(figsize=(12, 6))
-    plt.suptitle("Model "+self.model_name+" fluxfractions at optimum to conditions", fontsize=16)
+    plt.suptitle("Model "+model.model_name+" fluxfractions at optimum to conditions", fontsize=16)
 
-    for i in range(self.gba_model.nj):
-        plt.plot(conditions, f_to_condition[:, i], label = self.gba_model.reaction_ids[i])
+    for i in range(model.nj):
+        plt.plot(conditions, f_to_condition[:, i], label = model.reaction_ids[i])
 
     plt.xlabel('Conditions')
     plt.ylabel('Flux fraction at optimum')
-    plt.title('Model ' + self.model_name+ ' flux fractions over different conditions')
+    plt.title('Model ' + model.model_name+ ' flux fractions over different conditions')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
     plt.grid(False)
     plt.tight_layout(rect=[0, 0, 0.85, 0.95])
     plt.gcf()
-
-    auto_path = "./output/Model "+self.model_name+" output"
-    if path == None:
-        if not os.path.exists(auto_path):
-            os.makedirs(auto_path)
-            plt.savefig(auto_path+"/"+self.model_name+" Flux fractions over all model conditions.png")
-        else:
-            plt.savefig(auto_path+"/"+self.model_name+" Flux fractions over all model conditions.png")
-    else:
-            plt.savefig(path)
+    plt.show()
+    # auto_path = "./output/Model "+model.model_name+" output"
+    # if path == None:
+    #     if not os.path.exists(auto_path):
+    #         os.makedirs(auto_path)
+    #         plt.savefig(auto_path+"/"+model.model_name+" Flux fractions over all model conditions.png")
+    #     else:
+    #         plt.savefig(auto_path+"/"+model.model_name+" Flux fractions over all model conditions.png")
+    # else:
+    #         plt.savefig(path)
 
 ### Plot the MCMC trajectory and highlight fixation points ###
 def plot_MCMC_trajectory( model, path = None ):
