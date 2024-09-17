@@ -26,13 +26,26 @@ env.start()
 
 sys.path.append('./src/')
 
-from GBA_tol import *
+### Define constant and tolerance thresholds ###
+MIN_CONCENTRATION          = 1e-10 # Minimum concentration value
+MIN_FLUX_FRACTION          = 1e-10 # Minimum flux fraction value
+MAX_FLUX_FRACTION          = 2.0   # Maximum flux fraction value
+DENSITY_TOL                = 1e-10 # Density tolerance threshold (|1-rho| < ε)
+NEGATIVE_C_TOL             = 1e-10 # Negative C tolerance threshold (C > -ε)
+NEGATIVE_P_TOL             = 1e-10 # Negative P tolerance threshold (P > -ε)
+TRAJECTORY_STABLE_MU_COUNT = 1000  # Number of iterations with equal mu values to consider the trajectory stable
+TRAJECTORY_CONVERGENCE_TOL = 1e-10 # Mu threshold below which growth rates are considered equal
+DECREASING_DT_FACTOR       = 5.0   # Factor by which the time step is decreased when the trajectory is unstable
+INCREASING_DT_FACTOR       = 2.0   # Factor by which the time step is increased when the trajectory is stable
+MCMC_CONVERGENCE_TOL       = 1e-5  # MCMC trajectory convergence tolerance
+POPLEVEL_CONVERGENCE_TOL   = 1e-5  # Population-level trajectory convergence tolerance
+EFM_TOL                    = 1e-5  # Tolerance threshold below which EFM values are considered to be zero
 
 ### Dump the model in a binary file ###
-def dump_model( gba_model, model_name ):
+def dump_model( model, model_name ):
     filename = "./binary_models/"+model_name+".gba"
     ofile = open(filename, "wb")
-    dill.dump(gba_model, ofile)
+    dill.dump(model, ofile)
     ofile.close()
     assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
 
@@ -41,7 +54,7 @@ def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    model = GBA_model()
+    model = Model()
     model.load_model("./csv_models/", model_name)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
@@ -81,7 +94,7 @@ def load_model( model_name ):
     return model
 
 
-class GBA_model:
+class Model:
 
     # Mathematical formalism may differ from original ODS files and R scripts,
     # in particular with ni = nx + nc, and not ni = nc.
@@ -880,7 +893,7 @@ class GBA_model:
         optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ### Compute the gradient ascent with noise ###
-    def compute_gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):
+    def gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -1060,14 +1073,6 @@ class GBA_model:
     ### Clear trajectory ###
     def clear_trajectory( self ):
         self.trajectory = pd.DataFrame()
-    
-    def plot_trajectory( self ):
-        fig, ax = plt.subplots()
-        for index in self.trajectory['index'].unique():
-            ax.step(self.trajectory[self.trajectory['index']==index]['t'], self.trajectory[self.trajectory['index']==index]['mu'], label=index)
-        ax.set(xlabel='time', ylabel='mu', title='Trajectory of mu')
-        ax.grid()
-        plt.show()
     
     ######################
     #   Export methods   #

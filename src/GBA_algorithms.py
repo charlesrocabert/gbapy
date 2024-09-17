@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 sys.path.append('./src/')
 
 from GBA_tol import *
-from GBA_model import *
+from Model import *
 
 
 class GBA_algorithms:
@@ -529,8 +529,7 @@ class GBA_algorithms:
                 plt.savefig(auto_path+"/"+"condition "+self.condition+" MCMC trajectory.png")
         else:
                 plt.savefig(path)
-        
-
+    
     ### Calculates the mutated flux fraction for each reaction ###
     def mutate_f( self, index, sigma ):
         non_mutated_f     = np.copy(self.gba_model.f_trunc)

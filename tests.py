@@ -8,7 +8,9 @@ import argparse
 
 sys.path.append('./src/')
 
-from GBA_model import *
+from Model import *
+from Graphics import *
+
 
 ##################
 #      MAIN      #
@@ -25,7 +27,8 @@ if __name__ == "__main__":
     # model.plot_trajectory()
 
     model.set_f0(model.random_solutions[1])
-    #model.compute_gradient_ascent_with_noise(condition = "10", max_time = 5, initial_dt = 0.01, sigma = 1.0, index=1, track=True, add=False)
-
+    #model.gradient_ascent(condition = "10", max_time = 5, initial_dt = 0.01, index=1, track=True, add=False)
     model.MCMC(condition = "1", max_time = 10000, sigma = 0.01, N_e = 2.5e7, index = 1, track = True)
-    model.plot_trajectory()
+    #plot_gradient_ascent_trajectory(model)
+    #plot_EFM_trajectory(model)
+    plot_MCMC_trajectory(model)

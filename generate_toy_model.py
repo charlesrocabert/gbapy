@@ -18,7 +18,7 @@ import argparse
 
 sys.path.append('./src/')
 
-from GBA_model import *
+from Model import *
 
 ### Parse command line arguments ###
 def parse_arguments():
