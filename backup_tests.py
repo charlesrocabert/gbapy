@@ -16,5 +16,5 @@ from GBA_model import *
 ##################
 
 if __name__ == "__main__":
-    load_and_backup_model("A")
+    load_and_backup_model("A", save_f0=True, save_optimums=True)
 

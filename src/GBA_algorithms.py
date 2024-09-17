@@ -72,7 +72,7 @@ class GBA_algorithms:
             negative_term = True
             while negative_term:
                 f_trunc = np.random.rand(self.gba_model.nj-1)
-                f_trunc = f_trunc*FLUX_BOUNDARY
+                f_trunc = f_trunc*MAX_FLUX_FRACTION
                 self.gba_model.set_f(f_trunc)
                 if self.gba_model.f[0] >= 0.0:
                     negative_term = False

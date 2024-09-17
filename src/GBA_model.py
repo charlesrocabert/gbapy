@@ -14,6 +14,7 @@
 import os
 import sys
 import dill
+import time
 import numpy as np
 import pandas as pd
 import gurobipy as gp
@@ -35,7 +36,7 @@ def dump_model( gba_model, model_name ):
     assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
 
 ### Load a model and dump the binary backup ###
-def load_and_backup_model( model_name, save_f0, save_optimums ):
+def load_and_backup_model( model_name, save_f0 = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -44,19 +45,23 @@ def load_and_backup_model( model_name, save_f0, save_optimums ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    model.solve_local_linear_problem()
-    model.set_condition("1")
-    model.calculate()
-    model.check_model_consistency()
-    if model.consistent:
-        model.write_f0()
-    else:
-        print("> ERROR: Model is inconsistent with condition 1. f0 vector cannot be saved.")
-        sys.exit(1)
+    if save_f0:
+        print("> Computing f0 for model "+model_name+"...")
+        model.solve_local_linear_problem()
+        model.set_condition("1")
+        model.calculate()
+        model.check_model_consistency()
+        if model.consistent:
+            model.write_f0()
+        else:
+            print("> ERROR: Model is inconsistent with condition 1. f0 vector cannot be saved.")
+            sys.exit(1)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Compute and save optimums if requested   #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    algo.compute_optimum_for_all_conditions(max_time=200, initial_dt=0.01)
+    if save_optimums:
+        print("> Computing optimums for model "+model_name+"...")
+        model.compute_optimums(max_time=200, initial_dt=0.01)
     dump_model(model, model_name)
     del model
 
@@ -178,6 +183,12 @@ class GBA_model:
         self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
         self.f                 = np.array([]) # Flux fractions vector
 
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Solutions                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.optimum_f = {} # Optimum f vectors for all conditions
+        self.random_f  = {} # Random f vectors for all conditions
+    
     #############################
     #   Model loading methods   #
     #############################
@@ -450,7 +461,7 @@ class GBA_model:
     ### WARNING: this method assumes full irreversibility             ###
     def solve_local_linear_problem( self ):
         gpmodel = gp.Model(env=env)
-        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=FLUX_BOUNDARY)
+        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=MAX_FLUX_FRACTION)
         min_b   = 1/self.nc/10
         rhs     = np.repeat(min_b, self.nc)
         gpmodel.setObjective(x[-1], gp.GRB.MAXIMIZE)
@@ -644,7 +655,7 @@ class GBA_model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Test density constraint                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        test1 = (np.abs(self.density-1.0) < DENSITY_CONSTRAINT_TOL)
+        test1 = (np.abs(self.density-1.0) < DENSITY_TOL)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Test negative concentrations constraint #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -663,6 +674,104 @@ class GBA_model:
     ######################
     # Trajectory Methods #
     ######################
+    
+    ### Compute the gradient ascent ###
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01 ):
+        start_time = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.set_condition(condition)
+        self.calculate()
+        self.check_model_consistency()
+        assert self.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize the algorithm  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        t                     = 0.0
+        dt                    = initial_dt
+        mu_alteration_counter = 0
+        previous_f            = np.copy(self.f_trunc)
+        next_f                = np.copy(self.f_trunc)
+        previous_mu           = self.mu
+        self.converged        = False
+        nb_iterations         = 0
+        dt_counter            = 0
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Start the gradient ascent #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        while (t < max_time):
+            nb_iterations += 1
+            ### 4.1) Test trajectory convergence ###
+            if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
+                self.converged = True
+                break
+            ### 4.2) Calculate the next step ###
+            previous_mu = self.mu
+            next_f      = next_f+self.GCC_f[1:]*dt
+            next_f[next_f < 0.0] = 0.0
+            self.set_f(next_f)
+            self.calculate()
+            self.check_model_consistency()
+            ### 4.3) If the model is consistent: ###
+            if self.consistent and self.mu >= previous_mu:
+                previous_f  = np.copy(next_f)
+                t           = t + dt
+                dt_counter += 1
+                ### Check if mu changes significantly ###
+                if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
+                    mu_alteration_counter += 1
+                else:
+                    mu_alteration_counter = 0
+                ### Check if dt is never changing, and possibly increase it ###
+                if dt_counter == 1000:
+                    dt         = dt*INCREASING_DT_FACTOR
+                    dt_counter = 0
+            ### 4.4) If the model is inconsistent: ###
+            else:
+                next_f = np.copy(previous_f)
+                self.set_f(previous_f)
+                self.calculate()
+                self.check_model_consistency()
+                assert self.consistent, "> Previous model is not consistent"
+                if (dt > 1e-100):
+                    dt         = dt/DECREASING_DT_FACTOR
+                    dt_counter = 0
+                else:
+                    raise AssertionError("> Trajectory was stopped, because dt got too small")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Final algorithm steps     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        end_time = time.time()
+        run_time = end_time-start_time
+        if t >= max_time:
+            print("> Max time was reached, Model is consistent for condition: ",condition)
+            return False, run_time
+        else:
+            print("> Maximum was found, Model is consistent for condition: ",condition)
+            return True, run_time
+        
+    ### Compute all the optimums ###
+    def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
+        overview_columns = ['condition', 'mu','density','converged', 'run_time']
+        overview_columns = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
+        optimum_df       = pd.DataFrame(columns=overview_columns)
+        self.optimum_f.clear()
+        for condition in self.condition_ids:
+            converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
+            overview_dict = {
+                "condition": condition,
+                "mu": self.mu,
+                "density": self.density,
+                "converged": converged,
+                "run_time": run_time
+            }
+            for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = fluxfraction
+            overview_row    = pd.Series(data=overview_dict)
+            optimum_df                = pd.concat([optimum_df, overview_row.to_frame().T], ignore_index=True)
+            self.optimum_f[condition] = np.copy(self.f)
+        optimum_df.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
     
     ######################
     #   Export methods   #
