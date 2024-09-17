@@ -127,9 +127,8 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Model path and name ###
-        self.model_path     = "" # Model path
-        self.model_name     = "" # Model name
-        self.model_kinetics = "" # Kinetics model
+        self.model_path = "" # Model path
+        self.model_name = "" # Model name
 
         ### Identifier lists ###
         self.metabolite_ids   = [] # List of all metabolite ids 
@@ -140,16 +139,18 @@ class Model:
         self.condition_params = [] # List of condition parameter ids
 
         ### Model structure ###
-        self.Mx         = np.array([]) # Total mass fraction matrix
-        self.M          = np.array([]) # Internal mass fraction matrix
-        self.KM_f       = np.array([]) # Forward KM matrix
-        self.KM_b       = np.array([]) # Backward KM matrix
-        self.KI         = np.array([]) # KI matrix
-        self.KA         = np.array([]) # KA matrix
-        self.kcat_f     = np.array([]) # Forward kcat vector
-        self.kcat_b     = np.array([]) # Backward kcat vector
-        self.reversible = []           # Indicates if the reaction is reversible
-        self.conditions = np.array([]) # List of conditions
+        self.Mx            = np.array([]) # Total mass fraction matrix
+        self.M             = np.array([]) # Internal mass fraction matrix
+        self.KM_f          = np.array([]) # Forward KM matrix
+        self.KM_b          = np.array([]) # Backward KM matrix
+        self.KI            = np.array([]) # KI matrix
+        self.rKI           = np.array([]) # 1/KI matrix
+        self.KA            = np.array([]) # KA matrix
+        self.kcat_f        = np.array([]) # Forward kcat vector
+        self.kcat_b        = np.array([]) # Backward kcat vector
+        self.reversible    = []           # Indicates if the reaction is reversible
+        self.kinetic_model = []           # Indicates the kinetic model of the reaction
+        self.conditions    = np.array([]) # List of conditions
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) GBA model constant variables  #
@@ -318,6 +319,10 @@ class Model:
 
     ### Initialize model mathematical variables ###
     def initialize_model_mathematical_variables( self ):
+        ### Inverse of KI ###
+        with np.errstate(divide='ignore'):
+            self.rKI = 1/self.KI
+            self.rKI[np.isinf(self.rKI)] = 0.0
         ### Vector lengths ###
         self.nx = len(self.x_ids)
         self.nc = len(self.c_ids)
@@ -392,22 +397,22 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.initialize_model_mathematical_variables()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Define the kinetics model to be used                   #
+        # 5) Define the kinetic model of each reaction              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.model_kinetics = ""
-        if (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0 and np.sum(self.KA) == 0):
-            self.model_kinetics = "iMM"
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) == 0):
-            self.model_kinetics = "iMMi"
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) == 0  and np.sum(self.KA) > 0):
-            self.model_kinetics = "iMMa"
-        elif (np.sum(self.kcat_b) == 0 and np.sum(self.KI) > 0  and np.sum(self.KA) > 0):
-            self.model_kinetics = "iMMia"
-        elif (np.sum(self.kcat_b) > 0):
-            assert np.sum(self.KI) == 0
-            assert np.sum(self.KA) == 0
-            self.model_kinetics = "rMM"
-        assert self.model_kinetics != "", "> ERROR: load_model: kinetics model not found."
+        self.kinetic_model.clear()
+        for j in range(self.nj):
+            if (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() == 0):
+                self.kinetic_model.append("iMM")
+            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() == 0):
+                self.kinetic_model.append("iMMi")
+            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() > 0):
+                self.kinetic_model.append("iMMa")
+            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() > 0):
+                self.kinetic_model.append("iMMia")
+            elif (self.kcat_b[j] > 0):
+                assert self.KI[:,j].sum() == 0
+                assert self.KA[:,j].sum() == 0
+                self.kinetic_model.append("rMM")
 
     ### Reset model variables (used before binary export) ###
     def reset_variables( self ):
@@ -506,133 +511,115 @@ class Model:
         self.xc = np.concatenate([self.x, self.c])
         
     ### Irreversible Michaelis-Menten kinetics ###
-    def iMM( self ):
-        for j in range(self.nj):
-            self.tau_j[j] = np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+    def iMM( self, j ):
+        self.tau_j[j] = np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
 
     ### Irreversible Michaelis-Menten kinetics + inhibition (only one inhibitor per reaction) ###
-    def iMMi( self ):
-        rKI                = 1/self.KI
-        rKI[np.isinf(rKI)] = 0.0
-        for j in range(self.nj):
-            self.tau_j[j] = np.prod(1+self.xc*rKI[:,j])*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+    def iMMi( self, j ):
+        self.tau_j[j] = np.prod(1+self.xc*self.rKI[:,j])*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
     
     ### Irreversible Michaelis-Menten kinetics + activation (only one activator per reaction) ###
-    def iMMa( self ):
-        for j in range(self.nj):
-            term1 = np.prod(1+self.KA[:,j]/self.xc)
-            term2 = np.prod(1+self.KM_f[:,j]/self.xc)
-            term3 = self.kcat_f[j]
-            self.tau_j[j] = term1*term2/term3
+    def iMMa( self, j ):
+        term1 = np.prod(1+self.KA[:,j]/self.xc)
+        term2 = np.prod(1+self.KM_f[:,j]/self.xc)
+        term3 = self.kcat_f[j]
+        self.tau_j[j] = term1*term2/term3
 
     ### Irreversible Michaelis-Menten kinetics + inhibition + activation ###
-    def iMMia( self ):
-        rKI                = 1/self.KI
-        rKI[np.isinf(rKI)] = 0
-        for j in range(self.nj):
-            self.tau_j[j] = np.prod(1+self.xc*rKI[:,j])*np.prod(1+self.KA[:,j]/self.xc)*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+    def iMMia( self, j ):
+        self.tau_j[j] = np.prod(1+self.xc*self.rKI[:,j])*np.prod(1+self.KA[:,j]/self.xc)*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
 
     ### Reversible Michaelis-Menten kinetics ###
-    def rMM( self ):
-        for j in range(self.nj):
-            forward_term  = self.kcat_f[j]/np.prod(1+self.KM_f[:,j]/self.xc)
-            backward_term = self.kcat_b[j]/np.prod(1+self.KM_b[:,j]/self.xc)
-            self.tau_j[j] = 1/(forward_term-backward_term)
+    def rMM( self, j ):
+        forward_term  = self.kcat_f[j]/np.prod(1+self.KM_f[:,j]/self.xc)
+        backward_term = self.kcat_b[j]/np.prod(1+self.KM_b[:,j]/self.xc)
+        self.tau_j[j] = 1/(forward_term-backward_term)
     
     ### Compute tau ###
-    def compute_tau( self ):
-        if self.model_kinetics == "iMM":
-            self.iMM()
-        elif self.model_kinetics == "iMMi":
-            self.iMMi()
-        elif self.model_kinetics == "iMMa":
-            self.iMMa()
-        elif self.model_kinetics == "iMMia":
-            self.iMMia()
-        elif self.model_kinetics == "rMM":
-            self.rMM()
+    def compute_tau( self, j ):
+        if self.kinetic_model[j] == "iMM":
+            self.iMM(j)
+        elif self.kinetic_model[j] == "iMMi":
+            self.iMMi(j)
+        elif self.kinetic_model[j] == "iMMa":
+            self.iMMa(j)
+        elif self.kinetic_model[j] == "iMMia":
+            self.iMMia(j)
+        elif self.kinetic_model[j] == "rMM":
+            self.rMM(j)
     
     ### derivative of iMM with respect to metabolite concentrations ###
-    def diMM( self ):
-        for j in range(self.nj):
-            for i in range(self.nc):
-                y       = i+self.nx
-                indices = np.arange(self.ni) != y
-                term1   = (self.KM_f[y,j]/self.c[i]**2)
-                term2   = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-                term3   = self.kcat_f[j]
-                self.ditau_j[j,i] = -term1*term2/term3
+    def diMM( self, j ):
+        for i in range(self.nc):
+            y       = i+self.nx
+            indices = np.arange(self.ni) != y
+            term1   = (self.KM_f[y,j]/self.c[i]**2)
+            term2   = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
+            term3   = self.kcat_f[j]
+            self.ditau_j[j,i] = -term1*term2/term3
 
     ### derivative of iMMi with respect to metabolite concentrations ###
-    def diMMi( self ):
-        rKI                = 1/self.KI
-        rKI[np.isinf(rKI)] = 0
-        for j in range(self.nj):
-            for i in range(self.nc):
-                y                 = i+self.nx
-                term1             = rKI[y,j]*np.prod(1+self.KM_f[:,j]/self.xc)
-                term2             = np.prod(1+self.xc*rKI[:,j])
-                term3             = self.KM_f[y,j]/self.c[i]**2
-                term4             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-                term5             = self.kcat_f[j]
-                self.ditau_j[j,i] = term1-term2*term3*term4/term5
+    def diMMi( self, j ):
+        for i in range(self.nc):
+            y                 = i+self.nx
+            term1             = self.rKI[y,j]*np.prod(1+self.KM_f[:,j]/self.xc)
+            term2             = np.prod(1+self.xc*self.rKI[:,j])
+            term3             = self.KM_f[y,j]/self.c[i]**2
+            term4             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
+            term5             = self.kcat_f[j]
+            self.ditau_j[j,i] = term1-term2*term3*term4/term5
     
     ### derivative of iMMa with respect to metabolite concentrations ###
-    def diMMa( self ):
-        for j in range(self.nj):
-            for i in range(self.nc):
-                y     = i+self.nx
-                term1 = self.KA[y,j]/self.c[i]**2
-                term2 = np.prod(1+self.KM_f[:,j]/self.xc)
-                term3 = self.KM_f[y,j]/self.c[i]**2
-                term4 = np.prod(1+self.KA[:,j]/self.xc)
-                term5 = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-                term6 = self.kcat_f[j]
-                self.ditau_j[j,i] = -(term1*term2+term3*term4*term5)/term6
+    def diMMa( self, j ):
+        for i in range(self.nc):
+            y     = i+self.nx
+            term1 = self.KA[y,j]/self.c[i]**2
+            term2 = np.prod(1+self.KM_f[:,j]/self.xc)
+            term3 = self.KM_f[y,j]/self.c[i]**2
+            term4 = np.prod(1+self.KA[:,j]/self.xc)
+            term5 = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
+            term6 = self.kcat_f[j]
+            self.ditau_j[j,i] = -(term1*term2+term3*term4*term5)/term6
 
     ### derivative of iMMia with respect to metabolite concentrations ###
-    def diMMia( self ):
-        rKI                = 1/self.KI
-        rKI[np.isinf(rKI)] = 0
-        for j in range(self.nj):
-            for i in range(self.nc):
-                y                 = i+self.nx
-                term1             = rKI[y,j]*np.prod(1+self.KA[:,j]/self.c)*np.prod(1+self.KM_f[:,j]/self.c)
-                term2             = np.prod(1+self.c*rKI[:,j])
-                term3             = -self.KA[y,j]/self.c[i]**2
-                term4             = np.prod(1+self.KM_f[:,j]/self.c)
-                term5             = np.prod(1+self.c*rKI[:,j])
-                term6             = np.prod(1+self.KA[:,j]/self.c)
-                term7             = -self.KM_f[y,j]/self.c[i]**2
-                term8             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.c[np.arange(self.ni) != y])
-                term9             = self.kcat_f[j]
-                self.ditau_j[j,i] = term1+(term2*term3*term4)+(term5*term6*term7*term8)/term9
+    def diMMia( self, j ):
+        for i in range(self.nc):
+            y                 = i+self.nx
+            term1             = self.rKI[y,j]*np.prod(1+self.KA[:,j]/self.c)*np.prod(1+self.KM_f[:,j]/self.c)
+            term2             = np.prod(1+self.c*self.rKI[:,j])
+            term3             = -self.KA[y,j]/self.c[i]**2
+            term4             = np.prod(1+self.KM_f[:,j]/self.c)
+            term5             = np.prod(1+self.c*self.rKI[:,j])
+            term6             = np.prod(1+self.KA[:,j]/self.c)
+            term7             = -self.KM_f[y,j]/self.c[i]**2
+            term8             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.c[np.arange(self.ni) != y])
+            term9             = self.kcat_f[j]
+            self.ditau_j[j,i] = term1+(term2*term3*term4)+(term5*term6*term7*term8)/term9
 
     ### Derivative of rMM with respect to metabolite concentrations ###
-    def drMM( self ):
-        for j in range(self.nj):
-            for i in range(self.nc):
-                y       = i+self.nx
-                indices = np.arange(self.ni) != y
-                term1   = (self.kcat_f[j]/np.prod(1 + self.KM_f[indices,j]/self.xc[indices]))
-                term2   = self.KM_f[y,j]/((self.c[i] + self.KM_f[y,j])**2)
-                term3   = (self.kcat_b[j]/np.prod(1 + self.KM_b[indices,j]/self.xc[indices]))
-                term4   = self.KM_b[y,j]/((self.c[i] + self.KM_b[y,j])**2)
-                self.ditau_j[j,i] = term1*term2-term3*term4
-            self.ditau_j[j,:] *= -self.tau_j[j]
+    def drMM( self, j ):
+        for i in range(self.nc):
+            y       = i+self.nx
+            indices = np.arange(self.ni) != y
+            term1   = (self.kcat_f[j]/np.prod(1 + self.KM_f[indices,j]/self.xc[indices]))
+            term2   = self.KM_f[y,j]/((self.c[i] + self.KM_f[y,j])**2)
+            term3   = (self.kcat_b[j]/np.prod(1 + self.KM_b[indices,j]/self.xc[indices]))
+            term4   = self.KM_b[y,j]/((self.c[i] + self.KM_b[y,j])**2)
+            self.ditau_j[j,i] = term1*term2-term3*term4
+        self.ditau_j[j,:] *= -self.tau_j[j]
     
     ### Compute dtau ###
-    def compute_dtau( self ):
-        if self.model_kinetics == "iMM":
-            self.diMM()
-        elif self.model_kinetics == "iMMi":
-            self.diMMi()
-        elif self.model_kinetics == "iMMa":
-            self.diMMa()
-        elif self.model_kinetics == "iMMia":
-            self.diMMia()
-        elif self.model_kinetics == "rMM":
-            self.drMM()
+    def compute_dtau( self, j ):
+        if self.kinetic_model[j] == "iMM":
+            self.diMM(j)
+        elif self.kinetic_model[j] == "iMMi":
+            self.diMMi(j)
+        elif self.kinetic_model[j] == "iMMa":
+            self.diMMa(j)
+        elif self.kinetic_model[j] == "iMMia":
+            self.diMMia(j)
+        elif self.kinetic_model[j] == "rMM":
+            self.drMM(j)
     
     ### Compute the growth rate ###
     def compute_mu( self ):
@@ -669,13 +656,15 @@ class Model:
     ### Calculate all model variables from the f vector ###
     def calculate( self ):
         self.compute_c()
-        self.compute_tau()
-        self.compute_dtau()
+        for j in range(self.nj):
+            self.compute_tau(j)
         self.compute_mu()
         self.compute_v()
         self.compute_p()
         self.compute_b()
         self.compute_density()
+        for j in range(self.nj):
+            self.compute_dtau(j)
         self.compute_dmu_f()
         self.compute_GCC_f()
 
