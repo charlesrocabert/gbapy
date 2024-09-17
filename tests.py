@@ -18,7 +18,7 @@ from Graphics import *
 
 if __name__ == "__main__":
     
-    model = load_model("A")
+    model = load_model("newextended_M2")
     #model.generate_random_initial_solutions("1", 1, 10000, 1e-6)
     # for i in range(1, 11):
     #     model.set_f0(model.random_solutions[i])
@@ -32,4 +32,4 @@ if __name__ == "__main__":
     #plot_gradient_ascent_trajectory(model)
     #plot_EFM_trajectory(model)
     #plot_MCMC_trajectory(model)
-    plot_f_to_condition(model)
+    plot_mu_to_condition(model)

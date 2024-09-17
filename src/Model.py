@@ -182,7 +182,7 @@ class Model:
         self.LP_solution       = np.array([])   # Linear programming solution
         self.optimum_solutions = {}             # Optimum f vectors for all conditions
         self.random_solutions  = {}             # Random f vectors for all conditions
-        self.optimum_data      = pd.DataFrame() # Optimum data for all conditions
+        
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -210,9 +210,10 @@ class Model:
         self.f                 = np.array([]) # Flux fractions vector
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Trajectory tracker            #
+        # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.trajectory = pd.DataFrame() # Trajectory dataframe
+        self.optimum_data = pd.DataFrame() # Optimum dataframe for all conditions
+        self.trajectory   = pd.DataFrame() # Trajectory dataframe
 
     #############################
     #   Model loading methods   #
