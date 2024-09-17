@@ -736,7 +736,37 @@ class GBA_model:
     ########################
     # Optimization Methods #
     ########################
+
+    ### Draw a random normal vector with std 'sigma' and length 'n' ###
+    def draw_noise( self, sigma, n ):
+        epsilon = np.random.normal(0.0, sigma, size=n)
+        return epsilon
     
+    ### Calculates the mutated flux fraction for each reaction ###
+    def mutate_f( self, index, sigma ):
+        non_mutated_f     = np.copy(self.f_trunc)
+        mutated_f         = np.copy(self.f_trunc)
+        epsilon           = self.draw_noise(sigma, 1)
+        mutated_f[index] += epsilon 
+        mutated_f[mutated_f < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
+        self.set_f(mutated_f)
+        return non_mutated_f
+    
+    ### Calculate the selection coefficient for MCMC mutation fixation ###
+    def calculate_selection_coefficient( self, mu, mutated_mu ):
+        return 1.0 - mu / mutated_mu
+    
+    ### Simulate fixation for MCMC ###
+    def simulate_fixation( self, pi ):
+        return np.random.rand() < pi
+        
+    ### Calcutlate fixation probability pi for MCMC ###
+    def calculate_pi( self, selection_coefficient, N_e ):
+        if (selection_coefficient == 0):
+            return 1/N_e
+        else:
+            return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
+
     ### Compute the gradient ascent ###
     def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
         start_time = time.time()
@@ -884,7 +914,7 @@ class GBA_model:
         self.converged        = False
         nb_iterations         = 0
         dt_counter            = 0
-        epsilon               = np.random.normal(0.0, sigma, size=self.nj-1)
+        epsilon               = self.draw_noise(sigma, self.nj-1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the gradient ascent #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -904,7 +934,7 @@ class GBA_model:
             ### 4.3) If the model is consistent: ###
             if self.consistent and self.mu >= previous_mu:
                 previous_f  = np.copy(next_f)
-                epsilon     = np.random.normal(0.0, sigma, size=self.nj-1)
+                epsilon     = self.draw_noise(sigma, self.nj-1)
                 t           = t + dt
                 dt_counter += 1
                 if track:
@@ -947,68 +977,76 @@ class GBA_model:
             return True, run_time
 
     ### Compute Markov chain Monte Carlo ###    
-    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7 ):
+    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.condition = condition
-        self.gba_model.set_condition(condition)
-        self.gba_model.calculate()
-        self.gba_model.check_model_consistency()
-        assert self.gba_model.consistent, "> Initial model is not consistent"
+        self.set_condition(condition)
+        self.calculate()
+        self.check_model_consistency()
+        assert self.consistent, "> Initial model is not consistent"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.t_trajectory    = [0.0]
-        self.mu_trajectory   = [self.gba_model.mu]
-        self.f_trajectory    = np.copy(self.gba_model.f)
-        self.fixation_stamps = []
+        if track:
+            if not add or self.trajectory.empty:
+                overview_columns = ['index', 'condition', 't','mu']
+                overview_columns = overview_columns + self.reaction_ids
+                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            overview_dict = {"index": index, "condition": condition, "t": 0.0, "mu": self.mu}
+            for reaction_id, value in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = value
+            overview_row                   = pd.Series(data=overview_dict)
+            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        current_mu = self.gba_model.mu
+        current_mu = self.mu
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the MCMC            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t = 0
+        fixed = 0
+        t     = 0
         while t < max_time:
             t += 1
-            if t%1000 == 0:
-                print("> Iteration: ", t, " mu: ", self.mu_trajectory[-1])
             ### 4.1) Draw reaction to mutate at random ###
-            reaction_index = np.random.randint(len(self.gba_model.f_trunc))
-            current_mu     = self.gba_model.mu
+            reaction_index = np.random.randint(len(self.f_trunc))
+            current_mu     = self.mu
             non_mutated_f  = self.mutate_f(reaction_index, sigma)
-            self.gba_model.calculate()
-            self.gba_model.check_model_consistency()
+            self.calculate()
+            self.check_model_consistency()
             ### 4.2) Check model consistency and simulate fixation ###
-            if self.gba_model.consistent:
-                mutated_mu = self.gba_model.mu
+            if self.consistent:
+                mutated_mu = self.mu
                 s          = self.calculate_selection_coefficient(current_mu, mutated_mu)
                 pi         = self.calculate_pi(s, N_e)
-            ### 4.3) Undo Mutation if no fixation occurs ###
+                ### 4.3) Undo Mutation if no fixation occurs ###
                 if self.simulate_fixation(pi) == False:
-                    self.gba_model.set_f(non_mutated_f)
-            ### 4.4) Save Mutation for trajectory if fixation occurs ###
+                    self.set_f(non_mutated_f)
+                ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
-                    self.t_trajectory.append(t)
-                    self.mu_trajectory.append(mutated_mu)
-                    self.f_trajectory = np.vstack((self.f_trajectory, self.gba_model.f))
-                    self.fixation_stamps.append(t)
+                    fixed         += 1
+                    overview_dict  = {"index": index, "condition": condition, "t": t, "mu": self.mu}
+                    for reaction_id, value in zip(self.reaction_ids, self.f):
+                        overview_dict[reaction_id] = value
+                    overview_row                   = pd.Series(data=overview_dict)
+                    self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
-                self.gba_model.set_f(non_mutated_f)
-            self.gba_model.calculate()
+                self.set_f(non_mutated_f)
+            self.calculate()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if len(self.fixation_stamps) == 0:
+        end_time = time.time()
+        run_time = end_time-start_time
+        if fixed == 0:
             print("> MCMC simulation was completed. No mutation was fixed")
+            return False, run_time
         else:
             print("> MCMC simulation was completed")
-        end_time      = time.time()
-        self.run_time = end_time-start_time
+            return True, run_time
 
     ### Save trajectory to csv ###
     def save_trajectory( self, label = "" ):
@@ -1026,7 +1064,7 @@ class GBA_model:
     def plot_trajectory( self ):
         fig, ax = plt.subplots()
         for index in self.trajectory['index'].unique():
-            ax.plot(self.trajectory[self.trajectory['index']==index]['t'], self.trajectory[self.trajectory['index']==index]['mu'], label=index)
+            ax.step(self.trajectory[self.trajectory['index']==index]['t'], self.trajectory[self.trajectory['index']==index]['mu'], label=index)
         ax.set(xlabel='time', ylabel='mu', title='Trajectory of mu')
         ax.grid()
         plt.show()
