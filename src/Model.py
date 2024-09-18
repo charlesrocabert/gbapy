@@ -444,7 +444,6 @@ class Model:
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
 
-    #def get_random_initial_solution( self, condition_id ):
     ###################
     #   Print model   #
     ###################
@@ -550,27 +549,28 @@ class Model:
     
     ### derivative of iMM with respect to metabolite concentrations ###
     def diMM( self, j ):
+        term3 = self.kcat_f[j]
         for i in range(self.nc):
-            y       = i+self.nx
-            indices = np.arange(self.ni) != y
-            term1   = (self.KM_f[y,j]/self.c[i]**2)
-            term2   = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-            term3   = self.kcat_f[j]
+            y                 = i+self.nx
+            indices           = np.arange(self.ni) != y
+            term1             = (self.KM_f[y,j]/self.c[i]**2)
+            term2             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
             self.ditau_j[j,i] = -term1*term2/term3
 
     ### derivative of iMMi with respect to metabolite concentrations ###
     def diMMi( self, j ):
+        term5 = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             term1             = self.rKI[y,j]*np.prod(1+self.KM_f[:,j]/self.xc)
             term2             = np.prod(1+self.xc*self.rKI[:,j])
             term3             = self.KM_f[y,j]/self.c[i]**2
             term4             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-            term5             = self.kcat_f[j]
             self.ditau_j[j,i] = term1-term2*term3*term4/term5
     
     ### derivative of iMMa with respect to metabolite concentrations ###
     def diMMa( self, j ):
+        term6 = self.kcat_f[j]
         for i in range(self.nc):
             y     = i+self.nx
             term1 = self.KA[y,j]/self.c[i]**2
@@ -578,11 +578,11 @@ class Model:
             term3 = self.KM_f[y,j]/self.c[i]**2
             term4 = np.prod(1+self.KA[:,j]/self.xc)
             term5 = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-            term6 = self.kcat_f[j]
             self.ditau_j[j,i] = -(term1*term2+term3*term4*term5)/term6
 
     ### derivative of iMMia with respect to metabolite concentrations ###
     def diMMia( self, j ):
+        term9 = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             term1             = self.rKI[y,j]*np.prod(1+self.KA[:,j]/self.c)*np.prod(1+self.KM_f[:,j]/self.c)
@@ -593,7 +593,6 @@ class Model:
             term6             = np.prod(1+self.KA[:,j]/self.c)
             term7             = -self.KM_f[y,j]/self.c[i]**2
             term8             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.c[np.arange(self.ni) != y])
-            term9             = self.kcat_f[j]
             self.ditau_j[j,i] = term1+(term2*term3*term4)+(term5*term6*term7*term8)/term9
 
     ### Derivative of rMM with respect to metabolite concentrations ###
@@ -810,6 +809,8 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
+            if nb_iterations%1000 == 0:
+                print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
             ### 4.1) Test trajectory convergence ###
             if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
                 self.converged = True
