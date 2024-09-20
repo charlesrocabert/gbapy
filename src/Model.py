@@ -29,7 +29,7 @@ sys.path.append('./src/')
 ### Define constant and tolerance thresholds ###
 MIN_CONCENTRATION          = 1e-10 # Minimum concentration value
 MIN_FLUX_FRACTION          = 1e-10 # Minimum flux fraction value
-MAX_FLUX_FRACTION          = 2.0   # Maximum flux fraction value
+MAX_FLUX_FRACTION          = 10.0  # Maximum flux fraction value
 DENSITY_TOL                = 1e-10 # Density tolerance threshold (|1-rho| < ε)
 NEGATIVE_C_TOL             = 1e-10 # Negative C tolerance threshold (C > -ε)
 NEGATIVE_P_TOL             = 1e-10 # Negative P tolerance threshold (P > -ε)
@@ -37,6 +37,7 @@ TRAJECTORY_STABLE_MU_COUNT = 1000  # Number of iterations with equal mu values t
 TRAJECTORY_CONVERGENCE_TOL = 1e-10 # Mu threshold below which growth rates are considered equal
 DECREASING_DT_FACTOR       = 5.0   # Factor by which the time step is decreased when the trajectory is unstable
 INCREASING_DT_FACTOR       = 2.0   # Factor by which the time step is increased when the trajectory is stable
+INCREASING_DT_COUNT        = 100   # Number of iterations with equal mu values to increase the time step
 MCMC_CONVERGENCE_TOL       = 1e-5  # MCMC trajectory convergence tolerance
 POPLEVEL_CONVERGENCE_TOL   = 1e-5  # Population-level trajectory convergence tolerance
 EFM_TOL                    = 1e-5  # Tolerance threshold below which EFM values are considered to be zero
@@ -76,7 +77,9 @@ def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_optimums:
         print("> Computing optimums for model "+model_name+"...")
-        model.compute_optimums(max_time=200, initial_dt=0.01)
+        if not save_LP:
+            model.load_LP()
+        model.compute_optimums(max_time=10000, initial_dt=0.01)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -150,6 +153,7 @@ class Model:
         self.kcat_b        = np.array([]) # Backward kcat vector
         self.reversible    = []           # Indicates if the reaction is reversible
         self.kinetic_model = []           # Indicates the kinetic model of the reaction
+        self.direction     = []           # Indicates the direction of the reaction
         self.conditions    = np.array([]) # List of conditions
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -187,17 +191,18 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.tau_j      = np.array([]) # Tau values (turnover times)
-        self.ditau_j    = np.array([]) # Tau derivative values
-        self.x          = np.array([]) # External metabolite concentrations
-        self.c          = np.array([]) # Internal metabolite concentrations
-        self.xc         = np.array([]) # Metabolite concentrations
-        self.v          = np.array([]) # Fluxes vector
-        self.p          = np.array([]) # Protein concentrations vector
-        self.b          = np.array([]) # Biomass fractions vector
-        self.density    = 0.0          # Cell's relative density
-        self.mu         = 0.0          # Growth rate
-        self.consistent = False        # Is the model consistent?
+        self.tau_j                 = np.array([]) # Tau values (turnover times)
+        self.ditau_j               = np.array([]) # Tau derivative values
+        self.x                     = np.array([]) # External metabolite concentrations
+        self.c                     = np.array([]) # Internal metabolite concentrations
+        self.xc                    = np.array([]) # Metabolite concentrations
+        self.v                     = np.array([]) # Fluxes vector
+        self.p                     = np.array([]) # Protein concentrations vector
+        self.b                     = np.array([]) # Biomass fractions vector
+        self.density               = 0.0          # Cell's relative density
+        self.mu                    = 0.0          # Growth rate
+        self.consistent            = False        # Is the model consistent?
+        self.adjust_concentrations = False        # Adjust concentrations to avoid negative values
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Evolutionary variables        #
@@ -317,6 +322,14 @@ class Model:
             self.KA     = self.KA.astype(float)
             del(df)
 
+    ### Load the LP solution on request ###
+    def load_LP( self ):
+        LP_filename = self.model_path+"/"+self.model_name+"/f0.csv"
+        assert os.path.exists(LP_filename), "> File "+LP_filename+" does not exist."
+        df          = pd.read_csv(LP_filename, sep=";")
+        self.LP_solution = np.array(df["f0"])
+        del(df)
+
     ### Initialize model mathematical variables ###
     def initialize_model_mathematical_variables( self ):
         ### Inverse of KI ###
@@ -338,11 +351,10 @@ class Model:
             for j in range(self.nj):
                 self.M[i,j] = self.Mx[self.metabolite_ids.index(met_id),j]
         ### Indices for reactions: s (transport), e (enzymatic), and ribosome r ###
-        self.sM                  = np.sum(self.M, axis=0)
-        self.sM[self.sM < 1e-10] = 0
-        is_e                     = [self.sM[0:(self.nj-1)] == 0]
-        self.e                   = []
-        self.s                   = []
+        self.sM = np.sum(self.M, axis=0)
+        is_e    = [self.sM[0:(self.nj-1)] == 0]
+        self.e  = []
+        self.s  = []
         for i in range(self.nj-1):
             if is_e[0][i] == True:
                 self.e.append(i)
@@ -400,19 +412,24 @@ class Model:
         # 5) Define the kinetic model of each reaction              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.kinetic_model.clear()
+        self.direction.clear()
         for j in range(self.nj):
             if (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() == 0):
                 self.kinetic_model.append("iMM")
+                self.direction.append("forward")
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() == 0):
                 self.kinetic_model.append("iMMi")
+                self.direction.append("forward")
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() > 0):
                 self.kinetic_model.append("iMMa")
+                self.direction.append("forward")
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() > 0):
                 self.kinetic_model.append("iMMia")
             elif (self.kcat_b[j] > 0):
                 assert self.KI[:,j].sum() == 0
                 assert self.KA[:,j].sum() == 0
                 self.kinetic_model.append("rMM")
+                self.direction.append("reversible")
 
     ### Reset model variables (used before binary export) ###
     def reset_variables( self ):
@@ -487,7 +504,7 @@ class Model:
             x_name    = self.x_ids[i]
             x_value   = self.get_condition(self.current_condition, x_name)
             self.x[i] = x_value
-            if self.x[i] < MIN_CONCENTRATION:
+            if self.adjust_concentrations and self.x[i] < MIN_CONCENTRATION:
                 self.x[i] = MIN_CONCENTRATION
 
     ### Set f0 ###
@@ -498,15 +515,15 @@ class Model:
         self.f       = np.copy(self.f0)
     
     ### Compute f from truncated vector f_trunc ###
-    def set_f( self, f_trunc ):
-        self.f_trunc = np.copy(f_trunc)
-        term1        = (1-self.sM[1:self.nj].dot(self.f_trunc))/self.sM[0]
-        self.f       = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
+    def set_f( self ):
+        term1  = (1-self.sM[1:].dot(self.f_trunc))/self.sM[0]
+        self.f = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
     
     ### Compute internal concentrations ###
     def compute_c( self ):
         self.c = self.current_rho*self.M.dot(self.f)
-        self.c[self.c < MIN_CONCENTRATION] = MIN_CONCENTRATION
+        if self.adjust_concentrations:
+            self.c[self.c < MIN_CONCENTRATION] = MIN_CONCENTRATION
         self.xc = np.concatenate([self.x, self.c])
         
     ### Irreversible Michaelis-Menten kinetics ###
@@ -553,9 +570,11 @@ class Model:
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
-            term1             = (self.KM_f[y,j]/self.c[i]**2)
+            term1             = self.KM_f[y,j]/np.power(self.c[i], 2)
             term2             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
             self.ditau_j[j,i] = -term1*term2/term3
+            #if self.ditau_j[j,i] == -0.0:
+            #    self.ditau_j[j,i] = 0.0
 
     ### derivative of iMMi with respect to metabolite concentrations ###
     def diMMi( self, j ):
@@ -642,7 +661,7 @@ class Model:
 
     ### Compute local mu gradient with respect to f ###
     def compute_dmu_f( self ):
-        term1      = self.mu**2/self.b[self.a]
+        term1      = np.power(self.mu, 2)/self.b[self.a]
         term2      = self.M[self.a,:]/self.mu
         term3      = self.f.T.dot(self.current_rho*self.ditau_j.dot(self.M))
         term4      = self.tau_j
@@ -699,7 +718,7 @@ class Model:
     ### WARNING: this method assumes full irreversibility             ###
     def solve_local_linear_problem( self ):
         gpmodel = gp.Model(env=env)
-        x       = gpmodel.addMVar(self.nj, lb=0.0, ub=MAX_FLUX_FRACTION)
+        x       = gpmodel.addMVar(self.nj, lb=MIN_FLUX_FRACTION, ub=MAX_FLUX_FRACTION)
         min_b   = 1/self.nc/10
         rhs     = np.repeat(min_b, self.nc)
         gpmodel.setObjective(x[-1], gp.GRB.MAXIMIZE)
@@ -769,12 +788,33 @@ class Model:
         else:
             return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
 
+    ### Bloc reactions tending to zero ###
+    def block_reactions( self ):
+        for j in range(self.nj-1):
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            # 1) Reaction is irreversible and positive #
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            if self.direction[j+1] == "forward" and self.f_trunc[j] <= MIN_FLUX_FRACTION:
+                self.f_trunc[j] = MIN_FLUX_FRACTION
+                if self.GCC_f[(j+1)] < 0.0:
+                    self.GCC_f[(j+1)] = 0.0
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            # 2) Reaction is reversible                #
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            elif self.direction[j+1] == "reversible" and np.abs(self.f_trunc[j]) <= MIN_FLUX_FRACTION:
+                self.GCC_f[(j+1)] = 0.0
+                if self.f_trunc[j] >= 0.0:
+                    self.f_trunc[j] = MIN_FLUX_FRACTION
+                elif self.f_trunc[j] < 0.0:
+                    self.f_trunc[j] = -MIN_FLUX_FRACTION
+    
     ### Compute the gradient ascent ###
     def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.adjust_concentrations = False
         self.set_condition(condition)
         self.calculate()
         self.check_model_consistency()
@@ -799,7 +839,6 @@ class Model:
         dt                    = initial_dt
         mu_alteration_counter = 0
         previous_f            = np.copy(self.f_trunc)
-        next_f                = np.copy(self.f_trunc)
         previous_mu           = self.mu
         self.converged        = False
         nb_iterations         = 0
@@ -809,22 +848,26 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
-            if nb_iterations%1000 == 0:
-                print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
+            #if nb_iterations%1000 == 0:
+            #    print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
             ### 4.1) Test trajectory convergence ###
             if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
                 self.converged = True
                 break
             ### 4.2) Calculate the next step ###
             previous_mu = self.mu
-            next_f      = next_f+self.GCC_f[1:]*dt
-            next_f[next_f < 0.0] = 0.0
-            self.set_f(next_f)
+            self.block_reactions()
+            self.f_trunc = self.f_trunc+self.GCC_f[1:]*dt
+            #self.f_trunc[self.f_trunc < 0.0] = 0.0
+            self.set_f()
             self.calculate()
             self.check_model_consistency()
+            
+            #print(pd.DataFrame(data={"f": self.f, "GCC_f": self.GCC_f}, index=self.reaction_ids))
+            #sys.exit()
             ### 4.3) If the model is consistent: ###
             if self.consistent and self.mu >= previous_mu:
-                previous_f  = np.copy(next_f)
+                previous_f  = np.copy(self.f_trunc)
                 t           = t + dt
                 dt_counter += 1
                 if track:
@@ -834,18 +877,18 @@ class Model:
                     overview_row = pd.Series(data=overview_dict)
                     self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
-                if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
+                if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
                 else:
                     mu_alteration_counter = 0
                 ### Check if dt is never changing, and possibly increase it ###
-                if dt_counter == 1000:
+                if dt_counter == INCREASING_DT_COUNT:
                     dt         = dt*INCREASING_DT_FACTOR
                     dt_counter = 0
             ### 4.4) If the model is inconsistent: ###
             else:
-                next_f = np.copy(previous_f)
-                self.set_f(previous_f)
+                self.f_trunc = np.copy(previous_f)
+                self.set_f()
                 self.calculate()
                 self.check_model_consistency()
                 assert self.consistent, "> Previous model is not consistent"
@@ -860,20 +903,21 @@ class Model:
         end_time = time.time()
         run_time = end_time-start_time
         if t >= max_time:
-            print("> Max time was reached, Model is consistent for condition: ",condition)
+            print("> Condition "+condition+": MAXTIME reached")
             return False, run_time
         else:
-            print("> Maximum was found, Model is consistent for condition: ",condition)
+            print("> Condition "+condition+": convergence reached (mu="+str(self.mu)+", nb iterations="+str(nb_iterations)+")")
             return True, run_time
         
     ### Compute all the optimums ###
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
+        start = time.time()
         overview_columns  = ['condition', 'mu','density','converged', 'run_time']
         overview_columns  = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
         self.optimum_data = pd.DataFrame(columns=overview_columns)
-        self.set_f0(self.LP_solution)
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
+            self.set_f0(self.LP_solution)
             converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
             overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": converged, "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
@@ -882,6 +926,8 @@ class Model:
             self.optimum_data                 = pd.concat([self.optimum_data, overview_row.to_frame().T], ignore_index=True)
             self.optimum_solutions[condition] = np.copy(self.f)
         self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
+        end = time.time()
+        print("> All optimums were computed in ", end-start, " seconds")
     
     ### Compute the gradient ascent with noise ###
     def gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):
@@ -953,7 +999,7 @@ class Model:
                 else:
                     mu_alteration_counter = 0
                 ### Check if dt is never changing, and possibly increase it ###
-                if dt_counter == 1000:
+                if dt_counter == INCREASING_DT_COUNT:
                     dt         = dt*INCREASING_DT_FACTOR
                     dt_counter = 0
             ### 4.4) If the model is inconsistent: ###

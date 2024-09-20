@@ -1,6 +1,6 @@
 ;G_transport;CO2_excretion;AA_production;Ribosome
 x_G;-1;0;0;0
-x_CO2;0;-1;0;0
+x_CO2;0;1;0;0
 G;1;0;-1;0
 CO2;0;-1;0.2;0
 AA;0;0;0.8;-1
