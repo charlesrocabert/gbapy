@@ -913,7 +913,7 @@ class Model:
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
         start = time.time()
         overview_columns  = ['condition', 'mu','density','converged', 'run_time']
-        overview_columns  = overview_columns[:3] + self.reaction_ids + overview_columns[3:]
+        overview_columns  = overview_columns + self.reaction_ids
         self.optimum_data = pd.DataFrame(columns=overview_columns)
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
