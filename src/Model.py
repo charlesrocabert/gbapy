@@ -919,7 +919,7 @@ class Model:
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
             converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
-            overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": converged, "run_time": run_time}
+            overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
             overview_row                      = pd.Series(data=overview_dict)
