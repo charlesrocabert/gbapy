@@ -817,20 +817,20 @@ class Model:
     # and generations continuous.
     def mean_evolutionary_trajectory( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, label = 1 ):
         start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.adjust_concentrations = False
         self.set_condition(condition)
         self.calculate()
         self.check_model_consistency()
         assert self.consistent, "> Initial model is not consistent"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize tracker        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize tracker       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.ME_trajectory.empty:
-                overview_columns   = ['label', 'condition', 't','dt','mu','dmu']
+                overview_columns   = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
                 overview_columns   = overview_columns + self.reaction_ids
                 self.ME_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
@@ -838,9 +838,9 @@ class Model:
                 overview_dict[reaction_id] = value
             overview_row       = pd.Series(data=overview_dict)
             self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Initialize the algorithm  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         t                     = 0.0
         dt                    = initial_dt
         mu_alteration_counter = 0
@@ -849,9 +849,9 @@ class Model:
         self.converged        = False
         nb_iterations         = 0
         dt_counter            = 0
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Start the gradient ascent #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the main loop      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
             if nb_iterations%5000 == 0:
@@ -900,9 +900,9 @@ class Model:
                     dt_counter = 0
                 else:
                     raise AssertionError("> Trajectory was stopped, because dt got too small")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Final algorithm steps     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Final algorithm steps    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
         if t >= max_time:
@@ -936,47 +936,41 @@ class Model:
     # Pál & Miklós formulation
     def mean_evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_condition(condition)
         self.calculate()
         self.check_model_consistency()
         assert self.consistent, "> Initial model is not consistent"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize tracker        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize tracker       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MED_trajectory.empty:
-                overview_columns    = ['label', 'condition', 't','dt','mu','dmu']
+                overview_columns    = ['label', 'condition', 't', 'mu']
                 overview_columns    = overview_columns + self.reaction_ids
                 self.MED_trajectory = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
             self.MED_trajectory            = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Initialize the algorithm  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         t             = 0.0
         previous_f    = np.copy(self.f_trunc)
         next_f        = np.copy(self.f_trunc)
-        previous_mu   = self.mu
         nb_iterations = 0
-        epsilon       = self.draw_noise(sigma, self.nj-1)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Start the gradient ascent #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the loop           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
-            ### 4.1) Test trajectory convergence ###
-            if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
-                self.converged = True
-                break
-            ### 4.2) Calculate the next step ###
-            previous_mu          = self.mu
-            next_f               = next_f+self.GCC_f[1:]*dt+epsilon*dt
+            ### 4.1) Calculate the next step ###
+            epsilon              = self.draw_noise(sigma/(2*N_e), self.nj-1)
+            next_f               = next_f+sigma*self.GCC_f[1:]*dt+epsilon
             next_f[next_f < 0.0] = 0.0
             self.set_f(next_f)
             self.calculate()
@@ -1014,9 +1008,9 @@ class Model:
                     dt_counter = 0
                 else:
                     raise AssertionError("> Trajectory was stopped, because dt got too small")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Final algorithm steps     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Final algorithm steps    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
         if t >= max_time:
@@ -1042,7 +1036,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MCMC_trajectory.empty:
-                overview_columns     = ['label', 'condition', 't','mu']
+                overview_columns     = ['label', 'condition', 't', 'mu']
                 overview_columns     = overview_columns + self.reaction_ids
                 self.MCMC_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
