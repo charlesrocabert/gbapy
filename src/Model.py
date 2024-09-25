@@ -184,9 +184,9 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.LP_solution       = np.array([])   # Linear programming solution
-        self.optimum_solutions = {}             # Optimum f vectors for all conditions
-        self.random_solutions  = {}             # Random f vectors
+        self.LP_solution       = np.array([]) # Linear programming solution
+        self.optimum_solutions = {}           # Optimum f vectors for all conditions
+        self.random_solutions  = {}           # Random f vectors
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
@@ -218,8 +218,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data = pd.DataFrame() # Optimum dataframe for all conditions
-        self.trajectory   = pd.DataFrame() # Trajectory dataframe
+        self.optimum_data    = pd.DataFrame() # Optimum dataframe for all conditions
+        self.ME_trajectory   = pd.DataFrame() # Mean evolutionary trajectory
+        self.MED_trajectory  = pd.DataFrame() # Mean evolutionary trajectory with genetic drift
+        self.MCMC_trajectory = pd.DataFrame() # MCMC trajectory
 
     #############################
     #   Model loading methods   #
@@ -808,8 +810,10 @@ class Model:
                 elif self.f_trunc[j] < 0.0:
                     self.f_trunc[j] = -MIN_FLUX_FRACTION
     
-    ### Compute the gradient ascent ###
-    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
+    ### Compute the mean evolutionary trajectory ###
+    # It corresponds to the continuous trajectory if the population was infinite
+    # and generations continuous.
+    def mean_evolutionary_trajectory( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -823,15 +827,15 @@ class Model:
         # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.trajectory.empty:
-                overview_columns = ['index', 'condition', 't','dt','mu','dmu']
-                overview_columns = overview_columns + self.reaction_ids
-                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            if not add or self.ME_trajectory.empty:
+                overview_columns   = ['index', 'condition', 't','dt','mu','dmu']
+                overview_columns   = overview_columns + self.reaction_ids
+                self.ME_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
-            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+            self.ME_trajectory             = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -871,8 +875,8 @@ class Model:
                     overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row = pd.Series(data=overview_dict)
-                    self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row       = pd.Series(data=overview_dict)
+                    self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -915,7 +919,7 @@ class Model:
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
-            converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
+            converged, run_time = self.mean_evolutionary_trajectory(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
             overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
@@ -926,8 +930,9 @@ class Model:
         end = time.time()
         print("> All optimums were computed in ", end-start, " seconds")
     
-    ### Compute the gradient ascent with noise ###
-    def gradient_ascent_with_noise( self, condition = "1", max_time = 5, initial_dt = 0.01, sigma = 0.1, index = 1, track = False, add = False ):
+    ### Compute the mean evolutionary trajectory with genetic drift ###
+    # Pál & Miklós formulation
+    def mean_evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, sigma = 0.1, N_e = 2.5e7, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -940,28 +945,24 @@ class Model:
         # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.trajectory.empty:
-                overview_columns = ['index', 'condition', 't','dt','mu','dmu']
-                overview_columns = overview_columns + self.reaction_ids
-                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            if not add or self.MED_trajectory.empty:
+                overview_columns    = ['index', 'condition', 't','dt','mu','dmu']
+                overview_columns    = overview_columns + self.reaction_ids
+                self.MED_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
-            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+            self.MED_trajectory            = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t                     = 0.0
-        dt                    = initial_dt
-        mu_alteration_counter = 0
-        previous_f            = np.copy(self.f_trunc)
-        next_f                = np.copy(self.f_trunc)
-        previous_mu           = self.mu
-        self.converged        = False
-        nb_iterations         = 0
-        dt_counter            = 0
-        epsilon               = self.draw_noise(sigma, self.nj-1)
+        t             = 0.0
+        previous_f    = np.copy(self.f_trunc)
+        next_f        = np.copy(self.f_trunc)
+        previous_mu   = self.mu
+        nb_iterations = 0
+        epsilon       = self.draw_noise(sigma, self.nj-1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the gradient ascent #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -988,8 +989,8 @@ class Model:
                     overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row = pd.Series(data=overview_dict)
-                    self.trajectory = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row        = pd.Series(data=overview_dict)
+                    self.MED_trajectory = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -1023,7 +1024,8 @@ class Model:
             print("> Maximum was found, Model is consistent for condition: ",condition)
             return True, run_time
 
-    ### Compute Markov chain Monte Carlo ###    
+    ### Compute Markov chain Monte Carlo ###
+    # Standard MCMC formulation 
     def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7, index = 1, track = False, add = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1037,15 +1039,15 @@ class Model:
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.trajectory.empty:
-                overview_columns = ['index', 'condition', 't','mu']
-                overview_columns = overview_columns + self.reaction_ids
-                self.trajectory  = pd.DataFrame(columns=overview_columns)
+            if not add or self.MCMC_trajectory.empty:
+                overview_columns     = ['index', 'condition', 't','mu']
+                overview_columns     = overview_columns + self.reaction_ids
+                self.MCMC_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"index": index, "condition": condition, "t": 0.0, "mu": self.mu}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
-            self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+            self.MCMC_trajectory           = pd.concat([self.MCMC_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1078,7 +1080,7 @@ class Model:
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row                   = pd.Series(data=overview_dict)
-                    self.trajectory                = pd.concat([self.trajectory, overview_row.to_frame().T], ignore_index=True)
+                    self.MCMC_trajectory           = pd.concat([self.MCMC_trajectory, overview_row.to_frame().T], ignore_index=True)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
                 self.set_f(non_mutated_f)
@@ -1097,16 +1099,21 @@ class Model:
 
     ### Save trajectory to csv ###
     def save_trajectory( self, label = "" ):
-        filename = "./output/"+self.model_name+"_"
-        if label == "":
-            filename += "trajectory.csv"
-        else:
-            filename += label+"_trajectory.csv"
-        self.trajectory.to_csv(filename, sep=';', index=False)
+        header = "./output/"+self.model_name
+        if label != "":
+            header += "_"+str(label)
+        if not self.ME_trajectory.empty:
+            self.ME_trajectory.to_csv(header+"_ME_trajectory.csv", sep=';', index=False)
+        if not self.MED_trajectory.empty:
+            self.MED_trajectory.to_csv(header+"_MED_trajectory.csv", sep=';', index=False)
+        if not self.MCMC_trajectory.empty:
+            self.MCMC_trajectory.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
 
     ### Clear trajectory ###
     def clear_trajectory( self ):
-        self.trajectory = pd.DataFrame()
+        self.ME_trajectory   = pd.DataFrame()
+        self.MED_trajectory  = pd.DataFrame()
+        self.MCMC_trajectory = pd.DataFrame()
     
     ######################
     #   Export methods   #
