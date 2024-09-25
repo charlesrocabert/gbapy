@@ -186,7 +186,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.LP_solution       = np.array([])   # Linear programming solution
         self.optimum_solutions = {}             # Optimum f vectors for all conditions
-        self.random_solutions  = {}             # Random f vectors for all conditions
+        self.random_solutions  = {}             # Random f vectors
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model dynamical variables #
@@ -848,8 +848,8 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
-            #if nb_iterations%1000 == 0:
-            #    print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
+            if nb_iterations%5000 == 0:
+               print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
             ### 4.1) Test trajectory convergence ###
             if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
                 self.converged = True
@@ -862,9 +862,6 @@ class Model:
             self.set_f()
             self.calculate()
             self.check_model_consistency()
-            
-            #print(pd.DataFrame(data={"f": self.f, "GCC_f": self.GCC_f}, index=self.reaction_ids))
-            #sys.exit()
             ### 4.3) If the model is consistent: ###
             if self.consistent and self.mu >= previous_mu:
                 previous_f  = np.copy(self.f_trunc)
