@@ -767,29 +767,31 @@ class Model:
     
     ### Calculates the mutated flux fraction for each reaction ###
     def mutate_f( self, index, sigma ):
-        non_mutated_f     = np.copy(self.f_trunc)
-        mutated_f         = np.copy(self.f_trunc)
-        epsilon           = self.draw_noise(sigma, 1)
-        mutated_f[index] += epsilon 
-        mutated_f[mutated_f < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
-        self.set_f(mutated_f)
+        non_mutated_f        = np.copy(self.f_trunc)
+        epsilon              = self.draw_noise(sigma, 1)
+        self.f_trunc[index] += epsilon 
+        self.f_trunc[self.f_trunc < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
+        self.set_f()
         return non_mutated_f
     
     ### Calculate the selection coefficient for MCMC mutation fixation ###
     def calculate_selection_coefficient( self, mu, mutated_mu ):
         return 1.0 - mu / mutated_mu
     
+    ### Calcutlate fixation probability pi for MCMC ###
+    def calculate_pi( self, selection_coefficient, N_e ):
+        pi = 0.0
+        with np.errstate(divide="ignore", over="ignore", invalid="ignore"):
+            if selection_coefficient == 0.0:
+                pi = 1.0/N_e
+            else:
+                pi = (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
+        return pi
+
     ### Simulate fixation for MCMC ###
     def simulate_fixation( self, pi ):
         return np.random.rand() < pi
-        
-    ### Calcutlate fixation probability pi for MCMC ###
-    def calculate_pi( self, selection_coefficient, N_e ):
-        if (selection_coefficient == 0):
-            return 1/N_e
-        else:
-            return (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
-
+    
     ### Bloc reactions tending to zero ###
     def block_reactions( self ):
         for j in range(self.nj-1):
@@ -813,7 +815,7 @@ class Model:
     ### Compute the mean evolutionary trajectory ###
     # It corresponds to the continuous trajectory if the population was infinite
     # and generations continuous.
-    def mean_evolutionary_trajectory( self, condition = "1", max_time = 5.0, initial_dt = 0.01, index = 1, track = False, add = False ):
+    def mean_evolutionary_trajectory( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -827,15 +829,15 @@ class Model:
         # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.ME_trajectory.empty:
-                overview_columns   = ['index', 'condition', 't','dt','mu','dmu']
+            if self.ME_trajectory.empty:
+                overview_columns   = ['label', 'condition', 't','dt','mu','dmu']
                 overview_columns   = overview_columns + self.reaction_ids
                 self.ME_trajectory = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                   = pd.Series(data=overview_dict)
-            self.ME_trajectory             = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row       = pd.Series(data=overview_dict)
+            self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -872,7 +874,7 @@ class Model:
                 t           = t + dt
                 dt_counter += 1
                 if track:
-                    overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row       = pd.Series(data=overview_dict)
@@ -919,7 +921,7 @@ class Model:
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
-            converged, run_time = self.mean_evolutionary_trajectory(condition=condition, max_time=max_time, initial_dt=initial_dt, track=False, add=False)
+            converged, run_time = self.mean_evolutionary_trajectory(condition=condition, max_time=max_time, initial_dt=initial_dt)
             overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
@@ -932,7 +934,7 @@ class Model:
     
     ### Compute the mean evolutionary trajectory with genetic drift ###
     # Pál & Miklós formulation
-    def mean_evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, sigma = 0.1, N_e = 2.5e7, index = 1, track = False, add = False ):
+    def mean_evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -945,11 +947,11 @@ class Model:
         # 2) Initialize tracker        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.MED_trajectory.empty:
-                overview_columns    = ['index', 'condition', 't','dt','mu','dmu']
+            if self.MED_trajectory.empty:
+                overview_columns    = ['label', 'condition', 't','dt','mu','dmu']
                 overview_columns    = overview_columns + self.reaction_ids
                 self.MED_trajectory = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"index": index, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
@@ -986,7 +988,7 @@ class Model:
                 t           = t + dt
                 dt_counter += 1
                 if track:
-                    overview_dict = {"index": index, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row        = pd.Series(data=overview_dict)
@@ -1026,7 +1028,7 @@ class Model:
 
     ### Compute Markov chain Monte Carlo ###
     # Standard MCMC formulation 
-    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7, index = 1, track = False, add = False ):
+    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -1039,11 +1041,11 @@ class Model:
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if not add or self.MCMC_trajectory.empty:
-                overview_columns     = ['index', 'condition', 't','mu']
+            if self.MCMC_trajectory.empty:
+                overview_columns     = ['label', 'condition', 't','mu']
                 overview_columns     = overview_columns + self.reaction_ids
                 self.MCMC_trajectory = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"index": index, "condition": condition, "t": 0.0, "mu": self.mu}
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
             overview_row                   = pd.Series(data=overview_dict)
@@ -1072,18 +1074,20 @@ class Model:
                 pi         = self.calculate_pi(s, N_e)
                 ### 4.3) Undo Mutation if no fixation occurs ###
                 if self.simulate_fixation(pi) == False:
-                    self.set_f(non_mutated_f)
+                    self.f_trunc = np.copy(non_mutated_f)
+                    self.set_f()
                 ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
                     fixed         += 1
-                    overview_dict  = {"index": index, "condition": condition, "t": t, "mu": self.mu}
+                    overview_dict  = {"label": label, "condition": condition, "t": t, "mu": self.mu}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row                   = pd.Series(data=overview_dict)
                     self.MCMC_trajectory           = pd.concat([self.MCMC_trajectory, overview_row.to_frame().T], ignore_index=True)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
-                self.set_f(non_mutated_f)
+                self.f_trunc = np.copy(non_mutated_f)
+                self.set_f()
             self.calculate()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
