@@ -799,6 +799,7 @@ class Model:
             # 1) Reaction is irreversible and positive #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             if self.direction[j+1] == "forward" and self.f_trunc[j] <= MIN_FLUX_FRACTION:
+                print("> Reaction ", j+1, " is blocked")
                 self.f_trunc[j] = MIN_FLUX_FRACTION
                 if self.GCC_f[(j+1)] < 0.0:
                     self.GCC_f[(j+1)] = 0.0
@@ -806,6 +807,7 @@ class Model:
             # 2) Reaction is reversible                #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             elif self.direction[j+1] == "reversible" and np.abs(self.f_trunc[j]) <= MIN_FLUX_FRACTION:
+                print("> Reaction ", j+1, " is blocked")
                 self.GCC_f[(j+1)] = 0.0
                 if self.f_trunc[j] >= 0.0:
                     self.f_trunc[j] = MIN_FLUX_FRACTION
@@ -864,7 +866,7 @@ class Model:
             previous_mu = self.mu
             self.block_reactions()
             self.f_trunc = self.f_trunc+self.GCC_f[1:]*dt
-            #self.f_trunc[self.f_trunc < 0.0] = 0.0
+            #self.f_trunc[self.f_trunc < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
             self.set_f()
             self.calculate()
             self.check_model_consistency()
@@ -911,7 +913,7 @@ class Model:
         else:
             print("> Condition "+condition+": convergence reached (mu="+str(self.mu)+", nb iterations="+str(nb_iterations)+")")
             return True, run_time
-        
+    
     ### Compute all the optimums ###
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
         start = time.time()
