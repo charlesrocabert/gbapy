@@ -799,20 +799,25 @@ class Model:
             # 1) Reaction is irreversible and positive #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             if self.direction[j+1] == "forward" and self.f_trunc[j] <= MIN_FLUX_FRACTION:
-                print("> Reaction ", j+1, " is blocked")
                 self.f_trunc[j] = MIN_FLUX_FRACTION
                 if self.GCC_f[(j+1)] < 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # 2) Reaction is reversible                #
+            # 2) Reaction is irreversible and negative #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            elif self.direction[j+1] == "reversible" and np.abs(self.f_trunc[j]) <= MIN_FLUX_FRACTION:
-                print("> Reaction ", j+1, " is blocked")
-                self.GCC_f[(j+1)] = 0.0
-                if self.f_trunc[j] >= 0.0:
-                    self.f_trunc[j] = MIN_FLUX_FRACTION
-                elif self.f_trunc[j] < 0.0:
-                    self.f_trunc[j] = -MIN_FLUX_FRACTION
+            elif self.direction[j+1] == "backward" and self.f_trunc[j] >= -MIN_FLUX_FRACTION:
+                self.f_trunc[j] = -MIN_FLUX_FRACTION
+                if self.GCC_f[(j+1)] > 0.0:
+                    self.GCC_f[(j+1)] = 0.0
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            # 3) Reaction is reversible                #
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            # elif self.direction[j+1] == "reversible" and np.abs(self.f_trunc[j]) <= MIN_FLUX_FRACTION:
+            #     self.GCC_f[(j+1)] = 0.0
+            #     if self.f_trunc[j] >= 0.0:
+            #         self.f_trunc[j] = MIN_FLUX_FRACTION
+            #     elif self.f_trunc[j] < 0.0:
+            #         self.f_trunc[j] = -MIN_FLUX_FRACTION
     
     ### Compute the mean evolutionary trajectory ###
     # It corresponds to the continuous trajectory if the population was infinite
@@ -913,7 +918,7 @@ class Model:
         else:
             print("> Condition "+condition+": convergence reached (mu="+str(self.mu)+", nb iterations="+str(nb_iterations)+")")
             return True, run_time
-    
+
     ### Compute all the optimums ###
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
         start = time.time()
@@ -934,9 +939,9 @@ class Model:
         end = time.time()
         print("> All optimums were computed in ", end-start, " seconds")
     
-    ### Compute the mean evolutionary trajectory with genetic drift ###
+    ### Compute the evolutionary trajectory with genetic drift ###
     # Pál & Miklós formulation
-    def mean_evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
+    def evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -950,77 +955,70 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MED_trajectory.empty:
-                overview_columns    = ['label', 'condition', 't', 'mu']
+                overview_columns    = ['label', 'condition', 't', 'mu', 'fixed']
                 overview_columns    = overview_columns + self.reaction_ids
                 self.MED_trajectory = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                   = pd.Series(data=overview_dict)
-            self.MED_trajectory            = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row        = pd.Series(data=overview_dict)
+            self.MED_trajectory = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         t             = 0.0
         previous_f    = np.copy(self.f_trunc)
-        next_f        = np.copy(self.f_trunc)
+        previous_mu   = self.mu
         nb_iterations = 0
+        fixed         = 0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the loop           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         while (t < max_time):
             nb_iterations += 1
+            if nb_iterations >= max_iter:
+                print("> Condition "+condition+": MAXITER reached")
+                break
             ### 4.1) Calculate the next step ###
-            epsilon              = self.draw_noise(sigma/(2*N_e), self.nj-1)
-            next_f               = next_f+sigma*self.GCC_f[1:]*dt+epsilon
-            next_f[next_f < 0.0] = 0.0
-            self.set_f(next_f)
+            epsilon      = self.draw_noise(np.sqrt(sigma/(2.0*N_e)), self.nj-1)
+            self.f_trunc = self.f_trunc+sigma*self.GCC_f[1:]+epsilon
+            #self.block_reactions()
+            self.set_f()
             self.calculate()
             self.check_model_consistency()
-            ### 4.3) If the model is consistent: ###
-            if self.consistent and self.mu >= previous_mu:
-                previous_f  = np.copy(next_f)
-                epsilon     = self.draw_noise(sigma, self.nj-1)
-                t           = t + dt
-                dt_counter += 1
+            ### 4.2) If the model is consistent: ###
+            if self.consistent and self.mu > 1e-10:# and self.mu >= previous_mu:
+                previous_f  = np.copy(self.f_trunc)
+                previous_mu = self.mu
+                t          += 1
+                fixed      += 1
                 if track:
-                    overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": fixed}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
                     overview_row        = pd.Series(data=overview_dict)
                     self.MED_trajectory = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
-                ### Check if mu changes significantly ###
-                if np.abs(self.mu - previous_mu) <= TRAJECTORY_CONVERGENCE_TOL:
-                    mu_alteration_counter += 1
-                else:
-                    mu_alteration_counter = 0
-                ### Check if dt is never changing, and possibly increase it ###
-                if dt_counter == INCREASING_DT_COUNT:
-                    dt         = dt*INCREASING_DT_FACTOR
-                    dt_counter = 0
-            ### 4.4) If the model is inconsistent: ###
+            ### 4.3) If the model is inconsistent: ###
             else:
-                next_f = np.copy(previous_f)
-                self.set_f(previous_f)
+                self.f_trunc = np.copy(previous_f)
+                self.set_f()
                 self.calculate()
                 self.check_model_consistency()
                 assert self.consistent, "> Previous model is not consistent"
-                if (dt > 1e-100):
-                    dt         = dt/DECREASING_DT_FACTOR
-                    dt_counter = 0
-                else:
-                    raise AssertionError("> Trajectory was stopped, because dt got too small")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
-        if t >= max_time:
-            print("> Max time was reached, Model is consistent for condition: ",condition)
+        if fixed == 0 and nb_iterations < max_iter:
+            print("> Evolutionary simulation was completed. No mutation was fixed")
             return False, run_time
-        else:
-            print("> Maximum was found, Model is consistent for condition: ",condition)
+        elif fixed > 0 and nb_iterations < max_iter:
+            print("> Evolutionary simulation was completed")
             return True, run_time
+        elif nb_iterations >= max_iter:
+            print("> Evolutionary simulation was stopped because MAXITER was reached")
+            return False, run_time
 
     ### Compute Markov chain Monte Carlo ###
     # Standard MCMC formulation 
