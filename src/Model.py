@@ -530,28 +530,37 @@ class Model:
         
     ### Irreversible Michaelis-Menten kinetics ###
     def iMM( self, j ):
-        self.tau_j[j] = np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+        term1         = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        term2         = self.kcat_f[j]
+        self.tau_j[j] = term1/term2
 
     ### Irreversible Michaelis-Menten kinetics + inhibition (only one inhibitor per reaction) ###
     def iMMi( self, j ):
-        self.tau_j[j] = np.prod(1+self.xc*self.rKI[:,j])*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+        term1 = np.prod(1.0+self.xc*self.rKI[:,j])
+        term2 = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        term3 = self.kcat_f[j]
+        self.tau_j[j] = term1*term2/term3
     
     ### Irreversible Michaelis-Menten kinetics + activation (only one activator per reaction) ###
     def iMMa( self, j ):
-        term1 = np.prod(1+self.KA[:,j]/self.xc)
-        term2 = np.prod(1+self.KM_f[:,j]/self.xc)
+        term1 = np.prod(1.0+self.KA[:,j]/self.xc)
+        term2 = np.prod(1.0+self.KM_f[:,j]/self.xc)
         term3 = self.kcat_f[j]
         self.tau_j[j] = term1*term2/term3
 
     ### Irreversible Michaelis-Menten kinetics + inhibition + activation ###
     def iMMia( self, j ):
-        self.tau_j[j] = np.prod(1+self.xc*self.rKI[:,j])*np.prod(1+self.KA[:,j]/self.xc)*np.prod(1+self.KM_f[:,j]/self.xc)/self.kcat_f[j]
+        term1 = np.prod(1.0+self.xc*self.rKI[:,j])
+        term2 = np.prod(1.0+self.KA[:,j]/self.xc)
+        term3 = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        term4 = self.kcat_f[j]
+        self.tau_j[j] = term1*term2*term3/term4
 
     ### Reversible Michaelis-Menten kinetics ###
     def rMM( self, j ):
         forward_term  = self.kcat_f[j]/np.prod(1+self.KM_f[:,j]/self.xc)
         backward_term = self.kcat_b[j]/np.prod(1+self.KM_b[:,j]/self.xc)
-        self.tau_j[j] = 1/(forward_term-backward_term)
+        self.tau_j[j] = 1.0/(forward_term-backward_term)
     
     ### Compute tau ###
     def compute_tau( self, j ):
@@ -568,65 +577,72 @@ class Model:
     
     ### derivative of iMM with respect to metabolite concentrations ###
     def diMM( self, j ):
-        term3 = self.kcat_f[j]
+        constant1 = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
-            term1             = self.KM_f[y,j]/np.power(self.c[i], 2)
+            term1             = self.KM_f[y,j]/np.power(self.c[i], 2.0)
             term2             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-            self.ditau_j[j,i] = -term1*term2/term3
-            #if self.ditau_j[j,i] == -0.0:
-            #    self.ditau_j[j,i] = 0.0
+            self.ditau_j[j,i] = -term1*term2/constant1
 
     ### derivative of iMMi with respect to metabolite concentrations ###
     def diMMi( self, j ):
-        term5 = self.kcat_f[j]
+        constant1 = np.prod(1+self.KM_f[:,j]/self.xc)
+        constant2 = np.prod(1+self.xc*self.rKI[:,j])
+        constant3 = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
-            term1             = self.rKI[y,j]*np.prod(1+self.KM_f[:,j]/self.xc)
-            term2             = np.prod(1+self.xc*self.rKI[:,j])
-            term3             = self.KM_f[y,j]/self.c[i]**2
-            term4             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-            self.ditau_j[j,i] = term1-term2*term3*term4/term5
+            indices           = np.arange(self.ni) != y
+            term1             = self.rKI[y,j]*constant1
+            term2             = self.KM_f[y,j]/np.power(self.c[i], 2)
+            term3             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
+            self.ditau_j[j,i] = (term1-constant2*term2*term3)/constant3
     
     ### derivative of iMMa with respect to metabolite concentrations ###
     def diMMa( self, j ):
-        term6 = self.kcat_f[j]
+        constant1 = np.prod(1+self.KM_f[:,j]/self.xc)
+        constant2 = np.prod(1+self.KA[:,j]/self.xc)
+        constant3 = self.kcat_f[j]
         for i in range(self.nc):
-            y     = i+self.nx
-            term1 = self.KA[y,j]/self.c[i]**2
-            term2 = np.prod(1+self.KM_f[:,j]/self.xc)
-            term3 = self.KM_f[y,j]/self.c[i]**2
-            term4 = np.prod(1+self.KA[:,j]/self.xc)
-            term5 = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.xc[np.arange(self.ni) != y])
-            self.ditau_j[j,i] = -(term1*term2+term3*term4*term5)/term6
+            y                 = i+self.nx
+            indices           = np.arange(self.ni) != y
+            term1             = self.KA[y,j]/np.power(self.c[i], 2.0)
+            term2             = self.KM_f[y,j]/np.power(self.c[i], 2.0)
+            term3             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
+            self.ditau_j[j,i] = -(constant1*term1+constant2*term2*term3)/constant3
 
     ### derivative of iMMia with respect to metabolite concentrations ###
     def diMMia( self, j ):
-        term9 = self.kcat_f[j]
+        constant1 = np.prod(1.0+self.c*self.rKI[:,j])
+        constant2 = np.prod(1.0+self.KA[:,j]/self.c)
+        constant3 = np.prod(1.0+self.KM_f[:,j]/self.c)
+        constant4 = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
-            term1             = self.rKI[y,j]*np.prod(1+self.KA[:,j]/self.c)*np.prod(1+self.KM_f[:,j]/self.c)
-            term2             = np.prod(1+self.c*self.rKI[:,j])
-            term3             = -self.KA[y,j]/self.c[i]**2
-            term4             = np.prod(1+self.KM_f[:,j]/self.c)
-            term5             = np.prod(1+self.c*self.rKI[:,j])
-            term6             = np.prod(1+self.KA[:,j]/self.c)
-            term7             = -self.KM_f[y,j]/self.c[i]**2
-            term8             = np.prod(1+self.KM_f[np.arange(self.ni) != y,j]/self.c[np.arange(self.ni) != y])
-            self.ditau_j[j,i] = term1+(term2*term3*term4)+(term5*term6*term7*term8)/term9
+            indices           = np.arange(self.ni) != y
+            term1             = self.rKI[y,j]
+            term2             = -self.KA[y,j]/np.power(self.c[i], 2.0)
+            term3             = -self.KM_f[y,j]/np.power(self.c[i], 2.0)
+            term4             = np.prod(1+self.KM_f[indices,j]/self.c[indices])
+            term5             = (term1*constant2*constant3)+(term2*constant1*constant3)+(term3*term4*constant1*constant2)
+            self.ditau_j[j,i] = term5/constant4
 
     ### Derivative of rMM with respect to metabolite concentrations ###
     def drMM( self, j ):
+        constant1 = self.kcat_f[j]
+        constant2 = self.kcat_b[j]
+        constant3 = np.prod(1+self.KM_f[:,j]/self.xc)
+        constant4 = np.prod(1+self.KM_b[:,j]/self.xc)
         for i in range(self.nc):
             y       = i+self.nx
             indices = np.arange(self.ni) != y
-            term1   = (self.kcat_f[j]/np.prod(1 + self.KM_f[indices,j]/self.xc[indices]))
-            term2   = self.KM_f[y,j]/((self.c[i] + self.KM_f[y,j])**2)
-            term3   = (self.kcat_b[j]/np.prod(1 + self.KM_b[indices,j]/self.xc[indices]))
-            term4   = self.KM_b[y,j]/((self.c[i] + self.KM_b[y,j])**2)
+            term1   = constant1 / np.prod(1 + self.KM_f[indices,j]/self.xc[indices])
+            term2   = self.KM_f[y,j] / np.power(self.c[i] + self.KM_f[y,j], 2.0)
+            term3   = constant2 / np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
+            term4   = self.KM_b[y,j] / np.power(self.c[i] + self.KM_b[y,j], 2.0)
             self.ditau_j[j,i] = term1*term2-term3*term4
-        self.ditau_j[j,:] *= -self.tau_j[j]
+        term5 = constant1/constant3-constant2/constant4
+        self.ditau_j[j,:] *= -1.0/np.power(term5, 2.0)
     
     ### Compute dtau ###
     def compute_dtau( self, j ):
@@ -864,7 +880,7 @@ class Model:
             if nb_iterations%5000 == 0:
                print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
             ### 4.1) Test trajectory convergence ###
-            if(mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT):
+            if mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT:
                 self.converged = True
                 break
             ### 4.2) Calculate the next step ###
@@ -877,6 +893,121 @@ class Model:
             self.check_model_consistency()
             ### 4.3) If the model is consistent: ###
             if self.consistent and self.mu >= previous_mu:
+                #print("> Mu: ", self.mu, " Previous mu: ", previous_mu)
+                previous_f  = np.copy(self.f_trunc)
+                t           = t + dt
+                dt_counter += 1
+                if track:
+                    overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    for reaction_id, value in zip(self.reaction_ids, self.f):
+                        overview_dict[reaction_id] = value
+                    overview_row       = pd.Series(data=overview_dict)
+                    self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
+                ### Check if mu changes significantly ###
+                if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
+                    mu_alteration_counter += 1
+                else:
+                    mu_alteration_counter = 0
+                ### Check if dt is never changing, and possibly increase it ###
+                if dt_counter == INCREASING_DT_COUNT:
+                    dt         = dt*INCREASING_DT_FACTOR
+                    dt_counter = 0
+            ### 4.4) If the model is inconsistent: ###
+            else:
+                self.f_trunc = np.copy(previous_f)
+                self.set_f()
+                self.calculate()
+                self.check_model_consistency()
+                assert self.consistent, "> Previous model is not consistent"
+                if (dt > 1e-100):
+                    dt         = dt/DECREASING_DT_FACTOR
+                    dt_counter = 0
+                else:
+                    raise AssertionError("> Trajectory was stopped, because dt got too small")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Final algorithm steps    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        end_time = time.time()
+        run_time = end_time-start_time
+        if t >= max_time:
+            print("> Condition "+condition+": MAXTIME reached")
+            return False, run_time
+        else:
+            print("> Condition "+condition+": convergence reached (mu="+str(self.mu)+", nb iterations="+str(nb_iterations)+")")
+            return True, run_time
+
+    ### Compute the mean evolutionary trajectory ###
+    # It corresponds to the continuous trajectory if the population was infinite
+    # and generations continuous.
+    def mean_evolutionary_trajectory2( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, label = 1 ):
+        start_time = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.adjust_concentrations = False
+        self.set_condition(condition)
+        self.calculate()
+        self.check_model_consistency()
+        assert self.consistent, "> Initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize tracker       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if track:
+            if self.ME_trajectory.empty:
+                overview_columns   = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
+                overview_columns   = overview_columns + self.reaction_ids
+                self.ME_trajectory = pd.DataFrame(columns=overview_columns)
+            overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+            for reaction_id, value in zip(self.reaction_ids, self.f):
+                overview_dict[reaction_id] = value
+            overview_row       = pd.Series(data=overview_dict)
+            self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Initialize the algorithm #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        t                     = 0.0
+        dt                    = initial_dt
+        mu_alteration_counter = 0
+        previous_f            = np.copy(self.f_trunc)
+        previous_mu           = self.mu
+        self.converged        = False
+        nb_iterations         = 0
+        dt_counter            = 0
+        SWITCH = False
+        SWITCH_COUNT = 0
+        on_count  = 0
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Start the main loop      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        while (t < max_time):
+            nb_iterations += 1
+            if nb_iterations%5000 == 0:
+               print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
+            ### 4.1) Test trajectory convergence ###
+            if mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT and not SWITCH and SWITCH_COUNT < 10:
+                print("> Switching to escape mode")
+                SWITCH = True
+                SWITCH_COUNT += 1
+            elif mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT and SWITCH_COUNT == 10:
+                self.converged = True
+                break
+            ### 4.2) Calculate the next step ###
+            previous_mu = self.mu
+            self.block_reactions()
+            self.f_trunc = self.f_trunc+self.GCC_f[1:]*dt
+            #self.f_trunc[self.f_trunc < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
+            self.set_f()
+            self.calculate()
+            self.check_model_consistency()
+            ### 4.3) If the model is consistent: ###
+            if self.consistent and (SWITCH or (not SWITCH and self.mu >= previous_mu)):
+                if SWITCH:
+                    on_count += 1
+                if on_count == 10000:
+                    print("> Switching to safe mode")
+                    SWITCH = False
+                    on_count = 0
+                #print("> Mu: ", self.mu, " Previous mu: ", previous_mu)
                 previous_f  = np.copy(self.f_trunc)
                 t           = t + dt
                 dt_counter += 1
