@@ -215,10 +215,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data    = pd.DataFrame() # Optimum dataframe for all conditions
-        self.ME_trajectory   = pd.DataFrame() # Mean evolutionary trajectory
-        self.MED_trajectory  = pd.DataFrame() # Mean evolutionary trajectory with genetic drift
-        self.MCMC_trajectory = pd.DataFrame() # MCMC trajectory
+        self.optimum_data                 = pd.DataFrame() # Optimum dataframe for all conditions
+        self.mean_evolutionary_trajectory = pd.DataFrame() # Mean evolutionary trajectory
+        self.evolutionary_trajectory      = pd.DataFrame() # Evolutionary trajectory with genetic drift
+        self.MCMC_trajectory              = pd.DataFrame() # MCMC trajectory
 
     #############################
     #   Model loading methods   #
@@ -852,14 +852,14 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.ME_trajectory.empty:
-                overview_columns   = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
-                overview_columns   = overview_columns + self.reaction_ids
-                self.ME_trajectory = pd.DataFrame(columns=overview_columns)
+                overview_columns                  = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
+                overview_columns                  = overview_columns + self.reaction_ids
+                self.mean_evolutionary_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row       = pd.Series(data=overview_dict)
-            self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row                      = pd.Series(data=overview_dict)
+            self.mean_evolutionary_trajectory = pd.concat([self.mean_evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -900,8 +900,8 @@ class Model:
                     overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row       = pd.Series(data=overview_dict)
-                    self.ME_trajectory = pd.concat([self.ME_trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row                      = pd.Series(data=overview_dict)
+                    self.mean_evolutionary_trajectory = pd.concat([self.mean_evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -957,7 +957,7 @@ class Model:
     
     ### Compute the evolutionary trajectory with genetic drift ###
     # Pál & Miklós formulation
-    def evolutionary_trajectory_with_drift( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
+    def evolutionary_trajectory( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -971,14 +971,14 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MED_trajectory.empty:
-                overview_columns    = ['label', 'condition', 't', 'mu', 'fixed']
-                overview_columns    = overview_columns + self.reaction_ids
-                self.MED_trajectory = pd.DataFrame(columns=overview_columns)
+                overview_columns             = ['label', 'condition', 't', 'mu', 'fixed']
+                overview_columns             = overview_columns + self.reaction_ids
+                self.evolutionary_trajectory = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row        = pd.Series(data=overview_dict)
-            self.MED_trajectory = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row                 = pd.Series(data=overview_dict)
+            self.evolutionary_trajectory = pd.concat([self.evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1012,8 +1012,8 @@ class Model:
                     overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": fixed}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row        = pd.Series(data=overview_dict)
-                    self.MED_trajectory = pd.concat([self.MED_trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row                 = pd.Series(data=overview_dict)
+                    self.evolutionary_trajectory = pd.concat([self.evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
             ### 4.3) If the model is inconsistent: ###
             else:
                 self.f_trunc = np.copy(previous_f)
@@ -1116,18 +1116,18 @@ class Model:
         header = "./output/"+self.model_name
         if label != "":
             header += "_"+str(label)
-        if not self.ME_trajectory.empty:
-            self.ME_trajectory.to_csv(header+"_ME_trajectory.csv", sep=';', index=False)
-        if not self.MED_trajectory.empty:
-            self.MED_trajectory.to_csv(header+"_MED_trajectory.csv", sep=';', index=False)
+        if not self.mean_evolutionary_trajectory.empty:
+            self.mean_evolutionary_trajectory.to_csv(header+"_mean_evolutionary_trajectory.csv", sep=';', index=False)
+        if not self.evolutionary_trajectory.empty:
+            self.evolutionary_trajectory.to_csv(header+"_evolutionary_trajectory.csv", sep=';', index=False)
         if not self.MCMC_trajectory.empty:
             self.MCMC_trajectory.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
 
     ### Clear trajectory ###
     def clear_trajectory( self ):
-        self.ME_trajectory   = pd.DataFrame()
-        self.MED_trajectory  = pd.DataFrame()
-        self.MCMC_trajectory = pd.DataFrame()
+        self.mean_evolutionary_trajectory = pd.DataFrame()
+        self.evolutionary_trajectory      = pd.DataFrame()
+        self.MCMC_trajectory              = pd.DataFrame()
     
     ######################
     #   Export methods   #
