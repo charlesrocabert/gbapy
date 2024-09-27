@@ -215,10 +215,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data                 = pd.DataFrame() # Optimum dataframe for all conditions
-        self.mean_evolutionary_trajectory = pd.DataFrame() # Mean evolutionary trajectory
-        self.evolutionary_trajectory      = pd.DataFrame() # Evolutionary trajectory with genetic drift
-        self.MCMC_trajectory              = pd.DataFrame() # MCMC trajectory
+        self.optimum_data              = pd.DataFrame() # Optimum dataframe for all conditions
+        self.mean_evolutionary_tracker = pd.DataFrame() # Mean evolutionary trajectory tracker
+        self.evolutionary_tracker      = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
+        self.MCMC_tracker              = pd.DataFrame() # MCMC trajectory tracker
 
     #############################
     #   Model loading methods   #
@@ -851,15 +851,15 @@ class Model:
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.ME_trajectory.empty:
-                overview_columns                  = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
-                overview_columns                  = overview_columns + self.reaction_ids
-                self.mean_evolutionary_trajectory = pd.DataFrame(columns=overview_columns)
+            if self.mean_evolutionary_tracker.empty:
+                overview_columns               = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
+                overview_columns               = overview_columns + self.reaction_ids
+                self.mean_evolutionary_tracker = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                      = pd.Series(data=overview_dict)
-            self.mean_evolutionary_trajectory = pd.concat([self.mean_evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row                   = pd.Series(data=overview_dict)
+            self.mean_evolutionary_tracker = pd.concat([self.mean_evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -900,8 +900,8 @@ class Model:
                     overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row                      = pd.Series(data=overview_dict)
-                    self.mean_evolutionary_trajectory = pd.concat([self.mean_evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row                   = pd.Series(data=overview_dict)
+                    self.mean_evolutionary_tracker = pd.concat([self.mean_evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -970,15 +970,15 @@ class Model:
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.MED_trajectory.empty:
-                overview_columns             = ['label', 'condition', 't', 'mu', 'fixed']
-                overview_columns             = overview_columns + self.reaction_ids
-                self.evolutionary_trajectory = pd.DataFrame(columns=overview_columns)
+            if self.evolutionary_tracker.empty:
+                overview_columns          = ['label', 'condition', 't', 'mu', 'fixed']
+                overview_columns          = overview_columns + self.reaction_ids
+                self.evolutionary_tracker = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                 = pd.Series(data=overview_dict)
-            self.evolutionary_trajectory = pd.concat([self.evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row              = pd.Series(data=overview_dict)
+            self.evolutionary_tracker = pd.concat([self.evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1012,8 +1012,8 @@ class Model:
                     overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": fixed}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row                 = pd.Series(data=overview_dict)
-                    self.evolutionary_trajectory = pd.concat([self.evolutionary_trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row              = pd.Series(data=overview_dict)
+                    self.evolutionary_tracker = pd.concat([self.evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
             ### 4.3) If the model is inconsistent: ###
             else:
                 self.f_trunc = np.copy(previous_f)
@@ -1051,15 +1051,15 @@ class Model:
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.MCMC_trajectory.empty:
-                overview_columns     = ['label', 'condition', 't', 'mu']
-                overview_columns     = overview_columns + self.reaction_ids
-                self.MCMC_trajectory = pd.DataFrame(columns=overview_columns)
+            if self.MCMC_tracker.empty:
+                overview_columns  = ['label', 'condition', 't', 'mu']
+                overview_columns  = overview_columns + self.reaction_ids
+                self.MCMC_tracker = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                   = pd.Series(data=overview_dict)
-            self.MCMC_trajectory           = pd.concat([self.MCMC_trajectory, overview_row.to_frame().T], ignore_index=True)
+            overview_row      = pd.Series(data=overview_dict)
+            self.MCMC_tracker = pd.concat([self.MCMC_tracker, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1092,8 +1092,8 @@ class Model:
                     overview_dict  = {"label": label, "condition": condition, "t": t, "mu": self.mu}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row                   = pd.Series(data=overview_dict)
-                    self.MCMC_trajectory           = pd.concat([self.MCMC_trajectory, overview_row.to_frame().T], ignore_index=True)
+                    overview_row      = pd.Series(data=overview_dict)
+                    self.MCMC_tracker = pd.concat([self.MCMC_tracker, overview_row.to_frame().T], ignore_index=True)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
                 self.f_trunc = np.copy(non_mutated_f)
@@ -1111,23 +1111,53 @@ class Model:
             print("> MCMC simulation was completed")
             return True, run_time
 
-    ### Save trajectory to csv ###
-    def save_trajectory( self, label = "" ):
+    ### Save mean evolutionary trajectory to csv ###
+    def save_mean_evolutionary_trajectory( self, label = "" ):
         header = "./output/"+self.model_name
         if label != "":
             header += "_"+str(label)
-        if not self.mean_evolutionary_trajectory.empty:
-            self.mean_evolutionary_trajectory.to_csv(header+"_mean_evolutionary_trajectory.csv", sep=';', index=False)
-        if not self.evolutionary_trajectory.empty:
-            self.evolutionary_trajectory.to_csv(header+"_evolutionary_trajectory.csv", sep=';', index=False)
-        if not self.MCMC_trajectory.empty:
-            self.MCMC_trajectory.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
+        if not self.mean_evolutionary_tracker.empty:
+            self.mean_evolutionary_tracker.to_csv(header+"_mean_evolutionary_trajectory.csv", sep=';', index=False)
 
-    ### Clear trajectory ###
-    def clear_trajectory( self ):
-        self.mean_evolutionary_trajectory = pd.DataFrame()
-        self.evolutionary_trajectory      = pd.DataFrame()
-        self.MCMC_trajectory              = pd.DataFrame()
+    ### Save evolutionary trajectory to csv ###
+    def save_evolutionary_trajectory( self, label = "" ):
+        header = "./output/"+self.model_name
+        if label != "":
+            header += "_"+str(label)
+        if not self.evolutionary_tracker.empty:
+            self.evolutionary_tracker.to_csv(header+"_evolutionary_trajectory.csv", sep=';', index=False)
+    
+    ### Save MCMC trajectory to csv ###
+    def save_MCMC_trajectory( self, label = "" ):
+        header = "./output/"+self.model_name
+        if label != "":
+            header += "_"+str(label)
+        if not self.MCMC_tracker.empty:
+            self.MCMC_tracker.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
+    
+    ### Save all trajectories to csv ###
+    def save_all_trajectories( self, label = "" ):
+        self.save_mean_evolutionary_trajectory(label)
+        self.save_evolutionary_trajectory(label) 
+        self.save_MCMC_trajectory(label)
+
+    ### Clear mean evolutionary trajectory ###
+    def clear_mean_evolutionary_trajectory( self ):
+        self.mean_evolutionary_tracker = pd.DataFrame()
+    
+    ### Clear evolutionary trajectory ###
+    def clear_evolutionary_trajectory( self ):
+        self.evolutionary_tracker = pd.DataFrame()
+    
+    ### Clear MCMC trajectory ###
+    def clear_MCMC_trajectory( self ):
+        self.MCMC_tracker = pd.DataFrame()
+    
+    ### Clear all trajectories ###
+    def clear_all_trajectories( self ):
+        self.clear_mean_evolutionary_trajectory()
+        self.clear_evolutionary_trajectory()
+        self.clear_MCMC_trajectory()
     
     ######################
     #   Export methods   #
