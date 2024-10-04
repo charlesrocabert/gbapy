@@ -4,6 +4,10 @@
 *.Rapp.history
 clean_folders.sh
 ./output/*
+./csv_models/FCR_EFM2/*
+./csv_models/NFCR_EFM2/*
+./binary_models/FCR_EFM2.gba
+./binary_models/NFCR_EFM2.gba
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

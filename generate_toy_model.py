@@ -23,7 +23,7 @@ from Model import *
 ### Parse command line arguments ###
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nb-efms", "-nb-efms", help="Number of EFMs", required=True)
+    parser.add_argument("--nb-efms", "-efms", help="Number of EFMs", required=True)
     args = parser.parse_args()
     return(vars(args))
 
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     nb_efms       = int(config["nb_efms"])
     x_conc        = 0.1
     kcat_max      = 10.0
-    kcat_gradient = 0.1
+    kcat_gradient = 0.01
     KM            = 1.0
     FCR_name      = "FCR_EFM"+str(nb_efms)
     NFCR_name     = "NFCR_EFM"+str(nb_efms)

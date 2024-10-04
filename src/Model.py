@@ -29,7 +29,7 @@ sys.path.append('./src/')
 ### Define constant and tolerance thresholds ###
 MIN_CONCENTRATION          = 1e-10 # Minimum concentration value
 MIN_FLUX_FRACTION          = 1e-10 # Minimum flux fraction value
-MAX_FLUX_FRACTION          = 10.0  # Maximum flux fraction value
+MAX_FLUX_FRACTION          = 2.0   # Maximum flux fraction value
 DENSITY_TOL                = 1e-10 # Density tolerance threshold (|1-rho| < ε)
 NEGATIVE_C_TOL             = 1e-10 # Negative C tolerance threshold (C > -ε)
 NEGATIVE_P_TOL             = 1e-10 # Negative P tolerance threshold (P > -ε)
@@ -215,6 +215,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.random_data               = pd.DataFrame() # Random solution data for all conditions
         self.optimum_data              = pd.DataFrame() # Optimum dataframe for all conditions
         self.mean_evolutionary_tracker = pd.DataFrame() # Mean evolutionary trajectory tracker
         self.evolutionary_tracker      = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
@@ -478,9 +479,6 @@ class Model:
         report += "| • Nb exchange reactions = " + str(self.ns) + "\n"
         report += "| • Nb internal reactions = " + str(self.ne) + "\n"
         report += "| • Column rank           = " + str(self.column_rank) + "\n"
-        report += " " + "".join(["-"]*(len(header)-2))
-        report += "\n"
-        report += "| • Model kinetics = " + self.model_kinetics + "\n"
         report += " " + "".join(["-"]*(len(header)-2))
         report += "\n"
         return report
@@ -750,6 +748,15 @@ class Model:
         assert nb_solutions > 0, "> Number of solutions must be greater than 0"
         assert max_trials >= nb_solutions, "> Number of trials must be greater than the number of solutions"
         assert min_mu >= 0.0, "> Minimal growth rate must be positive"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the optimums data frame #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        overview_columns = ['condition', 'mu','density']
+        overview_columns = overview_columns + self.reaction_ids
+        self.random_data = pd.DataFrame(columns=overview_columns)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Find the random solutions          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_condition(condition)
         self.random_solutions.clear()
         solutions = 0
@@ -758,17 +765,26 @@ class Model:
             trials       += 1
             negative_term = True
             while negative_term:
-                f_trunc = np.random.rand(self.nj-1)
-                f_trunc = f_trunc*MAX_FLUX_FRACTION
-                self.set_f(f_trunc)
+                self.f_trunc = np.random.rand(self.nj-1)
+                self.f_trunc = self.f_trunc*(MAX_FLUX_FRACTION-MIN_FLUX_FRACTION)+MIN_FLUX_FRACTION
+                self.set_f()
                 if self.f[0] >= 0.0:
                     negative_term = False
             self.calculate()
             self.check_model_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 print("> ", solutions, " solutions was found after ", trials, " trials")
-                solutions += 1
+                solutions    += 1
+                overview_dict = {"condition": condition, "mu": self.mu, "density": self.density}
+                for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
+                    overview_dict[reaction_id] = fluxfraction
+                overview_row                     = pd.Series(data=overview_dict)
+                self.random_data                 = pd.concat([self.random_data, overview_row.to_frame().T], ignore_index=True)
                 self.random_solutions[solutions] = np.copy(self.f)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Save the dataset                   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.random_data.to_csv("./csv_models/"+self.model_name+"/random_solutions.csv", sep=';', index=False)
         print("> ", solutions, " solutions was found after ", trials, " trials")
 
     ########################
@@ -938,9 +954,15 @@ class Model:
     ### Compute all the optimums ###
     def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
         start = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the optimums data frame #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         overview_columns  = ['condition', 'mu','density','converged', 'run_time']
         overview_columns  = overview_columns + self.reaction_ids
         self.optimum_data = pd.DataFrame(columns=overview_columns)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Calculate the optimums             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
@@ -951,7 +973,10 @@ class Model:
             overview_row                      = pd.Series(data=overview_dict)
             self.optimum_data                 = pd.concat([self.optimum_data, overview_row.to_frame().T], ignore_index=True)
             self.optimum_solutions[condition] = np.copy(self.f)
-        self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimum.csv", sep=';', index=False)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Save the dataset                   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimums.csv", sep=';', index=False)
         end = time.time()
         print("> All optimums were computed in ", end-start, " seconds")
     
