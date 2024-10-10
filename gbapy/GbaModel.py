@@ -61,17 +61,17 @@ def dump_gba_model( model, path ):
     assert os.path.isfile(filename), "> ERROR: .gba model creation failed."
 
 ### Create a GBA model from CSV files ###
-def create_gba_model( model_name, csv_path = "", gba_path = "", save_LP = False, save_optimums = False ):
+def create_gba_model( model_folder, gba_path = "", save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model = GbaModel()
-    model.read_csv_model(csv_path, model_name)
+    model.read_csv_model(model_folder)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_LP:
-        print("> Computing LP solution for model "+model_name+"...")
+        print("> Computing LP solution for model "+model.model_name+"...")
         model.solve_local_linear_problem()
         model.set_f0(model.LP_solution)
         model.set_condition("1")
@@ -85,7 +85,7 @@ def create_gba_model( model_name, csv_path = "", gba_path = "", save_LP = False,
     # 3) Compute and save optimums if requested   #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_optimums:
-        print("> Computing optimums for model "+model_name+"...")
+        print("> Computing optimums for model "+model.model_name+"...")
         if not save_LP:
             model.load_LP()
         model.compute_optimums(max_time=10000, initial_dt=0.01)
@@ -97,9 +97,9 @@ def create_gba_model( model_name, csv_path = "", gba_path = "", save_LP = False,
     del model
 
 ### Load the GBA model from a binary file ###
-def load_gba_model( path, model_name ):
-    filename = path+"/"+model_name+".gba"
+def load_gba_model( filename ):
     assert os.path.isfile(filename), "> ERROR: .gba model not found."
+    assert filename.endswith(".gba"), "> ERROR: .gba model file extension is missing."
     ifile = open(filename, "rb")
     model = dill.load(ifile)
     ifile.close()
@@ -138,9 +138,10 @@ class GbaModel:
         # 1) GBA model                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-        ### Model path and name ###
-        self.model_path = "" # Model path
-        self.model_name = "" # Model name
+        ### Model folder, name and informations ###
+        self.model_folder = "" # Model folder
+        self.model_name   = "" # Model name
+        self.model_infos  = {} # Model informations
 
         ### Identifier lists ###
         self.metabolite_ids   = [] # List of all metabolite ids 
@@ -236,10 +237,26 @@ class GbaModel:
     #############################
     #   Model loading methods   #
     #############################
-        
+    
+    ### Read information from CSV ###
+    def read_Infos_from_csv( self ):
+        self.model_infos.clear()
+        Infos_filename = self.model_folder+"/Infos.csv"
+        assert os.path.exists(Infos_filename), "> ERROR: file "+Infos_filename+" does not exist."
+        f = open(Infos_filename, "r")
+        l = f.readline()
+        while l:
+            l = l.strip().split(";")
+            self.model_infos[l[0]] = l[1]
+            if l[0] == "Name":
+                self.model_name = l[1]
+            l = f.readline()
+        f.close()
+        assert "Name" in self.model_infos, "> ERROR: Name not found in Infos.csv."
+
     ### Read the mass fraction matrix M from CSV ###
     def read_Mx_from_csv( self ):
-        Mx_filename = self.model_path+"/"+self.model_name+"/M.csv"
+        Mx_filename = self.model_folder+"/M.csv"
         assert os.path.exists(Mx_filename), "> File "+Mx_filename+" does not exist."
         df                  = pd.read_csv(Mx_filename, sep=";")
         self.metabolite_ids = self.metabolite_ids+list(df["Unnamed: 0"])
@@ -257,7 +274,7 @@ class GbaModel:
 
     ### Read the forward Michaelis constant matrix KM from CSV ###
     def read_KM_f_from_csv( self ):
-        KM_f_filename = self.model_path+"/"+self.model_name+"/KM_forward.csv"
+        KM_f_filename = self.model_folder+"/KM_forward.csv"
         assert os.path.exists(KM_f_filename), "> ERROR: file "+KM_f_filename+" does not exist."
         df        = pd.read_csv(KM_f_filename, sep=";")
         df        = df.drop(["Unnamed: 0"], axis=1)
@@ -269,7 +286,7 @@ class GbaModel:
     ### Read the backward Michaelis constant matrix KM from CSV ###
     def read_KM_b_from_csv( self ):
         self.KM_b     = np.zeros(self.KM_f.shape)
-        KM_b_filename = self.model_path+"/"+self.model_name+"/KM_backward.csv"
+        KM_b_filename = self.model_folder+"/KM_backward.csv"
         if os.path.exists(KM_b_filename):
             df        = pd.read_csv(KM_b_filename, sep=";")
             df        = df.drop(["Unnamed: 0"], axis=1)
@@ -280,7 +297,7 @@ class GbaModel:
 
     ### Read kcat forward and backward constant vectors from CSV ###
     def read_kcat_from_csv( self ):
-        kcat_filename = self.model_path+"/"+self.model_name+"/kcat.csv"
+        kcat_filename = self.model_folder+"/kcat.csv"
         assert os.path.exists(kcat_filename), "> ERROR: file "+kcat_filename+" does not exist."
         df          = pd.read_csv(kcat_filename, sep=";")
         df          = df.drop(["Unnamed: 0"], axis=1)
@@ -297,7 +314,7 @@ class GbaModel:
 
     ### Read the list of conditions from CSV ###
     def read_conditions_from_csv( self ):
-        conditions_filename = self.model_path+"/"+self.model_name+"/conditions.csv"
+        conditions_filename = self.model_folder+"/conditions.csv"
         assert os.path.exists(conditions_filename), "> ERROR: file "+conditions_filename+" does not exist."
         df                    = pd.read_csv(conditions_filename, sep=";")
         self.condition_params = list(df["Unnamed: 0"])
@@ -311,7 +328,7 @@ class GbaModel:
     ### Read the inhibition constants matrix KI from CSV ###
     def read_KI_from_csv( self ):
         self.KI     = np.zeros(self.Mx.shape)
-        KI_filename = self.model_path+"/"+self.model_name+"/KI.csv"
+        KI_filename = self.model_folder+"/KI.csv"
         if os.path.exists(KI_filename):
             df          = pd.read_csv(KI_filename, sep=";")
             metabolites = list(df["Unnamed: 0"])
@@ -324,7 +341,7 @@ class GbaModel:
     ### Read the activation constants matrix KA from CSV ###
     def read_KA_from_csv( self ):
         self.KA     = np.zeros(self.Mx.shape)
-        KA_filename = self.model_path+"/"+self.model_name+"/KA.csv"
+        KA_filename = self.model_folder+"/KA.csv"
         if os.path.exists(KA_filename):
             df          = pd.read_csv(KA_filename, sep=";")
             metabolites = list(df["Unnamed: 0"])
@@ -336,7 +353,7 @@ class GbaModel:
 
     ### Read the LP solution from CSV on request ###
     def read_LP_from_csv( self ):
-        LP_filename = self.model_path+"/"+self.model_name+"/f0.csv"
+        LP_filename = self.model_folder+"/f0.csv"
         assert os.path.exists(LP_filename), "> ERROR: file "+LP_filename+" does not exist."
         df               = pd.read_csv(LP_filename, sep=";")
         self.LP_solution = np.array(df["f0"])
@@ -435,9 +452,10 @@ class GbaModel:
                 self.direction.append("reversible")
     
     ### Read the GBA model from CSV files ###
-    def read_csv_model( self, model_path, model_name ):
-        self.model_path = model_path
-        self.model_name = model_name
+    def read_csv_model( self, model_folder ):
+        assert os.path.exists(model_folder), "> ERROR: folder "+model_folder+" does not exist."
+        self.model_folder = model_folder
+        self.read_Infos_from_csv()
         self.read_Mx_from_csv()
         self.read_KM_f_from_csv()
         self.read_KM_b_from_csv()
@@ -994,7 +1012,7 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Save the dataset                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data.to_csv(self.model_path+"/"+self.model_name+"/optimums.csv", sep=';', index=False)
+        self.optimum_data.to_csv(self.model_folder+"/optimums.csv", sep=';', index=False)
         end = time.time()
         print("> All optimums were computed in "+str(end-start)+" seconds")
     
