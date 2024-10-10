@@ -29,12 +29,6 @@ from matplotlib.pylab import f
 import matplotlib.pyplot as plt
 
 
-# Add the local src directory to the path
-sys.path.append('./src/')
-
-from Model import *
-
-
 ### Plot the gradient ascent trajectory ###
 def plot_gradient_ascent_trajectory( model ):
 

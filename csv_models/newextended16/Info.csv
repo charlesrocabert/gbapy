@@ -1,11 +1,11 @@
-Name;EC12b
-Description;E coli model with 12 reactions
+Name;newextended16
+Description;cyanobacterial model with 8 reactions
 Units;Km: g/L
-Units;KA: g/L
+Units;KI: g/L
 Units;kcat: 1/h ([mass of products]/[mass of protein]/h)
 Units;rho: g/L
 Files;M: Mass fraction matrix
 Files;KM_forward: Forward Michaelis constant matrix
-Files;KA: Activation constant matrix
+Files;KI: Inhibition constant matrix
 Files;kcat: Turnover numbers
 Files;conditions: Value of rho and external concentrations at different growth conditions

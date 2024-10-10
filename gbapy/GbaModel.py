@@ -53,20 +53,20 @@ INCREASING_DT_COUNT          = 100   # Number of iterations with equal mu values
 EXPORT_DATA_COUNT            = 1     # Frequency of data export
 
 ### Dump a binary .gba model ###
-def dump_gba_model( model, gba_path ):
-    filename = gba_path+"/"+model.model_name+".gba"
+def dump_gba_model( model, path ):
+    filename = path+"/"+model.model_name+".gba"
     ofile = open(filename, "wb")
     dill.dump(model, ofile)
     ofile.close()
     assert os.path.isfile(filename), "> ERROR: .gba model creation failed."
 
 ### Create a GBA model from CSV files ###
-def create_gba_model( csv_path, model_name, gba_path, save_LP = False, save_optimums = False ):
+def create_gba_model( model_name, csv_path = "", gba_path = "", save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    model = Model()
-    model.load_model(csv_path, model_name)
+    model = GbaModel()
+    model.read_csv_model(csv_path, model_name)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -96,8 +96,8 @@ def create_gba_model( csv_path, model_name, gba_path, save_LP = False, save_opti
     dump_gba_model(model, gba_path)
     del model
 
-### Load the model from a binary file ###
-def load_model( path, model_name ):
+### Load the GBA model from a binary file ###
+def load_gba_model( path, model_name ):
     filename = path+"/"+model_name+".gba"
     assert os.path.isfile(filename), "> ERROR: .gba model not found."
     ifile = open(filename, "rb")
@@ -106,7 +106,7 @@ def load_model( path, model_name ):
     return model
 
 
-class Model:
+class GbaModel:
 
     # Mathematical formalism may differ from original ODS files and R scripts,
     # in particular with ni = nx + nc, and not ni = nc.
@@ -237,8 +237,8 @@ class Model:
     #   Model loading methods   #
     #############################
         
-    ### Load the mass fraction matrix M ###
-    def load_Mx( self ):
+    ### Read the mass fraction matrix M from CSV ###
+    def read_Mx_from_csv( self ):
         Mx_filename = self.model_path+"/"+self.model_name+"/M.csv"
         assert os.path.exists(Mx_filename), "> File "+Mx_filename+" does not exist."
         df                  = pd.read_csv(Mx_filename, sep=";")
@@ -255,8 +255,8 @@ class Model:
         self.Mx             = self.Mx.astype(float)
         del(df)
 
-    ### Load the forward Michaelis constant matrix KM ###
-    def load_KM_f( self ):
+    ### Read the forward Michaelis constant matrix KM from CSV ###
+    def read_KM_f_from_csv( self ):
         KM_f_filename = self.model_path+"/"+self.model_name+"/KM_forward.csv"
         assert os.path.exists(KM_f_filename), "> ERROR: file "+KM_f_filename+" does not exist."
         df        = pd.read_csv(KM_f_filename, sep=";")
@@ -266,8 +266,8 @@ class Model:
         self.KM_f = self.KM_f.astype(float)
         del(df)
 
-    ### Load the backward Michaelis constant matrix KM ###
-    def load_KM_b( self ):
+    ### Read the backward Michaelis constant matrix KM from CSV ###
+    def read_KM_b_from_csv( self ):
         self.KM_b     = np.zeros(self.KM_f.shape)
         KM_b_filename = self.model_path+"/"+self.model_name+"/KM_backward.csv"
         if os.path.exists(KM_b_filename):
@@ -278,8 +278,8 @@ class Model:
             self.KM_b = self.KM_b.astype(float)
             del(df)
 
-    ### Load kcat forward and backward constant vectors ###
-    def load_kcat( self ):
+    ### Read kcat forward and backward constant vectors from CSV ###
+    def read_kcat_from_csv( self ):
         kcat_filename = self.model_path+"/"+self.model_name+"/kcat.csv"
         assert os.path.exists(kcat_filename), "> ERROR: file "+kcat_filename+" does not exist."
         df          = pd.read_csv(kcat_filename, sep=";")
@@ -295,8 +295,8 @@ class Model:
             else:
                 self.reversible.append(False)
 
-    ### Load the list of conditions ###
-    def load_conditions( self ):
+    ### Read the list of conditions from CSV ###
+    def read_conditions_from_csv( self ):
         conditions_filename = self.model_path+"/"+self.model_name+"/conditions.csv"
         assert os.path.exists(conditions_filename), "> ERROR: file "+conditions_filename+" does not exist."
         df                    = pd.read_csv(conditions_filename, sep=";")
@@ -308,8 +308,8 @@ class Model:
         self.conditions       = np.array(df)
         del(df)
 
-    ### Load the inhibition constants matrix KI ###
-    def load_KI( self ):
+    ### Read the inhibition constants matrix KI from CSV ###
+    def read_KI_from_csv( self ):
         self.KI     = np.zeros(self.Mx.shape)
         KI_filename = self.model_path+"/"+self.model_name+"/KI.csv"
         if os.path.exists(KI_filename):
@@ -321,8 +321,8 @@ class Model:
             self.KI     = self.KI.astype(float)
             del(df)
 
-    ### Load the activation constants matrix KA ###
-    def load_KA( self ):
+    ### Read the activation constants matrix KA from CSV ###
+    def read_KA_from_csv( self ):
         self.KA     = np.zeros(self.Mx.shape)
         KA_filename = self.model_path+"/"+self.model_name+"/KA.csv"
         if os.path.exists(KA_filename):
@@ -334,8 +334,8 @@ class Model:
             self.KA     = self.KA.astype(float)
             del(df)
 
-    ### Load the LP solution on request ###
-    def load_LP( self ):
+    ### Read the LP solution from CSV on request ###
+    def read_LP_from_csv( self ):
         LP_filename = self.model_path+"/"+self.model_name+"/f0.csv"
         assert os.path.exists(LP_filename), "> ERROR: file "+LP_filename+" does not exist."
         df               = pd.read_csv(LP_filename, sep=";")
@@ -434,17 +434,17 @@ class Model:
                 self.kinetic_model.append("rMM")
                 self.direction.append("reversible")
     
-    ### Load the GBA model (M, K and kcat matrices) ###
-    def load_model( self, model_path, model_name ):
+    ### Read the GBA model from CSV files ###
+    def read_csv_model( self, model_path, model_name ):
         self.model_path = model_path
         self.model_name = model_name
-        self.load_Mx()
-        self.load_KM_f()
-        self.load_KM_b()
-        self.load_kcat()
-        self.load_conditions()
-        self.load_KI()
-        self.load_KA()
+        self.read_Mx_from_csv()
+        self.read_KM_f_from_csv()
+        self.read_KM_b_from_csv()
+        self.read_kcat_from_csv()
+        self.read_conditions_from_csv()
+        self.read_KI_from_csv()
+        self.read_KA_from_csv()
         self.initialize_model_mathematical_variables()
 
     ### Reset model variables (used before binary export) ###
@@ -994,7 +994,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Save the dataset                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimums.csv", sep=';', index=False)
+        self.optimum_data.to_csv(self.model_path+"/"+self.model_name+"/optimums.csv", sep=';', index=False)
         end = time.time()
         print("> All optimums were computed in "+str(end-start)+" seconds")
     

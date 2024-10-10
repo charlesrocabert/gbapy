@@ -23,6 +23,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #***********************************************************************
 
-from .Model import *
-from .Graphics import *
+from .GbaModel import *
+#from Graphics import *
 
