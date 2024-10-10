@@ -52,21 +52,21 @@ INCREASING_DT_FACTOR         = 2.0   # Factor by which the time step is increase
 INCREASING_DT_COUNT          = 100   # Number of iterations with equal mu values to increase the time step
 EXPORT_DATA_COUNT            = 1     # Frequency of data export
 
-### Dump the model in a binary file ###
-def dump_model( model, model_name ):
-    filename = "./binary_models/"+model_name+".gba"
+### Dump a binary .gba model ###
+def dump_gba_model( model, gba_path ):
+    filename = gba_path+"/"+model.model_name+".gba"
     ofile = open(filename, "wb")
     dill.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), "> ERROR: model binary dump failed."
+    assert os.path.isfile(filename), "> ERROR: .gba model creation failed."
 
-### Load a model and dump the binary backup ###
-def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
+### Create a GBA model from CSV files ###
+def create_gba_model( csv_path, model_name, gba_path, save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model = Model()
-    model.load_model("./csv_models/", model_name)
+    model.load_model(csv_path, model_name)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -93,13 +93,13 @@ def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model.reset_variables()
-    dump_model(model, model_name)
+    dump_gba_model(model, gba_path)
     del model
 
 ### Load the model from a binary file ###
-def load_model( model_name ):
-    filename = "./binary_models/"+model_name+".gba"
-    assert os.path.isfile(filename), "ERROR: model not found."
+def load_model( path, model_name ):
+    filename = path+"/"+model_name+".gba"
+    assert os.path.isfile(filename), "> ERROR: .gba model not found."
     ifile = open(filename, "rb")
     model = dill.load(ifile)
     ifile.close()
