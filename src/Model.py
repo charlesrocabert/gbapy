@@ -214,19 +214,14 @@ class Model:
         self.f         = np.array([]) # Flux fractions vector
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Evolutionary variables        #
+        # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Trackers                      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.random_data      = pd.DataFrame() # Random solution data for all conditions
-        self.optimum_data     = pd.DataFrame() # Optimum dataframe for all conditions
-        self.GA_tracker       = pd.DataFrame() # Gradient ascent trajectory tracker
-        self.EGD_tracker      = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
-        self.MCMC_tracker     = pd.DataFrame() # MCMC trajectory tracker
-        self.POPLEVEL_tracker = pd.DataFrame() # POPULATION LEVEL trajectory tracker
-
+        self.random_data  = pd.DataFrame() # Random solution data for all conditions
+        self.optimum_data = pd.DataFrame() # Optimum dataframe for all conditions
+        self.GA_tracker   = pd.DataFrame() # Gradient ascent trajectory tracker
+        self.EGD_tracker  = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
+        self.MCMC_tracker = pd.DataFrame() # MCMC trajectory tracker
+        
     #############################
     #   Model loading methods   #
     #############################
@@ -1151,224 +1146,6 @@ class Model:
             print("> MCMC: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
 
-    ### Run a population level simulation ###
-    # Reproduction is synchronous and fitness proportionate.
-    def POPLEVEL_simulation( self, condition = "1", max_g = 1000, p = 0.01, sigma = 0.01, N = 1000, track = False, label = 1 ):
-        start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.set_condition(condition)
-        self.calculate_state()
-        self.check_model_consistency()
-        assert self.consistent, "> ERROR: initial model is not consistent"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize the algorithm    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        pop   = []
-        w     = []
-        w_sum = 0.0
-        ### Mean #########################
-        mean_w = 0.0
-        mean_f = np.zeros(self.model.nj)
-        mean_v = np.zeros(self.model.nj)
-        mean_p = np.zeros(self.model.nj)
-        mean_b = np.zeros(self.model.nc)
-        mean_c = np.zeros(self.model.nc)
-        ### Variance #####################
-        var_w = 0.0
-        var_f = np.zeros(self.model.nj)
-        var_v = np.zeros(self.model.nj)
-        var_p = np.zeros(self.model.nj)
-        var_b = np.zeros(self.model.nc)
-        var_c = np.zeros(self.model.nc)
-        ##################################
-        g = 0
-        for i in range(N):
-            pop.append(np.copy(self.model.f_trunc))
-            w.append(self.model.mu)
-            w_sum += self.model.mu
-            ### Mean #####################
-            mean_w += self.model.mu
-            mean_f += self.model.f
-            mean_c += self.model.c
-            mean_p += self.model.p
-            ### Variance #################
-            var_w += self.model.mu*self.model.mu
-            var_f += self.model.f*self.model.f
-            var_c += self.model.c*self.model.c
-            var_p += self.model.p*self.model.p
-            ##############################
-        w = np.array(w)/w_sum
-        ### Mean #########################
-        mean_w /= N
-        mean_f /= N
-        mean_c /= N
-        mean_p /= N
-        ### Variance #####################
-        var_w /= N
-        var_f /= N
-        var_c /= N
-        var_p /= N
-        var_w -= mean_w*mean_w
-        var_f -= mean_f*mean_f
-        var_c -= mean_c*mean_c
-        var_p -= mean_p*mean_p
-        ### CV ###########################
-        cv_w = mean_w/np.sqrt(var_w)
-        cv_f = mean_f/np.sqrt(var_f)
-        cv_c = mean_c/np.sqrt(var_c)
-        cv_p = mean_p/np.sqrt(var_p)
-        ##################################
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Create the output file      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if (os.path.exists(filename) and not add) or not os.path.exists(filename):
-            f = open(filename, "w")
-            header = "id;g;optimal_mu;mean_w"
-            for f_id in self.model.reaction_ids:
-                header += ";mean_"+f_id
-            for c_id in self.model.c_ids:
-                header += ";mean_"+c_id
-            for f_id in self.model.reaction_ids:
-                header += ";mean_protein_"+f_id
-            header += ";var_w"
-            for f_id in self.model.reaction_ids:
-                header += ";var_"+f_id
-            for c_id in self.model.c_ids:
-                header += ";var_"+c_id
-            for f_id in self.model.reaction_ids:
-                header += ";var_protein_"+f_id
-            header += ";cv_w"
-            for f_id in self.model.reaction_ids:
-                header += ";cv_"+f_id
-            for c_id in self.model.c_ids:
-                header += ";cv_"+c_id
-            for f_id in self.model.reaction_ids:
-                header += ";cv_protein_"+f_id
-            f.write(header+"\n")
-            f.flush()
-        else:
-            f = open(filename, "a")
-        line = str(identifier)+";"+str(g)+";"+str(optimal_mu)+";"+str(mean_w)
-        for val in mean_f:
-            line += ";"+str(val)
-        for val in mean_c:
-            line += ";"+str(val)
-        for val in mean_p:
-            line += ";"+str(val)
-        line += ";"+str(var_w)
-        for val in var_f:
-            line += ";"+str(val)
-        for val in var_c:
-            line += ";"+str(val)
-        for val in var_p:
-            line += ";"+str(val)
-        line += ";"+str(cv_w)
-        for val in cv_f:
-            line += ";"+str(val)
-        for val in cv_c:
-            line += ";"+str(val)
-        for val in cv_p:
-            line += ";"+str(val)
-        f.write(line+"\n")
-        f.flush()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Run the algorithm           #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        while g < max_generations:
-            if g%100 == 0:
-                print("> Calculating generation "+str(g))
-            draws   = np.random.multinomial(N, w, size=1)
-            new_pop = []
-            w       = []
-            w_sum   = 0.0
-            ### Mean #####################
-            mean_w  = 0.0
-            mean_f  = np.zeros(self.model.nj)
-            mean_c  = np.zeros(self.model.nc)
-            mean_p  = np.zeros(self.model.nj)
-            index   = 0
-            alive   = 0
-            for i in range(N):
-                for j in range(draws[0,i]):
-                    new_pop.append(np.copy(pop[i]))
-                    pval = np.random.rand()
-                    if pval < p_mut:
-                        new_pop[index] += np.random.normal(0.0, sigma, size=(self.model.nj-1))
-                        new_pop[index][new_pop[index] < 0.0] = 0.0
-                    self.model.set_f(new_pop[index])
-                    self.model.run_step_calculations()
-                    self.model.check_model_consistency()
-                    if not self.model.consistent or not np.isfinite(self.model.mu):
-                        w.append(0.0)
-                    else:
-                        w.append(self.model.mu)
-                        w_sum += self.model.mu
-                        ### Mean #########
-                        mean_w += self.model.mu
-                        mean_f += self.model.f
-                        mean_c += self.model.c
-                        mean_p += self.model.p
-                        ### Variance #####
-                        var_w += self.model.mu*self.model.mu
-                        var_f += self.model.f*self.model.f
-                        var_c += self.model.c*self.model.c
-                        var_p += self.model.p*self.model.p
-                        ##################
-                        alive  += 1
-                    index += 1
-            pop = new_pop
-            w   = np.array(w)/w_sum
-            ### Mean #####################
-            mean_w /= alive
-            mean_f /= alive
-            mean_c /= alive
-            mean_p /= alive
-            ### Variance #################
-            var_w /= alive
-            var_f /= alive
-            var_c /= alive
-            var_p /= alive
-            var_w -= mean_w*mean_w
-            var_f -= mean_f*mean_f
-            var_c -= mean_c*mean_c
-            var_p -= mean_p*mean_p
-            ### CV #######################
-            cv_w = mean_w/np.sqrt(var_w)
-            cv_f = mean_f/np.sqrt(var_f)
-            cv_c = mean_c/np.sqrt(var_c)
-            cv_p = mean_p/np.sqrt(var_p)
-            ##############################
-            del new_pop
-            g += 1
-            ##############################
-            line = str(identifier)+";"+str(g)+";"+str(optimal_mu)+";"+str(mean_w)
-            for val in mean_f:
-                line += ";"+str(val)
-            for val in mean_c:
-                line += ";"+str(val)
-            for val in mean_p:
-                line += ";"+str(val)
-            line += ";"+str(var_w)
-            for val in var_f:
-                line += ";"+str(val)
-            for val in var_c:
-                line += ";"+str(val)
-            for val in var_p:
-                line += ";"+str(val)
-            line += ";"+str(cv_w)
-            for val in cv_f:
-                line += ";"+str(val)
-            for val in cv_c:
-                line += ";"+str(val)
-            for val in cv_p:
-                line += ";"+str(val)
-            f.write(line+"\n")
-            f.flush()
-        f.close()
-        print("> Max nb. of generations reached (mean mu="+str(mean_w)+", generation="+str(g)+").")
-
     ### Save the gradient ascent trajectory to csv ###
     def save_gradient_ascent_trajectory( self, label = "" ):
         header = "./output/"+self.model_name
@@ -1393,20 +1170,11 @@ class Model:
         if not self.MCMC_tracker.empty:
             self.MCMC_tracker.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
     
-    ### Save POPLEVEL trajectory to csv ###
-    def save_POPLEVEL_trajectory( self, label = "" ):
-        header = "./output/"+self.model_name
-        if label != "":
-            header += "_"+str(label)
-        if not self.POPLEVEL_tracker.empty:
-            self.POPLEVEL_tracker.to_csv(header+"_POPLEVEL_trajectory.csv", sep=';', index=False)
-    
     ### Save all trajectories to csv ###
     def save_all_trajectories( self, label = "" ):
         self.save_gradient_ascent_trajectory(label)
         self.save_EGD_trajectory(label) 
         self.save_MCMC_trajectory(label)
-        self.save_POPLEVEL_trajectory(label)
 
     ### Clear gradient ascent trajectory ###
     def clear_gradient_ascent_trajectory( self ):
@@ -1420,16 +1188,11 @@ class Model:
     def clear_MCMC_trajectory( self ):
         self.MCMC_tracker = pd.DataFrame()
     
-    ### Clear POPLEVEL trajectory ###
-    def clear_POPLEVEL_trajectory( self ):
-        self.POPLEVEL_tracker = pd.DataFrame()
-    
     ### Clear all trajectories ###
     def clear_all_trajectories( self ):
         self.clear_gradient_ascent_trajectory()
         self.clear_EGD_trajectory()
         self.clear_MCMC_trajectory()
-        self.clear_POPLEVEL_trajectory()
     
     ######################
     #   Export methods   #
