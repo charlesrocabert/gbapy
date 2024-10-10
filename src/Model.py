@@ -5,9 +5,10 @@
 # Copyright © 2023-2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/GBA_Evolution
 #
-# GBA_model.py
-# ------------
-# Implementation of the GBA analytical formalism for a given model.
+# Model.py
+# --------
+# Implementation of the GBA analytical formalism and evolutionary
+# algorithms for a given model.
 # (LOCAL SCRIPT)
 #***********************************************************************
 
@@ -27,17 +28,18 @@ env.start()
 sys.path.append('./src/')
 
 ### Define constant and tolerance thresholds ###
-MIN_CONCENTRATION          = 1e-10 # Minimum concentration value
-MIN_FLUX_FRACTION          = 1e-10 # Minimum flux fraction value
-MAX_FLUX_FRACTION          = 2.0   # Maximum flux fraction value
-DENSITY_TOL                = 1e-10 # Density tolerance threshold (|1-rho| < ε)
-NEGATIVE_C_TOL             = 1e-10 # Negative C tolerance threshold (C > -ε)
-NEGATIVE_P_TOL             = 1e-10 # Negative P tolerance threshold (P > -ε)
-TRAJECTORY_STABLE_MU_COUNT = 1000  # Number of iterations with equal mu values to consider the trajectory stable
-TRAJECTORY_CONVERGENCE_TOL = 1e-10 # Mu threshold below which growth rates are considered equal
-DECREASING_DT_FACTOR       = 5.0   # Factor by which the time step is decreased when the trajectory is unstable
-INCREASING_DT_FACTOR       = 2.0   # Factor by which the time step is increased when the trajectory is stable
-INCREASING_DT_COUNT        = 100   # Number of iterations with equal mu values to increase the time step
+MIN_CONCENTRATION            = 1e-10 # Minimum concentration value
+MIN_FLUX_FRACTION            = 1e-10 # Minimum flux fraction value
+MAX_FLUX_FRACTION            = 2.0   # Maximum flux fraction value
+DENSITY_TOL                  = 1e-10 # Density tolerance threshold (|1-rho| < ε)
+NEGATIVE_C_TOL               = 1e-10 # Negative C tolerance threshold (C > -ε)
+NEGATIVE_P_TOL               = 1e-10 # Negative P tolerance threshold (P > -ε)
+TRAJECTORY_CONVERGENCE_COUNT = 1000  # Number of iterations with equal mu values to consider the trajectory stable
+TRAJECTORY_CONVERGENCE_TOL   = 1e-10 # Mu threshold below which growth rates are considered equal
+DECREASING_DT_FACTOR         = 5.0   # Factor by which the time step is decreased when the trajectory is unstable
+INCREASING_DT_FACTOR         = 2.0   # Factor by which the time step is increased when the trajectory is stable
+INCREASING_DT_COUNT          = 100   # Number of iterations with equal mu values to increase the time step
+EXPORT_DATA_COUNT            = 1     # Frequency of data export
 
 ### Dump the model in a binary file ###
 def dump_model( model, model_name ):
@@ -45,7 +47,7 @@ def dump_model( model, model_name ):
     ofile = open(filename, "wb")
     dill.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), "ERROR: dump_model: model dump failed."
+    assert os.path.isfile(filename), "> ERROR: model binary dump failed."
 
 ### Load a model and dump the binary backup ###
 def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
@@ -62,13 +64,12 @@ def load_and_backup_model( model_name, save_LP = False, save_optimums = False ):
         model.solve_local_linear_problem()
         model.set_f0(model.LP_solution)
         model.set_condition("1")
-        model.calculate()
+        model.calculate_state()
         model.check_model_consistency()
         if model.consistent:
             model.write_f0()
         else:
-            print("> ERROR: Model is inconsistent with condition 1. f0 vector cannot be saved.")
-            sys.exit(1)
+            raise Exception("> ERROR: model is inconsistent with condition 1. f0 vector cannot be saved.")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Compute and save optimums if requested   #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -154,7 +155,7 @@ class Model:
         self.conditions    = np.array([]) # List of conditions
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) GBA model constant variables  #
+        # 2) GBA model constants           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Vector lengths ###
@@ -186,7 +187,7 @@ class Model:
         self.random_solutions  = {}           # Random f vectors
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) GBA model dynamical variables #
+        # 4) GBA model variables           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j                 = np.array([]) # Tau values (turnover times)
         self.ditau_j               = np.array([]) # Tau derivative values
@@ -202,24 +203,29 @@ class Model:
         self.adjust_concentrations = False        # Adjust concentrations to avoid negative values
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Evolutionary variables        #
+        # 5) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.current_condition = ""           # Current environmental condition
-        self.current_rho       = 0.0          # Current total density
-        self.f0                = np.array([]) # Initial LP solution
-        self.dmu_f             = np.array([]) # Local mu derivatives with respect to f
-        self.GCC_f             = np.array([]) # Local growth control coefficients with respect to f
-        self.f_trunc           = np.array([]) # Truncated f vector (first element is removed)
-        self.f                 = np.array([]) # Flux fractions vector
+        self.condition = ""           # External condition
+        self.rho       = 0.0          # Total density
+        self.f0        = np.array([]) # Initial LP solution
+        self.dmu_f     = np.array([]) # Local mu derivatives with respect to f
+        self.GCC_f     = np.array([]) # Local growth control coefficients with respect to f
+        self.f_trunc   = np.array([]) # Truncated f vector (first element is removed)
+        self.f         = np.array([]) # Flux fractions vector
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Trackers                      #
+        # 6) Evolutionary variables        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.random_data               = pd.DataFrame() # Random solution data for all conditions
-        self.optimum_data              = pd.DataFrame() # Optimum dataframe for all conditions
-        self.mean_evolutionary_tracker = pd.DataFrame() # Mean evolutionary trajectory tracker
-        self.evolutionary_tracker      = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
-        self.MCMC_tracker              = pd.DataFrame() # MCMC trajectory tracker
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) Trackers                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.random_data      = pd.DataFrame() # Random solution data for all conditions
+        self.optimum_data     = pd.DataFrame() # Optimum dataframe for all conditions
+        self.GA_tracker       = pd.DataFrame() # Gradient ascent trajectory tracker
+        self.EGD_tracker      = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
+        self.MCMC_tracker     = pd.DataFrame() # MCMC trajectory tracker
+        self.POPLEVEL_tracker = pd.DataFrame() # POPULATION LEVEL trajectory tracker
 
     #############################
     #   Model loading methods   #
@@ -246,7 +252,7 @@ class Model:
     ### Load the forward Michaelis constant matrix KM ###
     def load_KM_f( self ):
         KM_f_filename = self.model_path+"/"+self.model_name+"/KM_forward.csv"
-        assert os.path.exists(KM_f_filename), "> File "+KM_f_filename+" does not exist."
+        assert os.path.exists(KM_f_filename), "> ERROR: file "+KM_f_filename+" does not exist."
         df        = pd.read_csv(KM_f_filename, sep=";")
         df        = df.drop(["Unnamed: 0"], axis=1)
         df.index  = self.metabolite_ids
@@ -269,7 +275,7 @@ class Model:
     ### Load kcat forward and backward constant vectors ###
     def load_kcat( self ):
         kcat_filename = self.model_path+"/"+self.model_name+"/kcat.csv"
-        assert os.path.exists(kcat_filename), "> File "+kcat_filename+" does not exist."
+        assert os.path.exists(kcat_filename), "> ERROR: file "+kcat_filename+" does not exist."
         df          = pd.read_csv(kcat_filename, sep=";")
         df          = df.drop(["Unnamed: 0"], axis=1)
         kcat        = np.array(df)
@@ -286,7 +292,7 @@ class Model:
     ### Load the list of conditions ###
     def load_conditions( self ):
         conditions_filename = self.model_path+"/"+self.model_name+"/conditions.csv"
-        assert os.path.exists(conditions_filename), "> File "+conditions_filename+" does not exist."
+        assert os.path.exists(conditions_filename), "> ERROR: file "+conditions_filename+" does not exist."
         df                    = pd.read_csv(conditions_filename, sep=";")
         self.condition_params = list(df["Unnamed: 0"])
         self.condition_ids    = list(df.columns)[1:df.shape[1]]
@@ -325,18 +331,22 @@ class Model:
     ### Load the LP solution on request ###
     def load_LP( self ):
         LP_filename = self.model_path+"/"+self.model_name+"/f0.csv"
-        assert os.path.exists(LP_filename), "> File "+LP_filename+" does not exist."
-        df          = pd.read_csv(LP_filename, sep=";")
+        assert os.path.exists(LP_filename), "> ERROR: file "+LP_filename+" does not exist."
+        df               = pd.read_csv(LP_filename, sep=";")
         self.LP_solution = np.array(df["f0"])
         del(df)
 
     ### Initialize model mathematical variables ###
     def initialize_model_mathematical_variables( self ):
-        ### Inverse of KI ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Inverse of KI                                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with np.errstate(divide='ignore'):
-            self.rKI = 1/self.KI
+            self.rKI                     = 1/self.KI
             self.rKI[np.isinf(self.rKI)] = 0.0
-        ### Vector lengths ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Vector lengths                                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.nx = len(self.x_ids)
         self.nc = len(self.c_ids)
         self.ni = self.nx+self.nc
@@ -344,13 +354,17 @@ class Model:
         self.x  = np.zeros(self.nx)
         self.c  = np.zeros(self.nc)
         self.xc = np.zeros(self.ni)
-        ### Create M matrix ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Create M matrix                                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.M = np.zeros((self.nc, self.nj))
         for i in range(self.nc):
             met_id = self.c_ids[i]
             for j in range(self.nj):
                 self.M[i,j] = self.Mx[self.metabolite_ids.index(met_id),j]
-        ### Indices for reactions: s (transport), e (enzymatic), and ribosome r ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Indices: s (transport), e (enzymatic), r (ribosome) #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.sM = np.sum(self.M, axis=0)
         is_e    = [self.sM[0:(self.nj-1)] == 0]
         self.e  = []
@@ -363,12 +377,18 @@ class Model:
         self.r  = self.nj-1
         self.ne = len(self.e)
         self.ns = len(self.s)
-        ### Indices: m (metabolite), a (all proteins) ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Indices: m (metabolite), a (all proteins)           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.m = list(range(self.nc-1))
         self.a = self.nc-1
-        ### Matrix column rank ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Matrix column rank                                  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.column_rank = np.linalg.matrix_rank(self.M)
-        ### GBA model dynamical variables ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) GBA model dynamical variables                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
         self.x       = np.zeros(self.nx)
@@ -377,40 +397,17 @@ class Model:
         self.v       = np.zeros(self.nj)
         self.p       = np.zeros(self.nj)
         self.b       = np.zeros(self.nc)
-        ### Evolutionary variables ###
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Evolutionary variables                              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.f0      = np.zeros(self.nj)
         self.dmu_f   = np.zeros(self.nj)
         self.GCC_f   = np.zeros(self.nj)
         self.f_trunc = np.zeros(self.nj-1)
         self.f       = np.zeros(self.nj)
-    
-    ### Load the GBA model (M, K and kcat matrices) ###
-    def load_model( self, model_path, model_name ):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Save model path and name                               #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.model_path = model_path
-        self.model_name = model_name
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Load model's kinetics                                  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.load_Mx()
-        self.load_KM_f()
-        self.load_KM_b()
-        self.load_kcat()
-        self.load_conditions()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Load inhibition and activation constants if they exist #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.load_KI()
-        self.load_KA()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Initialize model mathematical variables                #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.initialize_model_mathematical_variables()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Define the kinetic model of each reaction              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Define the kinetic model of each reaction           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.kinetic_model.clear()
         self.direction.clear()
         for j in range(self.nj):
@@ -430,10 +427,22 @@ class Model:
                 assert self.KA[:,j].sum() == 0
                 self.kinetic_model.append("rMM")
                 self.direction.append("reversible")
+    
+    ### Load the GBA model (M, K and kcat matrices) ###
+    def load_model( self, model_path, model_name ):
+        self.model_path = model_path
+        self.model_name = model_name
+        self.load_Mx()
+        self.load_KM_f()
+        self.load_KM_b()
+        self.load_kcat()
+        self.load_conditions()
+        self.load_KI()
+        self.load_KA()
+        self.initialize_model_mathematical_variables()
 
     ### Reset model variables (used before binary export) ###
     def reset_variables( self ):
-        ### GBA model dynamical variables ###
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
         self.x       = np.zeros(self.nx)
@@ -442,7 +451,6 @@ class Model:
         self.v       = np.zeros(self.nj)
         self.p       = np.zeros(self.nj)
         self.b       = np.zeros(self.nc)
-        ### Evolutionary variables ###
         self.f0      = np.zeros(self.nj)
         self.dmu_f   = np.zeros(self.nj)
         self.GCC_f   = np.zeros(self.nj)
@@ -455,8 +463,8 @@ class Model:
     
     ### Get a condition parameter value ###
     def get_condition( self, condition_id, condition_param ):
-        assert condition_id in self.condition_ids
-        assert condition_param in self.condition_params
+        assert condition_id in self.condition_ids, "> ERROR: unknown condition identifier "+condition_id+"."
+        assert condition_param in self.condition_params, "> ERROR: unknown condition parameter "+condition_param+"."
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
@@ -494,19 +502,19 @@ class Model:
     ### Set external conditions                       ###
     ### (Minimal values bounded to MIN_CONCENTRATION) ###
     def set_condition( self, condition ):
-        assert condition in self.condition_ids
-        self.current_condition = condition
-        self.current_rho       = self.get_condition(self.current_condition, "rho")
+        assert condition in self.condition_ids, "> ERROR: unknown condition identifier "+condition_id+"."
+        self.condition = condition
+        self.rho       = self.get_condition(self.condition, "rho")
         for i in range(self.nx):
             x_name    = self.x_ids[i]
-            x_value   = self.get_condition(self.current_condition, x_name)
+            x_value   = self.get_condition(self.condition, x_name)
             self.x[i] = x_value
             if self.adjust_concentrations and self.x[i] < MIN_CONCENTRATION:
                 self.x[i] = MIN_CONCENTRATION
 
     ### Set f0 ###
     def set_f0( self, f0 ):
-        assert len(f0) == self.nj
+        assert len(f0) == self.nj, "> ERROR: incorrect f0 length."
         self.f0      = np.copy(f0)
         self.f_trunc = np.copy(self.f0[1:self.nj])
         self.f       = np.copy(self.f0)
@@ -518,7 +526,7 @@ class Model:
     
     ### Compute internal concentrations ###
     def compute_c( self ):
-        self.c = self.current_rho*self.M.dot(self.f)
+        self.c = self.rho*self.M.dot(self.f)
         if self.adjust_concentrations:
             self.c[self.c < MIN_CONCENTRATION] = MIN_CONCENTRATION
         self.xc = np.concatenate([self.x, self.c])
@@ -631,14 +639,14 @@ class Model:
         constant3 = np.prod(1+self.KM_f[:,j]/self.xc)
         constant4 = np.prod(1+self.KM_b[:,j]/self.xc)
         for i in range(self.nc):
-            y       = i+self.nx
-            indices = np.arange(self.ni) != y
-            term1   = self.KM_f[y,j] / np.power(self.c[i] + self.KM_f[y,j], 2.0)
-            term2   = self.KM_b[y,j] / np.power(self.c[i] + self.KM_b[y,j], 2.0)
-            term3   = np.prod(1 + self.KM_f[indices,j]/self.xc[indices])
-            term4   = np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
-            term5   = term1*constant1/term3-term2*constant2/term4
-            term6   = constant1/constant3-constant2/constant4
+            y                 = i+self.nx
+            indices           = np.arange(self.ni) != y
+            term1             = self.KM_f[y,j] / np.power(self.c[i] + self.KM_f[y,j], 2.0)
+            term2             = self.KM_b[y,j] / np.power(self.c[i] + self.KM_b[y,j], 2.0)
+            term3             = np.prod(1 + self.KM_f[indices,j]/self.xc[indices])
+            term4             = np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
+            term5             = term1*constant1/term3-term2*constant2/term4
+            term6             = constant1/constant3-constant2/constant4
             self.ditau_j[j,i] = -term5/np.power(term6, 2.0)
     
     ### Compute dtau ###
@@ -660,7 +668,7 @@ class Model:
 
     ### Compute fluxes ###
     def compute_v( self ):
-        self.v = self.mu*self.current_rho*self.f
+        self.v = self.mu*self.rho*self.f
 
     ### Compute protein concentrations ###
     def compute_p( self ):
@@ -678,7 +686,7 @@ class Model:
     def compute_dmu_f( self ):
         term1      = np.power(self.mu, 2)/self.b[self.a]
         term2      = self.M[self.a,:]/self.mu
-        term3      = self.f.T.dot(self.current_rho*self.ditau_j.dot(self.M))
+        term3      = self.f.T.dot(self.rho*self.ditau_j.dot(self.M))
         term4      = self.tau_j
         self.dmu_f = term1*(term2-term3-term4)
 
@@ -686,8 +694,8 @@ class Model:
     def compute_GCC_f( self ):
         self.GCC_f = self.dmu_f-self.dmu_f[0]*(self.sM/self.sM[0])
     
-    ### Calculate all model variables from the f vector ###
-    def calculate( self ):
+    ### Calculate the model state ###
+    def calculate_state( self ):
         self.compute_c()
         for j in range(self.nj):
             self.compute_tau(j)
@@ -727,10 +735,9 @@ class Model:
     ###################################
 
     ### Initial value subproblem: linear optimization to find maximal ###
-    ### ribosome flux fraction f^r, with a minimal production of each ###
-    ### metabolite. The constraints are mass conservation (M*f = b)   ###
-    ### and surface flux balance (sM*f = 1).                          ###
-    ### WARNING: this method assumes full irreversibility             ###
+    # Ribosome flux fraction f^r, with a minimal production of each
+    # metabolite. The constraints are mass conservation (M*f = b)
+    # and surface flux balance (sM*f = 1).
     def solve_local_linear_problem( self ):
         gpmodel = gp.Model(env=env)
         x       = gpmodel.addMVar(self.nj, lb=MIN_FLUX_FRACTION, ub=MAX_FLUX_FRACTION)
@@ -744,14 +751,14 @@ class Model:
 
     ### Generate random initial solutions ###
     def generate_random_initial_solutions( self, condition, nb_solutions, max_trials, min_mu ):
-        assert condition in self.condition_ids, "> Condition not found"
-        assert nb_solutions > 0, "> Number of solutions must be greater than 0"
-        assert max_trials >= nb_solutions, "> Number of trials must be greater than the number of solutions"
-        assert min_mu >= 0.0, "> Minimal growth rate must be positive"
+        assert condition in self.condition_ids, "> ERROR: unknown condition identifier."
+        assert nb_solutions > 0, "> ERROR: number of solutions must be greater than 0."
+        assert max_trials >= nb_solutions, "> ERROR: number of trials must be greater than the number of solutions."
+        assert min_mu >= 0.0, "> ERROR: minimal growth rate must be positive."
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optimums data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        overview_columns = ['condition', 'mu','density']
+        overview_columns = ['condition', 'mu', 'density']
         overview_columns = overview_columns + self.reaction_ids
         self.random_data = pd.DataFrame(columns=overview_columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -770,7 +777,7 @@ class Model:
                 self.set_f()
                 if self.f[0] >= 0.0:
                     negative_term = False
-            self.calculate()
+            self.calculate_state()
             self.check_model_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 print("> ", solutions, " solutions was found after ", trials, " trials")
@@ -792,14 +799,14 @@ class Model:
     ########################
 
     ### Draw a random normal vector with std 'sigma' and length 'n' ###
-    def draw_noise( self, sigma, n ):
+    def draw_gaussian_noise( self, sigma, n ):
         epsilon = np.random.normal(0.0, sigma, size=n)
         return epsilon
     
-    ### Calculates the mutated flux fraction for each reaction ###
+    ### Mutate an element of f with Gaussian std 'sigma' ###
     def mutate_f( self, index, sigma ):
         non_mutated_f        = np.copy(self.f_trunc)
-        epsilon              = self.draw_noise(sigma, 1)
+        epsilon              = self.draw_gaussian_noise(sigma, 1)
         self.f_trunc[index] += epsilon 
         self.f_trunc[self.f_trunc < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
         self.set_f()
@@ -807,9 +814,9 @@ class Model:
     
     ### Calculate the selection coefficient for MCMC mutation fixation ###
     def calculate_selection_coefficient( self, mu, mutated_mu ):
-        return 1.0 - mu / mutated_mu
+        return 1.0-mu/mutated_mu
     
-    ### Calcutlate fixation probability pi for MCMC ###
+    ### Calculate fixation probability pi for MCMC ###
     def calculate_pi( self, selection_coefficient, N_e ):
         pi = 0.0
         with np.errstate(divide="ignore", over="ignore", invalid="ignore"):
@@ -823,7 +830,12 @@ class Model:
     def simulate_fixation( self, pi ):
         return np.random.rand() < pi
     
-    ### Bloc reactions tending to zero ###
+    ### Block reactions tending to zero ###
+    # f values tending towards zero are bounded to min value.
+    # Corresponding derivative values are set to zero depending
+    # on the direction:
+    # - f -> 0+ and gcc < 0: f = min_f, gcc = 0
+    # - f -> 0- and gcc > 0: f = -min_f, gcc = 0
     def block_reactions( self ):
         for j in range(self.nj-1):
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -850,32 +862,32 @@ class Model:
             #     elif self.f_trunc[j] < 0.0:
             #         self.f_trunc[j] = -MIN_FLUX_FRACTION
     
-    ### Compute the mean evolutionary trajectory ###
+    ### Run a gradient ascent ###
     # It corresponds to the continuous trajectory if the population was infinite
-    # and generations continuous.
-    def mean_evolutionary_trajectory( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, label = 1 ):
+    # with overlapping generations.
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.adjust_concentrations = False
         self.set_condition(condition)
-        self.calculate()
+        self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Initial model is not consistent"
+        assert self.consistent, "> ERROR: initial model is not consistent."
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.mean_evolutionary_tracker.empty:
-                overview_columns               = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
-                overview_columns               = overview_columns + self.reaction_ids
-                self.mean_evolutionary_tracker = pd.DataFrame(columns=overview_columns)
+            if self.GA_tracker.empty:
+                overview_columns = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
+                overview_columns = overview_columns + self.reaction_ids
+                self.GA_tracker  = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row                   = pd.Series(data=overview_dict)
-            self.mean_evolutionary_tracker = pd.concat([self.mean_evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
+            overview_row    = pd.Series(data=overview_dict)
+            self.GA_tracker = pd.concat([self.GA_tracker, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -886,6 +898,7 @@ class Model:
         previous_mu           = self.mu
         self.converged        = False
         nb_iterations         = 0
+        nb_fixed              = 0
         dt_counter            = 0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the main loop      #
@@ -895,29 +908,28 @@ class Model:
             # if nb_iterations%5000 == 0:
             #    print("> Iteration: ",nb_iterations, " Time: ",t, " mu: ",self.mu, " dt: ",dt)
             ### 4.1) Test trajectory convergence ###
-            if mu_alteration_counter >= TRAJECTORY_STABLE_MU_COUNT:
+            if mu_alteration_counter >= TRAJECTORY_CONVERGENCE_COUNT:
                 self.converged = True
                 break
             ### 4.2) Calculate the next step ###
             previous_mu = self.mu
             self.block_reactions()
             self.f_trunc = self.f_trunc+self.GCC_f[1:]*dt
-            #self.f_trunc[self.f_trunc < MIN_FLUX_FRACTION] = MIN_FLUX_FRACTION
             self.set_f()
-            self.calculate()
+            self.calculate_state()
             self.check_model_consistency()
             ### 4.3) If the model is consistent: ###
             if self.consistent and self.mu >= previous_mu:
-                #print("> Mu: ", self.mu, " Previous mu: ", previous_mu)
                 previous_f  = np.copy(self.f_trunc)
                 t           = t + dt
                 dt_counter += 1
-                if track:
+                nb_fixed   += 1
+                if track and nb_iterations%EXPORT_DATA_COUNT == 0:
                     overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row                   = pd.Series(data=overview_dict)
-                    self.mean_evolutionary_tracker = pd.concat([self.mean_evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
+                    overview_row    = pd.Series(data=overview_dict)
+                    self.GA_tracker = pd.concat([self.GA_tracker, overview_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -931,24 +943,24 @@ class Model:
             else:
                 self.f_trunc = np.copy(previous_f)
                 self.set_f()
-                self.calculate()
+                self.calculate_state()
                 self.check_model_consistency()
-                assert self.consistent, "> Previous model is not consistent"
+                assert self.consistent, "> ERROR: previous model is not consistent"
                 if (dt > 1e-100):
                     dt         = dt/DECREASING_DT_FACTOR
                     dt_counter = 0
                 else:
-                    raise AssertionError("> Trajectory was stopped, because dt got too small")
+                    raise AssertionError("> ERROR: adaptative timestep < 1e-100.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
         if t >= max_time:
-            print("> Condition "+condition+": MAXTIME reached")
+            print("> Gradient ascent: maximum time reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
             return False, run_time
         else:
-            print("> Condition "+condition+": convergence reached (mu="+str(self.mu)+", nb iterations="+str(nb_iterations)+")")
+            print("> Gradient ascent: convergence reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
             return True, run_time
 
     ### Compute all the optimums ###
@@ -957,7 +969,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optimums data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        overview_columns  = ['condition', 'mu','density','converged', 'run_time']
+        overview_columns  = ['condition', 'mu', 'density', 'converged', 'run_time']
         overview_columns  = overview_columns + self.reaction_ids
         self.optimum_data = pd.DataFrame(columns=overview_columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -966,7 +978,7 @@ class Model:
         self.optimum_solutions.clear()
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
-            converged, run_time = self.mean_evolutionary_trajectory(condition=condition, max_time=max_time, initial_dt=initial_dt)
+            converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
             overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = fluxfraction
@@ -978,32 +990,32 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.optimum_data.to_csv("./csv_models/"+self.model_name+"/optimums.csv", sep=';', index=False)
         end = time.time()
-        print("> All optimums were computed in ", end-start, " seconds")
+        print("> All optimums were computed in "+str(end-start)+" seconds")
     
-    ### Compute the evolutionary trajectory with genetic drift ###
-    # Pál & Miklós formulation
-    def evolutionary_trajectory( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
+    ### Run an evolutionary simulation with genetic drift (Pál & Miklós, 1998) ###
+    # f(t+1) = f(t) + sigma * dmu/df + epsilon.
+    def EGD_simulation( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_condition(condition)
-        self.calculate()
+        self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Initial model is not consistent"
+        assert self.consistent, "> Error: initial model is not consistent."
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.evolutionary_tracker.empty:
-                overview_columns          = ['label', 'condition', 't', 'mu', 'fixed']
-                overview_columns          = overview_columns + self.reaction_ids
-                self.evolutionary_tracker = pd.DataFrame(columns=overview_columns)
+            if self.EGD_tracker.empty:
+                overview_columns = ['label', 'condition', 't', 'mu', 'fixed']
+                overview_columns = overview_columns + self.reaction_ids
+                self.EGD_tracker = pd.DataFrame(columns=overview_columns)
             overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
                 overview_dict[reaction_id] = value
-            overview_row              = pd.Series(data=overview_dict)
-            self.evolutionary_tracker = pd.concat([self.evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
+            overview_row     = pd.Series(data=overview_dict)
+            self.EGD_tracker = pd.concat([self.EGD_tracker, overview_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1011,7 +1023,7 @@ class Model:
         previous_f    = np.copy(self.f_trunc)
         previous_mu   = self.mu
         nb_iterations = 0
-        fixed         = 0
+        nb_fixed      = 0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the loop           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1025,53 +1037,53 @@ class Model:
             self.f_trunc = self.f_trunc+sigma*self.GCC_f[1:]+epsilon
             #self.block_reactions()
             self.set_f()
-            self.calculate()
+            self.calculate_state()
             self.check_model_consistency()
             ### 4.2) If the model is consistent: ###
             if self.consistent and self.mu > 1e-10:# and self.mu >= previous_mu:
-                previous_f  = np.copy(self.f_trunc)
-                previous_mu = self.mu
-                t          += 1
-                fixed      += 1
-                if track:
-                    overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": fixed}
+                previous_f   = np.copy(self.f_trunc)
+                previous_mu  = self.mu
+                t           += 1
+                nb_fixed    += 1
+                if track and nb_iterations%EXPORT_DATA_COUNT == 0:
+                    overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": nb_fixed}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
-                    overview_row              = pd.Series(data=overview_dict)
-                    self.evolutionary_tracker = pd.concat([self.evolutionary_tracker, overview_row.to_frame().T], ignore_index=True)
+                    overview_row     = pd.Series(data=overview_dict)
+                    self.EGD_tracker = pd.concat([self.EGD_tracker, overview_row.to_frame().T], ignore_index=True)
             ### 4.3) If the model is inconsistent: ###
             else:
                 self.f_trunc = np.copy(previous_f)
                 self.set_f()
-                self.calculate()
+                self.calculate_state()
                 self.check_model_consistency()
-                assert self.consistent, "> Previous model is not consistent"
+                assert self.consistent, "> ERROR: previous model is not consistent."
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
-        if fixed == 0 and nb_iterations < max_iter:
-            print("> Evolutionary simulation was completed. No mutation was fixed")
+        if nb_fixed == 0 and nb_iterations < max_iter:
+            print("> EGD: simulation completed with no fixed mutation (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
-        elif fixed > 0 and nb_iterations < max_iter:
-            print("> Evolutionary simulation was completed")
+        elif nb_fixed > 0 and nb_iterations < max_iter:
+            print("> EGD: simulation completed (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return True, run_time
         elif nb_iterations >= max_iter:
-            print("> Evolutionary simulation was stopped because MAXITER was reached")
+            print("> EGD: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
 
-    ### Compute Markov chain Monte Carlo ###
-    # Standard MCMC formulation 
-    def MCMC(self, condition = "1", max_time = 100000, sigma = 0.01, N_e = 2.5e7, track = False, label = 1 ):
+    ### Run a Markov chain Monte Carlo simulation ###
+    # Standard MCMC formulation (Gillespie, 1983).
+    def MCMC_simulation(self, condition = "1", max_iter = 100000, sigma = 0.01, N_e = 2.5e7, track = False, label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_condition(condition)
-        self.calculate()
+        self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Initial model is not consistent"
+        assert self.consistent, "> ERROR: initial model is not consistent"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1092,15 +1104,15 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Start the MCMC            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        fixed = 0
-        t     = 0
-        while t < max_time:
-            t += 1
+        nb_iterations = 0
+        nb_fixed      = 0
+        while nb_iterations < max_iter:
+            nb_iterations += 1
             ### 4.1) Draw reaction to mutate at random ###
             reaction_index = np.random.randint(len(self.f_trunc))
             current_mu     = self.mu
             non_mutated_f  = self.mutate_f(reaction_index, sigma)
-            self.calculate()
+            self.calculate_state()
             self.check_model_consistency()
             ### 4.2) Check model consistency and simulate fixation ###
             if self.consistent:
@@ -1113,7 +1125,7 @@ class Model:
                     self.set_f()
                 ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
-                    fixed         += 1
+                    nb_fixed      += 1
                     overview_dict  = {"label": label, "condition": condition, "t": t, "mu": self.mu}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
                         overview_dict[reaction_id] = value
@@ -1123,34 +1135,255 @@ class Model:
             else:
                 self.f_trunc = np.copy(non_mutated_f)
                 self.set_f()
-            self.calculate()
+            self.calculate_state()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
-        if fixed == 0:
-            print("> MCMC simulation was completed. No mutation was fixed")
+        if nb_fixed == 0 and nb_iterations < max_iter:
+            print("> MCMC: simulation completed with no fixed mutation (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
-        else:
-            print("> MCMC simulation was completed")
+        elif nb_fixed > 0 and nb_iterations < max_iter:
+            print("> MCMC: simulation completed (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return True, run_time
+        elif nb_iterations >= max_iter:
+            print("> MCMC: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
+            return False, run_time
 
-    ### Save mean evolutionary trajectory to csv ###
-    def save_mean_evolutionary_trajectory( self, label = "" ):
+    ### Run a population level simulation ###
+    # Reproduction is synchronous and fitness proportionate.
+    def POPLEVEL_simulation( self, condition = "1", max_g = 1000, p = 0.01, sigma = 0.01, N = 1000, track = False, label = 1 ):
+        start_time = time.time()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the model      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.set_condition(condition)
+        self.calculate_state()
+        self.check_model_consistency()
+        assert self.consistent, "> ERROR: initial model is not consistent"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Initialize the algorithm    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        pop   = []
+        w     = []
+        w_sum = 0.0
+        ### Mean #########################
+        mean_w = 0.0
+        mean_f = np.zeros(self.model.nj)
+        mean_v = np.zeros(self.model.nj)
+        mean_p = np.zeros(self.model.nj)
+        mean_b = np.zeros(self.model.nc)
+        mean_c = np.zeros(self.model.nc)
+        ### Variance #####################
+        var_w = 0.0
+        var_f = np.zeros(self.model.nj)
+        var_v = np.zeros(self.model.nj)
+        var_p = np.zeros(self.model.nj)
+        var_b = np.zeros(self.model.nc)
+        var_c = np.zeros(self.model.nc)
+        ##################################
+        g = 0
+        for i in range(N):
+            pop.append(np.copy(self.model.f_trunc))
+            w.append(self.model.mu)
+            w_sum += self.model.mu
+            ### Mean #####################
+            mean_w += self.model.mu
+            mean_f += self.model.f
+            mean_c += self.model.c
+            mean_p += self.model.p
+            ### Variance #################
+            var_w += self.model.mu*self.model.mu
+            var_f += self.model.f*self.model.f
+            var_c += self.model.c*self.model.c
+            var_p += self.model.p*self.model.p
+            ##############################
+        w = np.array(w)/w_sum
+        ### Mean #########################
+        mean_w /= N
+        mean_f /= N
+        mean_c /= N
+        mean_p /= N
+        ### Variance #####################
+        var_w /= N
+        var_f /= N
+        var_c /= N
+        var_p /= N
+        var_w -= mean_w*mean_w
+        var_f -= mean_f*mean_f
+        var_c -= mean_c*mean_c
+        var_p -= mean_p*mean_p
+        ### CV ###########################
+        cv_w = mean_w/np.sqrt(var_w)
+        cv_f = mean_f/np.sqrt(var_f)
+        cv_c = mean_c/np.sqrt(var_c)
+        cv_p = mean_p/np.sqrt(var_p)
+        ##################################
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Create the output file      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if (os.path.exists(filename) and not add) or not os.path.exists(filename):
+            f = open(filename, "w")
+            header = "id;g;optimal_mu;mean_w"
+            for f_id in self.model.reaction_ids:
+                header += ";mean_"+f_id
+            for c_id in self.model.c_ids:
+                header += ";mean_"+c_id
+            for f_id in self.model.reaction_ids:
+                header += ";mean_protein_"+f_id
+            header += ";var_w"
+            for f_id in self.model.reaction_ids:
+                header += ";var_"+f_id
+            for c_id in self.model.c_ids:
+                header += ";var_"+c_id
+            for f_id in self.model.reaction_ids:
+                header += ";var_protein_"+f_id
+            header += ";cv_w"
+            for f_id in self.model.reaction_ids:
+                header += ";cv_"+f_id
+            for c_id in self.model.c_ids:
+                header += ";cv_"+c_id
+            for f_id in self.model.reaction_ids:
+                header += ";cv_protein_"+f_id
+            f.write(header+"\n")
+            f.flush()
+        else:
+            f = open(filename, "a")
+        line = str(identifier)+";"+str(g)+";"+str(optimal_mu)+";"+str(mean_w)
+        for val in mean_f:
+            line += ";"+str(val)
+        for val in mean_c:
+            line += ";"+str(val)
+        for val in mean_p:
+            line += ";"+str(val)
+        line += ";"+str(var_w)
+        for val in var_f:
+            line += ";"+str(val)
+        for val in var_c:
+            line += ";"+str(val)
+        for val in var_p:
+            line += ";"+str(val)
+        line += ";"+str(cv_w)
+        for val in cv_f:
+            line += ";"+str(val)
+        for val in cv_c:
+            line += ";"+str(val)
+        for val in cv_p:
+            line += ";"+str(val)
+        f.write(line+"\n")
+        f.flush()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Run the algorithm           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        while g < max_generations:
+            if g%100 == 0:
+                print("> Calculating generation "+str(g))
+            draws   = np.random.multinomial(N, w, size=1)
+            new_pop = []
+            w       = []
+            w_sum   = 0.0
+            ### Mean #####################
+            mean_w  = 0.0
+            mean_f  = np.zeros(self.model.nj)
+            mean_c  = np.zeros(self.model.nc)
+            mean_p  = np.zeros(self.model.nj)
+            index   = 0
+            alive   = 0
+            for i in range(N):
+                for j in range(draws[0,i]):
+                    new_pop.append(np.copy(pop[i]))
+                    pval = np.random.rand()
+                    if pval < p_mut:
+                        new_pop[index] += np.random.normal(0.0, sigma, size=(self.model.nj-1))
+                        new_pop[index][new_pop[index] < 0.0] = 0.0
+                    self.model.set_f(new_pop[index])
+                    self.model.run_step_calculations()
+                    self.model.check_model_consistency()
+                    if not self.model.consistent or not np.isfinite(self.model.mu):
+                        w.append(0.0)
+                    else:
+                        w.append(self.model.mu)
+                        w_sum += self.model.mu
+                        ### Mean #########
+                        mean_w += self.model.mu
+                        mean_f += self.model.f
+                        mean_c += self.model.c
+                        mean_p += self.model.p
+                        ### Variance #####
+                        var_w += self.model.mu*self.model.mu
+                        var_f += self.model.f*self.model.f
+                        var_c += self.model.c*self.model.c
+                        var_p += self.model.p*self.model.p
+                        ##################
+                        alive  += 1
+                    index += 1
+            pop = new_pop
+            w   = np.array(w)/w_sum
+            ### Mean #####################
+            mean_w /= alive
+            mean_f /= alive
+            mean_c /= alive
+            mean_p /= alive
+            ### Variance #################
+            var_w /= alive
+            var_f /= alive
+            var_c /= alive
+            var_p /= alive
+            var_w -= mean_w*mean_w
+            var_f -= mean_f*mean_f
+            var_c -= mean_c*mean_c
+            var_p -= mean_p*mean_p
+            ### CV #######################
+            cv_w = mean_w/np.sqrt(var_w)
+            cv_f = mean_f/np.sqrt(var_f)
+            cv_c = mean_c/np.sqrt(var_c)
+            cv_p = mean_p/np.sqrt(var_p)
+            ##############################
+            del new_pop
+            g += 1
+            ##############################
+            line = str(identifier)+";"+str(g)+";"+str(optimal_mu)+";"+str(mean_w)
+            for val in mean_f:
+                line += ";"+str(val)
+            for val in mean_c:
+                line += ";"+str(val)
+            for val in mean_p:
+                line += ";"+str(val)
+            line += ";"+str(var_w)
+            for val in var_f:
+                line += ";"+str(val)
+            for val in var_c:
+                line += ";"+str(val)
+            for val in var_p:
+                line += ";"+str(val)
+            line += ";"+str(cv_w)
+            for val in cv_f:
+                line += ";"+str(val)
+            for val in cv_c:
+                line += ";"+str(val)
+            for val in cv_p:
+                line += ";"+str(val)
+            f.write(line+"\n")
+            f.flush()
+        f.close()
+        print("> Max nb. of generations reached (mean mu="+str(mean_w)+", generation="+str(g)+").")
+
+    ### Save the gradient ascent trajectory to csv ###
+    def save_gradient_ascent_trajectory( self, label = "" ):
         header = "./output/"+self.model_name
         if label != "":
             header += "_"+str(label)
-        if not self.mean_evolutionary_tracker.empty:
-            self.mean_evolutionary_tracker.to_csv(header+"_mean_evolutionary_trajectory.csv", sep=';', index=False)
+        if not self.GA_tracker.empty:
+            self.GA_tracker.to_csv(header+"_gradient_ascent_trajectory.csv", sep=';', index=False)
 
-    ### Save evolutionary trajectory to csv ###
-    def save_evolutionary_trajectory( self, label = "" ):
+    ### Save EGD trajectory to csv ###
+    def save_EGD_trajectory( self, label = "" ):
         header = "./output/"+self.model_name
         if label != "":
             header += "_"+str(label)
-        if not self.evolutionary_tracker.empty:
-            self.evolutionary_tracker.to_csv(header+"_evolutionary_trajectory.csv", sep=';', index=False)
+        if not self.EGD_tracker.empty:
+            self.EGD_tracker.to_csv(header+"_EGD_trajectory.csv", sep=';', index=False)
     
     ### Save MCMC trajectory to csv ###
     def save_MCMC_trajectory( self, label = "" ):
@@ -1160,29 +1393,43 @@ class Model:
         if not self.MCMC_tracker.empty:
             self.MCMC_tracker.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
     
+    ### Save POPLEVEL trajectory to csv ###
+    def save_POPLEVEL_trajectory( self, label = "" ):
+        header = "./output/"+self.model_name
+        if label != "":
+            header += "_"+str(label)
+        if not self.POPLEVEL_tracker.empty:
+            self.POPLEVEL_tracker.to_csv(header+"_POPLEVEL_trajectory.csv", sep=';', index=False)
+    
     ### Save all trajectories to csv ###
     def save_all_trajectories( self, label = "" ):
-        self.save_mean_evolutionary_trajectory(label)
-        self.save_evolutionary_trajectory(label) 
+        self.save_gradient_ascent_trajectory(label)
+        self.save_EGD_trajectory(label) 
         self.save_MCMC_trajectory(label)
+        self.save_POPLEVEL_trajectory(label)
 
-    ### Clear mean evolutionary trajectory ###
-    def clear_mean_evolutionary_trajectory( self ):
-        self.mean_evolutionary_tracker = pd.DataFrame()
+    ### Clear gradient ascent trajectory ###
+    def clear_gradient_ascent_trajectory( self ):
+        self.GA_tracker = pd.DataFrame()
     
-    ### Clear evolutionary trajectory ###
-    def clear_evolutionary_trajectory( self ):
-        self.evolutionary_tracker = pd.DataFrame()
+    ### Clear EGD trajectory ###
+    def clear_EGD_trajectory( self ):
+        self.EGD_tracker = pd.DataFrame()
     
     ### Clear MCMC trajectory ###
     def clear_MCMC_trajectory( self ):
         self.MCMC_tracker = pd.DataFrame()
     
+    ### Clear POPLEVEL trajectory ###
+    def clear_POPLEVEL_trajectory( self ):
+        self.POPLEVEL_tracker = pd.DataFrame()
+    
     ### Clear all trajectories ###
     def clear_all_trajectories( self ):
-        self.clear_mean_evolutionary_trajectory()
-        self.clear_evolutionary_trajectory()
+        self.clear_gradient_ascent_trajectory()
+        self.clear_EGD_trajectory()
         self.clear_MCMC_trajectory()
+        self.clear_POPLEVEL_trajectory()
     
     ######################
     #   Export methods   #

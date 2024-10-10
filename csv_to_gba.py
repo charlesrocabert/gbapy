@@ -39,9 +39,9 @@ if __name__ == "__main__":
     print("# Copyright © 2024 Charles Rocabert, Furkan Mert")
     print("# Web: https://github.com/charlesrocabert/GBA_Evolution")
     print("#")
-    print("# csv_to_binary.py")
-    print("# ----------------")
-    print("# Load the GBA model from CSV files and save it in binary format.")
+    print("# csv_to_gba.py")
+    print("# -------------")
+    print("# Load the GBA model from CSV files and save it in binary format .gba")
     print("# (LOCAL SCRIPT)")
     print("#***********************************************************************")
 
