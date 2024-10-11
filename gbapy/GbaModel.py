@@ -139,9 +139,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Model folder, name and informations ###
-        self.folder = "" # Model folder
-        self.name   = "" # Model name
-        self.infos  = {} # Model informations
+        self.folder = ""             # Model folder
+        self.name   = ""             # Model name
+        self.infos  = pd.DataFrame() # Model informations
 
         ### Identifier lists ###
         self.metabolite_ids   = [] # List of all metabolite ids 
@@ -240,7 +240,8 @@ class GbaModel:
     
     ### Read information from CSV ###
     def read_Infos_from_csv( self ):
-        self.infos.clear()
+        infos_columns = ['Variable', 'Content']
+        self.infos    = pd.DataFrame(columns=infos_columns)
         Infos_filename = self.folder+"/Infos.csv"
         assert os.path.exists(Infos_filename), "> ERROR: file "+Infos_filename+" does not exist."
         f = open(Infos_filename, "r")
@@ -483,6 +484,12 @@ class GbaModel:
         self.f_trunc = np.zeros(self.nj-1)
         self.f       = np.zeros(self.nj)
     
+    #######################
+    #   Print functions   #
+    #######################
+
+    def description( self ):
+
     ###############
     #   Getters   #
     ###############
@@ -784,9 +791,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optimums data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        overview_columns = ['condition', 'mu', 'density']
-        overview_columns = overview_columns + self.reaction_ids
-        self.random_data = pd.DataFrame(columns=overview_columns)
+        columns          = ['condition', 'mu', 'density']
+        columns          = columns + self.reaction_ids
+        self.random_data = pd.DataFrame(columns=columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Find the random solutions          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -807,12 +814,12 @@ class GbaModel:
             self.check_model_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 print("> ", solutions, " solutions was found after ", trials, " trials")
-                solutions    += 1
-                overview_dict = {"condition": condition, "mu": self.mu, "density": self.density}
+                solutions += 1
+                data_dict  = {"condition": condition, "mu": self.mu, "density": self.density}
                 for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
-                    overview_dict[reaction_id] = fluxfraction
-                overview_row                     = pd.Series(data=overview_dict)
-                self.random_data                 = pd.concat([self.random_data, overview_row.to_frame().T], ignore_index=True)
+                    data_dict[reaction_id] = fluxfraction
+                data_row                         = pd.Series(data=data_dict)
+                self.random_data                 = pd.concat([self.random_data, data_row.to_frame().T], ignore_index=True)
                 self.random_solutions[solutions] = np.copy(self.f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Save the dataset                   #
@@ -906,14 +913,14 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.GA_tracker.empty:
-                overview_columns = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
-                overview_columns = overview_columns + self.reaction_ids
-                self.GA_tracker  = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
+                columns         = ['label', 'condition', 't', 'dt', 'mu', 'dmu']
+                columns         = columns + self.reaction_ids
+                self.GA_tracker = pd.DataFrame(columns=columns)
+            data_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
-                overview_dict[reaction_id] = value
-            overview_row    = pd.Series(data=overview_dict)
-            self.GA_tracker = pd.concat([self.GA_tracker, overview_row.to_frame().T], ignore_index=True)
+                data_dict[reaction_id] = value
+            data_row        = pd.Series(data=data_dict)
+            self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -951,11 +958,11 @@ class GbaModel:
                 dt_counter += 1
                 nb_fixed   += 1
                 if track and nb_iterations%EXPORT_DATA_COUNT == 0:
-                    overview_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
+                    data_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
-                        overview_dict[reaction_id] = value
-                    overview_row    = pd.Series(data=overview_dict)
-                    self.GA_tracker = pd.concat([self.GA_tracker, overview_row.to_frame().T], ignore_index=True)
+                        data_dict[reaction_id] = value
+                    data_row        = pd.Series(data=data_dict)
+                    self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
                 if np.abs(self.mu - previous_mu) < TRAJECTORY_CONVERGENCE_TOL:
                     mu_alteration_counter += 1
@@ -995,9 +1002,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optimums data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        overview_columns  = ['condition', 'mu', 'density', 'converged', 'run_time']
-        overview_columns  = overview_columns + self.reaction_ids
-        self.optimum_data = pd.DataFrame(columns=overview_columns)
+        columns           = ['condition', 'mu', 'density', 'converged', 'run_time']
+        columns           = columns + self.reaction_ids
+        self.optimum_data = pd.DataFrame(columns=columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Calculate the optimums             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1005,11 +1012,11 @@ class GbaModel:
         for condition in self.condition_ids:
             self.set_f0(self.LP_solution)
             converged, run_time = self.gradient_ascent(condition=condition, max_time=max_time, initial_dt=initial_dt)
-            overview_dict = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
+            data_dict           = {"condition": condition, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
-                overview_dict[reaction_id] = fluxfraction
-            overview_row                      = pd.Series(data=overview_dict)
-            self.optimum_data                 = pd.concat([self.optimum_data, overview_row.to_frame().T], ignore_index=True)
+                data_dict[reaction_id] = fluxfraction
+            data_row                          = pd.Series(data=data_dict)
+            self.optimum_data                 = pd.concat([self.optimum_data, data_row.to_frame().T], ignore_index=True)
             self.optimum_solutions[condition] = np.copy(self.f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Save the dataset                   #
@@ -1034,14 +1041,14 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.EGD_tracker.empty:
-                overview_columns = ['label', 'condition', 't', 'mu', 'fixed']
-                overview_columns = overview_columns + self.reaction_ids
-                self.EGD_tracker = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
+                columns = ['label', 'condition', 't', 'mu', 'fixed']
+                columns = columns + self.reaction_ids
+                self.EGD_tracker = pd.DataFrame(columns=columns)
+            data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
             for reaction_id, value in zip(self.reaction_ids, self.f):
-                overview_dict[reaction_id] = value
-            overview_row     = pd.Series(data=overview_dict)
-            self.EGD_tracker = pd.concat([self.EGD_tracker, overview_row.to_frame().T], ignore_index=True)
+                data_dict[reaction_id] = value
+            data_row         = pd.Series(data=data_dict)
+            self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1072,11 +1079,11 @@ class GbaModel:
                 t           += 1
                 nb_fixed    += 1
                 if track and nb_iterations%EXPORT_DATA_COUNT == 0:
-                    overview_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": nb_fixed}
+                    data_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": nb_fixed}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
-                        overview_dict[reaction_id] = value
-                    overview_row     = pd.Series(data=overview_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, overview_row.to_frame().T], ignore_index=True)
+                        data_dict[reaction_id] = value
+                    data_row         = pd.Series(data=data_dict)
+                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
             ### 4.3) If the model is inconsistent: ###
             else:
                 self.f_trunc = np.copy(previous_f)
@@ -1115,14 +1122,14 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MCMC_tracker.empty:
-                overview_columns  = ['label', 'condition', 't', 'mu']
-                overview_columns  = overview_columns + self.reaction_ids
-                self.MCMC_tracker = pd.DataFrame(columns=overview_columns)
-            overview_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
+                columns           = ['label', 'condition', 't', 'mu']
+                columns           = columns + self.reaction_ids
+                self.MCMC_tracker = pd.DataFrame(columns=columns)
+            data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             for reaction_id, value in zip(self.reaction_ids, self.f):
-                overview_dict[reaction_id] = value
-            overview_row      = pd.Series(data=overview_dict)
-            self.MCMC_tracker = pd.concat([self.MCMC_tracker, overview_row.to_frame().T], ignore_index=True)
+                data_dict[reaction_id] = value
+            data_row          = pd.Series(data=data_dict)
+            self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1151,12 +1158,12 @@ class GbaModel:
                     self.set_f()
                 ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
-                    nb_fixed      += 1
-                    overview_dict  = {"label": label, "condition": condition, "t": t, "mu": self.mu}
+                    nb_fixed  += 1
+                    data_dict  = {"label": label, "condition": condition, "t": t, "mu": self.mu}
                     for reaction_id, value in zip(self.reaction_ids, self.f):
-                        overview_dict[reaction_id] = value
-                    overview_row      = pd.Series(data=overview_dict)
-                    self.MCMC_tracker = pd.concat([self.MCMC_tracker, overview_row.to_frame().T], ignore_index=True)
+                        data_dict[reaction_id] = value
+                    data_row          = pd.Series(data=data_dict)
+                    self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
             ### 4.5) Undo Mutation if model is inconsistent ###
             else:
                 self.f_trunc = np.copy(non_mutated_f)
