@@ -27,12 +27,10 @@ If you are using gbapy for research purpose or have encountered any issues with 
 <img src="https://github.com/charlesrocabert/MetEvolSim/raw/master/pic/BRC_logo.png" height="100px"></a>&nbsp;&nbsp;&nbsp;<img src="https://github.com/charlesrocabert/MetEvolSim/raw/master/pic/MTA_logo.png" height="100px"></a>
 </p>
 
-# gbapy
-Evolutionary algorithms for Growth Balance Analysis (GBA).
-
 # To write
 - General presentation
 - Authors, copyright, etc
+- Roadmap
 - Tutorial:
   - Provide CSV files in a specific format
   - Load them (csv -> gba), options to calculate LP and optimums
