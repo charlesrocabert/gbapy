@@ -1073,7 +1073,7 @@ class GbaModel:
                 print("> Condition "+condition+": MAXITER reached")
                 break
             ### 4.1) Calculate the next step ###
-            epsilon      = self.draw_noise(np.sqrt(sigma/(2.0*N_e)), self.nj-1)
+            epsilon      = self.draw_gaussian_noise(np.sqrt(sigma/(2.0*N_e)), self.nj-1)
             self.f_trunc = self.f_trunc+sigma*self.GCC_f[1:]+epsilon
             #self.block_reactions()
             self.set_f()
