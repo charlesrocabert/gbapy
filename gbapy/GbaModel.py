@@ -240,22 +240,23 @@ class GbaModel:
     
     ### Read information from CSV ###
     def read_Infos_from_csv( self ):
-        infos_columns = ['Variable', 'Content']
-        self.infos    = pd.DataFrame(columns=infos_columns)
+        variables      = []
+        infos_columns  = ['Type', 'Content']
+        self.infos     = pd.DataFrame(columns=infos_columns)
         Infos_filename = self.folder+"/Infos.csv"
         assert os.path.exists(Infos_filename), "> ERROR: file "+Infos_filename+" does not exist."
         f = open(Infos_filename, "r")
         l = f.readline()
         while l:
             l = l.strip().split(";")
-            if l[0] not in self.infos:
-                self.infos[l[0]] = []
-            self.infos[l[0]].append(l[1])
+            variables.append(l[0])
+            data_row = [l[0], l[1]]
+            self.infos.loc[len(self.infos)] = data_row
             if l[0] == "Name":
                 self.name = l[1]
             l = f.readline()
         f.close()
-        assert "Name" in self.infos, "> ERROR: Name not found in Infos.csv."
+        assert "Name" in variables, "> ERROR: Name not found in Infos.csv."
 
     ### Read the mass fraction matrix M from CSV ###
     def read_Mx_from_csv( self ):
@@ -488,8 +489,14 @@ class GbaModel:
     #   Print functions   #
     #######################
 
+    ### Print model description ###
     def description( self ):
+        print(self.infos)
 
+    ### Print model summary ###
+    def summary( self ):
+        raise NotImplementedError("> ERROR: summary() method not implemented.")
+    
     ###############
     #   Getters   #
     ###############
