@@ -1242,7 +1242,7 @@ class GbaModel:
         if track:
             if self.MCMC_tracker.empty:
                 columns           = ['label', 'condition', 't', 'mu']
-                columns           = columns + self.reaction_ids
+                #columns           = columns + self.reaction_ids
                 self.MCMC_tracker = pd.DataFrame(columns=columns)
             data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             #Fluxfractions    
