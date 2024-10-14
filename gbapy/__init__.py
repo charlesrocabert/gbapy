@@ -24,5 +24,5 @@
 #***********************************************************************
 
 from .GbaModel import *
-#from Graphics import *
+from .GbaPlots import *
 

@@ -5,9 +5,4 @@ include *.md
 include LICENSE.txt
 
 # Include the data files
-recursive-include csv_models/A *
-recursive-include csv_models/B *
-recursive-include csv_models/C *
-recursive-include csv_models/D *
-recursive-include csv_models/EC12b *
 recursive-include examples *

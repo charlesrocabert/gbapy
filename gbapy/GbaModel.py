@@ -36,8 +36,6 @@ env = gp.Env(empty=True)
 env.setParam("OutputFlag", 0)
 env.start()
 
-sys.path.append('./src/')
-
 ### Define constant and tolerance thresholds ###
 MIN_CONCENTRATION            = 1e-10 # Minimum concentration value
 MIN_FLUX_FRACTION            = 1e-10 # Minimum flux fraction value
@@ -53,20 +51,22 @@ INCREASING_DT_COUNT          = 100   # Number of iterations with equal mu values
 EXPORT_DATA_COUNT            = 1     # Frequency of data export
 
 ### Dump a binary .gba model ###
-def dump_gba_model( model, path ):
-    filename = path+"/"+model.name+".gba"
+def dump_gba_model( model, path = "" ):
+    filename = model.name+".gba"
+    if path != "":
+        filename = path+"/"+model.name+".gba"
     ofile = open(filename, "wb")
     dill.dump(model, ofile)
     ofile.close()
     assert os.path.isfile(filename), "> ERROR: .gba model creation failed."
 
 ### Create a GBA model from CSV files ###
-def create_gba_model( model_folder, gba_path = "", save_LP = False, save_optimums = False ):
+def create_gba_model( csv_model, gba_path = "", save_LP = False, save_optimums = False ):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model = GbaModel()
-    model.read_csv_model(model_folder)
+    model.read_csv_model(csv_model)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -78,7 +78,7 @@ def create_gba_model( model_folder, gba_path = "", save_LP = False, save_optimum
         model.calculate_state()
         model.check_model_consistency()
         if model.consistent:
-            model.write_f0()
+            model.save_f0()
         else:
             raise Exception("> ERROR: model is inconsistent with condition 1. f0 vector cannot be saved.")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -97,40 +97,17 @@ def create_gba_model( model_folder, gba_path = "", save_LP = False, save_optimum
     del model
 
 ### Load the GBA model from a binary file ###
-def load_gba_model( filename ):
-    assert os.path.isfile(filename), "> ERROR: .gba model not found."
+def load_gba_model( gba_model ):
+    assert os.path.isfile(gba_model), "> ERROR: .gba model not found."
     assert filename.endswith(".gba"), "> ERROR: .gba model file extension is missing."
-    ifile = open(filename, "rb")
+    ifile = open(gba_model, "rb")
     model = dill.load(ifile)
     ifile.close()
     return model
 
 
 class GbaModel:
-
-    # Mathematical formalism may differ from original ODS files and R scripts,
-    # in particular with ni = nx + nc, and not ni = nc.
-    # ------------------------------------------------------------------------
-    # x:       External metabolite concentrations
-    # c:       Internal metabolite concentrations
-    # v:       Fluxes vector
-    # f:       Flux fractions vector
-    # p:       Protein concentrations vector
-    # b:       Biomass fractions vector
-    # Mx:      Total mass fraction matrix
-    # M:       Internal mass fraction matrix
-    # KM:      Km matrix
-    # KI:      Inhibition constants matrix
-    # KA:      Activation constants matrix
-    # kcat_f:  Forward kcat vector
-    # kcat_b:  Backward kcat vector
-    # tau_j:   Turnover times vector
-    # ditau_j: Turnover times derivative vector
-    # rho:     Total density
-    # mu:      Growth rate
-    # dmu_f:   Growth rate derivative with respect to f
-    # GCC_f:   Growh control coefficient vector with respect to f
-
+    
     ### Class constructor ###
     def __init__( self ):
 
@@ -139,9 +116,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Model folder, name and informations ###
-        self.folder = ""             # Model folder
-        self.name   = ""             # Model name
-        self.infos  = pd.DataFrame() # Model informations
+        self.csv_model = ""             # Model folder
+        self.name      = ""             # Model name
+        self.infos     = pd.DataFrame() # Model informations
 
         ### Identifier lists ###
         self.metabolite_ids   = [] # List of all metabolite ids 
@@ -243,7 +220,7 @@ class GbaModel:
         variables      = []
         infos_columns  = ['Type', 'Content']
         self.infos     = pd.DataFrame(columns=infos_columns)
-        Infos_filename = self.folder+"/Infos.csv"
+        Infos_filename = self.csv_model+"/Infos.csv"
         assert os.path.exists(Infos_filename), "> ERROR: file "+Infos_filename+" does not exist."
         f = open(Infos_filename, "r")
         l = f.readline()
@@ -260,7 +237,7 @@ class GbaModel:
 
     ### Read the mass fraction matrix M from CSV ###
     def read_Mx_from_csv( self ):
-        Mx_filename = self.folder+"/M.csv"
+        Mx_filename = self.csv_model+"/M.csv"
         assert os.path.exists(Mx_filename), "> File "+Mx_filename+" does not exist."
         df                  = pd.read_csv(Mx_filename, sep=";")
         self.metabolite_ids = self.metabolite_ids+list(df["Unnamed: 0"])
@@ -278,7 +255,7 @@ class GbaModel:
 
     ### Read the forward Michaelis constant matrix KM from CSV ###
     def read_KM_f_from_csv( self ):
-        KM_f_filename = self.folder+"/KM_forward.csv"
+        KM_f_filename = self.csv_model+"/KM_forward.csv"
         assert os.path.exists(KM_f_filename), "> ERROR: file "+KM_f_filename+" does not exist."
         df        = pd.read_csv(KM_f_filename, sep=";")
         df        = df.drop(["Unnamed: 0"], axis=1)
@@ -290,7 +267,7 @@ class GbaModel:
     ### Read the backward Michaelis constant matrix KM from CSV ###
     def read_KM_b_from_csv( self ):
         self.KM_b     = np.zeros(self.KM_f.shape)
-        KM_b_filename = self.folder+"/KM_backward.csv"
+        KM_b_filename = self.csv_model+"/KM_backward.csv"
         if os.path.exists(KM_b_filename):
             df        = pd.read_csv(KM_b_filename, sep=";")
             df        = df.drop(["Unnamed: 0"], axis=1)
@@ -301,7 +278,7 @@ class GbaModel:
 
     ### Read kcat forward and backward constant vectors from CSV ###
     def read_kcat_from_csv( self ):
-        kcat_filename = self.folder+"/kcat.csv"
+        kcat_filename = self.csv_model+"/kcat.csv"
         assert os.path.exists(kcat_filename), "> ERROR: file "+kcat_filename+" does not exist."
         df          = pd.read_csv(kcat_filename, sep=";")
         df          = df.drop(["Unnamed: 0"], axis=1)
@@ -318,7 +295,7 @@ class GbaModel:
 
     ### Read the list of conditions from CSV ###
     def read_conditions_from_csv( self ):
-        conditions_filename = self.folder+"/conditions.csv"
+        conditions_filename = self.csv_model+"/conditions.csv"
         assert os.path.exists(conditions_filename), "> ERROR: file "+conditions_filename+" does not exist."
         df                    = pd.read_csv(conditions_filename, sep=";")
         self.condition_params = list(df["Unnamed: 0"])
@@ -332,7 +309,7 @@ class GbaModel:
     ### Read the inhibition constants matrix KI from CSV ###
     def read_KI_from_csv( self ):
         self.KI     = np.zeros(self.Mx.shape)
-        KI_filename = self.folder+"/KI.csv"
+        KI_filename = self.csv_model+"/KI.csv"
         if os.path.exists(KI_filename):
             df          = pd.read_csv(KI_filename, sep=";")
             metabolites = list(df["Unnamed: 0"])
@@ -345,7 +322,7 @@ class GbaModel:
     ### Read the activation constants matrix KA from CSV ###
     def read_KA_from_csv( self ):
         self.KA     = np.zeros(self.Mx.shape)
-        KA_filename = self.folder+"/KA.csv"
+        KA_filename = self.csv_model+"/KA.csv"
         if os.path.exists(KA_filename):
             df          = pd.read_csv(KA_filename, sep=";")
             metabolites = list(df["Unnamed: 0"])
@@ -357,7 +334,7 @@ class GbaModel:
 
     ### Read the LP solution from CSV on request ###
     def read_LP_from_csv( self ):
-        LP_filename = self.folder+"/f0.csv"
+        LP_filename = self.csv_model+"/f0.csv"
         assert os.path.exists(LP_filename), "> ERROR: file "+LP_filename+" does not exist."
         df               = pd.read_csv(LP_filename, sep=";")
         self.LP_solution = np.array(df["f0"])
@@ -456,9 +433,9 @@ class GbaModel:
                 self.direction.append("reversible")
     
     ### Read the GBA model from CSV files ###
-    def read_csv_model( self, model_folder ):
-        assert os.path.exists(model_folder), "> ERROR: folder "+model_folder+" does not exist."
-        self.folder = model_folder
+    def read_csv_model( self, csv_model ):
+        assert os.path.exists(csv_model), "> ERROR: folder "+csv_model+" does not exist."
+        self.csv_model = csv_model
         self.read_Infos_from_csv()
         self.read_Mx_from_csv()
         self.read_KM_f_from_csv()
@@ -1081,7 +1058,7 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Save the dataset                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_data.to_csv(self.folder+"/optimums.csv", sep=';', index=False)
+        self.optimum_data.to_csv(self.csv_model+"/optimums.csv", sep=';', index=False)
         end = time.time()
         print("> All optimums were computed in "+str(end-start)+" seconds")
     
@@ -1361,6 +1338,15 @@ class GbaModel:
             print("> MCMC: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
 
+    ### Save f0 vector ###
+    def save_f0( self ):
+        ### Add the reaction name as header ###
+        f = open(self.csv_model+"/f0.csv", "w")
+        f.write("reaction;f0\n")
+        for i in range(self.nj):
+            f.write(self.reaction_ids[i]+";"+str(self.f0[i])+"\n")
+        f.close()
+
     ### Save the gradient ascent trajectory to csv ###
     def save_gradient_ascent_trajectory( self, label = "" ):
         header = "./output/"+self.name
@@ -1408,81 +1394,4 @@ class GbaModel:
         self.clear_gradient_ascent_trajectory()
         self.clear_EGD_trajectory()
         self.clear_MCMC_trajectory()
-    
-    ######################
-    #   Export methods   #
-    ######################
-
-    ### Write the model state in a file ###
-    def write_model_state( self, file, header, identifier, additional_variables ):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Write the header      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if header:
-            header = "identifier;mu;density;consistent"
-            for f_id in self.reaction_ids:
-                header += ";"+f_id
-            for c_id in self.c_ids:
-                header += ";"+c_id
-            for f_id in self.reaction_ids:
-                header += ";protein_"+f_id
-            for f_id in self.reaction_ids:
-                header += ";GCC_"+f_id
-            for var in additional_variables.keys():
-                header += ";"+var
-            file.write(header+"\n")
-            file.flush()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the model state #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        line = str(identifier)+";"+str(self.mu)+";"+str(self.density)+";"+str(int(self.consistent))
-        for val in self.f:
-            line += ";"+str(val)
-        for val in self.c:
-            line += ";"+str(val)
-        for val in self.p:
-            line += ";"+str(val)
-        for val in self.GCC_f:
-            line += ";"+str(val)
-        for var in additional_variables.keys():
-            line += ";"+str(additional_variables[var])
-        file.write(line+"\n")
-        file.flush()
-    
-    ### Write the list of model variables ###
-    def write_model_variables( self ):
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Write metabolite names #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open("./output/"+self.name+"_external_metabolite_ids.csv", "w")
-        for id in self.x_ids:
-            f.write(id+"\n")
-        f.close()
-        f = open("./output/"+self.name+"_internal_metabolite_ids.csv", "w")
-        for id in self.c_ids:
-            f.write(id+"\n")
-        f.close()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write reaction names   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open("./output/"+self.name+"_reaction_ids.csv", "w")
-        for id in self.reaction_ids:
-            f.write(id+"\n")
-        f.close()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write protein names    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open("./output/"+self.name+"_protein_ids.csv", "w")
-        for id in self.reaction_ids:
-            f.write("protein_"+id+"\n")
-        f.close()
-
-    ### Write f0 vector in a file ###
-    def write_f0( self ):
-        ### Add the reaction name as header ###
-        f = open("./csv_models/"+self.name+"/f0.csv", "w")
-        f.write("reaction;f0\n")
-        for i in range(self.nj):
-            f.write(self.reaction_ids[i]+";"+str(self.f0[i])+"\n")
-        f.close()
 

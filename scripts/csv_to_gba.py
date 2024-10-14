@@ -16,15 +16,15 @@ import sys
 import dill
 import argparse
 
-sys.path.append('./src/gbapy/')
-
-from gbapy import *
+sys.path.append('./gbapy/')
+from GbaModel import *
+#from gbapy import *
 
 ### Parse command line arguments ###
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-folder", "-folder", help="Model folder", required=True)
-    parser.add_argument("--gba-path", "-gba", help="Path of the newly created GBA model", required=True)
+    parser.add_argument("--csv-model", "-csv", help="CSV model path", required=True)
+    parser.add_argument("--gba-path", "-gba", help="Path of the newly created GBA model")
     parser.add_argument("--save-LP-solution", "-LP", action="store_true", help="Find and save the LP initial solution")
     parser.add_argument("--save-optimums", "-optimums", action="store_true", help="Find and save optimums for all conditions")
     args = parser.parse_args()
@@ -50,10 +50,12 @@ if __name__ == "__main__":
     # 1) Parse command line arguments #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     config = parse_arguments()
+    if config["gba_path"] == None:
+        config["gba_path"] = ""
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Generate the binary model    #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    print("> Export CSV model "+config["model_folder"]+" to binary format (into "+config["gba_path"]+")")
-    create_gba_model(config["model_folder"], config["gba_path"], config["save_LP_solution"], config["save_optimums"])
+    print("> Export CSV model "+config["csv_model"]+" to binary format (into "+config["gba_path"]+")")
+    create_gba_model(config["csv_model"], config["gba_path"], config["save_LP_solution"], config["save_optimums"])
 
