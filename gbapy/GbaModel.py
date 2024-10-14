@@ -1307,7 +1307,7 @@ class GbaModel:
                 ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
                     nb_fixed  += 1
-                    data_dict  = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
+                    data_dict  = {"label": label, "condition": condition, "t": nb_iterations , "mu": self.mu}
                 #Fluxfractions    
                     if 'f' in savedValues:
                         for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
