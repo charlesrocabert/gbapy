@@ -50,8 +50,8 @@ INCREASING_DT_FACTOR         = 2.0   # Factor by which the time step is increase
 INCREASING_DT_COUNT          = 100   # Number of iterations with equal mu values to increase the time step
 EXPORT_DATA_COUNT            = 1     # Frequency of data export
 
-### Dump a binary .gba model ###
-def dump_gba_model( model, path = "" ):
+### Backup a binary .gba model ###
+def backup_gba_model( model, path = "" ):
     filename = model.name+".gba"
     if path != "":
         filename = path+"/"+model.name+".gba"
@@ -93,13 +93,20 @@ def create_gba_model( csv_model, gba_path = "", save_LP = False, save_optimums =
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model.reset_variables()
-    dump_gba_model(model, gba_path)
+    backup_gba_model(model, gba_path)
     del model
 
-### Load the GBA model from a binary file ###
-def load_gba_model( gba_model ):
+### Read the GBA model from a binary file ###
+def read_csv_model( csv_model ):
+    assert os.path.exists(csv_model), "> ERROR: folder "+csv_model+" does not exist."
+    model = GbaModel()
+    model.read_from_csv(csv_model)
+    return model
+
+### Read the GBA model from a binary file ###
+def read_gba_model( gba_model ):
     assert os.path.isfile(gba_model), "> ERROR: .gba model not found."
-    assert filename.endswith(".gba"), "> ERROR: .gba model file extension is missing."
+    assert gba_model.endswith(".gba"), "> ERROR: .gba model file extension is missing."
     ifile = open(gba_model, "rb")
     model = dill.load(ifile)
     ifile.close()
@@ -433,7 +440,7 @@ class GbaModel:
                 self.direction.append("reversible")
     
     ### Read the GBA model from CSV files ###
-    def read_csv_model( self, csv_model ):
+    def read_from_csv( self, csv_model ):
         assert os.path.exists(csv_model), "> ERROR: folder "+csv_model+" does not exist."
         self.csv_model = csv_model
         self.read_Infos_from_csv()
@@ -882,7 +889,7 @@ class GbaModel:
     ### Run a gradient ascent ###
     # It corresponds to the continuous trajectory if the population was infinite
     # with overlapping generations.
-    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, savedValues = ['f'], label = 1 ):
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, savedValues = ['f'], label = 1, verbose = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -1027,14 +1034,16 @@ class GbaModel:
         end_time = time.time()
         run_time = end_time-start_time
         if t >= max_time:
-            print("> Gradient ascent: maximum time reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
+            if verbose:
+                print("> Gradient ascent: maximum time reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
             return False, run_time
         else:
-            print("> Gradient ascent: convergence reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
+            if verbose:
+                print("> Gradient ascent: convergence reached (condition="+str(condition)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
             return True, run_time
 
     ### Compute all the optimums ###
-    def compute_optimums( self, max_time = 5, initial_dt = 0.01 ):
+    def compute_optimums( self, max_time = 5, initial_dt = 0.01, verbose = False ):
         start = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optimums data frame #
@@ -1060,7 +1069,8 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.optimum_data.to_csv(self.csv_model+"/optimums.csv", sep=';', index=False)
         end = time.time()
-        print("> All optimums were computed in "+str(end-start)+" seconds")
+        if verbose:
+            print("> All optimums were computed in "+str(end-start)+" seconds")
     
     ### Run an evolutionary simulation with genetic drift (Pál & Miklós, 1998) ###
     # f(t+1) = f(t) + sigma * dmu/df + epsilon.
