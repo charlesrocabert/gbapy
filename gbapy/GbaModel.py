@@ -889,7 +889,7 @@ class GbaModel:
     ### Run a gradient ascent ###
     # It corresponds to the continuous trajectory if the population was infinite
     # with overlapping generations.
-    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, savedValues = ['f'], label = 1, verbose = False ):
+    def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, saved_values = ['f'], label = 1, verbose = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -908,29 +908,29 @@ class GbaModel:
                 #columns         = columns + self.reaction_ids
                 self.GA_tracker = pd.DataFrame(columns=columns)
             data_dict = {"label": label, "condition": condition, "t": 0.0, "dt": initial_dt, "mu": self.mu, "dmu": 0.0}
-            if 'f' in savedValues:
+            if 'f' in saved_values:
                 for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):  # Corrected
                         data_dict[reaction_id] = fluxfraction
                 data_row = pd.Series(data=data_dict)
                 self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-            if 'v' in savedValues:
+            if 'v' in saved_values:
                 for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                     data_dict[reaction_id] = flux
                 data_row = pd.Series(data=data_dict)
                 self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-            if 'b' in savedValues:
+            if 'b' in saved_values:
             # 3. Metabolites
                 for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                    data_dict[reaction_id] = metabolite
                 data_row = pd.Series(data=data_dict)
                 self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-            if 'c' in savedValues:
+            if 'c' in saved_values:
             # 4. Some other variable c
                 for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                     data_dict[reaction_id] = c
                 data_row = pd.Series(data=data_dict)
                 self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-            if 'p' in savedValues:
+            if 'p' in saved_values:
             # 5. Some other variable p
                 for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                     data_dict[reaction_id] = p
@@ -975,33 +975,33 @@ class GbaModel:
                 if track and nb_iterations%EXPORT_DATA_COUNT == 0:
                     data_dict = {"label": label, "condition": condition, "t": t, "dt": dt, "mu": self.mu, "dmu": np.abs(self.mu-previous_mu)}
                 #Fluxfractions    
-                    if 'f' in savedValues:
+                    if 'f' in saved_values:
                         for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                             data_dict[reaction_id] = fluxfraction
                         data_row        = pd.Series(data=data_dict)
                         self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 #Fluxes
-                    if 'v' in savedValues:
+                    if 'v' in saved_values:
                         for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                             data_dict[reaction_id] = flux
                         data_row = pd.Series(data=data_dict)
                         self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 #Metabolites
-                    if 'b' in savedValues:
+                    if 'b' in saved_values:
             
                         for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                             data_dict[reaction_id] = metabolite
                         data_row = pd.Series(data=data_dict)
                         self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 #c
-                    if 'c' in savedValues:
+                    if 'c' in saved_values:
             
                         for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                             data_dict[reaction_id] = c
                         data_row = pd.Series(data=data_dict)
                         self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 #p
-                    if 'p' in savedValues:
+                    if 'p' in saved_values:
             
                         for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                             data_dict[reaction_id] = p
@@ -1074,7 +1074,7 @@ class GbaModel:
     
     ### Run an evolutionary simulation with genetic drift (Pál & Miklós, 1998) ###
     # f(t+1) = f(t) + sigma * dmu/df + epsilon.
-    def EGD_simulation( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, savedValues = ['f'], label = 1 ):
+    def EGD_simulation( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, saved_values = ['f'], label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -1094,33 +1094,33 @@ class GbaModel:
             data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
 
         #Fluxfractions    
-            if 'f' in savedValues:
+            if 'f' in saved_values:
                 for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                     data_dict[reaction_id] = fluxfraction
                 data_row        = pd.Series(data=data_dict)
                 self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
         #Fluxes
-            if 'v' in savedValues:
+            if 'v' in saved_values:
                 for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                     data_dict[reaction_id] = flux
                 data_row = pd.Series(data=data_dict)
                 self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
         #Metabolites
-            if 'b' in savedValues:
+            if 'b' in saved_values:
     
                 for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                     data_dict[reaction_id] = metabolite
                 data_row = pd.Series(data=data_dict)
                 self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
         #c
-            if 'c' in savedValues:
+            if 'c' in saved_values:
     
                 for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                     data_dict[reaction_id] = c
                 data_row = pd.Series(data=data_dict)
                 self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
         #p
-            if 'p' in savedValues:
+            if 'p' in saved_values:
     
                 for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                     data_dict[reaction_id] = p
@@ -1158,33 +1158,33 @@ class GbaModel:
                 if track and nb_iterations%EXPORT_DATA_COUNT == 0:
                     data_dict = {"label": label, "condition": condition, "t": t, "mu": self.mu, "fixed": nb_fixed}
             #Fluxfractions    
-                if 'f' in savedValues:
+                if 'f' in saved_values:
                     for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                         data_dict[reaction_id] = fluxfraction
                     data_row        = pd.Series(data=data_dict)
                     self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
             #Fluxes
-                if 'v' in savedValues:
+                if 'v' in saved_values:
                     for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                         data_dict[reaction_id] = flux
                     data_row = pd.Series(data=data_dict)
                     self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
             #Metabolites
-                if 'b' in savedValues:
+                if 'b' in saved_values:
         
                     for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                         data_dict[reaction_id] = metabolite
                     data_row = pd.Series(data=data_dict)
                     self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
             #c
-                if 'c' in savedValues:
+                if 'c' in saved_values:
         
                     for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                         data_dict[reaction_id] = c
                     data_row = pd.Series(data=data_dict)
                     self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
             #p
-                if 'p' in savedValues:
+                if 'p' in saved_values:
         
                     for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                         data_dict[reaction_id] = p
@@ -1214,7 +1214,7 @@ class GbaModel:
 
     ### Run a Markov chain Monte Carlo simulation ###
     # Standard MCMC formulation (Gillespie, 1983).
-    def MCMC_simulation(self, condition = "1", max_iter = 100000, sigma = 0.01, N_e = 2.5e7, track = False,savedValues=['f'], label = 1 ):
+    def MCMC_simulation(self, condition = "1", max_iter = 100000, sigma = 0.01, N_e = 2.5e7, track = False,saved_values=['f'], label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model      #
@@ -1233,33 +1233,33 @@ class GbaModel:
                 self.MCMC_tracker = pd.DataFrame(columns=columns)
             data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu}
             #Fluxfractions    
-            if 'f' in savedValues:
+            if 'f' in saved_values:
                 for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                     data_dict[reaction_id] = fluxfraction
                 data_row        = pd.Series(data=data_dict)
                 self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
         #Fluxes
-            if 'v' in savedValues:
+            if 'v' in saved_values:
                 for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                     data_dict[reaction_id] = flux
                 data_row = pd.Series(data=data_dict)
                 self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
         #Metabolites
-            if 'b' in savedValues:
+            if 'b' in saved_values:
     
                 for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                     data_dict[reaction_id] = metabolite
                 data_row = pd.Series(data=data_dict)
                 self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
         #c
-            if 'c' in savedValues:
+            if 'c' in saved_values:
     
                 for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                     data_dict[reaction_id] = c
                 data_row = pd.Series(data=data_dict)
                 self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
         #p
-            if 'p' in savedValues:
+            if 'p' in saved_values:
     
                 for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                     data_dict[reaction_id] = p
@@ -1296,33 +1296,33 @@ class GbaModel:
                     nb_fixed  += 1
                     data_dict  = {"label": label, "condition": condition, "t": nb_iterations , "mu": self.mu}
                 #Fluxfractions    
-                    if 'f' in savedValues:
+                    if 'f' in saved_values:
                         for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                             data_dict[reaction_id] = fluxfraction
                         data_row        = pd.Series(data=data_dict)
                         self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
                 #Fluxes
-                    if 'v' in savedValues:
+                    if 'v' in saved_values:
                         for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                             data_dict[reaction_id] = flux
                         data_row = pd.Series(data=data_dict)
                         self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
                 #Metabolites
-                    if 'b' in savedValues:
+                    if 'b' in saved_values:
             
                         for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                             data_dict[reaction_id] = metabolite
                         data_row = pd.Series(data=data_dict)
                         self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
                 #c
-                    if 'c' in savedValues:
+                    if 'c' in saved_values:
             
                         for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                             data_dict[reaction_id] = c
                         data_row = pd.Series(data=data_dict)
                         self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
                 #p
-                    if 'p' in savedValues:
+                    if 'p' in saved_values:
             
                         for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                             data_dict[reaction_id] = p
