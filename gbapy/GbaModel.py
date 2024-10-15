@@ -215,7 +215,7 @@ class GbaModel:
         self.random_data  = pd.DataFrame() # Random solution data for all conditions
         self.optimum_data = pd.DataFrame() # Optimum dataframe for all conditions
         self.GA_tracker   = pd.DataFrame() # Gradient ascent trajectory tracker
-        self.EGD_tracker  = pd.DataFrame() # Evolutionary trajectory with genetic drift tracker
+        self.MC_tracker   = pd.DataFrame() # Monte Carlo with genetic drift tracker
         self.MCMC_tracker = pd.DataFrame() # MCMC trajectory tracker
         
     #############################
@@ -1072,9 +1072,9 @@ class GbaModel:
         if verbose:
             print("> All optimums were computed in "+str(end-start)+" seconds")
     
-    ### Run an evolutionary simulation with genetic drift (Pál & Miklós, 1998) ###
+    ### Run a Monte Carlo simulation with genetic drift (Pál & Miklós, 1998) ###
     # f(t+1) = f(t) + sigma * dmu/df + epsilon.
-    def EGD_simulation( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, saved_values = ['f'], label = 1 ):
+    def MC_simulation( self, condition = "1", max_time = 100000, max_iter = 100000, sigma = 0.1, N_e = 2.5e7, track = False, saved_values = ['f'], label = 1 ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the model     #
@@ -1087,10 +1087,10 @@ class GbaModel:
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
-            if self.EGD_tracker.empty:
+            if self.MC_tracker.empty:
                 columns = ['label', 'condition', 't', 'mu', 'fixed']
                 #columns = columns + self.reaction_ids
-                self.EGD_tracker = pd.DataFrame(columns=columns)
+                self.MC_tracker = pd.DataFrame(columns=columns)
             data_dict = {"label": label, "condition": condition, "t": 0.0, "mu": self.mu, "fixed": 0}
 
         #Fluxfractions    
@@ -1098,34 +1098,34 @@ class GbaModel:
                 for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                     data_dict[reaction_id] = fluxfraction
                 data_row        = pd.Series(data=data_dict)
-                self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
         #Fluxes
             if 'v' in saved_values:
                 for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                     data_dict[reaction_id] = flux
                 data_row = pd.Series(data=data_dict)
-                self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
         #Metabolites
             if 'b' in saved_values:
     
                 for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                     data_dict[reaction_id] = metabolite
                 data_row = pd.Series(data=data_dict)
-                self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
         #c
             if 'c' in saved_values:
     
                 for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                     data_dict[reaction_id] = c
                 data_row = pd.Series(data=data_dict)
-                self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
         #p
             if 'p' in saved_values:
     
                 for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                     data_dict[reaction_id] = p
                 data_row = pd.Series(data=data_dict)
-                self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Initialize the algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1162,34 +1162,34 @@ class GbaModel:
                     for reaction_id, fluxfraction in zip([rid + ".f" for rid in self.reaction_ids], self.f):
                         data_dict[reaction_id] = fluxfraction
                     data_row        = pd.Series(data=data_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
             #Fluxes
                 if 'v' in saved_values:
                     for reaction_id, flux in zip([rid + ".v" for rid in self.reaction_ids], self.v):  # Corrected
                         data_dict[reaction_id] = flux
                     data_row = pd.Series(data=data_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
             #Metabolites
                 if 'b' in saved_values:
         
                     for reaction_id, metabolite in zip([rid + ".b" for rid in self.reaction_ids], self.b):  # Corrected
                         data_dict[reaction_id] = metabolite
                     data_row = pd.Series(data=data_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
             #c
                 if 'c' in saved_values:
         
                     for reaction_id, c in zip([rid + ".c" for rid in self.reaction_ids], self.c):  # Corrected
                         data_dict[reaction_id] = c
                     data_row = pd.Series(data=data_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
             #p
                 if 'p' in saved_values:
         
                     for reaction_id, p in zip([rid + ".p" for rid in self.reaction_ids], self.p):  # Corrected
                         data_dict[reaction_id] = p
                     data_row = pd.Series(data=data_dict)
-                    self.EGD_tracker = pd.concat([self.EGD_tracker, data_row.to_frame().T], ignore_index=True)
+                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
             ### 4.3) If the model is inconsistent: ###
             else:
                 self.f_trunc = np.copy(previous_f)
@@ -1203,13 +1203,13 @@ class GbaModel:
         end_time = time.time()
         run_time = end_time-start_time
         if nb_fixed == 0 and nb_iterations < max_iter:
-            print("> EGD: simulation completed with no fixed mutation (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
+            print("> MC simulation completed with no fixed mutation (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
         elif nb_fixed > 0 and nb_iterations < max_iter:
-            print("> EGD: simulation completed (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
+            print("> MC simulation completed (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return True, run_time
         elif nb_iterations >= max_iter:
-            print("> EGD: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
+            print("> MC simulation: maximum iterations reached (condition="+condition+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+").")
             return False, run_time
 
     ### Run a Markov chain Monte Carlo simulation ###
@@ -1365,13 +1365,13 @@ class GbaModel:
         if not self.GA_tracker.empty:
             self.GA_tracker.to_csv(header+"_gradient_ascent_trajectory.csv", sep=';', index=False)
 
-    ### Save EGD trajectory to csv ###
-    def save_EGD_trajectory( self, label = "" ):
+    ### Save MC trajectory to csv ###
+    def save_MC_trajectory( self, label = "" ):
         header = "./output/"+self.name
         if label != "":
             header += "_"+str(label)
-        if not self.EGD_tracker.empty:
-            self.EGD_tracker.to_csv(header+"_EGD_trajectory.csv", sep=';', index=False)
+        if not self.MC_tracker.empty:
+            self.MC_tracker.to_csv(header+"_MC_trajectory.csv", sep=';', index=False)
     
     ### Save MCMC trajectory to csv ###
     def save_MCMC_trajectory( self, label = "" ):
@@ -1384,16 +1384,16 @@ class GbaModel:
     ### Save all trajectories to csv ###
     def save_all_trajectories( self, label = "" ):
         self.save_gradient_ascent_trajectory(label)
-        self.save_EGD_trajectory(label) 
+        self.save_MC_tracker_trajectory(label) 
         self.save_MCMC_trajectory(label)
 
     ### Clear gradient ascent trajectory ###
     def clear_gradient_ascent_trajectory( self ):
         self.GA_tracker = pd.DataFrame()
     
-    ### Clear EGD trajectory ###
-    def clear_EGD_trajectory( self ):
-        self.EGD_tracker = pd.DataFrame()
+    ### Clear MC trajectory ###
+    def clear_MC_trajectory( self ):
+        self.MC_tracker = pd.DataFrame()
     
     ### Clear MCMC trajectory ###
     def clear_MCMC_trajectory( self ):
@@ -1402,6 +1402,6 @@ class GbaModel:
     ### Clear all trajectories ###
     def clear_all_trajectories( self ):
         self.clear_gradient_ascent_trajectory()
-        self.clear_EGD_trajectory()
+        self.clear_MC_trajectory()
         self.clear_MCMC_trajectory()
 
