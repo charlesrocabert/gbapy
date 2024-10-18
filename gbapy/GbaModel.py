@@ -473,10 +473,6 @@ class GbaModel:
     #   Print functions   #
     #######################
 
-    ### Print model description ###
-    def description( self ):
-        print(self.infos)
-
     ### Print model summary ###
     def summary( self ):
         raise NotImplementedError("> ERROR: summary() method not implemented.")
