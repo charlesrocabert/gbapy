@@ -3,8 +3,7 @@
 *.Rhistory
 *.Rapp.history
 clean_folders.sh
-./deprecated/*
-./scripts/*
+scripts/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
