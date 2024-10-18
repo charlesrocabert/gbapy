@@ -4,6 +4,7 @@
 *.Rapp.history
 clean_folders.sh
 scripts/*
+deprecated/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
