@@ -8,7 +8,7 @@
 
 -----------------
 
-<p align="justify">
+<p align="center" style="font-size: 2.5em;">
 Documentation coming soon ...
 </p>
 
