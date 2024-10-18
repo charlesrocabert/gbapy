@@ -173,7 +173,7 @@ class GbaModel:
         self.a = 0  # Total proteins concentration index
 
         ### Matrix column rank ###
-        self.column_rank = 0
+        self.column_rank = 0 # Column rank of M
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
@@ -472,10 +472,6 @@ class GbaModel:
     #######################
     #   Print functions   #
     #######################
-
-    ### Print model description ###
-    def description( self ):
-        print(self.infos)
 
     ### Print model summary ###
     def summary( self ):
