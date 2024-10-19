@@ -4,7 +4,7 @@
 #***********************************************************************
 # gbapy
 # -----
-# Growth balance analysis for Python.
+# Growth balance analysis in Python.
 # 
 # Copyright © 2023-2024 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/gbapy
