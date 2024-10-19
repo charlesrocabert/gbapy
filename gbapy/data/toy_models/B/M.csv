@@ -1,0 +1,5 @@
+;rxn1;rxn2;Ribosome
+x_G;-1;0;0
+G;1;-1;0
+AA;0;1;-1
+Protein;0;0;1

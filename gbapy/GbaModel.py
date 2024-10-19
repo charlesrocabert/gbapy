@@ -25,11 +25,14 @@
 
 import os
 import sys
+import csv
 import dill
 import time
+import pkgutil
 import numpy as np
 import pandas as pd
 import gurobipy as gp
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 env = gp.Env(empty=True)
@@ -110,6 +113,13 @@ def read_gba_model( gba_model ):
     ifile = open(gba_model, "rb")
     model = dill.load(ifile)
     ifile.close()
+    return model
+
+### Load a toy model included in the Python package ###
+def load_toy_model( model_name ):
+    model_dir  = Path(pkgutil.resolve_name("gbapy.data").__file__).parent
+    model_path = Path(model_dir , "toy_models/"+model_name)
+    model      = read_csv_model(str(model_path))
     return model
 
 
@@ -228,6 +238,7 @@ class GbaModel:
         infos_columns  = ['Type', 'Content']
         self.infos     = pd.DataFrame(columns=infos_columns)
         Infos_filename = self.csv_model+"/Infos.csv"
+        print(Infos_filename)
         assert os.path.exists(Infos_filename), "> ERROR: file "+Infos_filename+" does not exist."
         f = open(Infos_filename, "r")
         l = f.readline()
@@ -883,8 +894,6 @@ class GbaModel:
             #         self.f_trunc[j] = -MIN_FLUX_FRACTION
     
     ### Run a gradient ascent ###
-    # It corresponds to the continuous trajectory if the population was infinite
-    # with overlapping generations.
     def gradient_ascent( self, condition = "1", max_time = 5.0, initial_dt = 0.01, track = False, saved_values = ['f'], label = 1, verbose = False ):
         start_time = time.time()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

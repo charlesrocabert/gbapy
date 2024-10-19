@@ -1,0 +1,9 @@
+Name;C
+Description;GBA model with four reactions
+Units;Km: g/L
+Units;kcat: 1/h ([mass of products]/[mass of protein]/h)
+Units;rho: g/L
+Files;M: Mass fraction matrix
+Files;KM_forward: Forward Michaelis constant matrix
+Files;kcat: Turnover numbers
+Files;conditions: Value of rho and external concentrations at different growth conditions
