@@ -9,7 +9,6 @@ deprecated/*
 
 # tutorials under writing
 tutorials/basic_manipulations_tutorial.ipynb
-tutorials/csv_models_tutorial.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
