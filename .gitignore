@@ -8,7 +8,7 @@ scripts/*
 deprecated/*
 
 # tutorials under writing
-tutorials/basic_manipulations_tutorial.ipynb
+tutorials/basic_model_manipulations_tutorial.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
