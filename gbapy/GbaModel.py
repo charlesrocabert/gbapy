@@ -115,8 +115,14 @@ def read_gba_model( gba_model ):
     ifile.close()
     return model
 
-### Load a toy model included in the Python package ###
-def load_toy_model( model_name ):
+### Get the path of a GBA toy model included in the Python package as CSV files ###
+def get_gba_toy_model_path( model_name ):
+    model_dir  = Path(pkgutil.resolve_name("gbapy.data").__file__).parent
+    model_path = Path(model_dir , "toy_models/"+model_name)
+    return str(model_path)
+
+### Read a GBA toy model included in the Python package as CSV files ###
+def read_gba_toy_model( model_name ):
     model_dir  = Path(pkgutil.resolve_name("gbapy.data").__file__).parent
     model_path = Path(model_dir , "toy_models/"+model_name)
     model      = read_csv_model(str(model_path))
