@@ -2,11 +2,8 @@
 # coding: utf-8
 
 #***********************************************************************
-# gbapy
-# -----
-# Growth balance analysis in Python.
-# 
-# Copyright © 2023-2024 Charles Rocabert, Furkan Mert
+# GBApy (Growth Balance Analysis for Python)
+# Copyright © 2024-2025 Charles Rocabert
 # Web: https://github.com/charlesrocabert/gbapy
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,6 +20,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #***********************************************************************
 
+from .Enumerations import *
 from .GbaModel import *
-from .GbaPlots import *
 
