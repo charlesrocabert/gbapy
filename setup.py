@@ -6,7 +6,7 @@
 # -----
 # Growth balance analysis in Python.
 # 
-# Copyright © 2023-2025 Charles Rocabert, Furkan Mert
+# Copyright © 2024-2025 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/gbapy
 #
 # This program is free software: you can redistribute it and/or modify

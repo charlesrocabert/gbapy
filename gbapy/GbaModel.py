@@ -3,7 +3,7 @@
 
 #***********************************************************************
 # GBApy (Growth Balance Analysis for Python)
-# Copyright © 2024-2025 Charles Rocabert
+# Copyright © 2024-2025 Charles Rocabert, Furkan Mert
 # Web: https://github.com/charlesrocabert/gbapy
 #
 # This program is free software: you can redistribute it and/or modify
@@ -22,12 +22,12 @@
 
 """
 Filename: GbaModel.py
-Author: Charles Rocabert
+Author: Charles Rocabert, Furkan Mert
 Date: 2024-10-22
 Description:
     GbaModel class of the GBApy module.
 License: GNU General Public License v3.0
-Copyright: © 2024-2025 Charles Rocabert
+Copyright: © 2024-2025 Charles Rocabert, Furkan Mert
 """
 
 import os
@@ -307,7 +307,7 @@ class GbaModel:
     
     TO DO
     """
-    
+
     def __init__( self, name: str ) -> None:
 
         """
