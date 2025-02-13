@@ -1619,11 +1619,11 @@ class GbaModel:
         run_time = end_time-start_time
         if t >= max_time:
             if verbose:
-                print("> Gradient ascent: maximum time reached (condition="+str(condition_id)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
+                print("> Gradient ascent: maximum time reached (condition="+str(condition_id)+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+")")
             return False, run_time
         else:
             if verbose:
-                print("> Gradient ascent: convergence reached (condition="+str(condition_id)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
+                print("> Gradient ascent: convergence reached (condition="+str(condition_id)+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+")")
             return True, run_time
 
     def compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01,
