@@ -40,7 +40,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 	long_description = f.read()
 
 setup(
-	name                          = "gbapy",
+	name                          = "gba",
 	version                       = "0.01",
 	license                       = "GNU General Public License v3 (GPLv3)",
 	description                   = "GBApy (growth balance analysis in Python) Python Package",
@@ -60,10 +60,10 @@ setup(
 	keywords         = "constraint-based-modeling growth-balance-analysis systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
 	packages         = find_packages(exclude=["contrib", "docs", "tests"]),
 	package_data= {
-        'gbapy.data': [ '**/*.csv', ]
+        'gba.data': [ '**/*.csv', ]
     },
 	python_requires  = ">=3",
-	install_requires = ["argparse", "dill", "numpy", "pandas", "gurobipy", "matplotlib"],
+	install_requires = ["argparse", "dill", "numpy", "pandas", "gurobipy"],
 	project_urls     = {
 	"Source": "https://github.com/charlesrocabert/gbapy"
 	},

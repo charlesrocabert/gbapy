@@ -20,6 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #***********************************************************************
 
-from .Enumerations import *
-from .GbaModel import *
+from gba import (
+    Enumerations,
+    GbaModel
+)
+from gba.Enumerations import *
+from gba.GbaModel import *
 

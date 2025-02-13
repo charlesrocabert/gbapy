@@ -41,12 +41,10 @@ import pandas as pd
 import gurobipy as gp
 from pathlib import Path
 from typing import Optional
-import plotly.express as px
-import plotly.graph_objects as go
 from IPython.display import display_html
 
 
-from Enumerations import *
+from .Enumerations import *
 #from GbaBuilder import *
 
 # Setting gurobi environment
@@ -2218,7 +2216,7 @@ def get_toy_model_path( model_name: str ) -> str:
     str
         Path to the toy model.
     """
-    model_dir  = Path(pkgutil.resolve_name("gbapy.data").__file__).parent
+    model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
     model_path = Path(model_dir , "toy_models/"+model_name)
     return str(model_path)
 
@@ -2236,7 +2234,7 @@ def read_toy_model( name: str ) -> GbaModel:
     GbaModel
         The loaded GBA model.
     """
-    model_dir  = Path(pkgutil.resolve_name("gbapy.data").__file__).parent
+    model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
     model_path = str(Path(model_dir , "toy_models/"))
     model      = read_csv_model(name=name, path=model_path)
     return model
