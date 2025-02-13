@@ -1649,8 +1649,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the optima data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        columns           = ["condition", "mu", "density", "converged", "run_time"]
-        columns           = columns + self.reaction_ids
+        columns = ["condition", "mu", "density", "converged", "run_time"]
+        for r_id in self.reaction_ids:
+            columns.append("f_"+r_id)
         self.optima_data = pd.DataFrame(columns=columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Calculate the optima             #
@@ -2056,107 +2057,46 @@ class GbaModel:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def summary( self ) -> None:
-        raise NotImplementedError("This method is not implemented yet.")
-    
-        header  = " -------- Model report: " + self.name + " --------\n"
-        report  = "\n"
-        report += header
-        report += "| • Nb metabolites          = " + str(self.ni) + "\n"
-        report += "| • Nb external metabolites = " + str(self.nx) + "\n"
-        report += "| • Nb internal metabolites = " + str(self.nc) + "\n"
-        report += " " + "".join(["-"]*(len(header)-2))
-        report += "\n"
-        report += "| • Nb reactions          = " + str(self.nj) + "\n"
-        report += "| • Nb exchange reactions = " + str(self.ns) + "\n"
-        report += "| • Nb internal reactions = " + str(self.ne) + "\n"
-        report += "| • Column rank           = " + str(self.column_rank) + "\n"
-        report += " " + "".join(["-"]*(len(header)-2))
-        report += "\n"
-        return report
-
-
-        # """
-        # Print a summary of the GBA builder.
-        # """
-        # #~~~~~~~~~~~~~~~~~~~~~~~~#
-        # # 1) Compile information #
-        # #~~~~~~~~~~~~~~~~~~~~~~~~#
-        # df1 = {
-        #     "Category": ["Proteins", "Metabolites", "Reactions"],
-        #     "Count": [len(self.proteins), len(self.metabolites), len(self.reactions)]
-        # }
-        # df1 = pd.DataFrame(df1)
-        # df2 = {
-        #     "Category": ["Small molecules", "Macro-molecules", "DNA(s)", "RNA(s)", "Proteins", "Unknown"],
-        #     "Count": [
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SmallMolecule]),
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MacroMolecule]),
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.DNA]),
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.RNA]),
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Protein]),
-        #         len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Unknown])
-        #     ],
-        #     "Percentage": [
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SmallMolecule])/len(self.metabolites)*100:.2f}%",
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MacroMolecule])/len(self.metabolites)*100:.2f}%",
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.DNA])/len(self.metabolites)*100:.2f}%",
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.RNA])/len(self.metabolites)*100:.2f}%",
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Protein])/len(self.metabolites)*100:.2f}%",
-        #         f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Unknown])/len(self.metabolites)*100:.2f}%"
-        #     ]
-        # }
-        # df2 = pd.DataFrame(df2)
-        # df3 = {
-        #     "Category": ["Metabolic", "Transport", "Exchange"],
-        #     "Count": [
-        #         len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic]),
-        #         len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport]),
-        #         len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])
-        #     ],
-        #     "Percentage": [
-        #         f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic])/len(self.reactions)*100:.2f}%",
-        #         f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport])/len(self.reactions)*100:.2f}%",
-        #         f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])/len(self.reactions)*100:.2f}%"
-        #     ]
-        # }
-        # df3 = pd.DataFrame(df3)
-        # df4 = {
-        #     "Category": ["Forward", "Backward", "Reversible"],
-        #     "Count": [
-        #         len([x for x in self.reactions.values() if x.direction == ReactionDirection.Forward]),
-        #         len([x for x in self.reactions.values() if x.direction == ReactionDirection.Backward]),
-        #         len([x for x in self.reactions.values() if x.direction == ReactionDirection.Reversible])
-        #     ],
-        #     "Percentage": [
-        #         f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Forward])/len(self.reactions)*100:.2f}%",
-        #         f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Backward])/len(self.reactions)*100:.2f}%",
-        #         f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Reversible])/len(self.reactions)*100:.2f}%"
-        #     ]
-        # }
-        # df4 = pd.DataFrame(df4)
-        # #~~~~~~~~~~~~~~~~~~~~~~~~#
-        # # 2) Display tables      #
-        # #~~~~~~~~~~~~~~~~~~~~~~~~#
-        # html_str  = "<h1>GBA build "+self.name+" summary</h1>"
-        # html_str += "<table>"
-        # html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-        # html_str += "<h2 style='text-align: left;'>General</h2>"
-        # html_str += df1.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
-        # html_str += "</td>"
-        # html_str += "<td style='vertical-align:top'>"
-        # html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
-        # html_str += df2.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
-        # html_str += "</td>"
-        # html_str += "<td style='vertical-align:top'>"
-        # html_str += "<h2 style='text-align: left;'>Reaction types</h2>"
-        # html_str += df3.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
-        # html_str += "</td>"
-        # html_str += "<td style='vertical-align:top'>"
-        # html_str += "<h2 style='text-align: left;'>Reaction directions</h2>"
-        # html_str += df4.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
-        # html_str += "</td></tr>"
-        # html_str += "</table>"
-        # display_html(html_str,raw=True)
+        """
+        Print a summary of the GBA model.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Compile information #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        df1 = {
+            "Category": ["Nb metabolites", "Nb external metabolites", "Nb internal metabolites"],
+            "Count": [self.ni, self.nx, self.nc]
+        }
+        df1 = pd.DataFrame(df1)
+        df2 = {
+            "Category": ["Nb reactions", "Nb exchange reactions", "Nb internal reactions"],
+            "Count": [self.nj, self.ns, self.ne]
+        }
+        df2 = pd.DataFrame(df2)
+        df3 = {
+            "Category": ["Column rank", "Is full column rank?"],
+            "Count": [self.column_rank, self.full_column_rank]
+        }
+        df3 = pd.DataFrame(df3)
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Display tables      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        html_str  = "<h1>GBA model "+self.name+" summary</h1>"
+        html_str += "<table>"
+        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+        html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
+        html_str += df1.to_html(escape=False, index=False)
+        html_str += "</td>"
+        html_str += "<td style='vertical-align:top'>"
+        html_str += "<h2 style='text-align: left;'>Reactions</h2>"
+        html_str += df2.to_html(escape=False, index=False)
+        html_str += "</td>"
+        html_str += "<td style='vertical-align:top'>"
+        html_str += "<h2 style='text-align: left;'>Matrix rank</h2>"
+        html_str += df3.to_html(escape=False, index=False)
+        html_str += "</td></tr>"
+        html_str += "</table>"
+        display_html(html_str,raw=True)
 
 
 def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
@@ -2178,28 +2118,6 @@ def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
     assert os.path.exists(path+"/"+name), "> Error: the folder "+path+"/"+name+" does not exist."
     model = GbaModel(name)
     model.read_from_csv(path=path)
-    return model
-
-def read_gba_model( name: str, path: Optional[str] = "." ) -> GbaModel:
-    """
-    Read a GBA model from a binary file.
-
-    Parameters
-    ----------
-    name : str
-        Name of the GBA model.
-    path : Optional[str], default="."
-        Path to the binary file.
-
-    Returns
-    -------
-    GbaModel
-        The loaded GBA model.
-    """
-    assert os.path.isfile(path+"/"+name+".gba"), f"> Error: .gba model {path+"/"+name+".gba"} not found."
-    ifile = open(path+"/"+name+".gba", "rb")
-    model = dill.load(ifile)
-    ifile.close()
     return model
 
 def get_toy_model_path( model_name: str ) -> str:
