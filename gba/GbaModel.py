@@ -608,7 +608,7 @@ class GbaModel:
             Path to the CSV file.
         """
         self.constant_reactions_loaded = False
-        filename                       = path+"/"+self.name+"/constant.csv"
+        filename                       = path+"/"+self.name+"/constants.csv"
         if os.path.exists(filename):
             f = open(filename, "r")
             l = f.readline()
