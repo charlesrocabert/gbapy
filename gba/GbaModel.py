@@ -189,8 +189,8 @@ class GbaModel:
     ============
     LP_solution : np.array
         Linear programming solution.
-    optimum_solutions : dict
-        Optimum f vectors for all conditions.
+    optimal_solutions : dict
+        Optimal f vectors for all conditions.
     random_solutions : dict
         Random f vectors.
 
@@ -242,8 +242,8 @@ class GbaModel:
     ===========
     random_data : pd.DataFrame
         Random solution data for all conditions.
-    optimum_data : pd.DataFrame
-        Optimum dataframe for all conditions.
+    optima_data : pd.DataFrame
+        Optima dataframe for all conditions.
     GA_tracker : pd.DataFrame
         Gradient ascent trajectory tracker.
     MC_tracker : pd.DataFrame
@@ -393,7 +393,7 @@ class GbaModel:
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.LP_solution       = np.array([]) # Linear programming solution
-        self.optimum_solutions = {}           # Optimum f vectors for all conditions
+        self.optimal_solutions = {}           # Optimal f vectors for all conditions
         self.random_solutions  = {}           # Random f vectors
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -427,7 +427,7 @@ class GbaModel:
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.random_data  = pd.DataFrame() # Random solution data for all conditions
-        self.optimum_data = pd.DataFrame() # Optimum dataframe for all conditions
+        self.optima_data  = pd.DataFrame() # Optima dataframe for all conditions
         self.GA_tracker   = pd.DataFrame() # Gradient ascent trajectory tracker
         self.MC_tracker   = pd.DataFrame() # Monte Carlo with genetic drift tracker
         self.MCMC_tracker = pd.DataFrame() # MCMC trajectory tracker
@@ -1338,15 +1338,15 @@ class GbaModel:
         assert nb_solutions > 0, f"> Error: number of solutions must be greater than 0."
         assert max_trials >= nb_solutions, f"> Error: number of trials must be greater than the number of solutions."
         assert min_mu >= 0.0, f"> Error: minimal growth rate must be positive."
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the optimums data frame #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the random data frame #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         columns          = ["condition", "mu", "density"]
         columns          = columns + self.reaction_ids
         self.random_data = pd.DataFrame(columns=columns)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Find the random solutions          #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Find the random solutions        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_condition(condition_id)
         self.random_solutions.clear()
         solutions = 0
@@ -1626,10 +1626,10 @@ class GbaModel:
                 print("> Gradient ascent: convergence reached (condition="+str(condition_id)+",\tmu="+str(round(self.mu, 5))+",\tnb iterations="+str(nb_iterations)+",\tnb fixed="+str(nb_fixed)+")")
             return True, run_time
 
-    def compute_optimums( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01,
-                          verbose: Optional[bool] = False ) -> float:
+    def compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01,
+                        verbose: Optional[bool] = False ) -> float:
         """
-        Compute the optimum by gradient ascent for all conditions.
+        Compute the optima by gradient ascent for all conditions.
 
         Parameters
         ----------
@@ -1646,31 +1646,31 @@ class GbaModel:
             Run time.
         """
         start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the optimums data frame #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Initialize the optima data frame #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         columns           = ["condition", "mu", "density", "converged", "run_time"]
         columns           = columns + self.reaction_ids
-        self.optimum_data = pd.DataFrame(columns=columns)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Calculate the optimums             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimum_solutions.clear()
+        self.optima_data = pd.DataFrame(columns=columns)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Calculate the optima             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.optimal_solutions.clear()
         for condition_id in self.condition_ids:
             self.set_f0(self.LP_solution)
             converged, run_time = self.gradient_ascent(condition_id=condition_id, max_time=max_time, initial_dt=initial_dt)
             data_dict           = {"condition": condition_id, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             self.track_variables(["f"], data_dict)
             data_row                             = pd.Series(data=data_dict)
-            self.optimum_data                    = pd.concat([self.optimum_data, data_row.to_frame().T], ignore_index=True)
-            self.optimum_solutions[condition_id] = np.copy(self.f)
+            self.optima_data                     = pd.concat([self.optima_data, data_row.to_frame().T], ignore_index=True)
+            self.optimal_solutions[condition_id] = np.copy(self.f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Return the result                  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
         if verbose:
-            print(f"> All optimums were computed in {run_time} seconds")
+            print(f"> All optima were computed in {run_time} seconds")
         return run_time
     
     def MC_simulation( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
@@ -1938,9 +1938,9 @@ class GbaModel:
         if not self.random_data.empty:
             self.random_data.to_csv(header+"_random_solutions.csv", sep=';', index=False)
     
-    def save_optimums( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
+    def save_optima( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
         """
-        Save the optimum data to CSV.
+        Save the optima data to CSV.
 
         Parameters
         ----------
@@ -1953,8 +1953,8 @@ class GbaModel:
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
-        if not self.optimum_data.empty:
-            self.optimum_data.to_csv(header+"_optimums.csv", sep=';', index=False)
+        if not self.optima_data.empty:
+            self.optima_data.to_csv(header+"_optima.csv", sep=';', index=False)
     
     def save_gradient_ascent_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
         """
@@ -2278,7 +2278,7 @@ def load_gba_model( path: str ) -> GbaModel:
     ifile.close()
     return model
 
-def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optimums: Optional[bool] = False ) -> None:
+def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
     """
     Create a GBA model from CSV files, and save it as a binary file.
 
@@ -2292,8 +2292,8 @@ def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[s
         Path to save the GBA model.
     save_LP : Optional[bool], default=False
         Save the LP solution.
-    save_optimums : Optional[bool], default=False
-        Save the optimums.
+    save_optima : Optional[bool], default=False
+        Save the optima.
     """
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Create and load the model from CSV files #
@@ -2314,13 +2314,13 @@ def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[s
         else:
             raise Exception("> Error: model is inconsistent with condition 1. f0 vector cannot be saved.")
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 3) Compute and save optimums if requested   #
+    # 3) Compute and save optima if requested     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if save_optimums:
-        print("> Computing optimums for model "+model.name+"...")
+    if save_optima:
+        print("> Computing optima for model "+model.name+"...")
         if not save_LP:
             model.read_LP_from_csv(path=path)
-        model.compute_optimums(max_time=10000, initial_dt=0.01)
+        model.compute_optima(max_time=10000, initial_dt=0.01)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
