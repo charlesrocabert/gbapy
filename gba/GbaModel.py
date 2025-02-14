@@ -2098,6 +2098,9 @@ class GbaModel:
         html_str += "</table>"
         display_html(html_str,raw=True)
 
+#~~~~~~~~~~~~~~~~~~~#
+# Utility functions #
+#~~~~~~~~~~~~~~~~~~~#
 
 def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
     """

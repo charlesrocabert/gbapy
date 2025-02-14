@@ -35,9 +35,9 @@ import sys
 import numpy as np
 from typing import Optional
 
-from Enumerations import *
-from Species import *
-from GbaBuilder import *
+from .Enumerations import *
+from .Species import *
+from .GbaBuilder import *
 
 
 class Reaction:

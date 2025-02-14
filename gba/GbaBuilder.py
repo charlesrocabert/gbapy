@@ -4,7 +4,7 @@
 #***********************************************************************
 # GBApy (Growth Balance Analysis for Python)
 # Copyright © 2024-2025 Charles Rocabert
-# Web: https://github.com/charlesrocabert/GBApy
+# Web: https://github.com/charlesrocabert/gbapy
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,10 +39,10 @@ import pandas as pd
 from typing import Optional
 from IPython.display import display_html
 
-from Enumerations import *
-from Species import Protein, Metabolite
-from Reaction import Reaction
-from GbaModel import GbaModel
+from .Enumerations import *
+from .Species import Protein, Metabolite
+from .Reaction import Reaction
+from .GbaModel import GbaModel
 
 
 class GbaBuilder:
@@ -1702,7 +1702,7 @@ class GbaBuilder:
 # Utility functions #
 #~~~~~~~~~~~~~~~~~~~#
 
-def backup_GBA_builder( builder: GbaBuilder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
+def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
     """
     Backup a GBA builder in binary format (extension .gbabuild).
 
@@ -1727,7 +1727,7 @@ def backup_GBA_builder( builder: GbaBuilder, name: Optional[str] = "", path: Opt
     ofile.close()
     assert os.path.isfile(filename), "> Error: .gbabuild file creation failed."
 
-def load_GBA_builder( path: str ) -> GbaBuilder:
+def load_gba_builder( path: str ) -> GbaBuilder:
     """
     Load a GBA builder from a binary file.
 
