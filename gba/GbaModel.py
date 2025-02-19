@@ -771,7 +771,6 @@ class GbaModel:
         term1  = (1-self.sM[1:].dot(self.f_trunc))/self.sM[0]
         self.f = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
     
-    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Analytical methods              #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
