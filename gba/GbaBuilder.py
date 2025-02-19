@@ -162,7 +162,7 @@ class GbaBuilder:
         Add an external condition to the GBA model.
     clear_constant_reactions() -> None
         Clear all constant reactions from the GBA model.
-    define_constant_reaction( reaction_id: str, value: float ) -> None
+    add_constant_reaction( reaction_id: str, value: float ) -> None
         Make GBA reaction constant to a given flux value.
     check_model( test_structure: Optional[bool] = False ) -> None
         Detect missing molecular masses, kinetic parameters and connectivity issues in the model.
@@ -716,9 +716,9 @@ class GbaBuilder:
         """
         self.GBA_constant_reactions = {}
     
-    def define_constant_reaction( self, reaction_id: str, value: float ) -> None:
+    def add_constant_reaction( self, reaction_id: str, value: float ) -> None:
         """
-        Make GBA reaction constant to a given flux value.
+        Make a GBA reaction constant to a given flux value.
 
         Parameters
         ----------

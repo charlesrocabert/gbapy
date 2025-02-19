@@ -56,254 +56,6 @@ env.start()
 class GbaModel:
     """
     Class to manipulate GBA models.
-
-    Attributes
-    ----------
-
-    name : str
-        Name of the GBA build.
-
-    1) GBA model
-    ============
-
-    1.1) Identifier lists
-    ---------------------
-    metabolite_ids : list
-        List of all metabolite ids.
-    x_ids : list
-        List of external metabolite ids.
-    c_ids : list
-        List of internal metabolite ids.
-    reaction_ids : list
-        List of reaction ids.
-    condition_ids : list
-        List of condition ids.
-    condition_params : list
-        List of condition parameter ids.
-    
-    1.2) Model structure
-    --------------------
-    Mx : np.array
-        Total mass fraction matrix.
-    M : np.array
-        Internal mass fraction matrix.
-    kcat_f : np.array
-        Forward kcat vector.
-    kcat_b : np.array
-        Backward kcat vector.
-    KM_f : np.array
-        Forward KM matrix.
-    KM_b : np.array
-        Backward KM matrix.
-    KA : np.array
-        KA matrix.
-    KI : np.array
-        KI matrix.
-    rKI : np.array
-        1/KI matrix.
-    reversible : list
-        Indicates if the reaction is reversible.
-    kinetic_model : list
-        Indicates the kinetic model of the reaction.
-    direction : list
-        Indicates the direction of the reaction.
-    conditions : np.array
-        List of conditions.
-    constant_reactions : dict
-        Constant reactions.
-    
-    1.3) Proteomics
-    ---------------
-    protein_contribution : dict
-        Protein contribution to each reaction.
-    proteomics : dict
-        Predicted proteomics.
-
-    1.4) Loaded objects
-    -------------------
-    Mx_loaded : bool
-        Is the mass fraction matrix loaded?
-    kcat_loaded : bool
-        Are the kcat constants loaded?
-    KM_f_loaded : bool
-        Are the KM forward constants loaded?
-    KM_b_loaded : bool
-        Are the KM backward constants loaded?
-    KA_loaded : bool
-        Are the KA constants loaded?
-    KI_loaded : bool
-        Are the KI constants loaded?
-    conditions_loaded : bool
-        Are the conditions loaded?
-    constant_reactions_loaded : bool
-        Are the constant reactions loaded?
-    protein_contribution_loaded : bool
-        Are the protein contributions loaded?
-    LP_solution_loaded : bool
-        Is the LP solution loaded?
-    
-    2) GBA model constants
-    ======================
-
-    2.1) Vector lengths
-    -------------------
-    nx : int
-        Number of external metabolites.
-    nc : int
-        Number of internal metabolites.
-    ni : int
-        Total number of metabolites.
-    nj : int
-        Number of reactions.
-
-    2.2) Indices for reactions
-    --------------------------
-    sM : list
-        Columns sum of M.
-    e : list
-        Enzymatic reaction indices.
-    s : list
-        Transport reaction indices.
-    r : int
-        Ribosome reaction index.
-    ne : int
-        Number of enzymatic reactions.
-    ns : int
-        Number of transport reactions.
-
-    2.3) Indices
-    ------------
-    m : list
-        Metabolite indices.
-    a : int
-        Total proteins concentration index.
-
-    2.4) Matrix column rank
-    -----------------------
-    column_rank : int
-        Column rank of M.
-    full_column_rank : bool
-        Does the matrix have full column rank?
-
-    3) Solutions
-    ============
-    LP_solution : np.array
-        Linear programming solution.
-    optimal_solutions : dict
-        Optimal f vectors for all conditions.
-    random_solutions : dict
-        Random f vectors.
-
-    4) GBA model variables
-    ======================
-    tau_j : np.array
-        Tau values (turnover times).
-    ditau_j : np.array
-        Tau derivative values.
-    x : np.array
-        External metabolite concentrations.
-    c : np.array
-        Internal metabolite concentrations.
-    xc : np.array
-        Metabolite concentrations.
-    v : np.array
-        Fluxes vector.
-    p : np.array
-        Protein concentrations vector.
-    b : np.array
-        Biomass fractions vector.
-    density : float
-        Cell's relative density.
-    mu : float
-        Growth rate.
-    consistent : bool
-        Is the model consistent?
-    adjust_concentrations : bool
-        Adjust concentrations to avoid negative values.
-
-    5) GBA model dynamical variables
-    ================================
-    condition : str
-        External condition.
-    rho : float
-        Total density.
-    f0 : np.array
-        Initial LP solution.
-    dmu_f : np.array
-        Local mu derivatives with respect to f.
-    GCC_f : np.array
-        Local growth control coefficients with respect to f.
-    f_trunc : np.array
-        Truncated f vector (first element is removed).
-    f : np.array
-        Flux fractions vector.
-
-    6) Trackers
-    ===========
-    random_data : pd.DataFrame
-        Random solution data for all conditions.
-    optima_data : pd.DataFrame
-        Optima dataframe for all conditions.
-    GA_tracker : pd.DataFrame
-        Gradient ascent trajectory tracker.
-    MC_tracker : pd.DataFrame
-        Monte Carlo with genetic drift tracker.
-    MCMC_tracker : pd.DataFrame
-        MCMC trajectory tracker.
-
-    Methods
-    -------
-
-    1) Model loading methods
-    ========================
-    read_Mx_from_csv( path: Optional[str] = "." ) -> None
-        Read the mass fraction matrix M from a CSV file.
-    read_kcat_from_csv( path: Optional[str] = "." ) -> None
-        Read the kcat forward and backward constant vectors from a CSV file.
-    read_KM_f_from_csv( path: Optional[str] = "." ) -> None
-        Read the forward Michaelis constant matrix KM from a CSV file.
-    read_KM_b_from_csv( path: Optional[str] = "." ) -> None
-        Read the backward Michaelis constant matrix KM from a CSV file.
-    read_KA_from_csv( path: Optional[str] = "." ) -> None
-        Read the activation constants matrix KA from a CSV file.
-    read_KI_from_csv( path: Optional[str] = "." ) -> None
-        Read the inhibition constants matrix KI from a CSV file.
-    read_conditions_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of conditions from a CSV file.
-    read_constant_reactions_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of constant reactions from a CSV file.
-    read_protein_contribution_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of protein contributions from a CSV file.
-    read_LP_from_csv( path: Optional[str] = "." ) -> None
-        Read the LP solution from a CSV file (on request).
-    check_model_loading( verbose: Optional[bool] = False ) -> None
-        Check if the model is loaded correctly.
-    initialize_model_mathematical_variables() -> None
-        Initialize the model mathematical variables.
-    read_from_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Read the GBA model from CSV files.
-    read_from_variables( builder ) -> None
-        Read the GBA model diretly from variables.
-
-    2) Getters
-    ==========
-    get_condition( condition_id: str, condition_param: str ) -> float
-        Get the condition value.
-    get_trajectory( self, algorithm: str, variable: str ) -> np.array
-        Get the trajectory of a variable.
-    
-    3) Setters
-    ==========
-    reset_variables() -> None
-        Reset the model variables.
-    set_condition( condition_id: str ) -> None
-        Set the external condition.
-    set_f0( f0: np.array ) -> None
-        Set the initial LP solution.
-    set_f()
-        Set the flux fractions vector.
-    
-    TO DO
     """
 
     def __init__( self, name: str ) -> None:
@@ -895,6 +647,70 @@ class GbaModel:
     # 3) Setters                         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+    def clear_conditions( self ) -> None:
+        """
+        Clear all external conditions from the GBA model.
+        """
+        self.condition_ids    = []
+        self.condition_params = ["rho"] + self.x_ids
+        self.conditions       = np.array([])
+    
+    def add_condition( self, condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None:
+        """
+        Add an external condition to the GBA model.
+
+        Parameters
+        ----------
+        condition_id : int
+            Identifier of the condition.
+        rho : float
+            Total density of the cell (g/L).
+        default_concentration : float
+            Default concentration of metabolites (g/L).
+        metabolites : dict[str, float]
+            Dictionary of metabolite concentrations (g/L).
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Assertions                             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        assert condition_id > 0, "> Error: The condition identifier must be positive"
+        assert condition_id not in self.condition_ids, f"> Error: Condition '{condition_id}' already exists"
+        assert rho > 0.0, "> Error: The total density must be positive"
+        assert default_concentration >= 0.0, "> Error: The default concentration must be positive"
+        if metabolites is not None:
+            for m_id, concentration in metabolites.items():
+                assert m_id in self.metabolites, f"> Error: Metabolite '{m_id}' does not exist"
+                assert m_id in self.condition_params, f"> Error: Metabolite '{m_id}' is not a condition parameter"
+                assert concentration >= 0.0, f"> Error: The concentration of metabolite '{m_id}' must be positive"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Set the condition                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.GBA_conditions[condition_id] = {"rho": rho}
+        self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.External})
+        if metabolites is not None:
+            for m_id, concentration in metabolites.items():
+                self.GBA_conditions[condition_id][m_id] = concentration
+    
+    def clear_constant_reactions( self ) -> None:
+        """
+        Clear all constant reactions from the GBA model.
+        """
+        self.constant_reactions = {}
+    
+    def add_constant_reaction( self, reaction_id: str, value: float ) -> None:
+        """
+        Make a GBA reaction constant to a given flux value.
+
+        Parameters
+        ----------
+        reaction_id : str
+            Identifier of the reaction.
+        value : float
+            Flux value.
+        """
+        assert reaction_id not in self.reaction_ids, "> Error: unknown reaction identifier "+reaction_id+"."
+        self.constant_reactions[reaction_id] = value
+    
     def reset_variables( self ) -> None:
         """
         Reset the model variables (used before binary export).
@@ -954,6 +770,7 @@ class GbaModel:
         """
         term1  = (1-self.sM[1:].dot(self.f_trunc))/self.sM[0]
         self.f = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
+    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Analytical methods              #
