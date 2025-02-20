@@ -41,6 +41,9 @@ import pandas as pd
 import gurobipy as gp
 from pathlib import Path
 from typing import Optional
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from IPython.display import display_html
 
 
@@ -616,30 +619,36 @@ class GbaModel:
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
 
-    def get_trajectory( self, algorithm: str, variable: str ) -> np.array:
+    def get_vector( self, source: str, variable: str ) -> np.array:
         """
-        Get the trajectory of a variable.
+        Get the vector of a variable in a data-frame.
 
         Parameters
         ----------
-        algorithm : str
-            Algorithm name.
+        source : str
+            Source of the vector.
         variable : str
             Variable name.
 
         Returns
         -------
         np.array
-            Trajectory of the variable.
+            Vector of the variable.
         """
-        assert algorithm in ["GA", "MC", "MCMC"], "> Error: algorithm must be 'GA', 'MC' or 'MCMC'."
-        if algorithm == "GA":
+        assert source in ["random", "optima", "GA", "MC", "MCMC"], "> Error: source must be 'random', 'optima', 'GA', 'MC' or 'MCMC'."
+        if source == "random":
+            assert not self.random_data.empty, "> Error: no data available for random solutions."
+            return self.random_data[variable].values
+        elif source == "optima":
+            assert not self.optima_data.empty, "> Error: no data available for optima."
+            return self.optima_data[variable].values
+        elif source == "GA":
             assert not self.GA_tracker.empty, "> Error: no data available for gradient ascent."
             return self.GA_tracker[variable].values
-        elif algorithm == "MC":
+        elif source == "MC":
             assert not self.MC_tracker.empty, "> Error: no data available for Monte Carlo."
             return self.MC_tracker[variable].values
-        elif algorithm == "MCMC":
+        elif source == "MCMC":
             assert not self.MCMC_tracker.empty, "> Error: no data available for MCMC."
             return self.MCMC_tracker[variable].values
     
@@ -708,7 +717,7 @@ class GbaModel:
         value : float
             Flux value.
         """
-        assert reaction_id not in self.reaction_ids, "> Error: unknown reaction identifier "+reaction_id+"."
+        assert reaction_id in self.reaction_ids, "> Error: unknown reaction identifier "+reaction_id+"."
         self.constant_reactions[reaction_id] = value
     
     def reset_variables( self ) -> None:
@@ -1913,6 +1922,67 @@ class GbaModel:
         html_str += "</td></tr>"
         html_str += "</table>"
         display_html(html_str,raw=True)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 8) Graphic generation      #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def create_figure( self, title: str ) -> go.Figure:
+        """
+        Create a figure for plotting.
+
+        Parameters
+        ----------
+        title : str
+            Title of the figure.
+
+        Returns
+        -------
+        go.Figure
+            Plotly figure.
+        """
+        fig = go.Figure()
+        fig.update_layout(plot_bgcolor='white', template="plotly_white", title=dict(text=title, x=0.5))
+        fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+        return fig
+    
+    def add_trajectory( self, fig: go.Figure, source: str, x_var: str, y_var: str,
+                        x_factor: Optional[float] = 1.0, y_factor: Optional[float] = 1.0,
+                        name: Optional[str] = "", data: Optional[pd.DataFrame] = None ) -> None:
+        """
+        Add a trajectory to a figure.
+
+        Parameters
+        ----------
+        fig : go.Figure
+            Plotly figure.
+        source : str
+            Source of the trajectory (random, optima, GA, MC, MCMC).
+        x_var : str
+            X-axis variable.
+        y_var : str
+            Y-axis variable.
+        x_factor : Optional[float], default=1.0
+            X-axis factor.
+        y_factor : Optional[float], default=1.0
+            Y-axis factor.
+        name : Optional[str], default=""
+            Name of the trajectory.
+        data : Optional[pd.DataFrame], default=None
+            Data for the trajectory.
+        """
+        assert source in ["random", "optima", "GA", "MC", "MCMC", "data"], "> Error: source must be 'random', 'optima', 'GA', 'MC' or 'MCMC' or 'data'."
+        if source == "data":
+            assert data is not None, "> Error: data must be provided for source 'data'."
+        X = None
+        Y = None
+        if data is not None:
+            X = data[x_var].values*x_factor
+            Y = data[y_var].values*y_factor
+        else:
+            X = self.get_vector(source, x_var)*x_factor
+            Y = self.get_vector(source, y_var)*y_factor
+        fig.add_trace(go.Scatter(x=X, y=Y, mode="lines", name=name))
 
 #~~~~~~~~~~~~~~~~~~~#
 # Utility functions #
