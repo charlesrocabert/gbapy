@@ -46,8 +46,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from IPython.display import display_html
 
-from Enumerations import *
-#from .Enumerations import *
+#from Enumerations import *
+from .Enumerations import *
 #from GbaBuilder import *
 
 # Setting gurobi environment
@@ -1334,8 +1334,8 @@ class GbaModel:
     
     def gradient_ascent( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
                          initial_dt: Optional[float] = 0.01, track: Optional[bool] = False,
-                        variables: Optional[list[str]] = ["f"], label: Optional[int] = 1,
-                        verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]:
+                         variables: Optional[list[str]] = ["f"], label: Optional[int] = 1,
+                         verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]:
         """
         Run a gradient ascent algorithm to find the optimal flux state.
 
