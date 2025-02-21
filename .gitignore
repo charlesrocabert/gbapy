@@ -4,7 +4,6 @@
 *.Rapp.history
 clean_folders.sh
 install_test.sh
-scripts/*
 deprecated/*
 
 # tutorials under writing

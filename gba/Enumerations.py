@@ -133,7 +133,7 @@ class GbaConstants(float, enum.Enum):
     DENSITY_TOL                  = 1e-10
     NEGATIVE_C_TOL               = 1e-10
     NEGATIVE_P_TOL               = 1e-10
-    TRAJECTORY_CONVERGENCE_COUNT = 1000
+    TRAJECTORY_CONVERGENCE_COUNT = 100
     TRAJECTORY_CONVERGENCE_TOL   = 1e-10
     DECREASING_DT_FACTOR         = 5.0
     INCREASING_DT_FACTOR         = 2.0

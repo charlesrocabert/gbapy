@@ -46,8 +46,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from IPython.display import display_html
 
-
-from .Enumerations import *
+from Enumerations import *
+#from .Enumerations import *
 #from GbaBuilder import *
 
 # Setting gurobi environment
@@ -1222,8 +1222,9 @@ class GbaModel:
         assert sigma > 0.0, f"> Error: sigma must be positive."
         non_mutated_f        = np.copy(self.f_trunc)
         epsilon              = np.random.normal(0.0, sigma, size=1)
-        self.f_trunc[index] += epsilon 
-        self.f_trunc[self.f_trunc < GbaConstants.MIN_FLUX_FRACTION] = GbaConstants.MIN_FLUX_FRACTION
+        self.f_trunc[index] += epsilon
+        self.block_reactions(block_GCC=False)
+        #self.f_trunc[self.f_trunc < GbaConstants.MIN_FLUX_FRACTION] = GbaConstants.MIN_FLUX_FRACTION
         self.set_f()
         return non_mutated_f
     
@@ -1281,7 +1282,7 @@ class GbaModel:
                 for c_id, value in zip(self.c_ids, getattr(self, variable)):
                     data_dict["c_"+c_id] = value
 
-    def block_reactions( self ) -> None:
+    def block_reactions( self, block_GCC: Optional[bool] = True ) -> None:
         """
         Block reactions tending to zero.
 
@@ -1292,6 +1293,11 @@ class GbaModel:
         on the direction:
         - f -> 0+ and gcc < 0: f = min_f, gcc = 0
         - f -> 0- and gcc > 0: f = -min_f, gcc = 0
+
+        Parameters
+        ----------
+        block_GCC : Optional[bool], default=True
+            Block the GCC values.
         """
         for j in range(self.nj-1):
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1299,20 +1305,21 @@ class GbaModel:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             if self.direction[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= GbaConstants.MIN_FLUX_FRACTION.value:
                 self.f_trunc[j] = GbaConstants.MIN_FLUX_FRACTION.value
-                if self.GCC_f[(j+1)] < 0.0:
+                if block_GCC and self.GCC_f[(j+1)] < 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 2) Reaction is irreversible and negative #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             elif self.direction[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -GbaConstants.MIN_FLUX_FRACTION.value:
                 self.f_trunc[j] = -GbaConstants.MIN_FLUX_FRACTION.value
-                if self.GCC_f[(j+1)] > 0.0:
+                if block_GCC and self.GCC_f[(j+1)] > 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 3) Reaction is reversible                #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # elif self.direction[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= GbaConstants.MIN_FLUX_FRACTION.value:
-            #     self.GCC_f[(j+1)] = 0.0
+            #     if block_GCC:
+            #         self.GCC_f[(j+1)] = 0.0
             #     if self.f_trunc[j] >= 0.0:
             #         self.f_trunc[j] = GbaConstants.MIN_FLUX_FRACTION.value
             #     elif self.f_trunc[j] < 0.0:
@@ -1322,7 +1329,8 @@ class GbaModel:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             if self.reaction_ids[(j+1)] in self.constant_reactions:
                 self.f_trunc[j] = self.constant_reactions[self.reaction_ids[(j+1)]]
-                self.GCC_f[(j+1)] = 0.0
+                if block_GCC:
+                    self.GCC_f[(j+1)] = 0.0
     
     def gradient_ascent( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
                          initial_dt: Optional[float] = 0.01, track: Optional[bool] = False,
@@ -1369,9 +1377,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.GA_tracker.empty:
-                columns = ["label", "condition", "dt", "t", "mu", "fixed"]
+                columns = ["label", "condition", "iter", "dt", "t", "mu", "fixed"]
                 self.GA_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "dt": initial_dt, "t": 0.0, "mu": self.mu, "fixed": 0}
+            data_dict = {"label": label, "condition": condition_id, "iter": 0, "dt": initial_dt, "t": 0.0, "mu": self.mu, "fixed": 0}
             self.track_variables(variables, data_dict)
             data_row        = pd.Series(data=data_dict)
             self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
@@ -1412,7 +1420,7 @@ class GbaModel:
                 dt_counter += 1
                 nb_fixed   += 1
                 if track and nb_iterations%GbaConstants.EXPORT_DATA_COUNT == 0:
-                    data_dict = {"label": label, "condition": condition_id, "dt": dt, "t": t, "mu": self.mu, "fixed": nb_fixed}
+                    data_dict = {"label": label, "condition": condition_id, "iter": nb_iterations, "dt": dt, "t": t, "mu": self.mu, "fixed": nb_fixed}
                     self.track_variables(variables, data_dict)
                     data_row        = pd.Series(data=data_dict)
                     self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
@@ -1579,9 +1587,9 @@ class GbaModel:
                     print("> Maximum number of iterations reached (condition "+condition_id+").")
                 break
             ### 4.1) Calculate the next step ###
+            self.block_reactions()
             epsilon      = np.random.normal(0.0, np.sqrt(sigma/(2.0*N_e)), size=self.nj-1)
             self.f_trunc = self.f_trunc+sigma*self.GCC_f[1:]+epsilon
-            #self.block_reactions()
             self.set_f()
             self.calculate_state()
             self.check_model_consistency()
