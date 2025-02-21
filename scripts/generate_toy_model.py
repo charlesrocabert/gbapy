@@ -43,6 +43,7 @@ def parse_arguments() -> dict:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", "-path", help="Path to save the model", required=True)
+    parser.add_argument("--name", "-name", help="Name of the model", required=True)
     parser.add_argument("--nb-efms", "-efms", help="Number of EFMs", required=True)
     parser.add_argument("--max-kcat", "-kcat", help="Maximum kcat value", default=10.0)
     parser.add_argument("--kcat-gradient", "-gradient", help="Gradient of the kcat values", default=0.01)
@@ -303,11 +304,11 @@ if __name__ == "__main__":
 
     config        = parse_arguments()
     path          = config["path"]
+    name          = config["name"]
     nb_efms       = int(config["nb_efms"])
     max_kcat      = float(config["max_kcat"])
     kcat_gradient = float(config["kcat_gradient"])
     KM            = float(config["KM"])
     x_conc        = float(config["x_conc"])
-    name          = "EFM"+str(nb_efms)
     generate_full_column_rank_model(path, name, nb_efms, x_conc, max_kcat, kcat_gradient, KM)
 
