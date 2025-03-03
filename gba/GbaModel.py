@@ -46,9 +46,10 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from IPython.display import display_html
 
-#from Enumerations import *
-from .Enumerations import *
-#from GbaBuilder import *
+try:
+    from .Enumerations import *
+except:
+    from Enumerations import *
 
 # Setting gurobi environment
 env = gp.Env(empty=True)

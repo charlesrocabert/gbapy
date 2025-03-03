@@ -142,3 +142,14 @@ class GbaConstants(float, enum.Enum):
     PRINT_DATA_COUNT             = 1
     EXPORT_DATA_COUNT            = 1
 
+class MessageType(enum.Enum):
+    """
+    Message type.
+    - Info    : Throw an information message.
+    - Warning : Throw a warning message.
+    - Error   : Throw an error message.
+    """
+    Info    = 1
+    Warning = 2
+    Error   = 3
+

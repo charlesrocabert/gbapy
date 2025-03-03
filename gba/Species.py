@@ -38,8 +38,12 @@ from typing import Optional
 import Bio.SeqUtils as SeqUtils
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
-from .Enumerations import *
-from .GbaBuilder import *
+try:
+    from .Enumerations import *
+    from .GbaBuilder import *
+except:
+    from Enumerations import *
+    from GbaBuilder import *
 
 
 class Species:
