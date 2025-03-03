@@ -496,7 +496,7 @@ class GbaBuilder:
         avg_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         avg_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])/len(proteins_list)
         self.add_protein(avg_protein)
-        throw_message(MessageType.Info, f"Created average protein <code>{protein_id}</code> ({avg_protein.mass} Da).")
+        throw_message(MessageType.Info, f"Created average protein <code>{protein_id}</code> ({round(avg_protein.mass,2)} Da).")
     
     def create_sum_protein( self, protein_id: str, protein_name: str, proteins_list: list[str] ) -> None:
         """
@@ -519,7 +519,7 @@ class GbaBuilder:
         sum_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         sum_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])
         self.add_protein(sum_protein)
-        throw_message(MessageType.Info, f"Created sum protein <code>{protein_id}</code> ({sum_protein.mass} Da).")
+        throw_message(MessageType.Info, f"Created sum protein <code>{protein_id}</code> ({round(sum_protein.mass,2)} Da).")
     
     def create_dummy_protein( self, protein_id: str, protein_name: str, protein_mass: float ) -> None:
         """
@@ -539,7 +539,7 @@ class GbaBuilder:
         assert protein_mass > 0.0, throw_message(MessageType.Error, "Invalid protein mass.")
         dummy_protein = Protein(id=protein_id, name=protein_name, sequence="", mass=protein_mass)
         self.add_protein(dummy_protein)
-        throw_message(MessageType.Info, f"Created dummy protein <code>{protein_id}</code> ({dummy_protein.mass} Da).")
+        throw_message(MessageType.Info, f"Created dummy protein <code>{protein_id}</code> ({round(dummy_protein.mass,2)} Da).")
 
     def create_average_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -562,7 +562,7 @@ class GbaBuilder:
         avg_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         avg_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])/len(metabolites_list)
         self.add_metabolite(avg_metabolite)
-        throw_message(MessageType.Info, f"Created average metabolite <code>{metabolite_id}</code> ({avg_metabolite.mass} Da).")
+        throw_message(MessageType.Info, f"Created average metabolite <code>{metabolite_id}</code> ({round(avg_metabolite.mass,2)} Da).")
     
     def create_sum_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -585,7 +585,7 @@ class GbaBuilder:
         sum_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         sum_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])
         self.add_metabolite(sum_metabolite)
-        throw_message(MessageType.Info, f"Created sum metabolite <code>{metabolite_id}</code> ({sum_metabolite.mass} Da).")
+        throw_message(MessageType.Info, f"Created sum metabolite <code>{metabolite_id}</code> ({round(sum_metabolite.mass,2)} Da).")
     
     def create_dummy_metabolite( self, metabolite_id: str, metabolite_name: str, metabolite_mass: float ) -> None:
         """
@@ -605,7 +605,7 @@ class GbaBuilder:
         assert metabolite_mass > 0.0, throw_message(MessageType.Error, "Invalid metabolite mass.")
         dummy_metabolite = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=metabolite_mass)
         self.add_metabolite(dummy_metabolite)
-        throw_message(MessageType.Info, f"Created dummy metabolite <code>{metabolite_id}</code> ({dummy_metabolite.mass} Da).")
+        throw_message(MessageType.Info, f"Created dummy metabolite <code>{metabolite_id}</code> ({round(dummy_metabolite.mass,2)} Da).")
     
     def enforce_kcat_irreversibility( self ) -> None:
         """
@@ -1726,11 +1726,11 @@ def throw_message( type: MessageType, message: str ) -> None:
         html_str  = "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         if type == MessageType.Info:
-            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info:</strong></td>"
+            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
         elif type == MessageType.Warning:
-            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning:</strong></td>"
+            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
         elif type == MessageType.Error:
-            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error:</strong></td>"
+            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
         html_str += "<td>"+message+"</td>"
         html_str += "</tr>"
         html_str += "</table>"
