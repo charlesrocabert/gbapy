@@ -196,7 +196,7 @@ class GbaBuilder:
         name : str
             Name of the GBA build.
         """
-        assert name != "", "> Error: Empty name"
+        assert name != "", throw_message(MessageType.Error, "Empty GBA build name.")
         self.name = name
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Main molecular species and reactions #
@@ -273,9 +273,8 @@ class GbaBuilder:
         protein : Protein
             Protein object to add to the model.
         """
-        if not isinstance(protein, Protein):
-            raise TypeError(f"> Error: Expected 'protein' to be a Protein, but got '{type(protein).__name__}'")
-        assert protein.id not in self.proteins, f"> Error: Protein '{protein.id}' already exists"
+        assert isinstance(protein, Protein), throw_message(MessageType.Error, f"Expected <code>protein</code> to be a Protein, but got <code>{type(protein).__name__}</code>.")
+        assert protein.id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein.id}</code> already exists.") 
         protein.set_builder(self)
         self.proteins[protein.id] = protein
     
@@ -300,9 +299,8 @@ class GbaBuilder:
         metabolite : Metabolite
             Metabolite object to add to the model.
         """
-        if not isinstance(metabolite, Metabolite):
-            raise TypeError(f"> Error: Expected 'metabolite' to be a Metabolite, but got '{type(metabolite).__name__}'")
-        assert metabolite.id not in self.metabolites, f"> Error: Metabolite '{metabolite.id}' already exists"
+        assert isinstance(metabolite, Metabolite), throw_message(MessageType.Error, f"Expected <code>metabolite</code> to be a Metabolite, but got <code>{type(metabolite).__name__}</code>.") 
+        assert metabolite.id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite.id}</code> already exists.")
         metabolite.set_builder(self)
         self.metabolites[metabolite.id] = metabolite
     
@@ -327,9 +325,8 @@ class GbaBuilder:
         reaction : Reaction
             Reaction object to add to the model.
         """
-        if not isinstance(reaction, Reaction):
-            raise TypeError(f"> Error: Expected 'reaction' to be a Reaction, but got '{type(reaction).__name__}'")
-        assert reaction.id not in self.reactions, f"> Error: Reaction '{reaction.id}' already exists"
+        assert isinstance(reaction, Reaction), throw_message(MessageType.Error, f"Expected <code>reaction</code> to be a Reaction, but got <code>{type(reaction).__name__}</code>.") 
+        assert reaction.id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction.id}</code> already exists.")
         reaction.set_builder(self)
         self.reactions[reaction.id] = reaction
     
@@ -354,7 +351,7 @@ class GbaBuilder:
         protein_id : str
             Identifier of the protein to remove.
         """
-        assert protein_id in self.proteins, f"> Error: Protein '{protein_id}' does not exist"
+        assert protein_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> does not exist.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Remove the protein from the main dictionary #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -387,7 +384,7 @@ class GbaBuilder:
         metabolite_id : str
             Identifier of the metabolite to remove.
         """
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' does not exist"
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Remove the metabolite from the main dictionary #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -420,7 +417,7 @@ class GbaBuilder:
         reaction_id : str
             Identifier of the reaction to remove.
         """
-        assert reaction_id in self.reactions, f"> Error: Reaction '{reaction_id}' does not exist"
+        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
         del self.reactions[reaction_id]
     
     def remove_reactions( self, reactions_list: list[str] ) -> None:
@@ -446,8 +443,8 @@ class GbaBuilder:
         new_id : str
             New identifier of the metabolite.
         """
-        assert previous_id in self.metabolites, f"> Error: Metabolite '{previous_id}' does not exist"
-        assert new_id not in self.metabolites, f"> Error: Metabolite '{new_id}' already exists"
+        assert previous_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{previous_id}</code> does not exist.")
+        assert new_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{new_id}</code> already exists.")
         #~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Manage reactions   #
         #~~~~~~~~~~~~~~~~~~~~~~~#
@@ -473,8 +470,8 @@ class GbaBuilder:
         new_id : str
             New identifier of the reaction.
         """
-        assert previous_id in self.reactions, f"> Error: Reaction '{previous_id}' does not exist"
-        assert new_id not in self.reactions, f"> Error: Reaction '{new_id}' already exists"
+        assert previous_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{previous_id}</code> does not exist.")
+        assert new_id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{new_id}</code> already exists.")
         self.reactions[new_id]    = self.reactions.pop(previous_id)
         self.reactions[new_id].id = new_id
     
@@ -491,15 +488,15 @@ class GbaBuilder:
         proteins_list : list[str]
             List of protein identifiers to average.    
         """
-        assert protein_id != "", "> Error: Empty protein identifier"
-        assert protein_id not in self.proteins, f"> Error: Protein '{protein_id}' already exists"
-        assert len(proteins_list) > 0, "> Error: Empty list of proteins"
+        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
+        assert len(proteins_list) > 0, throw_message(MessageType.Error, "Empty list of proteins.")
         for p_id in proteins_list:
-            assert p_id in self.proteins, f"> Error: Protein '{p_id}' does not exist"
+            assert p_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> does not exist.")
         avg_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         avg_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])/len(proteins_list)
         self.add_protein(avg_protein)
-        print(f"> Info: Created average protein {protein_id} ({avg_protein.mass} Da)")
+        throw_message(MessageType.Info, f"Created average protein <code>{protein_id}</code> ({avg_protein.mass} Da).")
     
     def create_sum_protein( self, protein_id: str, protein_name: str, proteins_list: list[str] ) -> None:
         """
@@ -514,15 +511,15 @@ class GbaBuilder:
         proteins_list : list[str]
             List of protein identifiers to sum.
         """
-        assert protein_id != "", "> Error: Empty protein identifier"
-        assert protein_id not in self.proteins, f"> Error: Protein '{protein_id}' already exists"
-        assert len(proteins_list) > 0, "> Error: Empty list of proteins"
+        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
+        assert len(proteins_list) > 0, throw_message(MessageType.Error, "Empty list of proteins.")
         for p_id in proteins_list:
-            assert p_id in self.proteins, f"> Error: Protein '{p_id}' does not exist"
+            assert p_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> does not exist.")
         sum_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         sum_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])
         self.add_protein(sum_protein)
-        print(f"> Info: Created sum protein {protein_id} ({sum_protein.mass} Da)")
+        throw_message(MessageType.Info, f"Created sum protein <code>{protein_id}</code> ({sum_protein.mass} Da).")
     
     def create_dummy_protein( self, protein_id: str, protein_name: str, protein_mass: float ) -> None:
         """
@@ -537,12 +534,12 @@ class GbaBuilder:
         protein_mass : float
             Mass of the dummy protein.
         """
-        assert protein_id != "", "> Error: Empty protein identifier"
-        assert protein_id not in self.proteins, f"> Error: Protein '{protein_id}' already exists"
-        assert protein_mass > 0.0, "> Error: Invalid protein mass"
+        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
+        assert protein_mass > 0.0, throw_message(MessageType.Error, "Invalid protein mass.")
         dummy_protein = Protein(id=protein_id, name=protein_name, sequence="", mass=protein_mass)
         self.add_protein(dummy_protein)
-        print(f"> Info: Created dummy protein: {protein_id}, ({dummy_protein.mass} Da)")
+        throw_message(MessageType.Info, f"Created dummy protein <code>{protein_id}</code> ({dummy_protein.mass} Da).")
 
     def create_average_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -557,15 +554,15 @@ class GbaBuilder:
         metabolites_list : list[str]
             List of metabolite identifiers to average.
         """
-        assert metabolite_id != "", "> Error: Empty metabolite identifier"
-        assert metabolite_id not in self.metabolites, f"> Error: Metabolite '{metabolite_id}' already exists"
-        assert len(metabolites_list) > 0, "> Error: Empty list of metabolites"
+        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert len(metabolites_list) > 0, throw_message(MessageType.Error, "Empty list of metabolites.")
         for m_id in metabolites_list:
-            assert m_id in self.metabolites, f"> Error: Metabolite '{m_id}' does not exist"
+            assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
         avg_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         avg_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])/len(metabolites_list)
         self.add_metabolite(avg_metabolite)
-        print(f"> Info: Created average metabolite {metabolite_id} ({avg_metabolite.mass} Da)")
+        throw_message(MessageType.Info, f"Created average metabolite <code>{metabolite_id}</code> ({avg_metabolite.mass} Da).")
     
     def create_sum_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -580,15 +577,15 @@ class GbaBuilder:
         metabolites_list : list[str]
             List of metabolite identifiers to sum.
         """
-        assert metabolite_id != "", "> Error: Empty metabolite identifier"
-        assert metabolite_id not in self.metabolites, f"> Error: Metabolite '{metabolite_id}' already exists"
-        assert len(metabolites_list) > 0, "> Error: Empty list of metabolites"
+        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert len(metabolites_list) > 0, throw_message(MessageType.Error, "Empty list of metabolites.")
         for m_id in metabolites_list:
-            assert m_id in self.metabolites, f"> Error: Metabolite '{m_id}' does not exist"
+            assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
         sum_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         sum_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])
         self.add_metabolite(sum_metabolite)
-        print(f"> Info: Created sum metabolite {metabolite_id} ({sum_metabolite.mass} Da)")
+        throw_message(MessageType.Info, f"Created sum metabolite <code>{metabolite_id}</code> ({sum_metabolite.mass} Da).")
     
     def create_dummy_metabolite( self, metabolite_id: str, metabolite_name: str, metabolite_mass: float ) -> None:
         """
@@ -603,12 +600,12 @@ class GbaBuilder:
         metabolite_mass : float
             Mass of the dummy metabolite.
         """
-        assert metabolite_id != "", "> Error: Empty metabolite identifier"
-        assert metabolite_id not in self.metabolites, f"> Error: Metabolite '{metabolite_id}' already exists"
-        assert metabolite_mass > 0.0, "> Error: Invalid metabolite mass"
+        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert metabolite_mass > 0.0, throw_message(MessageType.Error, "Invalid metabolite mass.")
         dummy_metabolite = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=metabolite_mass)
         self.add_metabolite(dummy_metabolite)
-        print(f"> Info: Created dummy metabolite: {metabolite_id}, ({dummy_metabolite.mass} Da)")
+        throw_message(MessageType.Info, f"Created dummy metabolite <code>{metabolite_id}</code> ({dummy_metabolite.mass} Da).")
     
     def enforce_kcat_irreversibility( self ) -> None:
         """
@@ -637,14 +634,14 @@ class GbaBuilder:
         value : float
             Activation constant value.
         """
-        assert self.GBA_is_built, "> Error: GBA model is not built"
-        assert self.GBA_KA is not None, "> Error: Activation constant matrix is not initialized"
-        assert self.GBA_KA.shape == (len(self.metabolites), len(self.reactions)), "> Error: Invalid activation constant matrix shape"
-        assert metabolite_id in self.GBA_row_indices, f"> Error: Metabolite '{metabolite_id}' is not listed in the GBA model"
-        assert reaction_id in self.GBA_col_indices, f"> Error: Reaction '{reaction_id}' is not listed in the GBA model"
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' does not exist"
-        assert reaction_id in self.reactions, f"> Error: Reaction '{reaction_id}' does not exist"
-        assert value > 0.0, "> Error: The activation constant value must be positive ('{metabolite_id}', '{reaction_id}')"
+        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
+        assert self.GBA_KA is not None, throw_message(MessageType.Error, "Activation constant matrix is not initialized.")
+        assert self.GBA_KA.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid activation constant matrix shape.")
+        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA model.")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA model.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.Error, f"The activation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
         m_index = self.GBA_row_indices[metabolite_id]
         r_index = self.GBA_col_indices[reaction_id]
         self.GBA_KA[m_index, r_index] = value
@@ -662,14 +659,14 @@ class GbaBuilder:
         value : float
             Inhibition constant value.
         """
-        assert self.GBA_is_built, "> Error: GBA model is not built"
-        assert self.GBA_KI is not None, "> Error: Inhibition constant matrix is not initialized"
-        assert self.GBA_KI.shape == (len(self.metabolites), len(self.reactions)), "> Error: Invalid inhibition constant matrix shape"
-        assert metabolite_id in self.GBA_row_indices, f"> Error: Metabolite '{metabolite_id}' is not listed in the GBA model"
-        assert reaction_id in self.GBA_col_indices, f"> Error: Reaction '{reaction_id}' is not listed in the GBA model"
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' does not exist"
-        assert reaction_id in self.reactions, f"> Error: Reaction '{reaction_id}' does not exist"
-        assert value > 0.0, "> Error: The inhibition constant value must be positive ('{metabolite_id}', '{reaction_id}')"
+        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
+        assert self.GBA_KI is not None, throw_message(MessageType.Error, "Inhibition constant matrix is not initialized.")
+        assert self.GBA_KI.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid inhibition constant matrix shape.")
+        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA model.")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA model.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.Error, f"The inhibition constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
         m_index = self.GBA_row_indices[metabolite_id]
         r_index = self.GBA_col_indices[reaction_id]
         self.GBA_KI[m_index, r_index] = value
@@ -698,15 +695,15 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert self.GBA_is_built, "> Error: GBA model is not built"
-        assert condition_id > 0, "> Error: The condition identifier must be positive"
-        assert condition_id not in self.GBA_conditions, f"> Error: Condition '{condition_id}' already exists"
-        assert rho > 0.0, "> Error: The total density must be positive"
-        assert default_concentration >= 0.0, "> Error: The default concentration must be positive"
+        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
+        assert condition_id > 0, throw_message(MessageType.Error, "The condition identifier must be positive.")
+        assert condition_id not in self.GBA_conditions, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
+        assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
+        assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolites, f"> Error: Metabolite '{m_id}' does not exist"
-                assert concentration >= 0.0, f"> Error: The concentration of metabolite '{m_id}' must be positive"
+                assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
+                assert concentration >= 0.0, throw_message(MessageType.Error, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -772,15 +769,15 @@ class GbaBuilder:
         if verbose:
             if len(v_proteins) > 0:
                 perc = len(v_proteins)/len(self.proteins)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of proteins with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of proteins with missing mass.")
             if len(v_metabolites) > 0:
                 perc = len(v_metabolites)/len(self.metabolites)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of metabolites with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of metabolites with missing mass.")
             if len(v_enzymes) > 0:
                 perc = len(v_enzymes)/len(self.reactions)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of enzymes with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of enzymes with missing mass.")
             if len(v_proteins)==0 and len(v_metabolites)==0 and len(v_enzymes)==0:
-                throw_message(MessageType.Info, "No missing mass in the model")
+                throw_message(MessageType.Info, "No missing mass in the model.")
         return {"proteins": v_proteins, "metabolites": v_metabolites, "enzymes": v_enzymes}
     
     def detect_missing_kinetic_parameters( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -801,12 +798,12 @@ class GbaBuilder:
                 perc              = len(missing_kcat)/len(self.reactions)*100
                 transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Transport])*100
                 metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Metabolic])*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic)")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic).")
             if len(missing_km) > 0:
                 perc = len(missing_km)/len(self.reactions)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values.")
             if len(missing_kcat)==0 and len(missing_km)==0:
-                throw_message(MessageType.Info, "No missing kinetic parameters in the model")
+                throw_message(MessageType.Info, "No missing kinetic parameters in the model.")
         return {"kcat": missing_kcat, "km": missing_km}
     
     def detect_missing_connections( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -848,21 +845,21 @@ class GbaBuilder:
                 m_to_r_vec.append(m_id)
                 connectivity_error = True
                 if verbose:
-                    self.throw_message(MessageType.Warning, f"Metabolite '{m_id}' has no associated reaction")
+                    self.throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> has no associated reaction.")
         for r_id in reaction_to_protein_map:
             if len(reaction_to_protein_map[r_id]) == 0:
                 r_to_p_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    self.throw_message(MessageType.Warning, f"Reaction '{r_id}' has no associated protein")
+                    self.throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated protein.")
         for r_id in reaction_to_metabolite_map:
             if len(reaction_to_metabolite_map[r_id]) == 0:
                 r_to_m_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    throw_message(MessageType.Warning, f"> Reaction '{r_id}' has no associated metabolite")
+                    throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated metabolite.")
         if not connectivity_error and verbose:
-            throw_message(MessageType.Info, "No connectivity issues in the model")
+            throw_message(MessageType.Info, "No connectivity issues in the model.")
         return {"protein_to_reaction":    p_to_r_vec,
                 "metabolite_to_reaction": m_to_r_vec,
                 "reaction_to_protein":    r_to_p_vec,
@@ -922,9 +919,9 @@ class GbaBuilder:
         not_produced = [m_id for m_id in met_to_met_connectivity if len(met_to_met_connectivity[m_id]["previous"]) == 0 and self.metabolites[m_id].species_location == SpeciesLocation.Internal]
         if verbose:
             if len(not_produced) == 0:
-                throw_message(MessageType.Info, "No unproduced metabolites in the model")
+                throw_message(MessageType.Info, "No unproduced metabolites in the model.")
             for m_id in not_produced:
-                throw_message(MessageType.Warning, f"Metabolite '{m_id}' is not produced by any reaction")
+                throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> is not produced by any reaction.")
         return not_produced
     
     def detect_infeasible_loops( self, verbose: Optional[bool] = False ) -> list[list[str]]:
@@ -1002,9 +999,9 @@ class GbaBuilder:
                         pairs.append([m_id, c_id])
         if verbose:
             if len(pairs) == 0:
-                throw_message(MessageType.Info, "No infeasible loops in the model")
+                throw_message(MessageType.Info, "No infeasible loops in the model.")
             for m_id, c_id in pairs:
-                throw_message(MessageType.Warning, f">Infeasible loop between {m_id} and {c_id}")
+                throw_message(MessageType.Warning, f"Infeasible loop between <code>{m_id}</code> and <code>{c_id}</code>.")
         return pairs
 
     def detect_isolated_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
@@ -1059,9 +1056,9 @@ class GbaBuilder:
                 if self.reactions[r_id].reaction_type == ReactionType.Transport:
                     isolated.append(m_id)
                     if verbose:
-                        throw_message(MessageType.Warning, f"Metabolite '{m_id}' is isolated (imported only)")
+                        throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> is isolated (imported only).")
         if verbose and len(isolated) == 0:
-            throw_message(MessageType.Info, "No isolated metabolites in the model")
+            throw_message(MessageType.Info, "No isolated metabolites in the model.")
         return isolated
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1184,7 +1181,8 @@ class GbaBuilder:
                 self.FBA_model.add_metabolites([m])
                 cobra_metabolites[m_item[0]] = m
             else:
-                raise ValueError(f"> Error: Unknown species location for metabolite '{m_id}'")
+                throw_message(MessageType.Error, "Unknown species location for metabolite <code>{m_id}</code>.")
+                sys.exit(1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Add reactions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1274,7 +1272,7 @@ class GbaBuilder:
             if not reaction.check_mass_balance(verbose):
                 is_balanced = False
         if is_balanced:
-            print(f"> Info: Model build '{self.name}' is mass balanced")
+            throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is mass balanced.")
 
     def check_mass_normalization( self, verbose: Optional[bool] = False ) -> None:
         """
@@ -1290,31 +1288,31 @@ class GbaBuilder:
             if not reaction.check_mass_normalization(verbose):
                 is_normalized = False
         if is_normalized:
-            print(f"> Info: Model build '{self.name}' is mass normalized")
+            throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is mass normalized")
     
     def check_ribosomal_reaction_consistency( self ):
         """
         Check the ribosomal reaction consistency of the model
         """
-        assert "Ribosome" in self.reactions, "> Error: Ribosomal reaction not found in the model"
-        assert "Protein" in self.metabolites, "> Error: Protein metabolite not found in the reaction"
+        assert "Ribosome" in self.reactions, throw_message(MessageType.Error, "Ribosomal reaction not found in the model.")
+        assert "Protein" in self.metabolites, throw_message(MessageType.Error, "Protein metabolite not found in the reaction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the ribosomal reaction itself #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         r_ribosome = self.reactions["Ribosome"]
-        assert "Protein" in r_ribosome.products, "> Error: Protein metabolite not found in the ribosomal reaction"
-        assert r_ribosome.kcat[ReactionDirection.Backward] == 0.0, "> Error: Ribosomal reaction should be forward irreversible"
-        assert r_ribosome.direction == ReactionDirection.Forward, "> Error: Ribosomal reaction should be forward irreversible"
-        assert r_ribosome.lb == 0.0, "> Error: Ribosomal reaction should have a lower bound of 0"
-        assert r_ribosome.ub > 0.0, "> Error: Ribosomal reaction should have a positive upper bound"
+        assert "Protein" in r_ribosome.products, throw_message(MessageType.Error, "Protein metabolite not found in the ribosomal reaction.")
+        assert r_ribosome.kcat[ReactionDirection.Backward] == 0.0, throw_message(MessageType.Error, "Ribosomal reaction should be forward irreversible.")
+        assert r_ribosome.direction == ReactionDirection.Forward, throw_message(MessageType.Error, "Ribosomal reaction should be forward irreversible.")
+        assert r_ribosome.lb == 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a lower bound of 0.")
+        assert r_ribosome.ub > 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a positive upper bound.")
         if len(r_ribosome.products) == 1:
-            assert r_ribosome.GBA_metabolites["Protein"] == 1.0, "> Error: Protein coefficient should be 1 in the ribosomal reaction"
+            assert r_ribosome.GBA_metabolites["Protein"] == 1.0, throw_message(MessageType.Error, "Protein coefficient should be 1 in the ribosomal reaction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Check other reactions               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for r in self.reactions.values():
             if not r.id == "Ribosome":
-                assert "Protein" not in r.GBA_metabolites, f"> Error: Protein metabolite found in reaction '{r.id}'. Protein metabolite should only be a ribosomal product"
+                assert "Protein" not in r.GBA_metabolites, throw_message(MessageType.Error, f"Protein metabolite found in reaction <code>{r.id}</code>. Protein metabolite should only be a ribosomal product.")
     
     def check_conversion( self, verbose: Optional[bool] = False ) -> None:
         """
@@ -1331,7 +1329,7 @@ class GbaBuilder:
                 is_converted = False
         if is_converted:
             if verbose:
-                print(f"> Info: Model build '{self.name}' is converted to a GBA model")
+                throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is converted to a GBA model.")
             return True
         return False
     
@@ -1470,7 +1468,7 @@ class GbaBuilder:
         """
         Build the GBA variables.
         """
-        assert self.check_conversion(), "> Error: The model is not converted to GBA units. Convert the model before building GBA variables."
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         self.build_GBA_indices()
         self.build_GBA_mass_fraction_matrix()
         self.build_GBA_kcat_vectors()
@@ -1505,10 +1503,10 @@ class GbaBuilder:
         direction : ReactionDirection
             Wanted direction of the reaction.
         """
-        assert self.check_conversion(), "> Error: The model is not converted to GBA units. Convert the model before building GBA variables."
-        assert self.GBA_is_built, f"> Error: The GBA model {self.name} is not built"
-        assert reaction_id in self.GBA_col_indices, f"> Error: Reaction '{reaction_id}' does not exist"
-        assert direction != ReactionDirection.Reversible, "> Error: The wanted direction should be irreversible"
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist")
+        assert direction != ReactionDirection.Reversible, throw_message(MessageType.Error, "The wanted direction should be irreversible")
         j = self.GBA_col_indices[reaction_id]
         if direction == ReactionDirection.Forward:
             self.GBA_kcat_b[j] = 0.0
@@ -1542,9 +1540,9 @@ class GbaBuilder:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         
     def export_GBA_model( self, path: Optional[str] = "" ) -> None:
-        assert self.check_conversion(), "> Error: The model is not converted to GBA units. Convert the model before building GBA variables."
-        assert self.GBA_is_built, f"> Error: The GBA model {self.name} is not built"
-        assert os.path.exists(path), f"> Error: The path '{path}' does not exist"
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1600,7 +1598,8 @@ class GbaBuilder:
             elif self.GBA_kcat_f[j] > 0.0 and self.GBA_kcat_f[j] > 0.0:
                 f.write(list(self.GBA_col_indices.keys())[j]+";reversible\n")
             else:
-                raise ValueError(f"> Error: Unknown direction for reaction '{list(self.GBA_col_indices.keys())[j]}'")
+                throw_message(MessageType.Error, f"Unknown direction for reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                sys.exit(1)
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant reactions      #
@@ -1760,7 +1759,7 @@ def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Opt
     ofile = open(filename, "wb")
     dill.dump(builder, ofile)
     ofile.close()
-    assert os.path.isfile(filename), "> Error: .gbabuild file creation failed."
+    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gbabuild file creation failed.")
 
 def load_gba_builder( path: str ) -> GbaBuilder:
     """
@@ -1771,8 +1770,8 @@ def load_gba_builder( path: str ) -> GbaBuilder:
     path : str
         Path to the GBA builder file.
     """
-    assert path.endswith(".gbabuild"), "> Error: GBA builder file extension is missing."
-    assert os.path.isfile(path), "> Error: GBA builder file not found."
+    assert path.endswith(".gbabuild"), throw_message(MessageType.Error, "GBA builder file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.Error, "GBA builder file not found.")
     ifile = open(path, "rb")
     builder = dill.load(ifile)
     ifile.close()
