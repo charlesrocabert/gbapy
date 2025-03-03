@@ -257,7 +257,7 @@ class GbaBuilder:
         metabolite_id : str
             Identifier of the metabolite.
         """
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' does not exist"
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         return [r_id for r_id, reaction in self.reactions.items() if metabolite_id in reaction.metabolites]
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -740,30 +740,6 @@ class GbaBuilder:
     # 3) Model consistency tests  #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     
-    def throw_message( self, type: MessageType, message: str ) -> None:
-        """
-        Throw a message to the user.
-
-        Parameters
-        ----------
-        type : MessageType
-            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
-        message : str
-            Content of the message.
-        """
-        html_str  = "<table>"
-        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-        if type == MessageType.Info:
-            html_str += "<td><strong>&#10095; Info:</strong></td>"
-        elif type == MessageType.Warning:
-            html_str += "<td><strong>&#9888; Warning:</strong></td>"
-        elif type == MessageType.Error:
-            html_str += "<td><strong>&#10006; Error:</strong></td>"
-        html_str += "<td>"+message+"</td>"
-        html_str += "</tr>"
-        html_str += "</table>"
-        display_html(html_str,raw=True)
-        
     def check_model( self, test_structure: Optional[bool] = False ) -> None:
         """
         Detect missing molecular masses, kinetic parameters and connectivity issues in the model.
@@ -796,15 +772,15 @@ class GbaBuilder:
         if verbose:
             if len(v_proteins) > 0:
                 perc = len(v_proteins)/len(self.proteins)*100
-                self.throw_message(MessageType.Warning, f"{perc:.2f}% of proteins with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of proteins with missing mass")
             if len(v_metabolites) > 0:
                 perc = len(v_metabolites)/len(self.metabolites)*100
-                self.throw_message(MessageType.Warning, f"{perc:.2f}% of metabolites with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of metabolites with missing mass")
             if len(v_enzymes) > 0:
                 perc = len(v_enzymes)/len(self.reactions)*100
-                self.throw_message(MessageType.Warning, f"{perc:.2f}% of enzymes with missing mass")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of enzymes with missing mass")
             if len(v_proteins)==0 and len(v_metabolites)==0 and len(v_enzymes)==0:
-                self.throw_message(MessageType.Info, "No missing mass in the model")
+                throw_message(MessageType.Info, "No missing mass in the model")
         return {"proteins": v_proteins, "metabolites": v_metabolites, "enzymes": v_enzymes}
     
     def detect_missing_kinetic_parameters( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -825,12 +801,12 @@ class GbaBuilder:
                 perc              = len(missing_kcat)/len(self.reactions)*100
                 transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Transport])*100
                 metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Metabolic])*100
-                self.throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic)")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic)")
             if len(missing_km) > 0:
                 perc = len(missing_km)/len(self.reactions)*100
-                self.throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values")
             if len(missing_kcat)==0 and len(missing_km)==0:
-                self.throw_message(MessageType.Info, "No missing kinetic parameters in the model")
+                throw_message(MessageType.Info, "No missing kinetic parameters in the model")
         return {"kcat": missing_kcat, "km": missing_km}
     
     def detect_missing_connections( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -884,9 +860,9 @@ class GbaBuilder:
                 r_to_m_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    self.throw_message(MessageType.Warning, f"> Reaction '{r_id}' has no associated metabolite")
+                    throw_message(MessageType.Warning, f"> Reaction '{r_id}' has no associated metabolite")
         if not connectivity_error and verbose:
-            self.throw_message(MessageType.Info, "No connectivity issues in the model")
+            throw_message(MessageType.Info, "No connectivity issues in the model")
         return {"protein_to_reaction":    p_to_r_vec,
                 "metabolite_to_reaction": m_to_r_vec,
                 "reaction_to_protein":    r_to_p_vec,
@@ -946,9 +922,9 @@ class GbaBuilder:
         not_produced = [m_id for m_id in met_to_met_connectivity if len(met_to_met_connectivity[m_id]["previous"]) == 0 and self.metabolites[m_id].species_location == SpeciesLocation.Internal]
         if verbose:
             if len(not_produced) == 0:
-                self.throw_message(MessageType.Info, "No unproduced metabolites in the model")
+                throw_message(MessageType.Info, "No unproduced metabolites in the model")
             for m_id in not_produced:
-                self.throw_message(MessageType.Warning, f"Metabolite '{m_id}' is not produced by any reaction")
+                throw_message(MessageType.Warning, f"Metabolite '{m_id}' is not produced by any reaction")
         return not_produced
     
     def detect_infeasible_loops( self, verbose: Optional[bool] = False ) -> list[list[str]]:
@@ -1026,9 +1002,9 @@ class GbaBuilder:
                         pairs.append([m_id, c_id])
         if verbose:
             if len(pairs) == 0:
-                self.throw_message(MessageType.Info, "No infeasible loops in the model")
+                throw_message(MessageType.Info, "No infeasible loops in the model")
             for m_id, c_id in pairs:
-                self.throw_message(MessageType.Warning, f">Infeasible loop between {m_id} and {c_id}")
+                throw_message(MessageType.Warning, f">Infeasible loop between {m_id} and {c_id}")
         return pairs
 
     def detect_isolated_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
@@ -1083,9 +1059,9 @@ class GbaBuilder:
                 if self.reactions[r_id].reaction_type == ReactionType.Transport:
                     isolated.append(m_id)
                     if verbose:
-                        self.throw_message(MessageType.Warning, f"Metabolite '{m_id}' is isolated (imported only)")
+                        throw_message(MessageType.Warning, f"Metabolite '{m_id}' is isolated (imported only)")
         if verbose and len(isolated) == 0:
-            self.throw_message(MessageType.Info, "No isolated metabolites in the model")
+            throw_message(MessageType.Info, "No isolated metabolites in the model")
         return isolated
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1736,6 +1712,30 @@ class GbaBuilder:
 #~~~~~~~~~~~~~~~~~~~#
 # Utility functions #
 #~~~~~~~~~~~~~~~~~~~#
+
+def throw_message( type: MessageType, message: str ) -> None:
+        """
+        Throw a message to the user.
+
+        Parameters
+        ----------
+        type : MessageType
+            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
+        message : str
+            Content of the message.
+        """
+        html_str  = "<table>"
+        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+        if type == MessageType.Info:
+            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info:</strong></td>"
+        elif type == MessageType.Warning:
+            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning:</strong></td>"
+        elif type == MessageType.Error:
+            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error:</strong></td>"
+        html_str += "<td>"+message+"</td>"
+        html_str += "</tr>"
+        html_str += "</table>"
+        display_html(html_str,raw=True)
 
 def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
     """
