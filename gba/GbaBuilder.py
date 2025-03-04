@@ -1691,19 +1691,19 @@ class GbaBuilder:
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>General</h2>"
-        html_str += df1.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
+        html_str += df1.to_html(escape=False, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
-        html_str += df2.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
+        html_str += df2.to_html(escape=False, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Reaction types</h2>"
-        html_str += df3.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
+        html_str += df3.to_html(escape=False, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Reaction directions</h2>"
-        html_str += df4.to_html(escape=False, index=False)#.replace('table','table style="display:inline"')
+        html_str += df4.to_html(escape=False, index=False)
         html_str += "</td></tr>"
         html_str += "</table>"
         display_html(html_str,raw=True)
