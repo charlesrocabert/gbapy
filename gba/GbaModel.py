@@ -1117,8 +1117,8 @@ class GbaModel:
         ub_vec = [GbaConstants.MAX_FLUX_FRACTION.value]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
-           lb_vec[r_index] = item[1]
-           ub_vec[r_index] = item[1]
+           lb_vec[r_index] = (item[1] if item[1] >= GbaConstants.MIN_FLUX_FRACTION.value else GbaConstants.MIN_FLUX_FRACTION.value)
+           ub_vec[r_index] = (item[1] if item[1] >= GbaConstants.MIN_FLUX_FRACTION.value else GbaConstants.MIN_FLUX_FRACTION.value)
         gpmodel = gp.Model(env=env)
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
         min_b   = 1/self.nc/rhs_factor
@@ -1131,6 +1131,7 @@ class GbaModel:
             self.LP_solution = np.copy(v.X)
             return True
         except:
+            throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
@@ -1435,7 +1436,7 @@ class GbaModel:
                     dt         = dt/GbaConstants.DECREASING_DT_FACTOR.value
                     dt_counter = 0
                 else:
-                    throw_message(MessageType.Error, f"> Error: Adaptative timestep < {GbaConstants.MIN_DT}.")
+                    throw_message(MessageType.Error, f"Adaptative timestep < {GbaConstants.MIN_DT}.")
                     sys.exit(1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
@@ -1746,7 +1747,7 @@ class GbaModel:
         path : Optional[str], default="."
             Path to save the initial flux state.
         """
-        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, f"Path <code>{path+"/"+self.name}</code> does not exist.")
+        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, f"Path <code>{path}/{self.name}</code> does not exist.")
         f = open(path+"/"+self.name+"/f0.csv", "w")
         f.write("reaction;f0\n")
         for i in range(self.nj):
