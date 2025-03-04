@@ -655,7 +655,7 @@ class GbaModel:
         self.condition_params = ["rho"] + self.x_ids
         self.conditions       = np.array([])
     
-    def add_condition( self, condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None:
+    def add_condition( self, condition_id: int, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
         Add an external condition to the GBA model.
 
@@ -673,23 +673,29 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert condition_id > 0, throw_message(MessageType.Error, "The condition identifier must be positive.")
         assert condition_id not in self.condition_ids, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
         assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
         assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
+                assert m_id in self.metabolite_ids, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
                 assert m_id in self.condition_params, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> is not a condition parameter.")
                 assert concentration >= 0.0, throw_message(MessageType.Error, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_conditions[condition_id] = {"rho": rho}
-        self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.External})
-        if metabolites is not None:
-            for m_id, concentration in metabolites.items():
-                self.GBA_conditions[condition_id][m_id] = concentration
+        vec = [rho]
+        if metabolites is None:
+            vec = vec + [default_concentration]*self.nx
+        else:
+            for x_id in self.x_ids:
+                if x_id in metabolites:
+                    vec.append(metabolites[x_id])
+                else:
+                    vec.append(default_concentration)
+        self.condition_ids.append(condition_id)
+        # add vec as a new column
+        self.conditions = np.column_stack([self.conditions, np.array(vec)]) if self.conditions.size else np.array(vec)
     
     def clear_constant_reactions( self ) -> None:
         """
