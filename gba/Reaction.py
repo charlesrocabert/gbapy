@@ -265,14 +265,14 @@ class Reaction:
         if self.metabolites == None:
             self.metabolites = {}
         for m_id in metabolites:
-            assert m_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the stoichiometry of reaction '{self.id}'")
-            assert metabolites[m_id] != 0, throw_message(MessageType.Error, f"Stoichiometry of metabolite '{m_id}' cannot be zero (reaction '{self.id}')")
+            assert m_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> already in the stoichiometry of reaction <code>{self.id}</code>.")
+            assert metabolites[m_id] != 0, throw_message(MessageType.Error, f"Stoichiometry of metabolite <code>{m_id}</code> cannot be zero (reaction <code>{self.id}</code>).")
             self.metabolites[m_id] = metabolites[m_id]
             if self.metabolites[m_id] < 0:
-                assert m_id not in self.reactants, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the list of reactants")
+                assert m_id not in self.reactants, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> already in the list of reactants.")
                 self.reactants.append(m_id)
             elif self.metabolites[m_id] > 0:
-                assert m_id not in self.products, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the list of products")
+                assert m_id not in self.products, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> already in the list of products.")
                 self.products.append(m_id)
     
     def add_proteins( self, proteins: dict[str,float] ) -> None:
@@ -285,14 +285,14 @@ class Reaction:
             Dictionary containing the protein IDs and their
             stoichiomety.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if proteins == None:
             return
         if self.proteins == None:
             self.proteins = {}
         for p_id in proteins:
-            assert p_id not in self.proteins, f"> Error: Protein '{p_id}' already in the enzyme composition of reaction '{self.id}'"
-            assert proteins[p_id] > 0, f"> Error: Stoichiometry of protein '{p_id}' must be positive"
+            assert p_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> already in the enzyme composition of reaction <code>{self.id}</code>.")
+            assert proteins[p_id] > 0, throw_message(MessageType.Error, f"Stoichiometry of protein <code>{p_id}</code> must be positive.")
             self.proteins[p_id] = proteins[p_id]
 
     def remove_metabolite( self, metabolite_id: str ) -> None:
@@ -304,20 +304,20 @@ class Reaction:
         metabolite_id : str
             Identifier of the metabolite to remove.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
-        assert self.metabolites != None, f"> Error: Reaction '{self.id}' has no metabolites"
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' not in the stoichiometry of reaction '{self.id}'"
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert self.metabolites != None, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no metabolites.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> not in the stoichiometry of reaction <code>{self.id}</code>.")
         del self.metabolites[metabolite_id]
         if len(self.metabolites) == 0:
-            print(f"> Warning: Reaction '{self.id}' has no metabolites")
+            throw_message(MessageType.Warning, f"Reaction <code>{self.id}</code> has no metabolites.")
         if metabolite_id in self.reactants:
             self.reactants.remove(metabolite_id)
             if len(self.reactants) == 0:
-                print(f"> Warning: Reaction '{self.id}' has no reactants")
+                throw_message(MessageType.Warning, f"Reaction <code>{self.id}</code> has no reactants.")
         elif metabolite_id in self.products:
             self.products.remove(metabolite_id)
             if len(self.products) == 0:
-                print(f"> Warning: Reaction '{self.id}' has no products")
+                throw_message(MessageType.Warning, f"Reaction <code>{self.id}</code> has no products.")
         if not self.km is None and metabolite_id in self.km:
             del self.km[metabolite_id]
     
@@ -330,11 +330,11 @@ class Reaction:
         protein_id : str
             Identifier of the protein to remove.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
-        assert self.proteins != None, f"> Error: Reaction '{self.id}' has no proteins"
-        assert protein_id in self.proteins, f"> Error: Protein '{protein_id}' not in the enzyme composition of reaction '{self.id}'"
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert self.proteins != None, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no proteins.")
+        assert protein_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> not in the enzyme composition of reaction <code>{self.id}</code>.")
         del self.proteins[protein_id]
-        assert len(self.proteins) > 0, f"> Error: Reaction '{self.id}' must have at least one protein"
+        assert len(self.proteins) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> must have at least one protein.")
     
     def rename_metabolite( self, previous_id: str, new_id: str ) -> None:
         """
@@ -347,9 +347,9 @@ class Reaction:
         new_id : str
             New identifier of the metabolite.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
-        assert previous_id in self.metabolites, f"> Error: Metabolite '{previous_id}' not in the stoichiometry of reaction '{self.id}'"
-        assert new_id not in self.metabolites, f"> Error: Metabolite '{new_id}' already in the stoichiometry of reaction '{self.id}'"
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert previous_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{previous_id}</code> not in the stoichiometry of reaction <code>{self.id}</code>.")
+        assert new_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{new_id}</code> already in the stoichiometry of reaction <code>{self.id}</code>.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Update the stoichiometries    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -382,13 +382,13 @@ class Reaction:
         kcat_value : float
             kcat value to add.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion.")
         if direction == None or kcat_value == None:
             return
         if self.kcat == None:
             self.kcat = {}
-        assert direction in [ReactionDirection.Forward, ReactionDirection.Backward], f"> Error: Direction '{dir}' not recognized for reaction '{self.id}'"
-        assert kcat_value >= 0.0, f"> Error: kcat value must be positive or null (reaction '{self.id}')"
+        assert direction in [ReactionDirection.Forward, ReactionDirection.Backward], throw_message(MessageType.Error, f"Direction <code>{dir}</code> not recognized for reaction <code>{self.id}</code>.")
+        assert kcat_value >= 0.0, throw_message(MessageType.Error, f"kcat value must be positive or null (reaction <code>{self.id}</code>).")
         self.kcat[direction] = kcat_value
     
     def add_km_value( self, metabolite_id: str, km_value: float ) -> None:
@@ -402,20 +402,20 @@ class Reaction:
         km_value : float
             KM value to add.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if metabolite_id == None or km_value == None:
             return
         if self.km == None:
             self.km = {}
-        assert metabolite_id in self.metabolites, f"> Error: Metabolite '{metabolite_id}' not in the stoichiometry of reaction '{self.id}'"
-        assert km_value >= 0.0, f"> Error: KM value must be positive or null (reaction '{self.id}')"
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> not in the stoichiometry of reaction <code>{self.id}</code>.")
+        assert km_value >= 0.0, throw_message(MessageType.Error, f"KM value must be positive or null (reaction <code>{self.id}</code>).")
         self.km[metabolite_id] = km_value
 
     def enforce_kcat_irreversibility( self ) -> None:
         """
         Enforce the irreversibility of the reaction at the level of kcat values.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.kcat == None:
             self.kcat = {}
         if self.direction == ReactionDirection.Forward:
@@ -427,7 +427,7 @@ class Reaction:
         """
         Enforce the irreversibility of the reaction at the level of KM values.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.km == None:
             self.km = {}
         if self.direction == ReactionDirection.Forward:
@@ -446,8 +446,8 @@ class Reaction:
         kcat_value : float
             kcat value to add.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
-        assert kcat_value >= 0.0, f"> Error: kcat value must be positive or null (reaction '{self.id}')"
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert kcat_value >= 0.0, throw_message(MessageType.Error, f"kcat value must be positive or null (reaction <code>{self.id}</code>).")
         if self.kcat == None or len(self.kcat) == 0:
             self.kcat = {ReactionDirection.Backward: kcat_value, ReactionDirection.Forward: kcat_value}
         elif len(self.kcat) == 1 and ReactionDirection.Backward in self.kcat:
@@ -464,8 +464,8 @@ class Reaction:
         km_value : float
             KM value to add.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
-        assert km_value >= 0.0, f"> Error: KM value must be positive or null (reaction '{self.id}')"
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert km_value >= 0.0, throw_message(MessageType.Error, f"KM value must be positive or null (reaction <code>{self.id}</code>).")
         if self.km == None or len(self.km) == 0:
             self.km = {}
         for m_id in self.metabolites:
@@ -495,10 +495,10 @@ class Reaction:
         Define the direction of the reaction based on the lower and
         upper bounds.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if not isinstance(self.lb, float) or not isinstance(self.ub, float):
             return
-        assert self.lb <= self.ub, f"> Error: Lower bound must be lower or equal to the upper bound for reaction '{self.id}'"
+        assert self.lb <= self.ub, throw_message(MessageType.Error, f"Lower bound must be lower or equal to the upper bound for reaction <code>{self.id}</code>.")
         if self.lb < 0 and self.ub > 0:
             self.direction = ReactionDirection.Reversible
         elif self.lb >= 0 and self.ub > 0:
@@ -529,18 +529,18 @@ class Reaction:
         Calculate the molecular mass of the enzyme based on its
         composition in proteins.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.proteins == None:
             return
         if self.GPR == ReactionGPR.NONE and len(self.proteins) > 1:
-            print(f"> Error: Reaction '{self.id}' has multiple proteins but no GPR logic")
+            throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has multiple proteins but no GPR logic.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Calculate the molecular mass of the enzyme               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.enzyme_mass          = 0.0
         self.protein_contribution = {}
         for p_id in self.proteins:
-            assert p_id in self._builder.proteins, f"Protein '{p_id}' not found in the list of proteins"
+            assert p_id in self._builder.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> not found in the list of proteins.")
             self.enzyme_mass += self._builder.proteins[p_id].mass*self.proteins[p_id]
         if self.GPR == ReactionGPR.OR:
             self.enzyme_mass /= len(self.proteins)
@@ -561,7 +561,7 @@ class Reaction:
         """
         if self.enzyme_mass == None or self.enzyme_mass == 0.0:
             if verbose:
-                print(f"> Warning: Enzyme mass of reaction '{self.id}' is missing")
+                throw_message(MessageType.Warning, f"Enzyme mass of reaction <code>{self.id}</code> is missing.")
             return True
         return False
 
@@ -576,15 +576,15 @@ class Reaction:
         """
         if self.kcat == None or len(self.kcat) == 0:
             if verbose:
-                print(f"> Warning: no defined kcat value for reaction '{self.id}'")
+                throw_message(MessageType.Warning, f"No defined kcat value for reaction <code>{self.id}</code>.")
             return True
         elif len(self.kcat) == 1 and ReactionDirection.Backward in self.kcat:
             if verbose:
-                print(f"> Warning: forward kcat value is missing for reaction '{self.id}'")
+                throw_message(MessageType.Warning, f"Forward kcat value is missing for reaction <code>{self.id}</code>.")
             return True
         elif len(self.kcat) == 1 and ReactionDirection.Forward in self.kcat:
             if verbose:
-                print(f"> Warning: backward kcat value is missing for reaction '{self.id}'")
+                throw_message(MessageType.Warning, f"Backward kcat value is missing for reaction <code>{self.id}</code>.")
             return True
         elif len(self.kcat) == 2:
             return False
@@ -600,12 +600,12 @@ class Reaction:
         """
         if self.km == None or len(self.km) == 0:
             if verbose:
-                print(f"> Warning: no defined KM value for reaction '{self.id}'")
+                throw_message(MessageType.Warning, f"No defined KM value for reaction <code>{self.id}</code>.")
             return True
         for m_id in self.metabolites:
             if m_id not in self.km:
                 if verbose:
-                    print(f"> Warning: KM value is missing for the pair '{self.id}', ''{m_id}'")
+                    throw_message(MessageType.Warning, f"KM value is missing for the pair <code>{self.id}</code>, <code>{m_id}</code>.")
                 return True
         return False
     
@@ -634,7 +634,7 @@ class Reaction:
         diff = np.abs(reactants_mass-products_mass)
         if diff > threshold:
             if verbose:
-                print(f"> Warning: No mass balance for reaction '{self.id}' (diff = {products_mass-reactants_mass}Da, threshold = {threshold}Da)")
+                throw_message(MessageType.Warning, f"No mass balance for reaction <code>{self.id}</code> (diff = {products_mass-reactants_mass}Da, threshold = {threshold}Da).")
             return False
         return True
     
@@ -658,7 +658,7 @@ class Reaction:
                 product_sum += self.GBA_metabolites[m_id]
         if np.abs(reactant_sum-1.0) > threshold or np.abs(product_sum-1.0) > threshold:
             if verbose:
-                print(f"> Warning: Stoichiometry of reaction '{self.id}' is not normalized (threshold = {threshold}Da)")
+                throw_message(MessageType.Warning, f"Stoichiometry of reaction <code>{self.id}</code> is not normalized (threshold = {threshold}Da).")
             return False
         return True
     
@@ -679,7 +679,7 @@ class Reaction:
         if self.stoichiometry_is_converted:
             converted = True
         if verbose:
-            print(f"> Warning: A GBA conversion exists for reaction '{self.id}'. Consider to reset the conversion.")
+            throw_message(MessageType.Warning, f"A GBA conversion exists for reaction <code>{self.id}</code>. Consider to reset the conversion.")
         return not converted
     
     def check_conversion( self, verbose: Optional[bool] = False ) -> bool:
@@ -693,15 +693,15 @@ class Reaction:
         """
         if not self.kcat_is_converted:
             if verbose:
-                print(f"> Warning: kcat values of reaction '{self.id}' have not been converted to GBA format")
+                throw_message(MessageType.Warning, f"kcat values of reaction <code>{self.id}</code> have not been converted to GBA format.")
             return False
         if not self.km_is_converted:
             if verbose:
-                print(f"> Warning: KM values of reaction '{self.id}' have not been converted to GBA format")
+                throw_message(MessageType.Warning, f"KM values of reaction <code>{self.id}</code> have not been converted to GBA format.")
             return False
         if not self.stoichiometry_is_converted:
             if verbose:
-                print(f"> Warning: Stoichiometry of reaction '{self.id}' has not been converted to GBA format")
+                throw_message(MessageType.Warning, f"Stoichiometry of reaction <code>{self.id}</code> has not been converted to GBA format.")
             return False
         return True
     
@@ -709,8 +709,8 @@ class Reaction:
         """
         Convert the kcat values of the reaction to GBA format (mass units).
         """
-        assert self._builder != None, f"GBA builder not set for reaction '{self.id}'"
-        assert self.kcat != None and len(self.kcat) > 0, f"Reaction '{self.id}' has no kcat values"
+        assert self._builder != None, throw_message(MessageType.Error, f"GBA builder not set for reaction <code>{self.id}</code>.")
+        assert self.kcat != None and len(self.kcat) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no kcat values.")
         reactant_sum = 0.0
         product_sum  = 0.0
         for m_id in self.metabolites:
@@ -734,10 +734,10 @@ class Reaction:
         """
         Convert the KM values of the reaction to GBA format (mass units).
         """
-        assert self._builder != None, f"GBA builder not set for reaction '{self.id}'"
-        assert self.km != None and len(self.km) > 0, f"Reaction '{self.id}' has no KM values"
+        assert self._builder != None, throw_message(MessageType.Error, f"GBA builder not set for reaction <code>{self.id}</code>.")
+        assert self.km != None and len(self.km) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no KM values.")
         for m_id in self.km:
-            assert m_id in self.metabolites, f"Metabolite '{m_id}' not found in the stoichiometry of reaction '{self.id}'"
+            assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> not found in the stoichiometry of reaction <code>{self.id}</code>.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Convert KM values to mass units     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -750,10 +750,10 @@ class Reaction:
         """
         Convert the stoichiometry of the reaction to GBA format (normalized mass units).
         """
-        assert self._builder != None, f"GBA builder not set for reaction '{self.id}'"
-        assert self.metabolites != None and len(self.metabolites) > 0, f"Reaction '{self.id}' has no metabolites"
+        assert self._builder != None, throw_message(MessageType.Error, f"GBA builder not set for reaction <code>{self.id}</code>.")
+        assert self.metabolites != None and len(self.metabolites) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no metabolites.")
         for m_id in self.metabolites:
-            assert m_id in self._builder.metabolites, f"Metabolite '{m_id}' not found in the list of metabolites"
+            assert m_id in self._builder.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> not found in the list of metabolites.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Convert stoichiometry to mass units #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -865,7 +865,7 @@ class Reaction:
         """
         self.define_expression()
         df       = self.build_dataframe()
-        html_str = df.to_html()#.replace('table','table style="display:inline"')
+        html_str = df.to_html(escape=False, index=False)
         display_html(html_str,raw=True)
 
 #~~~~~~~~~~~~~~~~~~~#
