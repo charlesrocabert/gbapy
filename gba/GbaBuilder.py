@@ -1550,7 +1550,7 @@ class GbaBuilder:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv", "conditions.csv", "direction.csv", "constant.csv", "protein_contribution.csv"]
+            files = ["M.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv", "conditions.csv", "directions.csv", "constants.csv", "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
@@ -1604,7 +1604,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constant.csv", "w")
+        f = open(model_path+"/constants.csv", "w")
         f.write("reaction;value\n")
         for item in self.GBA_constant_reactions.items():
             f.write(item[0]+";"+str(item[1])+"\n")
@@ -1612,7 +1612,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Save protein contributions        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/protein_contribution.csv", "w")
+        f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
         for r in self.reactions.values():
             if not r.protein_contribution is None:
