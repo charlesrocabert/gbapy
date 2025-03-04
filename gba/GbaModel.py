@@ -72,7 +72,7 @@ class GbaModel:
         name : str
             Name of the GBA build.
         """
-        assert name != "", "> Error: Empty name"
+        assert name != "", throw_message(MessageType.Error, "You must provide a name to the GbaModel constructor.")
         self.name = name
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -432,32 +432,22 @@ class GbaModel:
         verbose : Optional[bool], default=False
             Print the error messages.
         """
-        if not self.Mx_loaded:
-            raise ValueError("> Error: Mass fraction matrix Mx not loaded.")
-        if not self.kcat_loaded:
-            raise ValueError("> Error: kcat constants not loaded.")
-        if not self.KM_f_loaded:
-            raise ValueError("> Error: KM forward constants not loaded.")
+        assert self.Mx_loaded, throw_message(MessageType.Error, "Mass fraction matrix Mx not loaded.")
+        assert self.kcat_loaded, throw_message(MessageType.Error, "kcat constants not loaded.")
+        assert self.KM_f_loaded, throw_message(MessageType.Error, "KM forward constants not loaded.")
+        assert self.conditions_loaded, throw_message(MessageType.Error, "Conditions not loaded.")
         if not self.KM_b_loaded:
-            if verbose:
-                print("> Info: KM backward constants not found.")
+            throw_message(MessageType.Info, "KM backward constants not loaded.")
         if not self.KA_loaded:
-            if verbose:
-                print("> Info: KA constants not found.")
+            throw_message(MessageType.Info, "KA constants not loaded.")
         if not self.KI_loaded:
-            if verbose:
-                print("> Info: KI constants not found.")
-        if not self.conditions_loaded:
-            raise ValueError("> Error: conditions not loaded.")
+            throw_message(MessageType.Info, "KI constants not loaded.")
         if not self.constant_reactions_loaded:
-            if verbose:
-                print("> Info: constant reactions not found.")
+            throw_message(MessageType.Info, "Constant reactions not loaded.")
         if not self.protein_contribution_loaded:
-            if verbose:
-                print("> Info: protein contributions not found.")
+            throw_message(MessageType.Info, "Protein contributions not loaded.")
         if not self.LP_solution_loaded:
-            if verbose:
-                print("> Info: LP solution not found.")
+            throw_message(MessageType.Info, "LP solution not loaded.")
     
     def initialize_model_mathematical_variables( self ) -> None:
         """
@@ -553,8 +543,8 @@ class GbaModel:
                 self.kinetic_model.append(GbaReactionType.iMMia)
                 self.direction.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] > 0):
-                assert self.KA[:,j].sum() == 0, f"> Error: Reversible Michaelis-Menten reaction cannot have activation (reaction {j})."
-                assert self.KI[:,j].sum() == 0, f"> Error: Reversible Michaelis-Menten reaction cannot have inhibition (reaction {j})."
+                assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
+                assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
                 self.kinetic_model.append(GbaReactionType.rMM)
                 self.direction.append(self.direction.append(ReactionDirection.Reversible))
     
@@ -569,7 +559,7 @@ class GbaModel:
         verbose : Optional[bool], default=False
             Verbose mode.
         """
-        assert os.path.exists(path+"/"+self.name), "> Error: folder "+path+"/"+self.name+" does not exist."
+        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
         self.read_Mx_from_csv(path)
         self.read_kcat_from_csv(path)
         self.read_KM_f_from_csv(path)
@@ -614,8 +604,8 @@ class GbaModel:
         float
             Condition parameter value.
         """
-        assert condition_id in self.condition_ids, "> Error: unknown condition identifier "+condition_id+"."
-        assert condition_param in self.condition_params, "> Error: unknown condition parameter "+condition_param+"."
+        assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier <code>{condition_id}</code>.")
+        assert condition_param in self.condition_params, throw_message(MessageType.Error, f"Unknown condition parameter <code>{condition_param}</code>.")
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
@@ -636,21 +626,21 @@ class GbaModel:
         np.array
             Vector of the variable.
         """
-        assert source in ["random", "optima", "GA", "MC", "MCMC"], "> Error: source must be 'random', 'optima', 'GA', 'MC' or 'MCMC'."
+        assert source in ["random", "optima", "GA", "MC", "MCMC"], throw_message(MessageType.Error, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code>.")
         if source == "random":
-            assert not self.random_data.empty, "> Error: no data available for random solutions."
+            assert not self.random_data.empty, throw_message(MessageType.Error, "No data available for random solutions.")
             return self.random_data[variable].values
         elif source == "optima":
-            assert not self.optima_data.empty, "> Error: no data available for optima."
+            assert not self.optima_data.empty, throw_message(MessageType.Error, "No data available for optima.")
             return self.optima_data[variable].values
         elif source == "GA":
-            assert not self.GA_tracker.empty, "> Error: no data available for gradient ascent."
+            assert not self.GA_tracker.empty, throw_message(MessageType.Error, "No data available for gradient ascent.")
             return self.GA_tracker[variable].values
         elif source == "MC":
-            assert not self.MC_tracker.empty, "> Error: no data available for Monte Carlo."
+            assert not self.MC_tracker.empty, throw_message(MessageType.Error, "No data available for Monte Carlo.")
             return self.MC_tracker[variable].values
         elif source == "MCMC":
-            assert not self.MCMC_tracker.empty, "> Error: no data available for MCMC."
+            assert not self.MCMC_tracker.empty, throw_message(MessageType.Error, "No data available for MCMC.")
             return self.MCMC_tracker[variable].values
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -683,15 +673,15 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert condition_id > 0, "> Error: The condition identifier must be positive"
-        assert condition_id not in self.condition_ids, f"> Error: Condition '{condition_id}' already exists"
-        assert rho > 0.0, "> Error: The total density must be positive"
-        assert default_concentration >= 0.0, "> Error: The default concentration must be positive"
+        assert condition_id > 0, throw_message(MessageType.Error, "The condition identifier must be positive.")
+        assert condition_id not in self.condition_ids, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
+        assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
+        assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolites, f"> Error: Metabolite '{m_id}' does not exist"
-                assert m_id in self.condition_params, f"> Error: Metabolite '{m_id}' is not a condition parameter"
-                assert concentration >= 0.0, f"> Error: The concentration of metabolite '{m_id}' must be positive"
+                assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
+                assert m_id in self.condition_params, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> is not a condition parameter.")
+                assert concentration >= 0.0, throw_message(MessageType.Error, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -718,7 +708,7 @@ class GbaModel:
         value : float
             Flux value.
         """
-        assert reaction_id in self.reaction_ids, "> Error: unknown reaction identifier "+reaction_id+"."
+        assert reaction_id in self.reaction_ids, throw_message(MessageType.Error, f"Unknown reaction identifier <code>{reaction_id}</code>.")
         self.constant_reactions[reaction_id] = value
     
     def reset_variables( self ) -> None:
@@ -749,7 +739,7 @@ class GbaModel:
         condition_id : str
             External condition identifier.
         """
-        assert condition_id in self.condition_ids, "> Error: unknown condition identifier "+condition_id+"."
+        assert condition_id in self.condition_ids, throw_message(MessageType.Error, "Unknown condition identifier <code>{condition_id}</code>.")
         self.condition = condition_id
         self.rho       = self.get_condition(self.condition, "rho")
         for i in range(self.nx):
@@ -768,7 +758,7 @@ class GbaModel:
         f0 : np.array
             Initial flux fraction vector.
         """
-        assert len(f0) == self.nj, "> Error: incorrect f0 length."
+        assert len(f0) == self.nj, throw_message(MessageType.Error, "Incorrect f0 length.")
         self.f0      = np.copy(f0)
         self.f_trunc = np.copy(self.f0[1:self.nj])
         self.f       = np.copy(self.f0)
@@ -1160,10 +1150,10 @@ class GbaModel:
         verbose : Optional[bool], default=False
             Verbose mode.
         """
-        assert condition_id in self.condition_ids, f"> Error: unknown condition identifier ({condition_id})."
-        assert nb_solutions > 0, f"> Error: number of solutions must be greater than 0."
-        assert max_trials >= nb_solutions, f"> Error: number of trials must be greater than the number of solutions."
-        assert min_mu >= 0.0, f"> Error: minimal growth rate must be positive."
+        assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
+        assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
+        assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
+        assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1197,7 +1187,7 @@ class GbaModel:
                 self.random_data                 = pd.concat([self.random_data, data_row.to_frame().T], ignore_index=True)
                 self.random_solutions[solutions] = np.copy(self.f)
                 if verbose:
-                    print("> ", solutions, " solutions were found after ", trials, " trials (last mu = "+str(round(self.mu,5))+")")
+                    throw_message(MessageType.Plain, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Optimization Methods            #
@@ -1219,8 +1209,8 @@ class GbaModel:
         np.array
             Non-mutated flux fraction vector.
         """
-        assert index < self.nj, f"> Error: index {index} is out of bounds."
-        assert sigma > 0.0, f"> Error: sigma must be positive."
+        assert index < self.nj, throw_message(MessageType.Error, f"Index <code>{index}</code> is out of bounds.")
+        assert sigma > 0.0, throw_message(MessageType.Error, f"Sigma must be positive.")
         non_mutated_f        = np.copy(self.f_trunc)
         epsilon              = np.random.normal(0.0, sigma, size=1)
         self.f_trunc[index] += epsilon
@@ -1266,7 +1256,7 @@ class GbaModel:
         """
         allowed_variables = ["f", "v", "p", "b", "c"]
         for variable in variables:
-            assert variable in allowed_variables, f"> Error: variable {variable} is not allowed."
+            assert variable in allowed_variables, throw_message(MessageType.Error, f"Variable <code>{variable}</code> is not allowed.")
             if variable == "f":
                 for r_id, value in zip(self.reaction_ids, getattr(self, variable)):
                     data_dict["f_"+r_id] = value
@@ -1372,7 +1362,7 @@ class GbaModel:
         self.set_condition(condition_id)
         self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Error: Initial model is not consistent."
+        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize the tracker   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1402,7 +1392,7 @@ class GbaModel:
         while (t < max_time):
             nb_iterations += 1
             if verbose and print_period > 0 and nb_iterations%print_period == 0:
-               print("> Iteration: ",nb_iterations, " ( time =", t, ", mu =", self.mu, ", dt =", dt, ")")
+               throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (time = {t}, mu = {self.mu}, dt = {dt}).")
             ### 4.1) Test trajectory convergence ###
             if mu_alteration_counter >= GbaConstants.TRAJECTORY_CONVERGENCE_COUNT.value:
                 self.converged = True
@@ -1440,12 +1430,13 @@ class GbaModel:
                 self.set_f()
                 self.calculate_state()
                 self.check_model_consistency()
-                assert self.consistent, "> Error: Previous model is not consistent"
+                assert self.consistent, throw_message(MessageType.Error, "Previous model is not consistent.")
                 if (dt > GbaConstants.MIN_DT):
                     dt         = dt/GbaConstants.DECREASING_DT_FACTOR.value
                     dt_counter = 0
                 else:
-                    raise AssertionError(f"> Error: Adaptative timestep < {GbaConstants.MIN_DT}.")
+                    throw_message(MessageType.Error, f"> Error: Adaptative timestep < {GbaConstants.MIN_DT}.")
+                    sys.exit(1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1453,11 +1444,11 @@ class GbaModel:
         run_time = end_time-start_time
         if t >= max_time:
             if verbose:
-                print("> Gradient ascent: maximum time reached (condition="+str(condition_id)+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+")")
+                throw_message(MessageType.Plain, f"Gradient ascent: maximum time reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
             return False, run_time
         else:
             if verbose:
-                print("> Gradient ascent: convergence reached (condition="+str(condition_id)+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+")")
+                throw_message(MessageType.Plain, f"Gradient ascent: convergence reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
             return True, run_time
 
     def compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01,
@@ -1505,7 +1496,7 @@ class GbaModel:
         end_time = time.time()
         run_time = end_time-start_time
         if verbose:
-            print(f"> All optima were computed in {run_time} seconds")
+            throw_message(MessageType.Plain, f"All optima were computed in {run_time} seconds.")
         return run_time
     
     def MC_simulation( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
@@ -1556,7 +1547,7 @@ class GbaModel:
         self.set_condition(condition_id)
         self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Error: initial model is not consistent."
+        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize tracker       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1582,10 +1573,10 @@ class GbaModel:
         while (t < max_time):
             nb_iterations += 1
             if verbose and print_period > 0 and nb_iterations%print_period == 0:
-               print("> Iteration: "+str(nb_iterations)+" (time = "+str(t)+", mu = "+str(self.mu)+", fixed = "+str(nb_fixed)+")")
+               throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (time = {t}, mu = {self.mu}, fixed = {nb_fixed}).")
             if nb_iterations >= max_iterations:
                 if verbose:
-                    print("> Maximum number of iterations reached (condition "+condition_id+").")
+                    throw_message(MessageType.Plain, f"Maximum number of iterations reached (condition <code>{condition_id}</code>).")
                 break
             ### 4.1) Calculate the next step ###
             self.block_reactions()
@@ -1611,20 +1602,23 @@ class GbaModel:
                 self.set_f()
                 self.calculate_state()
                 self.check_model_consistency()
-                assert self.consistent, "> Error: previous model is not consistent."
+                assert self.consistent, throw_message(MessageType.Error, "Previous model is not consistent.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         end_time = time.time()
         run_time = end_time-start_time
         if nb_fixed == 0 and nb_iterations < max_iterations:
-            print("> MC simulation completed with no fixed mutation (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MC simulation completed with no fixed mutation (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
             return False, run_time
         elif nb_fixed > 0 and nb_iterations < max_iterations:
-            print("> MC simulation completed (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MC simulation completed (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
             return True, run_time
         elif nb_iterations >= max_iterations:
-            print("> MC simulation: maximum iterations reached (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MC simulation: maximum iterations reached (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
             return False, run_time
 
     def MCMC_simulation( self, condition_id: Optional[str] = "1", max_iterations: Optional[int] = 100000,
@@ -1672,7 +1666,7 @@ class GbaModel:
         self.set_condition(condition_id)
         self.calculate_state()
         self.check_model_consistency()
-        assert self.consistent, "> Error: initial model is not consistent"
+        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Initialize trackers       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1696,7 +1690,7 @@ class GbaModel:
         while nb_iterations < max_iterations:
             nb_iterations += 1
             if verbose and print_period > 0 and nb_iterations%print_period == 0:
-               print("> Iteration: "+str(nb_iterations)+" (mu = "+str(self.mu)+", fixed = "+str(nb_fixed)+")")
+                throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (mu = {self.mu}, fixed = {nb_fixed}).")
             ### 4.1) Draw reaction to mutate at random ###
             reaction_index = np.random.randint(len(self.f_trunc))
             current_mu     = self.mu
@@ -1731,13 +1725,16 @@ class GbaModel:
         end_time = time.time()
         run_time = end_time-start_time
         if nb_fixed == 0 and nb_iterations < max_iterations:
-            print("> MCMC: simulation completed with no fixed mutation (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MCMC simulation completed with no fixed mutation (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
             return False, run_time, nb_fixed
         elif nb_fixed > 0 and nb_iterations < max_iterations:
-            print("> MCMC: simulation completed (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MCMC simulation completed (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
             return True, run_time, nb_fixed
         elif nb_iterations >= max_iterations:
-            print("> MCMC: maximum iterations reached (condition="+condition_id+", mu="+str(round(self.mu, 5))+", nb iterations="+str(nb_iterations)+", nb fixed="+str(nb_fixed)+").")
+            if verbose:
+                throw_message(MessageType.Plain, f"MCMC simulation: maximum iterations reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
             return False, run_time, nb_fixed
 
     def save_f0( self, path: Optional[str] = "." ) -> None:
@@ -1749,6 +1746,7 @@ class GbaModel:
         path : Optional[str], default="."
             Path to save the initial flux state.
         """
+        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, f"Path <code>{path+"/"+self.name}</code> does not exist.")
         f = open(path+"/"+self.name+"/f0.csv", "w")
         f.write("reaction;f0\n")
         for i in range(self.nj):
@@ -1766,7 +1764,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectory.
         """
-        assert os.path.exists(path), f"> Error: path {path} does not exist."
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
@@ -1784,7 +1782,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectory.
         """
-        assert os.path.exists(path), f"> Error: path {path} does not exist."
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
@@ -1802,7 +1800,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectory.
         """
-        assert os.path.exists(path), f"> Error: path {path} does not exist."
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
@@ -1820,7 +1818,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectory.
         """
-        assert os.path.exists(path), f"> Error: path {path} does not exist."
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
@@ -1838,7 +1836,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectory.
         """
-        assert os.path.exists(path), f"> Error: path {path} does not exist."
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         header = path+"/"+self.name
         if label != "":
             header += "_"+str(label)
@@ -1856,6 +1854,7 @@ class GbaModel:
         label : Optional[str], default=""
             Label for the trajectories.
         """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
         self.save_gradient_ascent_trajectory(path, label)
         self.save_MC_tracker_trajectory(path, label) 
         self.save_MCMC_trajectory(path, label)
@@ -1980,9 +1979,9 @@ class GbaModel:
         data : Optional[pd.DataFrame], default=None
             Data for the trajectory.
         """
-        assert source in ["random", "optima", "GA", "MC", "MCMC", "data"], "> Error: source must be 'random', 'optima', 'GA', 'MC' or 'MCMC' or 'data'."
+        assert source in ["random", "optima", "GA", "MC", "MCMC", "data"], throw_message(MessageType.Error, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code> or <code>data</code>.")
         if source == "data":
-            assert data is not None, "> Error: data must be provided for source 'data'."
+            assert data is not None, throw_message(MessageType.Error, "Data must be provided for source <code>data</code>.")
         X = None
         Y = None
         if data is not None:
@@ -1998,16 +1997,19 @@ class GbaModel:
 #~~~~~~~~~~~~~~~~~~~#
 
 def throw_message( type: MessageType, message: str ) -> None:
-        """
-        Throw a message to the user.
+    """
+    Throw a message to the user.
 
-        Parameters
-        ----------
-        type : MessageType
-            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
-        message : str
-            Content of the message.
-        """
+    Parameters
+    ----------
+    type : MessageType
+        Type of message (MessageType.Info, MessageType.Warning, MessageType.Error, MessageType.Plain).
+    message : str
+        Content of the message.
+    """
+    if type == MessageType.Plain:
+        display_html("&#10095; "+message, raw=True)
+    else:
         html_str  = "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         if type == MessageType.Info:
@@ -2019,7 +2021,7 @@ def throw_message( type: MessageType, message: str ) -> None:
         html_str += "<td>"+message+"</td>"
         html_str += "</tr>"
         html_str += "</table>"
-        display_html(html_str,raw=True)
+        display_html(html_str, raw=True)
 
 def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
     """
@@ -2037,7 +2039,7 @@ def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
     GbaModel
         The loaded GBA model.
     """
-    assert os.path.exists(path+"/"+name), "> Error: the folder "+path+"/"+name+" does not exist."
+    assert os.path.exists(path+"/"+name), throw_message(MessageType.Error, "The folder "+path+"/"+name+" does not exist.")
     model = GbaModel(name)
     model.read_from_csv(path=path)
     return model
@@ -2100,7 +2102,7 @@ def backup_gba_model( model: GbaModel, name: Optional[str] = "", path: Optional[
     ofile = open(filename, "wb")
     dill.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), "> Error: .gba file creation failed."
+    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gba file creation failed.")
 
 def load_gba_model( path: str ) -> GbaModel:
     """
@@ -2111,8 +2113,8 @@ def load_gba_model( path: str ) -> GbaModel:
     path : str
         Path to the GBA model file.
     """
-    assert path.endswith(".gba"), "> Error: GBA model file extension is missing."
-    assert os.path.isfile(path), "> Error: GBA model file not found."
+    assert path.endswith(".gba"), throw_message(MessageType.Error, "GBA model file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.Error, "GBA model file not found.")
     ifile = open(path, "rb")
     model = dill.load(ifile)
     ifile.close()
@@ -2143,7 +2145,7 @@ def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[s
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_LP:
-        print("> Computing LP solution for model "+model.name+"...")
+        throw_message(MessageType.Plain, f"Computing LP solution for model {model.name}...")
         model.solve_local_linear_problem()
         model.set_f0(model.LP_solution)
         model.set_condition("1")
@@ -2152,12 +2154,13 @@ def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[s
         if model.consistent:
             model.save_f0(path=path)
         else:
-            raise Exception("> Error: model is inconsistent with condition 1. f0 vector cannot be saved.")
+            throw_message(MessageType.Error, "Model is inconsistent with condition 1. f0 vector cannot be saved.")
+            sys.exit(1)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Compute and save optima if requested     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_optima:
-        print("> Computing optima for model "+model.name+"...")
+        throw_message(MessageType.Plain, f"Computing optima for model {model.name}...")
         if not save_LP:
             model.read_LP_from_csv(path=path)
         model.compute_optima(max_time=10000, initial_dt=0.01)

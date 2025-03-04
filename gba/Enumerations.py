@@ -148,8 +148,10 @@ class MessageType(enum.Enum):
     - Info    : Throw an information message.
     - Warning : Throw a warning message.
     - Error   : Throw an error message.
+    - Plain   : Throw a plain message.
     """
     Info    = 1
     Warning = 2
     Error   = 3
+    Plain   = 4
 

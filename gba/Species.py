@@ -294,16 +294,19 @@ class Metabolite(Species):
 #~~~~~~~~~~~~~~~~~~~#
 
 def throw_message( type: MessageType, message: str ) -> None:
-        """
-        Throw a message to the user.
+    """
+    Throw a message to the user.
 
-        Parameters
-        ----------
-        type : MessageType
-            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
-        message : str
-            Content of the message.
-        """
+    Parameters
+    ----------
+    type : MessageType
+        Type of message (MessageType.Info, MessageType.Warning, MessageType.Error, MessageType.Plain).
+    message : str
+        Content of the message.
+    """
+    if type == MessageType.Plain:
+        display_html("&#10095; "+message, raw=True)
+    else:
         html_str  = "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         if type == MessageType.Info:
@@ -315,5 +318,5 @@ def throw_message( type: MessageType, message: str ) -> None:
         html_str += "<td>"+message+"</td>"
         html_str += "</tr>"
         html_str += "</table>"
-        display_html(html_str,raw=True)
+        display_html(html_str, raw=True)
 
