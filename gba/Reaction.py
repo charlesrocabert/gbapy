@@ -265,14 +265,14 @@ class Reaction:
         if self.metabolites == None:
             self.metabolites = {}
         for m_id in metabolites:
-            assert m_id not in self.metabolites, f"> Error: Metabolite '{m_id}' already in the stoichiometry of reaction '{self.id}'"
-            assert metabolites[m_id] != 0, f"> Error: Stoichiometry of metabolite '{m_id}' cannot be zero (reaction '{self.id}')"
+            assert m_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the stoichiometry of reaction '{self.id}'")
+            assert metabolites[m_id] != 0, throw_message(MessageType.Error, f"Stoichiometry of metabolite '{m_id}' cannot be zero (reaction '{self.id}')")
             self.metabolites[m_id] = metabolites[m_id]
             if self.metabolites[m_id] < 0:
-                assert m_id not in self.reactants, f"> Error: Metabolite '{m_id}' already in the list of reactants"
+                assert m_id not in self.reactants, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the list of reactants")
                 self.reactants.append(m_id)
             elif self.metabolites[m_id] > 0:
-                assert m_id not in self.products, f"> Error: Metabolite '{m_id}' already in the list of products"
+                assert m_id not in self.products, throw_message(MessageType.Error, f"Metabolite '{m_id}' already in the list of products")
                 self.products.append(m_id)
     
     def add_proteins( self, proteins: dict[str,float] ) -> None:
@@ -866,5 +866,33 @@ class Reaction:
         self.define_expression()
         df       = self.build_dataframe()
         html_str = df.to_html()#.replace('table','table style="display:inline"')
+        display_html(html_str,raw=True)
+
+#~~~~~~~~~~~~~~~~~~~#
+# Utility functions #
+#~~~~~~~~~~~~~~~~~~~#
+
+def throw_message( type: MessageType, message: str ) -> None:
+        """
+        Throw a message to the user.
+
+        Parameters
+        ----------
+        type : MessageType
+            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
+        message : str
+            Content of the message.
+        """
+        html_str  = "<table>"
+        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+        if type == MessageType.Info:
+            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
+        elif type == MessageType.Warning:
+            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
+        elif type == MessageType.Error:
+            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
+        html_str += "<td>"+message+"</td>"
+        html_str += "</tr>"
+        html_str += "</table>"
         display_html(html_str,raw=True)
 

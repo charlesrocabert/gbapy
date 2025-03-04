@@ -1997,6 +1997,30 @@ class GbaModel:
 # Utility functions #
 #~~~~~~~~~~~~~~~~~~~#
 
+def throw_message( type: MessageType, message: str ) -> None:
+        """
+        Throw a message to the user.
+
+        Parameters
+        ----------
+        type : MessageType
+            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
+        message : str
+            Content of the message.
+        """
+        html_str  = "<table>"
+        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+        if type == MessageType.Info:
+            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
+        elif type == MessageType.Warning:
+            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
+        elif type == MessageType.Error:
+            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
+        html_str += "<td>"+message+"</td>"
+        html_str += "</tr>"
+        html_str += "</table>"
+        display_html(html_str,raw=True)
+
 def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
     """
     Read a GBA model from CSV files.

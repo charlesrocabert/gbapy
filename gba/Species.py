@@ -132,9 +132,9 @@ class Species:
                 formula   = self.formula.replace("R", "")
                 self.mass = (molmass.Formula(formula).mass if formula != "" else 0.0)
             except:
-                print(f"> Warning: Could not calculate the molecular mass of '{self.id}'")
+                throw_message(MessageType.Warning, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
         else:
-            print(f"> Warning: Could not calculate the molecular mass of '{self.id}'")
+            throw_message(MessageType.Warning, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
 
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """
@@ -147,7 +147,7 @@ class Species:
         """
         if self.mass == None or self.mass == 0.0:
             if verbose:
-                print(f"> Warning: mass of species '{self.id}' is missing")
+                throw_message(MessageType.Warning, f"Mass of species <code>{self.id}</code> is missing.")
             return True
         return False
     
@@ -199,7 +199,7 @@ class Species:
         Print a summary of the species.
         """
         df       = self.build_dataframe()
-        html_str = df.to_html()#.replace('table','table style="display:inline"')
+        html_str = df.to_html(escape=False, index=False)
         display_html(html_str,raw=True)
 
 class Protein(Species):
@@ -288,4 +288,32 @@ class Metabolite(Species):
         """
         super().__init__(id, name, species_location, species_type, formula, mass)
         self.annotation = annotation
+
+#~~~~~~~~~~~~~~~~~~~#
+# Utility functions #
+#~~~~~~~~~~~~~~~~~~~#
+
+def throw_message( type: MessageType, message: str ) -> None:
+        """
+        Throw a message to the user.
+
+        Parameters
+        ----------
+        type : MessageType
+            Type of message (MessageType.Info, MessageType.Warning, MessageType.Error).
+        message : str
+            Content of the message.
+        """
+        html_str  = "<table>"
+        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+        if type == MessageType.Info:
+            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
+        elif type == MessageType.Warning:
+            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
+        elif type == MessageType.Error:
+            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
+        html_str += "<td>"+message+"</td>"
+        html_str += "</tr>"
+        html_str += "</table>"
+        display_html(html_str,raw=True)
 
