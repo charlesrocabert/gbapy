@@ -129,7 +129,6 @@ class GbaConstants(float, enum.Enum):
     """
     MIN_CONCENTRATION            = 1e-10
     MIN_FLUX_FRACTION            = 1e-10
-    MAX_FLUX_FRACTION            = 100.0
     DENSITY_TOL                  = 1e-10
     NEGATIVE_C_TOL               = 1e-10
     NEGATIVE_P_TOL               = 1e-10

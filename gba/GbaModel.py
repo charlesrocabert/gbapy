@@ -1103,7 +1103,7 @@ class GbaModel:
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def solve_local_linear_problem( self, rhs_factor: Optional[float] = 10.0 ) -> None:
+    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0 ) -> None:
         """
         Solve the local linear problem to find the initial solution.
 
@@ -1116,15 +1116,19 @@ class GbaModel:
 
         Parameters
         ----------
+        max_flux_fraction : Optional[float], default=10.0
+            Maximal flux fraction.
         rhs_factor : Optional[float], default=100.0
             Factor dividing the rhs of the mass conservation constraint.
         """
+        assert max_flux_fraction > GbaConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
+        assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
         lb_vec = [GbaConstants.MIN_FLUX_FRACTION.value]*self.nj
-        ub_vec = [GbaConstants.MAX_FLUX_FRACTION.value]*self.nj
+        ub_vec = [max_flux_fraction]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
-           lb_vec[r_index] = (item[1] if item[1] >= GbaConstants.MIN_FLUX_FRACTION.value else GbaConstants.MIN_FLUX_FRACTION.value)
-           ub_vec[r_index] = (item[1] if item[1] >= GbaConstants.MIN_FLUX_FRACTION.value else GbaConstants.MIN_FLUX_FRACTION.value)
+           lb_vec[r_index] = item[1]
+           ub_vec[r_index] = item[1]
         gpmodel = gp.Model(env=env)
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
         min_b   = 1/self.nc/rhs_factor
@@ -1140,7 +1144,7 @@ class GbaModel:
             throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
-    def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
+    def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
         Generate random initial solutions.
 
@@ -1152,6 +1156,8 @@ class GbaModel:
             Number of solutions to generate.
         max_trials : int
             Maximum number of trials.
+        max_flux_fraction : Optional[float], default=10.0
+            Maximal flux fraction.
         min_mu : Optional[float], default=1e-3
             Minimal growth rate.
         verbose : Optional[bool], default=False
@@ -1160,6 +1166,7 @@ class GbaModel:
         assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
         assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
         assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
+        assert max_flux_fraction > GbaConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
         assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
@@ -1179,7 +1186,7 @@ class GbaModel:
             negative_term  = True
             while negative_term:
                 self.f_trunc = np.random.rand(self.nj-1)
-                self.f_trunc = self.f_trunc*(GbaConstants.MAX_FLUX_FRACTION-GbaConstants.MIN_FLUX_FRACTION)+GbaConstants.MIN_FLUX_FRACTION
+                self.f_trunc = self.f_trunc*(max_flux_fraction-GbaConstants.MIN_FLUX_FRACTION)+GbaConstants.MIN_FLUX_FRACTION
                 self.set_f()
                 if self.f[0] >= 0.0:
                     negative_term = False
