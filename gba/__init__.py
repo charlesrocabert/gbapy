@@ -20,10 +20,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #***********************************************************************
 
+"""
+Filename: __init__.py
+Author: Charles Rocabert
+Date: 2025-05-03
+Description:
+    __init__ file of the GBApy module.
+License: GNU General Public License v3.0
+Copyright: © 2024-2025 Charles Rocabert
+"""
+
 from gba import (
     Enumerations,
+    Species,
+    Reaction,
+    GbaBuilder,
     GbaModel
 )
 from gba.Enumerations import *
+from gba.GbaBuilder import *
 from gba.GbaModel import *
 
