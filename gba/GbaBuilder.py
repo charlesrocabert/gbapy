@@ -734,6 +734,9 @@ class GbaBuilder:
         self.GBA_constant_reactions[reaction_id] = value
     
     def reset_conversion( self ) -> None:
+        """
+        Reset the GBA conversion of all reactions in the model.
+        """
         for reaction in self.reactions.values():
             reaction.reset_conversion()
     
@@ -1579,6 +1582,8 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         M_df.to_csv(model_path+"/M.csv", sep=";")
+        intM_df = pd.DataFrame(self.GBA_intM, index=self.GBA_internal_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        intM_df.to_csv(model_path+"/intM.csv", sep=";")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

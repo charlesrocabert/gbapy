@@ -377,7 +377,7 @@ class GbaModel:
             f.close()
             self.constant_reactions_loaded = True
 
-    def read_protein_contribution_from_csv( self, path: Optional[str] = "." ) -> None:
+    def read_protein_contributions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of protein contributions from a CSV file.
 
@@ -387,7 +387,7 @@ class GbaModel:
             Path to the CSV file.
         """
         self.protein_contribution_loaded = False
-        filename                         = path+"/"+self.name+"/protein_contribution.csv"
+        filename                         = path+"/"+self.name+"/protein_contributions.csv"
         if os.path.exists(filename):
             f = open(filename, "r")
             l = f.readline()
@@ -568,7 +568,7 @@ class GbaModel:
         self.read_KI_from_csv(path)
         self.read_conditions_from_csv(path)
         self.read_constant_reactions_from_csv(path)
-        self.read_protein_contribution_from_csv(path)
+        self.read_protein_contributions_from_csv(path)
         self.read_LP_from_csv(path)
         self.check_model_loading(verbose)
         self.initialize_model_mathematical_variables()
