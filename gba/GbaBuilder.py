@@ -733,6 +733,10 @@ class GbaBuilder:
         assert reaction_id not in self.GBA_constant_reactions
         self.GBA_constant_reactions[reaction_id] = value
     
+    def reset_conversion( self ) -> None:
+        for reaction in self.reactions.values():
+            reaction.reset_conversion()
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Model consistency tests  #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -845,13 +849,13 @@ class GbaBuilder:
                 m_to_r_vec.append(m_id)
                 connectivity_error = True
                 if verbose:
-                    self.throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> has no associated reaction.")
+                    throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> has no associated reaction.")
         for r_id in reaction_to_protein_map:
             if len(reaction_to_protein_map[r_id]) == 0:
                 r_to_p_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    self.throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated protein.")
+                    throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated protein.")
         for r_id in reaction_to_metabolite_map:
             if len(reaction_to_metabolite_map[r_id]) == 0:
                 r_to_m_vec.append(r_id)
@@ -1333,7 +1337,7 @@ class GbaBuilder:
             return True
         return False
     
-    def convert( self, ribosome_byproducts: Optional[bool] = True, ribosome_mass_kcat: Optional[float] = 4.55 ) -> None:
+    def convert( self, ribosome_byproducts: Optional[bool] = True, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3 ) -> None:
         """
         Convert the model to a GBA model.
 
@@ -1361,6 +1365,9 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.check_ribosomal_reaction_consistency()
         self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat
+        if ribosome_mass_km is not None:
+            for m_id in self.reactions["Ribosome"].reactants:
+                self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
     
     def reset_conversion( self ) -> None:
         for r in self.reactions.values():
@@ -1464,19 +1471,6 @@ class GbaBuilder:
         self.GBA_KA = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
         self.GBA_KI = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
     
-    def build_GBA_variables( self ) -> None:
-        """
-        Build the GBA variables.
-        """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        self.build_GBA_indices()
-        self.build_GBA_mass_fraction_matrix()
-        self.build_GBA_kcat_vectors()
-        self.build_GBA_KM_matrices()
-        self.build_GBA_KA_KI_matrices()
-        self.compute_mass_fraction_matrix_metrics()
-        self.GBA_is_built = True
-
     def compute_mass_fraction_matrix_metrics( self ) -> None:
         """
         Compute the mass fraction matrix metrics:
@@ -1491,6 +1485,19 @@ class GbaBuilder:
         indices                      = np.where(linearly_independent_indices == False)[0]
         r_ids                        = list(self.GBA_col_indices.keys())
         self.GBA_dependent_reactions = [r_id for i, r_id in enumerate(r_ids) if i in indices]
+    
+    def build_GBA_variables( self ) -> None:
+        """
+        Build the GBA variables.
+        """
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        self.build_GBA_indices()
+        self.build_GBA_mass_fraction_matrix()
+        self.build_GBA_kcat_vectors()
+        self.build_GBA_KM_matrices()
+        self.build_GBA_KA_KI_matrices()
+        self.compute_mass_fraction_matrix_metrics()
+        self.GBA_is_built = True
     
     def convert_GBA_reaction_to_forward_irreversible( self, reaction_id: str, direction: ReactionDirection ) -> None:
         """
