@@ -1535,6 +1535,19 @@ class GbaBuilder:
             elif r_id in self.reactions and f_val < 0.0:
                 self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.Backward)
     
+    def adjust_masses( self, metabolites: dict[str, float] ) -> None:
+        """
+        Adjust the masses of a list of metabolites.
+
+        Parameters
+        ----------
+        metabolites : dict[str, float]
+            Dictionary of metabolites and their mass adjustments.
+        """
+        for m_id, mass_adjust in metabolites.items():
+            if m_id in self.metabolites:
+                self.metabolites[m_id].mass += mass_adjust
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
