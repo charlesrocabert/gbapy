@@ -796,9 +796,12 @@ class Reaction:
         self.kcat_is_converted          = False
         self.km_is_converted            = False
         self.stoichiometry_is_converted = False
-        self.GBA_metabolites.clear()
-        self.GBA_kcat.clear()
-        self.GBA_km.clear()
+        if not self.GBA_metabolites is None:
+            self.GBA_metabolites.clear()
+        if not self.GBA_kcat is None:
+            self.GBA_kcat.clear()
+        if not self.GBA_km is None:
+            self.GBA_km.clear()
         self.GBA_metabolites = None
         self.GBA_kcat        = None
         self.GBA_km          = None

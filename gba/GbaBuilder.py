@@ -730,7 +730,7 @@ class GbaBuilder:
         value : float
             Flux value.
         """
-        assert reaction_id not in self.GBA_constant_reactions
+        assert reaction_id not in self.GBA_constant_reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is already constant.")
         self.GBA_constant_reactions[reaction_id] = value
     
     def reset_conversion( self ) -> None:
@@ -1337,7 +1337,7 @@ class GbaBuilder:
             return True
         return False
     
-    def convert( self, ribosome_byproducts: Optional[bool] = True, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3 ) -> None:
+    def convert( self, ribosome_byproducts: Optional[bool] = True, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = None ) -> None:
         """
         Convert the model to a GBA model.
 
