@@ -60,6 +60,8 @@ env.start()
 class GbaModel:
     """
     Class to manipulate GBA models.
+
+    TO BE COMPLETED
     """
 
     def __init__( self, name: str ) -> None:
@@ -99,25 +101,27 @@ class GbaModel:
         self.rKI                = np.array([]) # 1/KI matrix
         self.reversible         = []           # Indicates if the reaction is reversible
         self.kinetic_model      = []           # Indicates the kinetic model of the reaction
-        self.direction          = []           # Indicates the direction of the reaction
+        self.directions         = []           # Indicates the direction of the reaction
         self.conditions         = np.array([]) # List of conditions
+        self.constant_rhs       = {}           # Constant right-hand side terms
         self.constant_reactions = {}           # Constant reactions
 
         ### Proteomics ###
-        self.protein_contribution = {} # Protein contribution to each reaction
-        self.proteomics           = {} # Predicted proteomics
+        self.protein_contributions = {} # Protein contribution to each reaction
+        self.proteomics            = {} # Predicted proteomics
 
         ### Loaded objects ###
-        self.Mx_loaded                   = False # Is the mass fraction matrix loaded?
-        self.kcat_loaded                 = False # Are the kcat constants loaded?
-        self.KM_f_loaded                 = False # Are the KM forward constants loaded?
-        self.KM_b_loaded                 = False # Are the KM backward constants loaded?
-        self.KA_loaded                   = False # Are the KA constants loaded?
-        self.KI_loaded                   = False # Are the KI constants loaded?
-        self.conditions_loaded           = False # Are the conditions loaded?
-        self.constant_reactions_loaded   = False # Are the constant reactions loaded?
-        self.protein_contribution_loaded = False # Are the protein contributions loaded?
-        self.LP_solution_loaded          = False # Is the LP solution loaded?
+        self.Mx_loaded                    = False # Is the mass fraction matrix loaded?
+        self.kcat_loaded                  = False # Are the kcat constants loaded?
+        self.KM_f_loaded                  = False # Are the KM forward constants loaded?
+        self.KM_b_loaded                  = False # Are the KM backward constants loaded?
+        self.KA_loaded                    = False # Are the KA constants loaded?
+        self.KI_loaded                    = False # Are the KI constants loaded?
+        self.conditions_loaded            = False # Are the conditions loaded?
+        self.constant_rhs_loaded          = False # Are the constant right-hand side terms loaded?
+        self.constant_reactions_loaded    = False # Are the constant reactions loaded?
+        self.protein_contributions_loaded = False # Are the protein contributions loaded?
+        self.LP_solution_loaded           = False # Is the LP solution loaded?
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) GBA model constants           #
@@ -354,6 +358,29 @@ class GbaModel:
             self.conditions_loaded = True
             del(df)
 
+    def read_constant_rhs_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the list of constant RHS terms from a CSV file.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        self.constant_rhs_loaded = False
+        filename                 = path+"/"+self.name+"/constant_rhs.csv"
+        if os.path.exists(filename):
+            f = open(filename, "r")
+            l = f.readline()
+            l = f.readline()
+            self.constant_rhs.clear()
+            while l:
+                l = l.strip("\n").split(";")
+                self.constant_rhs[l[0]] = float(l[1])
+                l = f.readline()
+            f.close()
+            self.constant_rhs_loaded = True
+    
     def read_constant_reactions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of constant reactions from a CSV file.
@@ -364,7 +391,7 @@ class GbaModel:
             Path to the CSV file.
         """
         self.constant_reactions_loaded = False
-        filename                       = path+"/"+self.name+"/constants.csv"
+        filename                       = path+"/"+self.name+"/constant_reactions.csv"
         if os.path.exists(filename):
             f = open(filename, "r")
             l = f.readline()
@@ -386,25 +413,25 @@ class GbaModel:
         path : str, default="."
             Path to the CSV file.
         """
-        self.protein_contribution_loaded = False
-        filename                         = path+"/"+self.name+"/protein_contributions.csv"
+        self.protein_contributions_loaded = False
+        filename                          = path+"/"+self.name+"/protein_contributions.csv"
         if os.path.exists(filename):
             f = open(filename, "r")
             l = f.readline()
             l = f.readline()
-            self.protein_contribution.clear()
+            self.protein_contributions.clear()
             while l:
                 l = l.strip("\n").split(";")
                 r_id = l[0]
                 p_id = l[1]
                 val  = float(l[2])
-                if r_id not in self.protein_contribution:
-                    self.protein_contribution[r_id] = {p_id: val}
+                if r_id not in self.protein_contributions:
+                    self.protein_contributions[r_id] = {p_id: val}
                 else:
-                    self.protein_contribution[r_id][p_id] = val
+                    self.protein_contributions[r_id][p_id] = val
                 l = f.readline()
             f.close()
-            self.protein_contribution_loaded = True
+            self.protein_contributions_loaded = True
     
     def read_LP_from_csv( self, path: Optional[str] = "." ) -> None:
         """
@@ -442,9 +469,11 @@ class GbaModel:
             throw_message(MessageType.Info, "KA constants not loaded.")
         if not self.KI_loaded:
             throw_message(MessageType.Info, "KI constants not loaded.")
+        if not self.constant_rhs_loaded:
+            throw_message(MessageType.Info, "Constant RHS terms not loaded.")
         if not self.constant_reactions_loaded:
             throw_message(MessageType.Info, "Constant reactions not loaded.")
-        if not self.protein_contribution_loaded:
+        if not self.protein_contributions_loaded:
             throw_message(MessageType.Info, "Protein contributions not loaded.")
         if not self.LP_solution_loaded:
             throw_message(MessageType.Info, "LP solution not loaded.")
@@ -567,6 +596,7 @@ class GbaModel:
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
         self.read_conditions_from_csv(path)
+        self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
         self.read_protein_contributions_from_csv(path)
         self.read_LP_from_csv(path)
@@ -696,6 +726,27 @@ class GbaModel:
         self.condition_ids.append(condition_id)
         # add vec as a new column
         self.conditions = np.column_stack([self.conditions, np.array(vec)]) if self.conditions.size else np.array(vec)
+    
+    def clear_constant_rhs( self ) -> None:
+        """
+        Clear all constant RHS terms from the GBA model.
+        """
+        self.constant_rhs = {}
+    
+    def add_constant_rhs( self, metabolite_id: str, value: float ) -> None:
+        """
+        Make a GBA metabolite constant in the RHS term for the initial solution.
+
+        Parameters
+        ----------
+        metabolite_id : str
+            Identifier of the metabolite.
+        value : float
+            Flux value.
+        """
+        assert metabolite_id in self.metabolite_ids, throw_message(MessageType.Error, f"Unknown metabolite identifier <code>{metabolite_id}</code>.")
+        assert value >= 0.0, throw_message(MessageType.Error, "The constant value must be positive.")
+        self.constant_rhs[metabolite_id] = value
     
     def clear_constant_reactions( self ) -> None:
         """
@@ -1133,8 +1184,8 @@ class GbaModel:
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
         min_b   = 1/self.nc/rhs_factor
         rhs     = np.repeat(min_b, self.nc)
-        #rhs[self.c_ids.index("DNA")] = 0.055*(1-0.72)
-        #rhs[self.c_ids.index("rRNA")] = 0.16274*(1-0.72)
+        for m_id, rhs in self.constant_rhs.items():
+            rhs[self.c_ids.index(m_id)] = rhs
         gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
         gpmodel.addConstr(self.M @ v >= rhs, name="c1")
         gpmodel.addConstr(self.sM @ v == 1, name="c2")
