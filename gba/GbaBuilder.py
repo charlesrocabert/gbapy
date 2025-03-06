@@ -222,6 +222,7 @@ class GbaBuilder:
         self.FBA_column_rank          = 0
         self.FBA_is_full_column_rank  = False
         self.FBA_dependent_reactions  = []
+        self.FBA_inactive_reactions   = []
         self.FBA_is_built             = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) GBA model reconstruction             #
@@ -242,7 +243,7 @@ class GbaBuilder:
         self.GBA_directions                = {}
         self.GBA_constant_rhs              = {}
         self.GBA_constant_reactions        = {}
-        self.GBA_modeled_proteome_fraction = {}
+        self.GBA_modeled_proteome_fraction = 0.0
         self.GBA_column_rank               = 0
         self.GBA_is_full_column_rank       = False
         self.GBA_dependent_reactions       = []
@@ -1191,10 +1192,18 @@ class GbaBuilder:
         r_ids                        = list(self.FBA_col_indices.keys())
         self.FBA_dependent_reactions = [r_id for i, r_id in enumerate(r_ids) if i in indices]
     
-    def build_FBA_model( self ) -> None:
+    def build_FBA_model( self, enforced_reactions: Optional[dict[str, float]] = None ) -> None:
         """
         Build the FBA model.
+
+        Parameters
+        ----------
+        enforced_reactions : dict[str, float]
+            Dictionary of enforced reactions.
         """
+        if enforced_reactions is not None:
+            for r_id, value in enforced_reactions.items():
+                self.reactions[r_id].lb = value
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Create the cobra model            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1257,34 +1266,8 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Collect active/inactive reactions #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # self.inactive_reactions          = []
-        # self.active_reactions            = []
-        # ### Original model ###
-        # for i in range(self.original_fba_solution.fluxes.shape[0]):
-        #     index = self.original_fba_solution.fluxes.index[i]
-        #     if not index.startswith("EX_"):
-        #         if self.original_fba_solution.fluxes[i] != 0.0:
-        #             self.original_active_reactions.append(self.original_fba_solution.fluxes.index[i])
-        #         else:
-        #             self.original_inactive_reactions.append(self.original_fba_solution.fluxes.index[i])
-        # for i in range(self.original_fba_solution.fluxes.shape[0]):
-        #     index = self.original_fba_solution.fluxes.index[i]
-        #     if not index.startswith("EX_"):
-        #         if np.abs(self.original_fba_solution.fluxes[i]) < 1e-10:
-        #             assert self.original_fba_solution.fluxes.index[i] in self.original_inactive_reactions, "> ERROR: Infinitesimal flux for: "+self.original_fba_solution.fluxes.index[i]
-        # ### Reconstructed model ###
-        # for i in range(self.fba_solution.fluxes.shape[0]):
-        #     index = self.fba_solution.fluxes.index[i]
-        #     if not index.startswith("EX_"):
-        #         if self.fba_solution.fluxes[i] != 0.0:
-        #             self.active_reactions.append(self.fba_solution.fluxes.index[i])
-        #         else:
-        #             self.inactive_reactions.append(self.fba_solution.fluxes.index[i])
-        # for i in range(self.fba_solution.fluxes.shape[0]):
-        #     index = self.fba_solution.fluxes.index[i]
-        #     if not index.startswith("EX_"):
-        #         if np.abs(self.fba_solution.fluxes[i]) < 1e-10:
-        #             assert self.fba_solution.fluxes.index[i] in self.inactive_reactions, "> ERROR: Infinitesimal flux for: "+self.fba_solution.fluxes.index[i]
+        sol = self.FBA_solution.fluxes.to_dict()
+        self.inactive_reactions = [r_id for r_id in sol if sol[r_id] == 0.0 and not r_id.startswith("EX_")]
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 5) GBA model reconstruction #
@@ -1400,21 +1383,21 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Calculate the proteome fraction       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        proteome_fraction = 1.0
+        self.GBA_modeled_proteome_fraction = 1.0
         if consider_proteome_fraction:
             modeled_proteins = []
             for r in self.reactions.values():
                 if r.proteins is not None:
                     modeled_proteins += list(r.proteins.keys())
-            modeled_proteins  = list(set(modeled_proteins))
-            modeled_mass      = sum([self.proteins[p].mass for p in modeled_proteins])
-            total_mass        = sum([self.proteins[p].mass for p in self.proteins])
-            proteome_fraction = modeled_mass/total_mass
-            #proteome_fraction = len(modeled_proteins)/len(self.proteins)
+            modeled_proteins                   = list(set(modeled_proteins))
+            modeled_mass                       = sum([self.proteins[p].mass for p in modeled_proteins])
+            total_mass                         = sum([self.proteins[p].mass for p in self.proteins])
+            self.GBA_modeled_proteome_fraction = modeled_mass/total_mass
+            #self.GBA_modeled_proteome_fraction = len(modeled_proteins)/len(self.proteins)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*proteome_fraction
+        self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.GBA_modeled_proteome_fraction
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
@@ -1609,14 +1592,16 @@ class GbaBuilder:
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         
-    def export_GBA_model( self, path: Optional[str] = "" ) -> None:
+    def export_GBA_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
         Export the GBA model to a folder in CSV format.
 
         Parameters
         ----------
-        path : str
+        path : Optional[str], default="."
             Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
         """
         assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
@@ -1624,7 +1609,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model_path = path+"/"+self.name
+        model_path = path+"/"+(self.name if name == "" else name)
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
