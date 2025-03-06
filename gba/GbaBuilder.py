@@ -226,26 +226,27 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) GBA model reconstruction             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_row_indices          = {}
-        self.GBA_external_row_indices = {}
-        self.GBA_internal_row_indices = {}
-        self.GBA_col_indices          = {}
-        self.GBA_M                    = None
-        self.GBA_intM                 = None
-        self.GBA_kcat_f               = None
-        self.GBA_kcat_b               = None
-        self.GBA_KM_f                 = None
-        self.GBA_KM_b                 = None
-        self.GBA_KA                   = None
-        self.GBA_KI                   = None
-        self.GBA_conditions           = {}
-        self.GBA_directions           = {}
-        self.GBA_constant_rhs         = {}
-        self.GBA_constant_reactions   = {}
-        self.GBA_column_rank          = 0
-        self.GBA_is_full_column_rank  = False
-        self.GBA_dependent_reactions  = []
-        self.GBA_is_built             = False
+        self.GBA_row_indices               = {}
+        self.GBA_external_row_indices      = {}
+        self.GBA_internal_row_indices      = {}
+        self.GBA_col_indices               = {}
+        self.GBA_M                         = None
+        self.GBA_intM                      = None
+        self.GBA_kcat_f                    = None
+        self.GBA_kcat_b                    = None
+        self.GBA_KM_f                      = None
+        self.GBA_KM_b                      = None
+        self.GBA_KA                        = None
+        self.GBA_KI                        = None
+        self.GBA_conditions                = {}
+        self.GBA_directions                = {}
+        self.GBA_constant_rhs              = {}
+        self.GBA_constant_reactions        = {}
+        self.GBA_modeled_proteome_fraction = {}
+        self.GBA_column_rank               = 0
+        self.GBA_is_full_column_rank       = False
+        self.GBA_dependent_reactions       = []
+        self.GBA_is_built                  = False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Getters                  #
@@ -1364,7 +1365,8 @@ class GbaBuilder:
             return True
         return False
     
-    def convert( self, ribosome_byproducts: Optional[bool] = True, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = None ) -> None:
+    def convert( self, ribosome_byproducts: Optional[bool] = False, ribosome_mass_kcat: Optional[float] = 4.55,
+                 ribosome_mass_km: Optional[float] = None, consider_proteome_fraction: Optional[bool] = False ) -> None:
         """
         Convert the model to a GBA model.
 
@@ -1373,7 +1375,11 @@ class GbaBuilder:
         ribosome_byproducts : bool
             Add ribosome byproducts if True.
         ribosome_mass_kcat : float
-            Mass of the ribosome per kcat value.
+            Value of the mass normalized kcat value.
+        ribosome_mass_km : float
+            Value of the mass normalized KM value.
+        consider_proteome_fraction : bool
+            Consider the proteome fraction to weight the ribosome reaction.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Edit the ribosomal reaction if needed #
@@ -1391,6 +1397,20 @@ class GbaBuilder:
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.check_ribosomal_reaction_consistency()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Calculate the proteome fraction       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if consider_proteome_fraction:
+            modeled_proteins = []
+            for r in self.reactions.values():
+                if r.proteins is not None:
+                    modeled_proteins += list(r.proteins.keys())
+            modeled_proteins    = list(set(modeled_proteins))
+            proteome_fraction   = len(modeled_proteins)/len(self.proteins)
+            ribosome_mass_kcat *= proteome_fraction
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Check the ribosomal reaction          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
