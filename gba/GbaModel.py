@@ -1133,6 +1133,8 @@ class GbaModel:
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
         min_b   = 1/self.nc/rhs_factor
         rhs     = np.repeat(min_b, self.nc)
+        #rhs[self.c_ids.index("DNA")] = 0.055*(1-0.72)
+        #rhs[self.c_ids.index("rRNA")] = 0.16274*(1-0.72)
         gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
         gpmodel.addConstr(self.M @ v >= rhs, name="c1")
         gpmodel.addConstr(self.sM @ v == 1, name="c2")
