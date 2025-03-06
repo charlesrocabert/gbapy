@@ -222,7 +222,7 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Proteomics               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.protein_contribution = None
+        self.protein_contributions = None
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Kinetic parameters       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -537,8 +537,8 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Calculate the molecular mass of the enzyme               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.enzyme_mass          = 0.0
-        self.protein_contribution = {}
+        self.enzyme_mass           = 0.0
+        self.protein_contributions = {}
         for p_id in self.proteins:
             assert p_id in self._builder.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> not found in the list of proteins.")
             self.enzyme_mass += self._builder.proteins[p_id].mass*self.proteins[p_id]
@@ -548,7 +548,7 @@ class Reaction:
         # 2) Calculate the contribution of each protein to proteomics #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # [p] = [E] * (m_p * stoic_p / m_E) (in g/L)
-        self.protein_contribution = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
+        self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
     
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """

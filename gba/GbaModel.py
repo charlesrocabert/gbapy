@@ -107,7 +107,7 @@ class GbaModel:
         self.constant_reactions = {}           # Constant reactions
 
         ### Proteomics ###
-        self.protein_contributions = {} # Protein contribution to each reaction
+        self.protein_contributions = {} # Protein contributions for each reaction
         self.proteomics            = {} # Predicted proteomics
 
         ### Loaded objects ###
@@ -613,6 +613,115 @@ class GbaModel:
             GBA builder object.
         """
         raise NotImplementedError("> Error: method not implemented yet.")
+
+    def write_to_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
+        """
+        Write the GBA model to CSV files.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV files.
+        verbose : Optional[bool], default=False
+            Verbose mode.        
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Check the existence of the folder #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        model_path = path+"/"+self.name
+        if not os.path.exists(model_path):
+            os.makedirs(model_path)
+        else:
+            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv",
+                     "conditions.csv", "directions.csv", "constant_rhs.csv", "constant_reactions.csv",
+                     "protein_contributions.csv"]
+            for f in files:
+                if os.path.exists(model_path+"/"+f):
+                    os.system(f"rm {model_path}/{f}")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write the mass fraction matrix    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
+        M_df.to_csv(model_path+"/M.csv", sep=";")
+        del(M_df)
+        intM_df = pd.DataFrame(self.M, index=self.c_ids, columns=self.reaction_ids)
+        intM_df.to_csv(model_path+"/intM.csv", sep=";")
+        del(intM_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the kcat vectors            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        kcat_df = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["forward"])
+        kcat_df["backward"] = self.kcat_b
+        kcat_df = kcat_df.transpose()
+        kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
+        del(kcat_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Write the forward KM matrices     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        KM_df = pd.DataFrame(self.KM_f, index=self.metabolite_ids, columns=self.reaction_ids)
+        KM_df.to_csv(model_path+"/KM_forward.csv", sep=";")
+        del(KM_df)
+        KM_df = pd.DataFrame(self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
+        del(KM_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Write the KA and KI matrices      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
+        KA_df.to_csv(model_path+"/KA.csv", sep=";")
+        del(KA_df)
+        KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+        KI_df.to_csv(model_path+"/KI.csv", sep=";")
+        del(KI_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Write the conditions              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
+        conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
+        del(conditions_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) Write the directions              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/directions.csv", "w")
+        f.write("reaction;direction\n")
+        for j in range(len(self.reaction_ids)):
+            if self.kcat_b[j] == 0.0 and self.kcat_f[j] > 0.0:
+                f.write(self.reaction_ids[j]+";forward\n")
+            elif self.kcat_b[j] > 0.0 and self.kcat_f[j] == 0.0:
+                f.write(self.reaction_ids[j]+";backward\n")
+            elif self.kcat_b[j] > 0.0 and self.kcat_f[j] > 0.0:
+                f.write(self.reaction_ids[j]+";reversible\n")
+            else:
+                throw_message(MessageType.Error, f"Unknown direction for reaction <code>{self.reaction_ids[j]}</code>.")
+                sys.exit(1)
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Write the constant RHS terms      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/constant_rhs.csv", "w")
+        f.write("metabolite;value\n")
+        for item in self.constant_rhs.items():
+            f.write(item[0]+";"+str(item[1])+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the constant reactions      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/constant_reactions.csv", "w")
+        f.write("reaction;value\n")
+        for item in self.constant_reactions.items():
+            f.write(item[0]+";"+str(item[1])+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 10) Save protein contributions       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/protein_contributions.csv", "w")
+        f.write("reaction;protein;contribution\n")
+        for item in self.protein_contributions.items():
+            r_id = item[0]
+            for p_id, val in item[1].items():
+                f.write(r_id+";"+p_id+";"+str(val)+"\n")
+        f.close()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #

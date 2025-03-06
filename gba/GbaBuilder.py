@@ -1587,6 +1587,14 @@ class GbaBuilder:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         
     def export_GBA_model( self, path: Optional[str] = "" ) -> None:
+        """
+        Export the GBA model to a folder in CSV format.
+
+        Parameters
+        ----------
+        path : str
+            Path to the folder.
+        """
         assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
@@ -1597,7 +1605,9 @@ class GbaBuilder:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv", "conditions.csv", "directions.csv", "constants.csv", "protein_contributions.csv"]
+            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv",
+                     "conditions.csv", "directions.csv", "constant_rhs.csv", "constant_reactions.csv",
+                     "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
@@ -1606,8 +1616,10 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         M_df.to_csv(model_path+"/M.csv", sep=";")
+        del(M_df)
         intM_df = pd.DataFrame(self.GBA_intM, index=self.GBA_internal_row_indices.keys(), columns=self.GBA_col_indices.keys())
         intM_df.to_csv(model_path+"/intM.csv", sep=";")
+        del(intM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1615,25 +1627,31 @@ class GbaBuilder:
         kcat_df["backward"] = self.GBA_kcat_b
         kcat_df = kcat_df.transpose()
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
+        del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KM_df = pd.DataFrame(self.GBA_KM_f, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         KM_df.to_csv(model_path+"/KM_forward.csv", sep=";")
+        del(KM_df)
         KM_df = pd.DataFrame(self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
+        del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
+        del(KA_df)
         KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         KI_df.to_csv(model_path+"/KI.csv", sep=";")
+        del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.GBA_conditions)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
+        del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the directions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1642,9 +1660,9 @@ class GbaBuilder:
         for j in range(len(self.GBA_col_indices)):
             if self.GBA_kcat_b[j] == 0.0 and self.GBA_kcat_f[j] > 0.0:
                 f.write(list(self.GBA_col_indices.keys())[j]+";forward\n")
-            elif self.GBA_kcat_f[j] > 0.0 and self.GBA_kcat_f[j] == 0.0:
+            elif self.GBA_kcat_b[j] > 0.0 and self.GBA_kcat_f[j] == 0.0:
                 f.write(list(self.GBA_col_indices.keys())[j]+";backward\n")
-            elif self.GBA_kcat_f[j] > 0.0 and self.GBA_kcat_f[j] > 0.0:
+            elif self.GBA_kcat_b[j] > 0.0 and self.GBA_kcat_f[j] > 0.0:
                 f.write(list(self.GBA_col_indices.keys())[j]+";reversible\n")
             else:
                 throw_message(MessageType.Error, f"Unknown direction for reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
@@ -1672,8 +1690,8 @@ class GbaBuilder:
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
         for r in self.reactions.values():
-            if not r.protein_contribution is None:
-                for item in r.protein_contribution.items():
+            if not r.protein_contributions is None:
+                for item in r.protein_contributions.items():
                     f.write(r.id+";"+item[0]+";"+str(item[1])+"\n")
         f.close()
 
