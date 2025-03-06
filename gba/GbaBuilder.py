@@ -105,6 +105,8 @@ class GbaBuilder:
         GBA inhibition constant matrix.
     GBA_conditions : dict[int, dict[str, float]]
         GBA conditions matrix.
+    GBA_constant_rhs : dict[str, float]
+        GBA metabolites with a constant RHS term for the initial solution
     GBA_constant_reactions : dict[str, float]
         GBA reactions with a constant flux value.
     GBA_is_built : bool
@@ -238,6 +240,7 @@ class GbaBuilder:
         self.GBA_KI                   = None
         self.GBA_conditions           = {}
         self.GBA_directions           = {}
+        self.GBA_constant_rhs         = {}
         self.GBA_constant_reactions   = {}
         self.GBA_column_rank          = 0
         self.GBA_is_full_column_rank  = False
@@ -712,6 +715,27 @@ class GbaBuilder:
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
                 self.GBA_conditions[condition_id][m_id] = concentration
+    
+    def clear_constant_rhs( self ) -> None:
+        """
+        Clear all constant RHS terms from the GBA model.
+        """
+        self.GBA_constant_rhs = {}
+    
+    def add_constant_rhs( self, metabolite_id: str, value: float ) -> None:
+        """
+        Make a GBA metabolite constant in the RHS term for the initial solution.
+
+        Parameters
+        ----------
+        metabolite_id : str
+            Identifier of the metabolite.
+        value : float
+            Flux value.
+        """
+        assert metabolite_id not in self.GBA_constant_rhs, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is already constant.")
+        assert value > 0.0, throw_message(MessageType.Error, f"The constant value must be positive (<code>{metabolite_id}</code>).")
+        self.GBA_constant_rhs[metabolite_id] = value
     
     def clear_constant_reactions( self ) -> None:
         """
@@ -1627,15 +1651,23 @@ class GbaBuilder:
                 sys.exit(1)
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant reactions      #
+        # 8) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constants.csv", "w")
+        f = open(model_path+"/constant_rhs.csv", "w")
+        f.write("metabolite;value\n")
+        for item in self.GBA_constant_rhs.items():
+            f.write(item[0]+";"+str(item[1])+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the constant reactions      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/constant_reactions.csv", "w")
         f.write("reaction;value\n")
         for item in self.GBA_constant_reactions.items():
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Save protein contributions        #
+        # 10) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")

@@ -1184,8 +1184,8 @@ class GbaModel:
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
         min_b   = 1/self.nc/rhs_factor
         rhs     = np.repeat(min_b, self.nc)
-        for m_id, rhs in self.constant_rhs.items():
-            rhs[self.c_ids.index(m_id)] = rhs
+        for m_id, value in self.constant_rhs.items():
+            rhs[self.c_ids.index(m_id)] = value
         gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
         gpmodel.addConstr(self.M @ v >= rhs, name="c1")
         gpmodel.addConstr(self.sM @ v == 1, name="c2")
