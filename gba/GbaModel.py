@@ -603,17 +603,6 @@ class GbaModel:
         self.check_model_loading(verbose)
         self.initialize_model_mathematical_variables()
 
-    def read_from_variables( self, builder ) -> None:
-        """
-        Read the GBA model diretly from variables.
-
-        Parameters
-        ----------
-        builder : GbaBuilder
-            GBA builder object.
-        """
-        raise NotImplementedError("> Error: method not implemented yet.")
-
     def write_to_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
         """
         Write the GBA model to CSV files.
@@ -794,13 +783,13 @@ class GbaModel:
         self.condition_params = ["rho"] + self.x_ids
         self.conditions       = np.array([])
     
-    def add_condition( self, condition_id: int, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
+    def add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
         Add an external condition to the GBA model.
 
         Parameters
         ----------
-        condition_id : int
+        condition_id : str
             Identifier of the condition.
         rho : float
             Total density of the cell (g/L).
