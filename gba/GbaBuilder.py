@@ -1400,18 +1400,21 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Calculate the proteome fraction       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        proteome_fraction = 1.0
         if consider_proteome_fraction:
             modeled_proteins = []
             for r in self.reactions.values():
                 if r.proteins is not None:
                     modeled_proteins += list(r.proteins.keys())
-            modeled_proteins    = list(set(modeled_proteins))
-            proteome_fraction   = len(modeled_proteins)/len(self.proteins)
-            ribosome_mass_kcat *= proteome_fraction
+            modeled_proteins  = list(set(modeled_proteins))
+            modeled_mass      = sum([self.proteins[p].mass for p in modeled_proteins])
+            total_mass        = sum([self.proteins[p].mass for p in self.proteins])
+            proteome_fraction = modeled_mass/total_mass
+            #proteome_fraction = len(modeled_proteins)/len(self.proteins)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat
+        self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*proteome_fraction
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
