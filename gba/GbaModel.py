@@ -557,25 +557,25 @@ class GbaModel:
         # 9) Define the kinetic model of each reaction           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.kinetic_model.clear()
-        self.direction.clear()
+        self.directions.clear()
         for j in range(self.nj):
             if (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() == 0):
                 self.kinetic_model.append(GbaReactionType.iMM)
-                self.direction.append(ReactionDirection.Forward)
+                self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() > 0):
                 self.kinetic_model.append(GbaReactionType.iMMa)
-                self.direction.append(ReactionDirection.Forward)
+                self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() == 0):
                 self.kinetic_model.append(GbaReactionType.iMMi)
-                self.direction.append(ReactionDirection.Forward)
+                self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() > 0):
                 self.kinetic_model.append(GbaReactionType.iMMia)
-                self.direction.append(ReactionDirection.Forward)
+                self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] > 0):
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
                 self.kinetic_model.append(GbaReactionType.rMM)
-                self.direction.append(self.direction.append(ReactionDirection.Reversible))
+                self.directions.append(self.directions.append(ReactionDirection.Reversible))
     
     def read_from_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
         """
@@ -1361,21 +1361,21 @@ class GbaModel:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 1) Reaction is irreversible and positive #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            if self.direction[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= GbaConstants.MIN_FLUX_FRACTION.value:
+            if self.directions[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= GbaConstants.MIN_FLUX_FRACTION.value:
                 self.f_trunc[j] = GbaConstants.MIN_FLUX_FRACTION.value
                 if block_GCC and self.GCC_f[(j+1)] < 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 2) Reaction is irreversible and negative #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            elif self.direction[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -GbaConstants.MIN_FLUX_FRACTION.value:
+            elif self.directions[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -GbaConstants.MIN_FLUX_FRACTION.value:
                 self.f_trunc[j] = -GbaConstants.MIN_FLUX_FRACTION.value
                 if block_GCC and self.GCC_f[(j+1)] > 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 3) Reaction is reversible                #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # elif self.direction[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= GbaConstants.MIN_FLUX_FRACTION.value:
+            # elif self.directions[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= GbaConstants.MIN_FLUX_FRACTION.value:
             #     if block_GCC:
             #         self.GCC_f[(j+1)] = 0.0
             #     if self.f_trunc[j] >= 0.0:
