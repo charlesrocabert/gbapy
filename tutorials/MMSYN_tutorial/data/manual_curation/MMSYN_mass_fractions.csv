@@ -1,0 +1,36 @@
+Component;ID;Fraction
+Protein;Protein;54.727
+rRNA;rRNA;16.274
+DNA;DNA;5.5
+Acyl carrier protein;ACP;0.018
+dUTPase;dUTPase;0.003
+Lipogalactan capsule;lgltn;6.368
+Phosphatidylglycerol;pg;2.944
+Cardiolipin;clpn;2.944
+Cholesterol;chsterol;1.534
+Diacylglycerol;12dgr;1.366
+Gal-DAG;galfur12dgr;1.31
+Triacylglycerol;tag;0.549
+Fatty acid;fa;0.549
+Potassium;k;3.285
+Phosphate;pi;0.375
+Chloride;cl;0.198
+ATP;atp;0.167
+Sodium;na;10.131
+Spermine;sprm;0.128
+GTP;gtp;0.115
+UTP;utp;0.106
+CTP;ctp;0.053
+Magnesium;mg2;0.019
+Calcium;ca2;0.019
+FAD;fad;0.016
+5,10-meTHF(Glu)3;mlthfglu3;0.015
+CoA;coa;0.012
+Thiamin diphosphate;thmpp;0.009
+NADP+;nadp;0.008
+Pyridoxal phosphate;pydx5p;0.005
+dTTP;dttp;0.003
+dATP;datp;0.003
+dCTP;dctp;0.002
+dGTP;dgtp;0.001
+Generic amino acid;AA;1.247
