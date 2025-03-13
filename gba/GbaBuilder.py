@@ -1868,7 +1868,6 @@ class GbaBuilder:
                 for p_ID in r_proteins:
                     f.write(r_ID+";"+r_expression+";backward;"+m_ID+";"+p_ID+";"+products[m_ID]+";"+r_sequences[p_ID]+"\n")
         f.close()
-        
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 8) Summary function         #

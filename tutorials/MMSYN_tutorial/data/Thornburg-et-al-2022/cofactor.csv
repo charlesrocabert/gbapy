@@ -1,0 +1,104 @@
+Reaction Name;Subsystem;Parameter Type;Related Species;Value;Units
+NCTPPRT;Cofactor metabolism;Eff Enzyme Count;;165;#
+NCTPPRT;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0433;1/s
+NCTPPRT;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_nac_c;0.00806;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_prpp_c;0.0038;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_nicrnt_c;0.0346;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.18;mM
+NNATr;Cofactor metabolism;Eff Enzyme Count;;65;#
+NNATr;Cofactor metabolism;Substrate Catalytic Rate Constant;;3.6682;1/s
+NNATr;Cofactor metabolism;Product Catalytic Rate Constant;;0.0022;1/s
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.1837;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_nicrnt_c;0.0554;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_dnad_c;0.1804;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;1.0287;mM
+NADS;Cofactor metabolism;Eff Enzyme Count;;251;#
+NADS;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0454;1/s
+NADS;Cofactor metabolism;Product Catalytic Rate Constant;;0.0104;1/s
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0278;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_dnad_c;0.0465;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_nh3_c;0.0871;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_amp_c;0.2152;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_nad_c;0.2152;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.2152;mM
+NADK;Cofactor metabolism;Eff Enzyme Count;;10;#
+NADK;Cofactor metabolism;Substrate Catalytic Rate Constant;;1.36;1/s
+NADK;Cofactor metabolism;Product Catalytic Rate Constant;;104.4259;1/s
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.4312;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_nad_c;2;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;4.5824;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_nadp_c;0.18;mM
+NADHK;Cofactor metabolism;Eff Enzyme Count;;10;#
+NADHK;Cofactor metabolism;Substrate Catalytic Rate Constant;;31,3405;1/s
+NADHK;Cofactor metabolism;Product Catalytic Rate Constant;;104,2685;1/s
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_nadh_c;2;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0,4054;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_nadph_c;0,3;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;4,624;mM
+RBFK;Cofactor metabolism;Eff Enzyme Count;;68;#
+RBFK;Cofactor metabolism;Substrate Catalytic Rate Constant;;1.2796;1/s
+RBFK;Cofactor metabolism;Product Catalytic Rate Constant;;0.4249;1/s
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.1681;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_ribflv_c;0.0094;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1385;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_fmn_c;0.1385;mM
+FMNAT;Cofactor metabolism;Eff Enzyme Count;;68;#
+FMNAT;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0027;1/s
+FMNAT;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0173;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_fmn_c;0.0294;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_fad_c;0.0027;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.0281;mM
+5FTHFPGS;Cofactor metabolism;Eff Enzyme Count;;35;#
+5FTHFPGS;Cofactor metabolism;Substrate Catalytic Rate Constant;;2;1/s
+5FTHFPGS;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_5fthf_c;0.0999;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.23;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.23;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_glu__L_c;0.3;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_glu__L_c;0.3;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.1001;mM
+MTHFC;Cofactor metabolism;Eff Enzyme Count;;76;#
+MTHFC;Cofactor metabolism;Substrate Catalytic Rate Constant;;185;1/s
+MTHFC;Cofactor metabolism;Product Catalytic Rate Constant;;15.1817;1/s
+MTHFC;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.1207;mM
+MTHFC;Cofactor metabolism;Michaelis Menten Constant;M_10fthfglu3_c;0.0829;mM
+FMETTRS;Cofactor metabolism;Eff Enzyme Count;;128;#
+FMETTRS;Cofactor metabolism;Substrate Catalytic Rate Constant;;0,45;1/s
+FMETTRS;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_10fthfglu3_c;0.011;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_mettrna_c;0.01;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_fmettrna_c;0.001;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_thfglu3_c;0.1;mM
+GHMT;Cofactor metabolism;Eff Enzyme Count;;178;#
+GHMT;Cofactor metabolism;Substrate Catalytic Rate Constant;;640;1/s
+GHMT;Cofactor metabolism;Product Catalytic Rate Constant;;23.173;1/s
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_ser__L_c;2.3312;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_thfglu3_c;0.0684;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_gly_c;0.1463;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_mlthfglu3_c;0.1463;mM
+MTHFD;Cofactor metabolism;Eff Enzyme Count;;76;#
+MTHFD;Cofactor metabolism;Substrate Catalytic Rate Constant;;19.4491;1/s
+MTHFD;Cofactor metabolism;Product Catalytic Rate Constant;;3.2;1/s
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_mlthfglu3_c;0.1738;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_nadp_c;0.0303;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.0575;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_nadph_c;0.0575;mM
+FTHFCL;Cofactor metabolism;Eff Enzyme Count;;38;#
+FTHFCL;Cofactor metabolism;Substrate Catalytic Rate Constant;;3.0655;1/s
+FTHFCL;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0.0191;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0164;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.5231;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.5231;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.5231;mM
+GHMT2;Cofactor metabolism;Eff Enzyme Count;;178;#
+GHMT2;Cofactor metabolism;Substrate Catalytic Rate Constant;;0;1/s
+GHMT2;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+GHMT2;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0,0684;mM
+GHMT2;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0,1463;mM

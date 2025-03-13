@@ -1,0 +1,1074 @@
+Reaction Name;Subsystem;Parameter Type;Related Species;Value;Units
+PGI;Central metabolism;Eff Enzyme Count;;266;#
+PGI;Central metabolism;Substrate Catalytic Rate Constant;;804.3384;1/s
+PGI;Central metabolism;Product Catalytic Rate Constant;;650;1/s
+PGI;Central metabolism;Michaelis Menten Constant;M_g6p_c;0.28;mM
+PGI;Central metabolism;Michaelis Menten Constant;M_f6p_c;0.15;mM
+PFK;Central metabolism;Eff Enzyme Count;;458;#
+PFK;Central metabolism;Substrate Catalytic Rate Constant;;111;1/s
+PFK;Central metabolism;Product Catalytic Rate Constant;;0.3438;1/s
+PFK;Central metabolism;Michaelis Menten Constant;M_atp_c;0.117;mM
+PFK;Central metabolism;Michaelis Menten Constant;M_f6p_c;0.2133;mM
+PFK;Central metabolism;Michaelis Menten Constant;M_adp_c;0.1062;mM
+PFK;Central metabolism;Michaelis Menten Constant;M_fdp_c;0.1062;mM
+FBA;Central metabolism;Eff Enzyme Count;;775;#
+FBA;Central metabolism;Substrate Catalytic Rate Constant;;21;1/s
+FBA;Central metabolism;Product Catalytic Rate Constant;;12.6;1/s
+FBA;Central metabolism;Michaelis Menten Constant;M_fdp_c;0.12;mM
+FBA;Central metabolism;Michaelis Menten Constant;M_dhap_c;0.095;mM
+FBA;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.052;mM
+TPI;Central metabolism;Eff Enzyme Count;;410;#
+TPI;Central metabolism;Substrate Catalytic Rate Constant;;759.6105;1/s
+TPI;Central metabolism;Product Catalytic Rate Constant;;67;1/s
+TPI;Central metabolism;Michaelis Menten Constant;M_dhap_c;0.077;mM
+TPI;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.084;mM
+GAPD;Central metabolism;Eff Enzyme Count;;1355;#
+GAPD;Central metabolism;Substrate Catalytic Rate Constant;;442;1/s
+GAPD;Central metabolism;Product Catalytic Rate Constant;;73.6;1/s
+GAPD;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.0171;mM
+GAPD;Central metabolism;Michaelis Menten Constant;M_nad_c;1.3;mM
+GAPD;Central metabolism;Michaelis Menten Constant;M_pi_c;6.5826;mM
+GAPD;Central metabolism;Michaelis Menten Constant;M_13dpg_c;0.47;mM
+GAPD;Central metabolism;Michaelis Menten Constant;M_nadh_c;0.061;mM
+GAPDP;Central metabolism;Eff Enzyme Count;;248;#
+GAPDP;Central metabolism;Substrate Catalytic Rate Constant;;2.8;1/s
+GAPDP;Central metabolism;Product Catalytic Rate Constant;;0;1/s
+GAPDP;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.052;mM
+GAPDP;Central metabolism;Michaelis Menten Constant;M_nadp_c;0.385;mM
+GAPDP;Central metabolism;Michaelis Menten Constant;M_3pg_c;0.1924;mM
+GAPDP;Central metabolism;Michaelis Menten Constant;M_nadph_c;0.202;mM
+PGK;Central metabolism;Eff Enzyme Count;;411;#
+PGK;Central metabolism;Substrate Catalytic Rate Constant;;220;1/s
+PGK;Central metabolism;Product Catalytic Rate Constant;;3.4;1/s
+PGK;Central metabolism;Michaelis Menten Constant;M_13dpg_c;0.01;mM
+PGK;Central metabolism;Michaelis Menten Constant;M_adp_c;0.5273;mM
+PGK;Central metabolism;Michaelis Menten Constant;M_3pg_c;0.1;mM
+PGK;Central metabolism;Michaelis Menten Constant;M_atp_c;0.368;mM
+PGM;Central metabolism;Eff Enzyme Count;;322;#
+PGM;Central metabolism;Substrate Catalytic Rate Constant;;434;1/s
+PGM;Central metabolism;Product Catalytic Rate Constant;;14;1/s
+PGM;Central metabolism;Michaelis Menten Constant;M_3pg_c;3.6;mM
+PGM;Central metabolism;Michaelis Menten Constant;M_2pg_c;0.2;mM
+ENO;Central metabolism;Eff Enzyme Count;;998;#
+ENO;Central metabolism;Substrate Catalytic Rate Constant;;62.1825;1/s
+ENO;Central metabolism;Product Catalytic Rate Constant;;23.453;1/s
+ENO;Central metabolism;Michaelis Menten Constant;M_2pg_c;0.246;mM
+ENO;Central metabolism;Michaelis Menten Constant;M_pep_c;0.2874;mM
+PYK;Central metabolism;Eff Enzyme Count;;551;#
+PYK;Central metabolism;Substrate Catalytic Rate Constant;;3204;1/s
+PYK;Central metabolism;Product Catalytic Rate Constant;;0.0021;1/s
+PYK;Central metabolism;Michaelis Menten Constant;M_adp_c;0.2814;mM
+PYK;Central metabolism;Michaelis Menten Constant;M_pep_c;0.0754;mM
+PYK;Central metabolism;Michaelis Menten Constant;M_atp_c;0.121;mM
+PYK;Central metabolism;Michaelis Menten Constant;M_pyr_c;0.0585;mM
+LDH_L;Central metabolism;Eff Enzyme Count;;1100;#
+LDH_L;Central metabolism;Substrate Catalytic Rate Constant;;388.468;1/s
+LDH_L;Central metabolism;Product Catalytic Rate Constant;;400.2106;1/s
+LDH_L;Central metabolism;Michaelis Menten Constant;M_nadh_c;0.0381;mM
+LDH_L;Central metabolism;Michaelis Menten Constant;M_pyr_c;0.9649;mM
+LDH_L;Central metabolism;Michaelis Menten Constant;M_lac__L_c;59.656;mM
+LDH_L;Central metabolism;Michaelis Menten Constant;M_nad_c;32.972;mM
+PDH_acald;Central metabolism;Eff Enzyme Count;;20.1905259;#
+PDH_acald;Central metabolism;Substrate Catalytic Rate Constant;;38.1501;1/s
+PDH_acald;Central metabolism;Product Catalytic Rate Constant;;2.6212;1/s
+PDH_acald;Central metabolism;Michaelis Menten Constant;M_acald_c;0.1;mM
+PDH_acald;Central metabolism;Michaelis Menten Constant;M_coa_c;0.1;mM
+PDH_acald;Central metabolism;Michaelis Menten Constant;M_lpl_PdhC_c;0.1;mM
+PDH_acald;Central metabolism;Michaelis Menten Constant;M_accoa_c;0.1;mM
+PDH_acald;Central metabolism;Michaelis Menten Constant;M_dhlpl_PdhC_c;0.1;mM
+PDH_E3;Central metabolism;Eff Enzyme Count;;182;#
+PDH_E3;Central metabolism;Substrate Catalytic Rate Constant;;110;1/s
+PDH_E3;Central metabolism;Product Catalytic Rate Constant;;448;1/s
+PDH_E3;Central metabolism;Michaelis Menten Constant;M_dhlpl_PdhC_c;0.1003;mM
+PDH_E3;Central metabolism;Michaelis Menten Constant;M_nad_c;0.14;mM
+PDH_E3;Central metabolism;Michaelis Menten Constant;M_lpl_PdhC_c;0.0997;mM
+PDH_E3;Central metabolism;Michaelis Menten Constant;M_nadh_c;2.9919;mM
+PTAr;Central metabolism;Eff Enzyme Count;;301;#
+PTAr;Central metabolism;Substrate Catalytic Rate Constant;;895.9342;1/s
+PTAr;Central metabolism;Product Catalytic Rate Constant;;1509.0778;1/s
+PTAr;Central metabolism;Michaelis Menten Constant;M_accoa_c;0.5535;mM
+PTAr;Central metabolism;Michaelis Menten Constant;M_pi_c;5.291;mM
+PTAr;Central metabolism;Michaelis Menten Constant;M_actp_c;0.2373;mM
+PTAr;Central metabolism;Michaelis Menten Constant;M_coa_c;0.022;mM
+ACKr;Central metabolism;Eff Enzyme Count;;10;#
+ACKr;Central metabolism;Substrate Catalytic Rate Constant;;1452.2498;1/s
+ACKr;Central metabolism;Product Catalytic Rate Constant;;655.0835;1/s
+ACKr;Central metabolism;Michaelis Menten Constant;M_actp_c;0.9669;mM
+ACKr;Central metabolism;Michaelis Menten Constant;M_adp_c;0.6657;mM
+ACKr;Central metabolism;Michaelis Menten Constant;M_ac_c;55.7644;mM
+ACKr;Central metabolism;Michaelis Menten Constant;M_atp_c;1.6092;mM
+NOX;Central metabolism;Eff Enzyme Count;;20.1905259;#
+NOX;Central metabolism;Substrate Catalytic Rate Constant;;1520.2025;1/s
+NOX;Central metabolism;Product Catalytic Rate Constant;;0.0693;1/s
+NOX;Central metabolism;Michaelis Menten Constant;M_nadh_c;0.0268;mM
+NOX;Central metabolism;Michaelis Menten Constant;M_nadh_c;0.0268;mM
+NOX;Central metabolism;Michaelis Menten Constant;M_o2_c;0.0204;mM
+NOX;Central metabolism;Michaelis Menten Constant;M_nad_c;0.0993;mM
+NOX;Central metabolism;Michaelis Menten Constant;M_nad_c;0.0993;mM
+TALA;Central metabolism;Eff Enzyme Count;;20.1905259;#
+TALA;Central metabolism;Substrate Catalytic Rate Constant;;22.3;1/s
+TALA;Central metabolism;Product Catalytic Rate Constant;;0.54;1/s
+TALA;Central metabolism;Michaelis Menten Constant;M_e4p_c;0.0401;mM
+TALA;Central metabolism;Michaelis Menten Constant;M_f6p_c;0.6688;mM
+TALA;Central metabolism;Michaelis Menten Constant;M_g3p_c;1.9;mM
+TALA;Central metabolism;Michaelis Menten Constant;M_s7p_c;0.285;mM
+TKT1;Central metabolism;Eff Enzyme Count;;148;#
+TKT1;Central metabolism;Substrate Catalytic Rate Constant;;20.58;1/s
+TKT1;Central metabolism;Product Catalytic Rate Constant;;0.8;1/s
+TKT1;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.743;mM
+TKT1;Central metabolism;Michaelis Menten Constant;M_s7p_c;3.7298;mM
+TKT1;Central metabolism;Michaelis Menten Constant;M_r5p_c;0.4717;mM
+TKT1;Central metabolism;Michaelis Menten Constant;M_xu5p__D_c;0.134;mM
+TKT2;Central metabolism;Eff Enzyme Count;;148;#
+TKT2;Central metabolism;Substrate Catalytic Rate Constant;;26.87;1/s
+TKT2;Central metabolism;Product Catalytic Rate Constant;;1.4;1/s
+TKT2;Central metabolism;Michaelis Menten Constant;M_f6p_c;0.25;mM
+TKT2;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.743;mM
+TKT2;Central metabolism;Michaelis Menten Constant;M_e4p_c;0.0227;mM
+TKT2;Central metabolism;Michaelis Menten Constant;M_xu5p__D_c;0.134;mM
+RPE;Central metabolism;Eff Enzyme Count;;209;#
+RPE;Central metabolism;Substrate Catalytic Rate Constant;;1337.133;1/s
+RPE;Central metabolism;Product Catalytic Rate Constant;;1301.6531;1/s
+RPE;Central metabolism;Michaelis Menten Constant;M_xu5p__D_c;2.9022;mM
+RPE;Central metabolism;Michaelis Menten Constant;M_ru5p__D_c;1.9567;mM
+RPI;Central metabolism;Eff Enzyme Count;;207;#
+RPI;Central metabolism;Substrate Catalytic Rate Constant;;10;1/s
+RPI;Central metabolism;Product Catalytic Rate Constant;;1;1/s
+RPI;Central metabolism;Michaelis Menten Constant;M_ru5p__D_c;2.1524;mM
+RPI;Central metabolism;Michaelis Menten Constant;M_r5p_c;3.3617;mM
+PRPPS;Central metabolism;Eff Enzyme Count;;315;#
+PRPPS;Central metabolism;Substrate Catalytic Rate Constant;;30.2215;1/s
+PRPPS;Central metabolism;Product Catalytic Rate Constant;;10.9581;1/s
+PRPPS;Central metabolism;Michaelis Menten Constant;M_atp_c;0.0749;mM
+PRPPS;Central metabolism;Michaelis Menten Constant;M_r5p_c;0.0676;mM
+PRPPS;Central metabolism;Michaelis Menten Constant;M_amp_c;0.0453;mM
+PRPPS;Central metabolism;Michaelis Menten Constant;M_prpp_c;0.0141;mM
+PPM;Central metabolism;Eff Enzyme Count;;274;#
+PPM;Central metabolism;Substrate Catalytic Rate Constant;;7.8902;1/s
+PPM;Central metabolism;Product Catalytic Rate Constant;;0.0822;1/s
+PPM;Central metabolism;Michaelis Menten Constant;M_r1p_c;0.073;mM
+PPM;Central metabolism;Michaelis Menten Constant;M_r5p_c;0.0854;mM
+PPM2;Central metabolism;Eff Enzyme Count;;274;#
+PPM2;Central metabolism;Substrate Catalytic Rate Constant;;173;1/s
+PPM2;Central metabolism;Product Catalytic Rate Constant;;10.201;1/s
+PPM2;Central metabolism;Michaelis Menten Constant;M_2dr1p_c;0.013;mM
+PPM2;Central metabolism;Michaelis Menten Constant;M_2dr5p_c;1.2;mM
+DRPA;Central metabolism;Eff Enzyme Count;;171;#
+DRPA;Central metabolism;Substrate Catalytic Rate Constant;;521;1/s
+DRPA;Central metabolism;Product Catalytic Rate Constant;;34;1/s
+DRPA;Central metabolism;Michaelis Menten Constant;M_2dr5p_c;0.2456;mM
+DRPA;Central metabolism;Michaelis Menten Constant;M_acald_c;0.267;mM
+DRPA;Central metabolism;Michaelis Menten Constant;M_g3p_c;0.2;mM
+ADPT;Nucleotide metabolism;Eff Enzyme Count;;363;#
+ADPT;Nucleotide metabolism;Substrate Catalytic Rate Constant;;6.5832;1/s
+ADPT;Nucleotide metabolism;Product Catalytic Rate Constant;;0.895;1/s
+ADPT;Nucleotide metabolism;Michaelis Menten Constant;M_ade_c;0.0044;mM
+ADPT;Nucleotide metabolism;Michaelis Menten Constant;M_prpp_c;0.0085;mM
+ADPT;Nucleotide metabolism;Michaelis Menten Constant;M_amp_c;0.0319;mM
+ADPT;Nucleotide metabolism;Michaelis Menten Constant;M_ppi_c;0.1586;mM
+PUNP1;Nucleotide metabolism;Eff Enzyme Count;;629;#
+PUNP1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;26.2772;1/s
+PUNP1;Nucleotide metabolism;Product Catalytic Rate Constant;;109.8453;1/s
+PUNP1;Nucleotide metabolism;Michaelis Menten Constant;M_adn_c;0.7652;mM
+PUNP1;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;2.1387;mM
+PUNP1;Nucleotide metabolism;Michaelis Menten Constant;M_ade_c;4.0132;mM
+PUNP1;Nucleotide metabolism;Michaelis Menten Constant;M_r1p_c;0.0142;mM
+ADK1;Nucleotide metabolism;Eff Enzyme Count;;213;#
+ADK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;319.1556;1/s
+ADK1;Nucleotide metabolism;Product Catalytic Rate Constant;;783.2866;1/s
+ADK1;Nucleotide metabolism;Michaelis Menten Constant;M_amp_c;0.096;mM
+ADK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1426;mM
+ADK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.2669;mM
+ADK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.2669;mM
+RNDR1;Nucleotide metabolism;Eff Enzyme Count;;50;#
+RNDR1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;4.3833;1/s
+RNDR1;Nucleotide metabolism;Product Catalytic Rate Constant;;0;1/s
+RNDR1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.0206;mM
+RNDR1;Nucleotide metabolism;Michaelis Menten Constant;M_trdrd_c;0.0389;mM
+RNDR1;Nucleotide metabolism;Michaelis Menten Constant;M_dadp_c;0.2569;mM
+RNDR1;Nucleotide metabolism;Michaelis Menten Constant;M_trdox_c;0.2569;mM
+TRDR;Nucleotide metabolism;Eff Enzyme Count;;100;#
+TRDR;Nucleotide metabolism;Substrate Catalytic Rate Constant;;19.0309;1/s
+TRDR;Nucleotide metabolism;Product Catalytic Rate Constant;;139.1897;1/s
+TRDR;Nucleotide metabolism;Michaelis Menten Constant;M_nadph_c;0.0468;mM
+TRDR;Nucleotide metabolism;Michaelis Menten Constant;M_trdox_c;0.0129;mM
+TRDR;Nucleotide metabolism;Michaelis Menten Constant;M_nadp_c;0.7737;mM
+TRDR;Nucleotide metabolism;Michaelis Menten Constant;M_trdrd_c;0.7737;mM
+PPA;Nucleotide metabolism;Eff Enzyme Count;;190;#
+PPA;Nucleotide metabolism;Substrate Catalytic Rate Constant;;646.7271;1/s
+PPA;Nucleotide metabolism;Product Catalytic Rate Constant;;0.1874;1/s
+PPA;Nucleotide metabolism;Michaelis Menten Constant;M_ppi_c;0.0024;mM
+PPA;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.0976;mM
+PPA;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.0976;mM
+PUNP2;Nucleotide metabolism;Eff Enzyme Count;;629;#
+PUNP2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;13.3;1/s
+PUNP2;Nucleotide metabolism;Product Catalytic Rate Constant;;109.8439;1/s
+PUNP2;Nucleotide metabolism;Michaelis Menten Constant;M_dad_2_c;0.7005;mM
+PUNP2;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;2.1382;mM
+PUNP2;Nucleotide metabolism;Michaelis Menten Constant;M_2dr1p_c;0.0143;mM
+PUNP2;Nucleotide metabolism;Michaelis Menten Constant;M_ade_c;4.0135;mM
+DADNK;Nucleotide metabolism;Eff Enzyme Count;;86;#
+DADNK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;1.48;1/s
+DADNK;Nucleotide metabolism;Product Catalytic Rate Constant;;0.4533;1/s
+DADNK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0094;mM
+DADNK;Nucleotide metabolism;Michaelis Menten Constant;M_dad_2_c;0.012;mM
+DADNK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1435;mM
+DADNK;Nucleotide metabolism;Michaelis Menten Constant;M_damp_c;0.1435;mM
+DADK;Nucleotide metabolism;Eff Enzyme Count;;213;#
+DADK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;2.9129;1/s
+DADK;Nucleotide metabolism;Product Catalytic Rate Constant;;3.43299;1/s
+DADK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1;mM
+DADK;Nucleotide metabolism;Michaelis Menten Constant;M_damp_c;0.1;mM
+DADK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;1;mM
+DADK;Nucleotide metabolism;Michaelis Menten Constant;M_dadp_c;0.1;mM
+PYK5;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK5;Nucleotide metabolism;Substrate Catalytic Rate Constant;;576.72;1/s
+PYK5;Nucleotide metabolism;Product Catalytic Rate Constant;;0.02;1/s
+PYK5;Nucleotide metabolism;Michaelis Menten Constant;M_dadp_c;0.2814;mM
+PYK5;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.0791;mM
+PYK5;Nucleotide metabolism;Michaelis Menten Constant;M_datp_c;0.1168;mM
+PYK5;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0553;mM
+PGK2;Nucleotide metabolism;Eff Enzyme Count;;411;#
+PGK2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;37.4;1/s
+PGK2;Nucleotide metabolism;Product Catalytic Rate Constant;;0.07699573353053;1/s
+PGK2;Nucleotide metabolism;Michaelis Menten Constant;M_13dpg_c;0.0057;mM
+PGK2;Nucleotide metabolism;Michaelis Menten Constant;M_dadp_c;0.5357;mM
+PGK2;Nucleotide metabolism;Michaelis Menten Constant;M_3pg_c;0.7375;mM
+PGK2;Nucleotide metabolism;Michaelis Menten Constant;M_datp_c;0.0902;mM
+GUAPRT;Nucleotide metabolism;Eff Enzyme Count;;439;#
+GUAPRT;Nucleotide metabolism;Substrate Catalytic Rate Constant;;14.4958;1/s
+GUAPRT;Nucleotide metabolism;Product Catalytic Rate Constant;;5.2464;1/s
+GUAPRT;Nucleotide metabolism;Michaelis Menten Constant;M_gua_c;0.0005;mM
+GUAPRT;Nucleotide metabolism;Michaelis Menten Constant;M_prpp_c;0.009;mM
+GUAPRT;Nucleotide metabolism;Michaelis Menten Constant;M_gmp_c;0.3931;mM
+GUAPRT;Nucleotide metabolism;Michaelis Menten Constant;M_ppi_c;0.4352;mM
+PUNP3;Nucleotide metabolism;Eff Enzyme Count;;629;#
+PUNP3;Nucleotide metabolism;Substrate Catalytic Rate Constant;;26.2373;1/s
+PUNP3;Nucleotide metabolism;Product Catalytic Rate Constant;;109.8576;1/s
+PUNP3;Nucleotide metabolism;Michaelis Menten Constant;M_gsn_c;1.2701;mM
+PUNP3;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;2.1432;mM
+PUNP3;Nucleotide metabolism;Michaelis Menten Constant;M_gua_c;1.8086;mM
+PUNP3;Nucleotide metabolism;Michaelis Menten Constant;M_r1p_c;0.0132;mM
+GK1;Nucleotide metabolism;Eff Enzyme Count;;186;#
+GK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;410.2268;1/s
+GK1;Nucleotide metabolism;Product Catalytic Rate Constant;;127.921;1/s
+GK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1501;mM
+GK1;Nucleotide metabolism;Michaelis Menten Constant;M_gmp_c;0.0259;mM
+GK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.0676;mM
+GK1;Nucleotide metabolism;Michaelis Menten Constant;M_gdp_c;0.0236;mM
+RNDR2;Nucleotide metabolism;Eff Enzyme Count;;50;#
+RNDR2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;4.1518;1/s
+RNDR2;Nucleotide metabolism;Product Catalytic Rate Constant;;0;1/s
+RNDR2;Nucleotide metabolism;Michaelis Menten Constant;M_gdp_c;0.24;mM
+RNDR2;Nucleotide metabolism;Michaelis Menten Constant;M_trdrd_c;0.0429;mM
+RNDR2;Nucleotide metabolism;Michaelis Menten Constant;M_dgdp_c;0.2331;mM
+RNDR2;Nucleotide metabolism;Michaelis Menten Constant;M_trdox_c;0.2331;mM
+PYK3;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK3;Nucleotide metabolism;Substrate Catalytic Rate Constant;;672.84;1/s
+PYK3;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0014;1/s
+PYK3;Nucleotide metabolism;Michaelis Menten Constant;M_gdp_c;0.2814;mM
+PYK3;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.075;mM
+PYK3;Nucleotide metabolism;Michaelis Menten Constant;M_gtp_c;0.1376;mM
+PYK3;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0589;mM
+PGK3;Nucleotide metabolism;Eff Enzyme Count;;411;#
+PGK3;Nucleotide metabolism;Substrate Catalytic Rate Constant;;140.8;1/s
+PGK3;Nucleotide metabolism;Product Catalytic Rate Constant;;0.030214276516037;1/s
+PGK3;Nucleotide metabolism;Michaelis Menten Constant;M_13dpg_c;0.0032;mM
+PGK3;Nucleotide metabolism;Michaelis Menten Constant;M_gdp_c;0.5357;mM
+PGK3;Nucleotide metabolism;Michaelis Menten Constant;M_3pg_c;0.7944;mM
+PGK3;Nucleotide metabolism;Michaelis Menten Constant;M_gtp_c;0.2033;mM
+PUNP4;Nucleotide metabolism;Eff Enzyme Count;;629;#
+PUNP4;Nucleotide metabolism;Substrate Catalytic Rate Constant;;25.6973;1/s
+PUNP4;Nucleotide metabolism;Product Catalytic Rate Constant;;110.0264;1/s
+PUNP4;Nucleotide metabolism;Michaelis Menten Constant;M_dgsn_c;0.183;mM
+PUNP4;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;2.2063;mM
+PUNP4;Nucleotide metabolism;Michaelis Menten Constant;M_2dr1p_c;0.0049;mM
+PUNP4;Nucleotide metabolism;Michaelis Menten Constant;M_gua_c;1.7535;mM
+DGSNK;Nucleotide metabolism;Eff Enzyme Count;;86;#
+DGSNK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;2.25;1/s
+DGSNK;Nucleotide metabolism;Product Catalytic Rate Constant;;0.4437;1/s
+DGSNK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0698;mM
+DGSNK;Nucleotide metabolism;Michaelis Menten Constant;M_dgsn_c;0.0061;mM
+DGSNK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1484;mM
+DGSNK;Nucleotide metabolism;Michaelis Menten Constant;M_dgmp_c;0.1484;mM
+DGK1;Nucleotide metabolism;Eff Enzyme Count;;186;#
+DGK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;410.1815;1/s
+DGK1;Nucleotide metabolism;Product Catalytic Rate Constant;;831.9981;1/s
+DGK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1549;mM
+DGK1;Nucleotide metabolism;Michaelis Menten Constant;M_dgmp_c;0.0441;mM
+DGK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.0601;mM
+DGK1;Nucleotide metabolism;Michaelis Menten Constant;M_dgdp_c;0.0601;mM
+PYK6;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK6;Nucleotide metabolism;Substrate Catalytic Rate Constant;;833.04;1/s
+PYK6;Nucleotide metabolism;Product Catalytic Rate Constant;;0.02;1/s
+PYK6;Nucleotide metabolism;Michaelis Menten Constant;M_dgdp_c;0.2814;mM
+PYK6;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.0791;mM
+PYK6;Nucleotide metabolism;Michaelis Menten Constant;M_dgtp_c;0.1168;mM
+PYK6;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0553;mM
+PGK4;Nucleotide metabolism;Eff Enzyme Count;;411;#
+PGK4;Nucleotide metabolism;Substrate Catalytic Rate Constant;;35.2;1/s
+PGK4;Nucleotide metabolism;Product Catalytic Rate Constant;;0.072466572734617;1/s
+PGK4;Nucleotide metabolism;Michaelis Menten Constant;M_13dpg_c;0.0057;mM
+PGK4;Nucleotide metabolism;Michaelis Menten Constant;M_dgdp_c;0.5357;mM
+PGK4;Nucleotide metabolism;Michaelis Menten Constant;M_3pg_c;0.7375;mM
+PGK4;Nucleotide metabolism;Michaelis Menten Constant;M_dgtp_c;0.0902;mM
+UPPRT;Nucleotide metabolism;Eff Enzyme Count;;362;#
+UPPRT;Nucleotide metabolism;Substrate Catalytic Rate Constant;;5.1;1/s
+UPPRT;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0035;1/s
+UPPRT;Nucleotide metabolism;Michaelis Menten Constant;M_prpp_c;0.084;mM
+UPPRT;Nucleotide metabolism;Michaelis Menten Constant;M_ura_c;0.00407;mM
+UPPRT;Nucleotide metabolism;Michaelis Menten Constant;M_ppi_c;1;mM
+UPPRT;Nucleotide metabolism;Michaelis Menten Constant;M_ump_c;0.0138;mM
+UMPK;Nucleotide metabolism;Eff Enzyme Count;;144;#
+UMPK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;263.7845;1/s
+UMPK;Nucleotide metabolism;Product Catalytic Rate Constant;;0.7058;1/s
+UMPK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;2.3428;mM
+UMPK;Nucleotide metabolism;Michaelis Menten Constant;M_ump_c;0.2951;mM
+UMPK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.0962;mM
+UMPK;Nucleotide metabolism;Michaelis Menten Constant;M_udp_c;0.0962;mM
+PYK2;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;352.44;1/s
+PYK2;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0004;1/s
+PYK2;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.073;mM
+PYK2;Nucleotide metabolism;Michaelis Menten Constant;M_udp_c;0.2814;mM
+PYK2;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0608;mM
+PYK2;Nucleotide metabolism;Michaelis Menten Constant;M_utp_c;0.1491;mM
+RNDR4;Nucleotide metabolism;Eff Enzyme Count;;50;#
+RNDR4;Nucleotide metabolism;Substrate Catalytic Rate Constant;;0.29;1/s
+RNDR4;Nucleotide metabolism;Product Catalytic Rate Constant;;0;1/s
+RNDR4;Nucleotide metabolism;Michaelis Menten Constant;M_trdrd_c;0.0395;mM
+RNDR4;Nucleotide metabolism;Michaelis Menten Constant;M_udp_c;1.2;mM
+RNDR4;Nucleotide metabolism;Michaelis Menten Constant;M_dudp_c;0.253;mM
+RNDR4;Nucleotide metabolism;Michaelis Menten Constant;M_trdox_c;0.253;mM
+CYTK1;Nucleotide metabolism;Eff Enzyme Count;;66;#
+CYTK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;18.464;1/s
+CYTK1;Nucleotide metabolism;Product Catalytic Rate Constant;;5.416;1/s
+CYTK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1;mM
+CYTK1;Nucleotide metabolism;Michaelis Menten Constant;M_cmp_c;0.1;mM
+CYTK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1;mM
+CYTK1;Nucleotide metabolism;Michaelis Menten Constant;M_cdp_c;0.1;mM
+PYK4;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK4;Nucleotide metabolism;Substrate Catalytic Rate Constant;;544.68;1/s
+PYK4;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0001;1/s
+PYK4;Nucleotide metabolism;Michaelis Menten Constant;M_cdp_c;0.2814;mM
+PYK4;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.0712;mM
+PYK4;Nucleotide metabolism;Michaelis Menten Constant;M_ctp_c;0.1611;mM
+PYK4;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0627;mM
+RNDR3;Nucleotide metabolism;Eff Enzyme Count;;50;#
+RNDR3;Nucleotide metabolism;Substrate Catalytic Rate Constant;;4.1273;1/s
+RNDR3;Nucleotide metabolism;Product Catalytic Rate Constant;;0;1/s
+RNDR3;Nucleotide metabolism;Michaelis Menten Constant;M_cdp_c;0.057;mM
+RNDR3;Nucleotide metabolism;Michaelis Menten Constant;M_trdrd_c;0.0433;mM
+RNDR3;Nucleotide metabolism;Michaelis Menten Constant;M_dcdp_c;0.2307;mM
+RNDR3;Nucleotide metabolism;Michaelis Menten Constant;M_trdox_c;0.2307;mM
+DCYTK;Nucleotide metabolism;Eff Enzyme Count;;86;#
+DCYTK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;1.8;1/s
+DCYTK;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0058;1/s
+DCYTK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0136;mM
+DCYTK;Nucleotide metabolism;Michaelis Menten Constant;M_dcyt_c;0.0023;mM
+DCYTK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.2097;mM
+DCYTK;Nucleotide metabolism;Michaelis Menten Constant;M_dcmp_c;0.2097;mM
+CYTK2;Nucleotide metabolism;Eff Enzyme Count;;66;#
+CYTK2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;18.566;1/s
+CYTK2;Nucleotide metabolism;Product Catalytic Rate Constant;;5.3862;1/s
+CYTK2;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.1;mM
+CYTK2;Nucleotide metabolism;Michaelis Menten Constant;M_dcmp_c;0.1;mM
+CYTK2;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1;mM
+CYTK2;Nucleotide metabolism;Michaelis Menten Constant;M_dcdp_c;0.1;mM
+PYK7;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK7;Nucleotide metabolism;Substrate Catalytic Rate Constant;;416.52;1/s
+PYK7;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0308;1/s
+PYK7;Nucleotide metabolism;Michaelis Menten Constant;M_dcdp_c;0.2814;mM
+PYK7;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.0799;mM
+PYK7;Nucleotide metabolism;Michaelis Menten Constant;M_dctp_c;0.1137;mM
+PYK7;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0547;mM
+DURIK1;Nucleotide metabolism;Eff Enzyme Count;;202;#
+DURIK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;19.3256;1/s
+DURIK1;Nucleotide metabolism;Product Catalytic Rate Constant;;0.1482;1/s
+DURIK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.4221;mM
+DURIK1;Nucleotide metabolism;Michaelis Menten Constant;M_duri_c;0.0283;mM
+DURIK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1249;mM
+DURIK1;Nucleotide metabolism;Michaelis Menten Constant;M_dump_c;0.1249;mM
+TMDK1;Nucleotide metabolism;Eff Enzyme Count;;202;#
+TMDK1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;19.2637;1/s
+TMDK1;Nucleotide metabolism;Product Catalytic Rate Constant;;0.2901;1/s
+TMDK1;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.4246;mM
+TMDK1;Nucleotide metabolism;Michaelis Menten Constant;M_thymd_c;0.0061;mM
+TMDK1;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1198;mM
+TMDK1;Nucleotide metabolism;Michaelis Menten Constant;M_dtmp_c;0.1198;mM
+TMPK;Nucleotide metabolism;Eff Enzyme Count;;92;#
+TMPK;Nucleotide metabolism;Substrate Catalytic Rate Constant;;4.7572;1/s
+TMPK;Nucleotide metabolism;Product Catalytic Rate Constant;;41.5553;1/s
+TMPK;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0524;mM
+TMPK;Nucleotide metabolism;Michaelis Menten Constant;M_dtmp_c;0.0168;mM
+TMPK;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.0958;mM
+TMPK;Nucleotide metabolism;Michaelis Menten Constant;M_dtdp_c;0.0958;mM
+PYK8;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK8;Nucleotide metabolism;Substrate Catalytic Rate Constant;;160.2;1/s
+PYK8;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0184;1/s
+PYK8;Nucleotide metabolism;Michaelis Menten Constant;M_dtdp_c;0.2814;mM
+PYK8;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.079;mM
+PYK8;Nucleotide metabolism;Michaelis Menten Constant;M_dttp_c;0.1174;mM
+PYK8;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0554;mM
+PYK9;Nucleotide metabolism;Eff Enzyme Count;;551;#
+PYK9;Nucleotide metabolism;Substrate Catalytic Rate Constant;;32.04;1/s
+PYK9;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0126;1/s
+PYK9;Nucleotide metabolism;Michaelis Menten Constant;M_dudp_c;0.2814;mM
+PYK9;Nucleotide metabolism;Michaelis Menten Constant;M_pep_c;0.0784;mM
+PYK9;Nucleotide metabolism;Michaelis Menten Constant;M_dutp_c;0.1202;mM
+PYK9;Nucleotide metabolism;Michaelis Menten Constant;M_pyr_c;0.0559;mM
+CTPS2;Nucleotide metabolism;Eff Enzyme Count;;306;#
+CTPS2;Nucleotide metabolism;Substrate Catalytic Rate Constant;;2.2;1/s
+CTPS2;Nucleotide metabolism;Product Catalytic Rate Constant;;0.027698870056497;1/s
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0164;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_gln__L_c;0.354;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_utp_c;0.071;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1326;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_ctp_c;0.1326;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_glu__L_c;0.1326;mM
+CTPS2;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1326;mM
+CTPSDUMP;Nucleotide metabolism;Eff Enzyme Count;;306;#
+CTPSDUMP;Nucleotide metabolism;Substrate Catalytic Rate Constant;;4.9027;1/s
+CTPSDUMP;Nucleotide metabolism;Product Catalytic Rate Constant;;0.027698870056497;1/s
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_atp_c;0.0164;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_dump_c;0.0351;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_gln__L_c;0.0667;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_adp_c;0.1326;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_dcmp_c;0.1326;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_glu__L_c;0.1326;mM
+CTPSDUMP;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1326;mM
+DCMPDA;Nucleotide metabolism;Eff Enzyme Count;;128;#
+DCMPDA;Nucleotide metabolism;Substrate Catalytic Rate Constant;;69;1/s
+DCMPDA;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0041;1/s
+DCMPDA;Nucleotide metabolism;Michaelis Menten Constant;M_dcmp_c;1;mM
+DCMPDA;Nucleotide metabolism;Michaelis Menten Constant;M_dump_c;0.1259;mM
+DCMPDA;Nucleotide metabolism;Michaelis Menten Constant;M_nh3_c;0.1259;mM
+DUTPDP;Nucleotide metabolism;Eff Enzyme Count;;10;#
+DUTPDP;Nucleotide metabolism;Substrate Catalytic Rate Constant;;12.4805;1/s
+DUTPDP;Nucleotide metabolism;Product Catalytic Rate Constant;;0;1/s
+DUTPDP;Nucleotide metabolism;Michaelis Menten Constant;M_dutp_c;0.0055;mM
+DUTPDP;Nucleotide metabolism;Michaelis Menten Constant;M_dump_c;0.2224;mM
+DUTPDP;Nucleotide metabolism;Michaelis Menten Constant;M_ppi_c;0.2224;mM
+NTD5;Nucleotide metabolism;Eff Enzyme Count;;371;#
+NTD5;Nucleotide metabolism;Substrate Catalytic Rate Constant;;1.1;1/s
+NTD5;Nucleotide metabolism;Product Catalytic Rate Constant;;0.2985;1/s
+NTD5;Nucleotide metabolism;Michaelis Menten Constant;M_dtmp_c;0.23;mM
+NTD5;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1;mM
+NTD5;Nucleotide metabolism;Michaelis Menten Constant;M_thymd_c;0.1;mM
+NTD1;Nucleotide metabolism;Eff Enzyme Count;;371;#
+NTD1;Nucleotide metabolism;Substrate Catalytic Rate Constant;;0.23;1/s
+NTD1;Nucleotide metabolism;Product Catalytic Rate Constant;;0.2027;1/s
+NTD1;Nucleotide metabolism;Michaelis Menten Constant;M_dump_c;0.2;mM
+NTD1;Nucleotide metabolism;Michaelis Menten Constant;M_duri_c;0.1;mM
+NTD1;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1;mM
+NTD8;Nucleotide metabolism;Eff Enzyme Count;;371;#
+NTD8;Nucleotide metabolism;Substrate Catalytic Rate Constant;;1.2;1/s
+NTD8;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0056;1/s
+NTD8;Nucleotide metabolism;Michaelis Menten Constant;M_dgmp_c;0.18;mM
+NTD8;Nucleotide metabolism;Michaelis Menten Constant;M_dgsn_c;0.1574;mM
+NTD8;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1574;mM
+NTD6;Nucleotide metabolism;Eff Enzyme Count;;371;#
+NTD6;Nucleotide metabolism;Substrate Catalytic Rate Constant;;1;1/s
+NTD6;Nucleotide metabolism;Product Catalytic Rate Constant;;0.0158;1/s
+NTD6;Nucleotide metabolism;Michaelis Menten Constant;M_damp_c;0.32;mM
+NTD6;Nucleotide metabolism;Michaelis Menten Constant;M_dad_2_c;0.1341;mM
+NTD6;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;0.1341;mM
+PUNP5;Nucleotide metabolism;Eff Enzyme Count;;629;#
+PUNP5;Nucleotide metabolism;Substrate Catalytic Rate Constant;;26.123325;1/s
+PUNP5;Nucleotide metabolism;Product Catalytic Rate Constant;;109.8933;1/s
+PUNP5;Nucleotide metabolism;Michaelis Menten Constant;M_uri_c;0.115;mM
+PUNP5;Nucleotide metabolism;Michaelis Menten Constant;M_pi_c;2.1566;mM
+PUNP5;Nucleotide metabolism;Michaelis Menten Constant;M_ura_c;2.8972;mM
+PUNP5;Nucleotide metabolism;Michaelis Menten Constant;M_r1p_c;0.0137;mM
+GLYK;Lipid metabolism;Eff Enzyme Count;;396;#
+GLYK;Lipid metabolism;Substrate Catalytic Rate Constant;;3280.3273;1/s
+GLYK;Lipid metabolism;Product Catalytic Rate Constant;;93.0643;1/s
+GLYK;Lipid metabolism;Michaelis Menten Constant;M_atp_c;0.3337;mM
+GLYK;Lipid metabolism;Michaelis Menten Constant;M_glyc_c;0.1345;mM
+GLYK;Lipid metabolism;Michaelis Menten Constant;M_adp_c;0.1719;mM
+GLYK;Lipid metabolism;Michaelis Menten Constant;M_glyc3p_c;3.9462;mM
+ACPS;Lipid metabolism;Eff Enzyme Count;;50;#
+ACPS;Lipid metabolism;Substrate Catalytic Rate Constant;;0.7524;1/s
+ACPS;Lipid metabolism;Product Catalytic Rate Constant;;0.0482;1/s
+ACPS;Lipid metabolism;Michaelis Menten Constant;M_apoACP_c;0.0041;mM
+ACPS;Lipid metabolism;Michaelis Menten Constant;M_coa_c;0.0161;mM
+ACPS;Lipid metabolism;Michaelis Menten Constant;M_ACP_c;0.6226;mM
+ACPS;Lipid metabolism;Michaelis Menten Constant;M_pap_c;0.6226;mM
+BPNT;Lipid metabolism;Eff Enzyme Count;;187;#
+BPNT;Lipid metabolism;Substrate Catalytic Rate Constant;;7.1703;1/s
+BPNT;Lipid metabolism;Product Catalytic Rate Constant;;0.3301;1/s
+BPNT;Lipid metabolism;Michaelis Menten Constant;M_pap_c;0.025;mM
+BPNT;Lipid metabolism;Michaelis Menten Constant;M_amp_c;0.2965;mM
+BPNT;Lipid metabolism;Michaelis Menten Constant;M_pi_c;0.2965;mM
+FAKr;Lipid metabolism;Eff Enzyme Count;;205;#
+FAKr;Lipid metabolism;Substrate Catalytic Rate Constant;;74.8817;1/s
+FAKr;Lipid metabolism;Product Catalytic Rate Constant;;228.2947;1/s
+FAKr;Lipid metabolism;Michaelis Menten Constant;M_atp_c;1.4528;mM
+FAKr;Lipid metabolism;Michaelis Menten Constant;M_fa_c;0.3014;mM
+FAKr;Lipid metabolism;Michaelis Menten Constant;M_adp_c;0.0332;mM
+FAKr;Lipid metabolism;Michaelis Menten Constant;M_ap_c;0.0332;mM
+ACPPAT;Lipid metabolism;Eff Enzyme Count;;140;#
+ACPPAT;Lipid metabolism;Substrate Catalytic Rate Constant;;20.7;1/s
+ACPPAT;Lipid metabolism;Product Catalytic Rate Constant;;0.0494;1/s
+ACPPAT;Lipid metabolism;Michaelis Menten Constant;M_ACP_c;0.0179;mM
+ACPPAT;Lipid metabolism;Michaelis Menten Constant;M_ap_c;0.0179;mM
+ACPPAT;Lipid metabolism;Michaelis Menten Constant;M_ACP_R_c;0.5602;mM
+ACPPAT;Lipid metabolism;Michaelis Menten Constant;M_pi_c;0.5602;mM
+APG3PAT;Lipid metabolism;Eff Enzyme Count;;100;#
+APG3PAT;Lipid metabolism;Substrate Catalytic Rate Constant;;8.4989;1/s
+APG3PAT;Lipid metabolism;Product Catalytic Rate Constant;;0.0658;1/s
+APG3PAT;Lipid metabolism;Michaelis Menten Constant;M_ap_c;0.0206;mM
+APG3PAT;Lipid metabolism;Michaelis Menten Constant;M_glyc3p_c;0.0206;mM
+APG3PAT;Lipid metabolism;Michaelis Menten Constant;M_1ag3p_c;0.4856;mM
+APG3PAT;Lipid metabolism;Michaelis Menten Constant;M_pi_c;0.4856;mM
+AGPAT;Lipid metabolism;Eff Enzyme Count;;170;#
+AGPAT;Lipid metabolism;Substrate Catalytic Rate Constant;;144.4;1/s
+AGPAT;Lipid metabolism;Product Catalytic Rate Constant;;0;1/s
+AGPAT;Lipid metabolism;Michaelis Menten Constant;M_1ag3p_c;0.0064;mM
+AGPAT;Lipid metabolism;Michaelis Menten Constant;M_ACP_R_c;0.0247;mM
+AGPAT;Lipid metabolism;Michaelis Menten Constant;M_ACP_c;0.4044;mM
+AGPAT;Lipid metabolism;Michaelis Menten Constant;M_pa_c;0.4044;mM
+DASYN;Lipid metabolism;Eff Enzyme Count;;40;#
+DASYN;Lipid metabolism;Substrate Catalytic Rate Constant;;6.4829;1/s
+DASYN;Lipid metabolism;Product Catalytic Rate Constant;;3.3541;1/s
+DASYN;Lipid metabolism;Michaelis Menten Constant;M_ctp_c;0.164;mM
+DASYN;Lipid metabolism;Michaelis Menten Constant;M_pa_c;0.0758;mM
+DASYN;Lipid metabolism;Michaelis Menten Constant;M_cdpdag_c;0.1446;mM
+DASYN;Lipid metabolism;Michaelis Menten Constant;M_ppi_c;0.1446;mM
+PGSA;Lipid metabolism;Eff Enzyme Count;;36;#
+PGSA;Lipid metabolism;Substrate Catalytic Rate Constant;;4.0472;1/s
+PGSA;Lipid metabolism;Product Catalytic Rate Constant;;0;1/s
+PGSA;Lipid metabolism;Michaelis Menten Constant;M_cdpdag_c;0.0324;mM
+PGSA;Lipid metabolism;Michaelis Menten Constant;M_glyc3p_c;0.0509;mM
+PGSA;Lipid metabolism;Michaelis Menten Constant;M_cmp_c;0.0416;mM
+PGSA;Lipid metabolism;Michaelis Menten Constant;M_pg3p_c;0.0536;mM
+PGPP;Lipid metabolism;Eff Enzyme Count;;10;#
+PGPP;Lipid metabolism;Substrate Catalytic Rate Constant;;26.212;1/s
+PGPP;Lipid metabolism;Product Catalytic Rate Constant;;0;1/s
+PGPP;Lipid metabolism;Michaelis Menten Constant;M_pg3p_c;0.0011;mM
+PGPP;Lipid metabolism;Michaelis Menten Constant;M_pg_c;46.068;mM
+PGPP;Lipid metabolism;Michaelis Menten Constant;M_pi_c;46.068;mM
+CLPNS;Lipid metabolism;Eff Enzyme Count;;15;#
+CLPNS;Lipid metabolism;Substrate Catalytic Rate Constant;;120.0193;1/s
+CLPNS;Lipid metabolism;Product Catalytic Rate Constant;;0.0005;1/s
+CLPNS;Lipid metabolism;Michaelis Menten Constant;M_pg_c;2.9902;mM
+CLPNS;Lipid metabolism;Michaelis Menten Constant;M_pg_c;2.9902;mM
+CLPNS;Lipid metabolism;Michaelis Menten Constant;M_clpn_c;1.8783;mM
+CLPNS;Lipid metabolism;Michaelis Menten Constant;M_glyc_c;1.8783;mM
+PAPA;Lipid metabolism;Eff Enzyme Count;;10;#
+PAPA;Lipid metabolism;Substrate Catalytic Rate Constant;;44.3467;1/s
+PAPA;Lipid metabolism;Product Catalytic Rate Constant;;0.1399;1/s
+PAPA;Lipid metabolism;Michaelis Menten Constant;M_pa_c;0.052;mM
+PAPA;Lipid metabolism;Michaelis Menten Constant;M_12dgr_c;0.3459;mM
+PAPA;Lipid metabolism;Michaelis Menten Constant;M_pi_c;0.3459;mM
+PGMT;Lipid metabolism;Eff Enzyme Count;;274;#
+PGMT;Lipid metabolism;Substrate Catalytic Rate Constant;;0.668;1/s
+PGMT;Lipid metabolism;Product Catalytic Rate Constant;;4.5294;1/s
+PGMT;Lipid metabolism;Michaelis Menten Constant;M_g6p_c;2.8402;mM
+PGMT;Lipid metabolism;Michaelis Menten Constant;M_g1p_c;6.6039;mM
+GALU;Lipid metabolism;Eff Enzyme Count;;336;#
+GALU;Lipid metabolism;Substrate Catalytic Rate Constant;;36.5547;1/s
+GALU;Lipid metabolism;Product Catalytic Rate Constant;;5.8538;1/s
+GALU;Lipid metabolism;Michaelis Menten Constant;M_g1p_c;0.1659;mM
+GALU;Lipid metabolism;Michaelis Menten Constant;M_utp_c;0.0903;mM
+GALU;Lipid metabolism;Michaelis Menten Constant;M_ppi_c;0.0377;mM
+GALU;Lipid metabolism;Michaelis Menten Constant;M_udpg_c;0.0459;mM
+UDPG4E;Lipid metabolism;Eff Enzyme Count;;86;#
+UDPG4E;Lipid metabolism;Substrate Catalytic Rate Constant;;449.458;1/s
+UDPG4E;Lipid metabolism;Product Catalytic Rate Constant;;243.4781;1/s
+UDPG4E;Lipid metabolism;Michaelis Menten Constant;M_udpg_c;29.0953;mM
+UDPG4E;Lipid metabolism;Michaelis Menten Constant;M_udpgal_c;0.1181;mM
+UDPGALM;Lipid metabolism;Eff Enzyme Count;;78;#
+UDPGALM;Lipid metabolism;Substrate Catalytic Rate Constant;;27;1/s
+UDPGALM;Lipid metabolism;Product Catalytic Rate Constant;;1.5;1/s
+UDPGALM;Lipid metabolism;Michaelis Menten Constant;M_udpgal_c;0.3042;mM
+UDPGALM;Lipid metabolism;Michaelis Menten Constant;M_udpgalfur_c;0.45;mM
+DAGGALT;Lipid metabolism;Eff Enzyme Count;;162;#
+DAGGALT;Lipid metabolism;Substrate Catalytic Rate Constant;;0.4457;1/s
+DAGGALT;Lipid metabolism;Product Catalytic Rate Constant;;0;1/s
+DAGGALT;Lipid metabolism;Michaelis Menten Constant;M_12dgr_c;0.5305;mM
+DAGGALT;Lipid metabolism;Michaelis Menten Constant;M_udpgalfur_c;0.0589;mM
+DAGGALT;Lipid metabolism;Michaelis Menten Constant;M_galfur12dgr_c;0.1699;mM
+DAGGALT;Lipid metabolism;Michaelis Menten Constant;M_udp_c;0.1699;mM
+NCTPPRT;Cofactor metabolism;Eff Enzyme Count;;165;#
+NCTPPRT;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0433;1/s
+NCTPPRT;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_nac_c;0.00806;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_prpp_c;0.0038;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_nicrnt_c;0.0346;mM
+NCTPPRT;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.18;mM
+NNATr;Cofactor metabolism;Eff Enzyme Count;;65;#
+NNATr;Cofactor metabolism;Substrate Catalytic Rate Constant;;3.6682;1/s
+NNATr;Cofactor metabolism;Product Catalytic Rate Constant;;0.0022;1/s
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.1837;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_nicrnt_c;0.0554;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_dnad_c;0.1804;mM
+NNATr;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;1.0287;mM
+NADS;Cofactor metabolism;Eff Enzyme Count;;251;#
+NADS;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0454;1/s
+NADS;Cofactor metabolism;Product Catalytic Rate Constant;;0.0104;1/s
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0278;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_dnad_c;0.0465;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_nh3_c;0.0871;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_amp_c;0.2152;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_nad_c;0.2152;mM
+NADS;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.2152;mM
+NADK;Cofactor metabolism;Eff Enzyme Count;;10;#
+NADK;Cofactor metabolism;Substrate Catalytic Rate Constant;;1.36;1/s
+NADK;Cofactor metabolism;Product Catalytic Rate Constant;;104.4259;1/s
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.4312;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_nad_c;2;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;4.5824;mM
+NADK;Cofactor metabolism;Michaelis Menten Constant;M_nadp_c;0.18;mM
+NADHK;Cofactor metabolism;Eff Enzyme Count;;10;#
+NADHK;Cofactor metabolism;Substrate Catalytic Rate Constant;;31.3405;1/s
+NADHK;Cofactor metabolism;Product Catalytic Rate Constant;;104.2685;1/s
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_nadh_c;2;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.4054;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_nadph_c;0.3;mM
+NADHK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;4.624;mM
+RBFK;Cofactor metabolism;Eff Enzyme Count;;68;#
+RBFK;Cofactor metabolism;Substrate Catalytic Rate Constant;;1.2796;1/s
+RBFK;Cofactor metabolism;Product Catalytic Rate Constant;;0.4249;1/s
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.1681;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_ribflv_c;0.0094;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1385;mM
+RBFK;Cofactor metabolism;Michaelis Menten Constant;M_fmn_c;0.1385;mM
+FMNAT;Cofactor metabolism;Eff Enzyme Count;;68;#
+FMNAT;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.0027;1/s
+FMNAT;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0173;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_fmn_c;0.0294;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_fad_c;0.0027;mM
+FMNAT;Cofactor metabolism;Michaelis Menten Constant;M_ppi_c;0.0281;mM
+5FTHFPGS;Cofactor metabolism;Eff Enzyme Count;;35;#
+5FTHFPGS;Cofactor metabolism;Substrate Catalytic Rate Constant;;2;1/s
+5FTHFPGS;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_5fthf_c;0.0999;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.23;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.23;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_glu__L_c;0.3;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_glu__L_c;0.3;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.1001;mM
+5FTHFPGS;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.1001;mM
+MTHFC;Cofactor metabolism;Eff Enzyme Count;;76;#
+MTHFC;Cofactor metabolism;Substrate Catalytic Rate Constant;;185;1/s
+MTHFC;Cofactor metabolism;Product Catalytic Rate Constant;;15.1817;1/s
+MTHFC;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.1207;mM
+MTHFC;Cofactor metabolism;Michaelis Menten Constant;M_10fthfglu3_c;0.0829;mM
+FMETTRS;Cofactor metabolism;Eff Enzyme Count;;128;#
+FMETTRS;Cofactor metabolism;Substrate Catalytic Rate Constant;;0.45;1/s
+FMETTRS;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_10fthfglu3_c;0.011;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_mettrna_c;0.01;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_fmettrna_c;0.001;mM
+FMETTRS;Cofactor metabolism;Michaelis Menten Constant;M_thfglu3_c;0.1;mM
+GHMT;Cofactor metabolism;Eff Enzyme Count;;178;#
+GHMT;Cofactor metabolism;Substrate Catalytic Rate Constant;;640;1/s
+GHMT;Cofactor metabolism;Product Catalytic Rate Constant;;23.173;1/s
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_ser__L_c;2.3312;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_thfglu3_c;0.0684;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_gly_c;0.1463;mM
+GHMT;Cofactor metabolism;Michaelis Menten Constant;M_mlthfglu3_c;0.1463;mM
+MTHFD;Cofactor metabolism;Eff Enzyme Count;;76;#
+MTHFD;Cofactor metabolism;Substrate Catalytic Rate Constant;;19.4491;1/s
+MTHFD;Cofactor metabolism;Product Catalytic Rate Constant;;3.2;1/s
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_mlthfglu3_c;0.1738;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_nadp_c;0.0303;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.0575;mM
+MTHFD;Cofactor metabolism;Michaelis Menten Constant;M_nadph_c;0.0575;mM
+FTHFCL;Cofactor metabolism;Eff Enzyme Count;;38;#
+FTHFCL;Cofactor metabolism;Substrate Catalytic Rate Constant;;3.0655;1/s
+FTHFCL;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0.0191;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_atp_c;0.0164;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_adp_c;0.5231;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.5231;mM
+FTHFCL;Cofactor metabolism;Michaelis Menten Constant;M_pi_c;0.5231;mM
+GHMT2;Cofactor metabolism;Eff Enzyme Count;;178;#
+GHMT2;Cofactor metabolism;Substrate Catalytic Rate Constant;;0;1/s
+GHMT2;Cofactor metabolism;Product Catalytic Rate Constant;;0;1/s
+GHMT2;Cofactor metabolism;Michaelis Menten Constant;M_methfglu3_c;0.0684;mM
+GHMT2;Cofactor metabolism;Michaelis Menten Constant;M_5fthfglu3_c;0.1463;mM
+ATPase;Transport;Eff Enzyme Count;;108;#
+ATPase;Transport;Substrate Catalytic Rate Constant;;20;1/s
+ATPase;Transport;Product Catalytic Rate Constant;;72.33333333;1/s
+ATPase;Transport;Michaelis Menten Constant;M_adp_c;0.1;mM
+ATPase;Transport;Michaelis Menten Constant;M_pi_c;4.2;mM
+ATPase;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+RIBFLVabc;Transport;Eff Enzyme Count;;10;#
+RIBFLVabc;Transport;Substrate Catalytic Rate Constant;;1.66;1/s
+RIBFLVabc;Transport;Product Catalytic Rate Constant;;0;1/s
+RIBFLVabc;Transport;Michaelis Menten Constant;0.003;0.0019;mM
+RIBFLVabc;Transport;Michaelis Menten Constant;M_ribflv_c;0.0019;mM
+P5Pabc;Transport;Eff Enzyme Count;;10;#
+P5Pabc;Transport;Substrate Catalytic Rate Constant;;1.66;1/s
+P5Pabc;Transport;Product Catalytic Rate Constant;;0;1/s
+P5Pabc;Transport;Michaelis Menten Constant;0.006;0.0019;mM
+P5Pabc;Transport;Michaelis Menten Constant;M_pydx5p_c;0.0019;mM
+5FTHFabc;Transport;Eff Enzyme Count;;10;#
+5FTHFabc;Transport;Substrate Catalytic Rate Constant;;1.66;1/s
+5FTHFabc;Transport;Product Catalytic Rate Constant;;0;1/s
+5FTHFabc;Transport;Michaelis Menten Constant;0.05;0.0019;mM
+5FTHFabc;Transport;Michaelis Menten Constant;M_5fthf_c;0.0019;mM
+NACabc;Transport;Eff Enzyme Count;;150;#
+NACabc;Transport;Substrate Catalytic Rate Constant;;1.66;1/s
+NACabc;Transport;Product Catalytic Rate Constant;;0;1/s
+NACabc;Transport;Michaelis Menten Constant;0.016;0.0019;mM
+NACabc;Transport;Michaelis Menten Constant;M_nac_c;0.0019;mM
+COAabc;Transport;Eff Enzyme Count;;10;#
+THMPPabc;Transport;Eff Enzyme Count;;10;#
+THMPPabc;Transport;Substrate Catalytic Rate Constant;;1.66;1/s
+THMPPabc;Transport;Product Catalytic Rate Constant;;0;1/s
+THMPPabc;Transport;Michaelis Menten Constant;0.008;0.0019;mM
+THMPPabc;Transport;Michaelis Menten Constant;M_thmpp_c;0.0019;mM
+SPRMabc;Transport;Eff Enzyme Count;;19;#
+SPRMabc;Transport;Substrate Catalytic Rate Constant;;3;1/s
+SPRMabc;Transport;Product Catalytic Rate Constant;;0;1/s
+SPRMabc;Transport;Michaelis Menten Constant;0.1;2;mM
+SPRMabc;Transport;Michaelis Menten Constant;M_sprm_c;2;mM
+DCYTabc;Transport;Eff Enzyme Count;;145;#
+DCYTabc;Transport;Substrate Catalytic Rate Constant;;0.5;1/s
+DCYTabc;Transport;Product Catalytic Rate Constant;;0;1/s
+DCYTabc;Transport;Michaelis Menten Constant;0.02;0.0011;mM
+DCYTabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+DCYTabc;Transport;Michaelis Menten Constant;M_dcyt_c;0.02;mM
+DCYTabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+DCYTabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+URIabc;Transport;Eff Enzyme Count;;145;#
+URIabc;Transport;Substrate Catalytic Rate Constant;;2;1/s
+URIabc;Transport;Product Catalytic Rate Constant;;0;1/s
+URIabc;Transport;Michaelis Menten Constant;0.18;0.0017;mM
+URIabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+URIabc;Transport;Michaelis Menten Constant;M_uri_c;0.02;mM
+URIabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+URIabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+THMDabc;Transport;Eff Enzyme Count;;145;#
+THMDabc;Transport;Substrate Catalytic Rate Constant;;0.75;1/s
+THMDabc;Transport;Product Catalytic Rate Constant;;0;1/s
+THMDabc;Transport;Michaelis Menten Constant;0.08;0.0017;mM
+THMDabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+THMDabc;Transport;Michaelis Menten Constant;M_thymd_c;0.02;mM
+THMDabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+THMDabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+ADNabc;Transport;Eff Enzyme Count;;145;#
+ADNabc;Transport;Substrate Catalytic Rate Constant;;2;1/s
+ADNabc;Transport;Product Catalytic Rate Constant;;0;1/s
+ADNabc;Transport;Michaelis Menten Constant;0.15;0.0019;mM
+ADNabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+ADNabc;Transport;Michaelis Menten Constant;M_adn_c;0.02;mM
+ADNabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+ADNabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+DADNabc;Transport;Eff Enzyme Count;;145;#
+DADNabc;Transport;Substrate Catalytic Rate Constant;;0.7;1/s
+DADNabc;Transport;Product Catalytic Rate Constant;;0;1/s
+DADNabc;Transport;Michaelis Menten Constant;0.15;0.0019;mM
+DADNabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+DADNabc;Transport;Michaelis Menten Constant;M_dad_2_c;0.02;mM
+DADNabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+DADNabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+GSNabc;Transport;Eff Enzyme Count;;145;#
+GSNabc;Transport;Substrate Catalytic Rate Constant;;1;1/s
+GSNabc;Transport;Product Catalytic Rate Constant;;0;1/s
+GSNabc;Transport;Michaelis Menten Constant;0.13;0.0019;mM
+GSNabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+GSNabc;Transport;Michaelis Menten Constant;M_gsn_c;0.02;mM
+GSNabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+GSNabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+DGSNabc;Transport;Eff Enzyme Count;;145;#
+DGSNabc;Transport;Substrate Catalytic Rate Constant;;0.7;1/s
+DGSNabc;Transport;Product Catalytic Rate Constant;;0;1/s
+DGSNabc;Transport;Michaelis Menten Constant;0.02;0.0019;mM
+DGSNabc;Transport;Michaelis Menten Constant;M_atp_c;0.6;mM
+DGSNabc;Transport;Michaelis Menten Constant;M_dgsn_c;0.02;mM
+DGSNabc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+DGSNabc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+Kt6;Transport;Eff Enzyme Count;;305;#
+Kt6;Transport;Substrate Catalytic Rate Constant;;3;1/s
+Kt6;Transport;Product Catalytic Rate Constant;;0;1/s
+Kt6;Transport;Michaelis Menten Constant;10;0.46;mM
+Kt6;Transport;Michaelis Menten Constant;M_atp_c;0.03;mM
+Kt6;Transport;Michaelis Menten Constant;10;7.47;mM
+Kt6;Transport;Michaelis Menten Constant;M_k_c;1.9;mM
+Kt6;Transport;Michaelis Menten Constant;M_adp_c;1.5;mM
+Kt6;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+Kt6;Transport;Michaelis Menten Constant;134;12.7;mM
+MG2abc;Transport;Eff Enzyme Count;;65;#
+MG2abc;Transport;Substrate Catalytic Rate Constant;;22;1/s
+MG2abc;Transport;Product Catalytic Rate Constant;;0;1/s
+MG2abc;Transport;Michaelis Menten Constant;1;0.05;mM
+MG2abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+MG2abc;Transport;Michaelis Menten Constant;M_mg2_c;0.05;mM
+MG2abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+MG2abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+CA2abc;Transport;Eff Enzyme Count;;80;#
+CA2abc;Transport;Substrate Catalytic Rate Constant;;9.5;1/s
+CA2abc;Transport;Product Catalytic Rate Constant;;0;1/s
+CA2abc;Transport;Michaelis Menten Constant;0.68;0.0075;mM
+CA2abc;Transport;Michaelis Menten Constant;M_atp_c;0.075;mM
+CA2abc;Transport;Michaelis Menten Constant;M_ca2_c;0.0075;mM
+CA2abc;Transport;Michaelis Menten Constant;M_adp_c;0.1;mM
+CA2abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+PIabc;Transport;Eff Enzyme Count;;123;#
+PIabc;Transport;Substrate Catalytic Rate Constant;;25;1/s
+PIabc;Transport;Product Catalytic Rate Constant;;0;1/s
+PIabc;Transport;Michaelis Menten Constant;134;0.0031;mM
+PIabc;Transport;Michaelis Menten Constant;M_atp_c;0.023;mM
+PIabc;Transport;Michaelis Menten Constant;M_pi_c;0.02;mM
+PIabc;Transport;Michaelis Menten Constant;M_pi_c;0.385;mM
+PIabc;Transport;Michaelis Menten Constant;M_adp_c;0.654;mM
+R_ARG4abc;Transport;Eff Enzyme Count;;241;#
+R_ARG4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_ARG4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ARG4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ARG4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_ARG4abc;Transport;Michaelis Menten Constant;M_arg__L_c;0.03;mM
+R_ARG4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_ARG4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_ASP4abc;Transport;Eff Enzyme Count;;241;#
+R_ASP4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_ASP4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ASP4abc;Transport;Michaelis Menten Constant;0.1;0.03;mM
+R_ASP4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_ASP4abc;Transport;Michaelis Menten Constant;M_asp__L_c;0.03;mM
+R_ASP4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_ASP4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_GLU4abc;Transport;Eff Enzyme Count;;241;#
+R_GLU4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_GLU4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLU4abc;Transport;Michaelis Menten Constant;4.3;0.03;mM
+R_GLU4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_GLU4abc;Transport;Michaelis Menten Constant;M_glu__L_c;0.03;mM
+R_GLU4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_GLU4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_GLY4abc;Transport;Eff Enzyme Count;;241;#
+R_GLY4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_GLY4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLY4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_GLY4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_GLY4abc;Transport;Michaelis Menten Constant;M_gly_c;0.03;mM
+R_GLY4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_GLY4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_ISO4abc;Transport;Eff Enzyme Count;;241;#
+R_ISO4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_ISO4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ISO4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ISO4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_ISO4abc;Transport;Michaelis Menten Constant;M_ile__L_c;0.03;mM
+R_ISO4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_ISO4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_ALA4abc;Transport;Eff Enzyme Count;;241;#
+R_ALA4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_ALA4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ALA4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ALA4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_ALA4abc;Transport;Michaelis Menten Constant;M_ala__L_c;0.03;mM
+R_ALA4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_ALA4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_ASN4abc;Transport;Eff Enzyme Count;;241;#
+R_ASN4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_ASN4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ASN4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ASN4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_ASN4abc;Transport;Michaelis Menten Constant;M_asn__L_c;0.03;mM
+R_ASN4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_ASN4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_LEU4abc;Transport;Eff Enzyme Count;;241;#
+R_LEU4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_LEU4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_LEU4abc;Transport;Michaelis Menten Constant;4.2;0.03;mM
+R_LEU4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_LEU4abc;Transport;Michaelis Menten Constant;M_leu__L_c;0.03;mM
+R_LEU4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_LEU4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_GLN4abc;Transport;Eff Enzyme Count;;241;#
+R_GLN4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_GLN4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLN4abc;Transport;Michaelis Menten Constant;2;0.03;mM
+R_GLN4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_GLN4abc;Transport;Michaelis Menten Constant;M_gln__L_c;0.03;mM
+R_GLN4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_GLN4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_HIS4abc;Transport;Eff Enzyme Count;;241;#
+R_HIS4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_HIS4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_HIS4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_HIS4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_HIS4abc;Transport;Michaelis Menten Constant;M_his__L_c;0.03;mM
+R_HIS4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_HIS4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_LYS4abc;Transport;Eff Enzyme Count;;241;#
+R_LYS4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_LYS4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_LYS4abc;Transport;Michaelis Menten Constant;4.2;0.03;mM
+R_LYS4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_LYS4abc;Transport;Michaelis Menten Constant;M_lys__L_c;0.03;mM
+R_LYS4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_LYS4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_PRO4abc;Transport;Eff Enzyme Count;;241;#
+R_PRO4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_PRO4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_PRO4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_PRO4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_PRO4abc;Transport;Michaelis Menten Constant;M_pro__L_c;0.03;mM
+R_PRO4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_PRO4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_PHE4abc;Transport;Eff Enzyme Count;;241;#
+R_PHE4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_PHE4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_PHE4abc;Transport;Michaelis Menten Constant;1;0.03;mM
+R_PHE4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_PHE4abc;Transport;Michaelis Menten Constant;M_phe__L_c;0.03;mM
+R_PHE4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_PHE4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_THR4abc;Transport;Eff Enzyme Count;;241;#
+R_THR4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_THR4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_THR4abc;Transport;Michaelis Menten Constant;1;0.03;mM
+R_THR4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_THR4abc;Transport;Michaelis Menten Constant;M_thr__L_c;0.03;mM
+R_THR4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_THR4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_TRP4abc;Transport;Eff Enzyme Count;;241;#
+R_TRP4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_TRP4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_TRP4abc;Transport;Michaelis Menten Constant;0.5;0.03;mM
+R_TRP4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_TRP4abc;Transport;Michaelis Menten Constant;M_trp__L_c;0.03;mM
+R_TRP4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_TRP4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_TYR4abc;Transport;Eff Enzyme Count;;241;#
+R_TYR4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_TYR4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_TYR4abc;Transport;Michaelis Menten Constant;4;0.03;mM
+R_TYR4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_TYR4abc;Transport;Michaelis Menten Constant;M_tyr__L_c;0.03;mM
+R_TYR4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_TYR4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_VAL4abc;Transport;Eff Enzyme Count;;241;#
+R_VAL4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_VAL4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_VAL4abc;Transport;Michaelis Menten Constant;8;0.03;mM
+R_VAL4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_VAL4abc;Transport;Michaelis Menten Constant;M_val__L_c;0.03;mM
+R_VAL4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_VAL4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_SER4abc;Transport;Eff Enzyme Count;;241;#
+R_SER4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_SER4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_SER4abc;Transport;Michaelis Menten Constant;1.1;0.03;mM
+R_SER4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_SER4abc;Transport;Michaelis Menten Constant;M_ser__L_c;0.03;mM
+R_SER4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_SER4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_MET4abc;Transport;Eff Enzyme Count;;241;#
+R_MET4abc;Transport;Substrate Catalytic Rate Constant;;0.2;1/s
+R_MET4abc;Transport;Product Catalytic Rate Constant;;0;1/s
+R_MET4abc;Transport;Michaelis Menten Constant;8;0.03;mM
+R_MET4abc;Transport;Michaelis Menten Constant;M_atp_c;2.8;mM
+R_MET4abc;Transport;Michaelis Menten Constant;M_met__L_c;0.03;mM
+R_MET4abc;Transport;Michaelis Menten Constant;M_adp_c;2.8;mM
+R_MET4abc;Transport;Michaelis Menten Constant;M_pi_c;10;mM
+R_ARGt2r;Transport;Eff Enzyme Count;;56;#
+R_ARGt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_ARGt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ARGt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ARGt2r;Transport;Michaelis Menten Constant;M_arg__L_c;0.03;mM
+R_ASPt2pr;Transport;Eff Enzyme Count;;56;#
+R_ASPt2pr;Transport;Substrate Catalytic Rate Constant;;9.1;1/s
+R_ASPt2pr;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ASPt2pr;Transport;Michaelis Menten Constant;0.1;0.03;mM
+R_ASPt2pr;Transport;Michaelis Menten Constant;M_asp__L_c;0.03;mM
+R_CYSt2r;Transport;Eff Enzyme Count;;56;#
+R_CYSt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_CYSt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_CYSt2r;Transport;Michaelis Menten Constant;2.3;0.03;mM
+R_CYSt2r;Transport;Michaelis Menten Constant;M_cys__L_c;0.03;mM
+R_GLUt2pr;Transport;Eff Enzyme Count;;44;#
+R_GLUt2pr;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_GLUt2pr;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLUt2pr;Transport;Michaelis Menten Constant;4.3;0.03;mM
+R_GLUt2pr;Transport;Michaelis Menten Constant;M_glu__L_c;0.03;mM
+R_GLYt2r;Transport;Eff Enzyme Count;;56;#
+R_GLYt2r;Transport;Substrate Catalytic Rate Constant;;5.1;1/s
+R_GLYt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLYt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_GLYt2r;Transport;Michaelis Menten Constant;M_gly_c;0.03;mM
+R_ISOt2r;Transport;Eff Enzyme Count;;56;#
+R_ISOt2r;Transport;Substrate Catalytic Rate Constant;;9.1;1/s
+R_ISOt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ISOt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ISOt2r;Transport;Michaelis Menten Constant;M_ile__L_c;0.03;mM
+R_ALAt2r;Transport;Eff Enzyme Count;;56;#
+R_ALAt2r;Transport;Substrate Catalytic Rate Constant;;5.1;1/s
+R_ALAt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ALAt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ALAt2r;Transport;Michaelis Menten Constant;M_ala__L_c;0.03;mM
+R_ASNt2r;Transport;Eff Enzyme Count;;56;#
+R_ASNt2r;Transport;Substrate Catalytic Rate Constant;;6.1;1/s
+R_ASNt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_ASNt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_ASNt2r;Transport;Michaelis Menten Constant;M_asn__L_c;0.03;mM
+R_LEUt2r;Transport;Eff Enzyme Count;;56;#
+R_LEUt2r;Transport;Substrate Catalytic Rate Constant;;9.1;1/s
+R_LEUt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_LEUt2r;Transport;Michaelis Menten Constant;4.2;0.03;mM
+R_LEUt2r;Transport;Michaelis Menten Constant;M_leu__L_c;0.03;mM
+R_GLNt2r;Transport;Eff Enzyme Count;;56;#
+R_GLNt2r;Transport;Substrate Catalytic Rate Constant;;7.1;1/s
+R_GLNt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_GLNt2r;Transport;Michaelis Menten Constant;2;0.03;mM
+R_GLNt2r;Transport;Michaelis Menten Constant;M_gln__L_c;0.03;mM
+R_HISt2r;Transport;Eff Enzyme Count;;56;#
+R_HISt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_HISt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_HISt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_HISt2r;Transport;Michaelis Menten Constant;M_his__L_c;0.03;mM
+R_LYSt2r;Transport;Eff Enzyme Count;;56;#
+R_LYSt2r;Transport;Substrate Catalytic Rate Constant;;9.1;1/s
+R_LYSt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_LYSt2r;Transport;Michaelis Menten Constant;4.2;0.03;mM
+R_LYSt2r;Transport;Michaelis Menten Constant;M_lys__L_c;0.03;mM
+R_PROt2r;Transport;Eff Enzyme Count;;56;#
+R_PROt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_PROt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_PROt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_PROt2r;Transport;Michaelis Menten Constant;M_pro__L_c;0.03;mM
+R_PHEt2r;Transport;Eff Enzyme Count;;56;#
+R_PHEt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_PHEt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_PHEt2r;Transport;Michaelis Menten Constant;1;0.03;mM
+R_PHEt2r;Transport;Michaelis Menten Constant;M_phe__L_c;0.03;mM
+R_THRt2r;Transport;Eff Enzyme Count;;56;#
+R_THRt2r;Transport;Substrate Catalytic Rate Constant;;5.1;1/s
+R_THRt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_THRt2r;Transport;Michaelis Menten Constant;1;0.03;mM
+R_THRt2r;Transport;Michaelis Menten Constant;M_thr__L_c;0.03;mM
+R_TRPt2r;Transport;Eff Enzyme Count;;56;#
+R_TRPt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_TRPt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_TRPt2r;Transport;Michaelis Menten Constant;0.5;0.03;mM
+R_TRPt2r;Transport;Michaelis Menten Constant;M_trp__L_c;0.03;mM
+R_TYRt2r;Transport;Eff Enzyme Count;;56;#
+R_TYRt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_TYRt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_TYRt2r;Transport;Michaelis Menten Constant;4;0.03;mM
+R_TYRt2r;Transport;Michaelis Menten Constant;M_tyr__L_c;0.03;mM
+R_VALt2r;Transport;Eff Enzyme Count;;56;#
+R_VALt2r;Transport;Substrate Catalytic Rate Constant;;5.1;1/s
+R_VALt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_VALt2r;Transport;Michaelis Menten Constant;8;0.03;mM
+R_VALt2r;Transport;Michaelis Menten Constant;M_val__L_c;0.03;mM
+R_SERt2r;Transport;Eff Enzyme Count;;56;#
+R_SERt2r;Transport;Substrate Catalytic Rate Constant;;6.1;1/s
+R_SERt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_SERt2r;Transport;Michaelis Menten Constant;1.1;0.03;mM
+R_SERt2r;Transport;Michaelis Menten Constant;M_ser__L_c;0.03;mM
+R_METt2r;Transport;Eff Enzyme Count;;56;#
+R_METt2r;Transport;Substrate Catalytic Rate Constant;;3.4;1/s
+R_METt2r;Transport;Product Catalytic Rate Constant;;0;1/s
+R_METt2r;Transport;Michaelis Menten Constant;8;0.03;mM
+R_METt2r;Transport;Michaelis Menten Constant;M_met__L_c;0.03;mM
