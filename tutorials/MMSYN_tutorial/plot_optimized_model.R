@@ -204,13 +204,13 @@ reaction_ids   = names(d_p[,-which(names(d_p)%in%c("condition", "iter", "t", "dt
 mass_fractions = load_mass_fractions()
 
 MF      = build_mass_fractions_data(d_b, mass_fractions, dim(d_b)[1])
-#MF_evol = mass_fraction_evolution(d_b, mass_fractions)
-PR      = build_proteomics_data(d_p)
+MF_evol = mass_fraction_evolution(d_b, mass_fractions)
+#PR      = build_proteomics_data(d_p)
 
-plot(PR$obs, PR$sim, log="xy", pch=20)
-abline(a=0, b=1)
+#plot(PR$obs, PR$sim, log="xy", pch=20)
+#abline(a=0, b=1)
 
-stop()
+
 p1 = ggplot(MF, aes(obs, sim)) +
   geom_abline(slope=1, intercept=0, color="pink") +
   geom_point() +
@@ -239,4 +239,6 @@ p3 = ggplot(MF_evol, aes(index, pval)) +
 
 plot_grid(p1, p2, p3, nrow=1)
 
-
+ggplot(d_state, aes(iter, mu)) +
+  geom_line() +
+  theme_classic()
