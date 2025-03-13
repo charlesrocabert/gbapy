@@ -185,7 +185,7 @@ class Species:
                           "Small molecule" if self.species_type == SpeciesType.SmallMolecule else
                           "Macro-molecule" if self.species_type == SpeciesType.MacroMolecule else
                           "Unknown")
-        if self.formula is not None:
+        if self.formula is not None and self.formula != "":
             text = self.formula
             if len(text) > 20:
                 text = text[:20] + "..."
@@ -199,7 +199,7 @@ class Species:
         Print a summary of the species.
         """
         df       = self.build_dataframe()
-        html_str = df.to_html(escape=False, index=False)
+        html_str = df.to_html(escape=False)
         display_html(html_str,raw=True)
 
 class Protein(Species):

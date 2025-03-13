@@ -868,7 +868,7 @@ class Reaction:
         """
         self.define_expression()
         df       = self.build_dataframe()
-        html_str = df.to_html(escape=False, index=False)
+        html_str = df.to_html(escape=False)
         display_html(html_str,raw=True)
 
 #~~~~~~~~~~~~~~~~~~~#

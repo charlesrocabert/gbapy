@@ -1802,7 +1802,76 @@ class GbaBuilder:
         f.close()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 7) Summary function         #
+    # 7) Utility functions        #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def generate_kinetic_parameter_tables( self, path: Optional[str] = "." ):
+        """
+        Generate the kinetic parameter tables for the model
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Generate kcat prediction table #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(path+"/kcat_table.csv", "w")
+        f.write("reaction_id;reaction;direction;substrate_ids;product_ids;protein_id;substrate_KEGGs;product_KEGGs;sequence\n")
+        for r_ID, r in self.reactions.items():
+            r_expression = r.expression
+            r_proteins   = list(r.proteins.keys())
+            if len(r_proteins) == 0:
+                continue
+            r_sequences = {p_ID: self.proteins[p_ID].formula for p_ID in r_proteins}
+            substrates  = {}
+            products    = {}
+            for m_ID, coef in r.metabolites.items():
+                if "kegg.compound" in self.metabolites[m_ID].annotation:
+                    m_KEGG = self.metabolites[m_ID].annotation["kegg.compound"]
+                    if coef < 0:
+                        substrates[m_ID] = m_KEGG
+                    elif coef > 0:
+                        products[m_ID] = m_KEGG
+            if len(substrates) == 0 or len(products) == 0:
+                continue
+            for p_ID in r_proteins:
+                f.write(r_ID+";"+r_expression+";forward;"+",".join(substrates.keys())+";"+",".join(products.keys())+";"+p_ID+";"+",".join(substrates.values())+";"+",".join(products.values())+";"+r_sequences[p_ID]+"\n")
+                f.write(r_ID+";"+r_expression+";backward;"+";"+",".join(products.keys())+";"+",".join(substrates.keys())+p_ID+";"+",".join(products.values())+";"+",".join(substrates.values())+";"+r_sequences[p_ID]+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Generate KM prediction table #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(path+"/KM_table.csv", "w")
+        f.write("reaction_id;reaction;direction;metabolite_id;protein_id;KEGG;sequence\n")
+        for r_ID, r in self.reactions.items():
+            r_expression = r.expression
+            r_proteins   = list(r.proteins.keys())
+            if len(r_proteins) == 0:
+                continue
+            r_sequences = {p_ID: self.proteins[p_ID].formula for p_ID in r_proteins}
+            substrates  = {}
+            products    = {}
+            for m_ID, coef in r.metabolites.items():
+                if "kegg.compound" in self.metabolites[m_ID].annotation:
+                    m_KEGG = self.metabolites[m_ID].annotation["kegg.compound"]
+                    if coef < 0:
+                        substrates[m_ID] = m_KEGG
+                    elif coef > 0:
+                        products[m_ID] = m_KEGG
+            for m_ID in substrates:
+                for p_ID in r_proteins:
+                    f.write(r_ID+";"+r_expression+";forward;"+m_ID+";"+p_ID+";"+substrates[m_ID]+";"+r_sequences[p_ID]+"\n")
+            for m_ID in products:
+                for p_ID in r_proteins:
+                    f.write(r_ID+";"+r_expression+";backward;"+m_ID+";"+p_ID+";"+products[m_ID]+";"+r_sequences[p_ID]+"\n")
+        f.close()
+        
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 8) Summary function         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def summary( self ) -> None:
