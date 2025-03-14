@@ -246,29 +246,31 @@ proteomics_evolution <- function( d_p, step )
   return(D)
 }
 
-plot_grow_rate <- function( d_state )
+plot_growth_rate <- function( d_state )
 {
+  last_mu = d_state$mu[dim(d_state)[1]]
   p = ggplot(d_state, aes(iter, mu)) +
     geom_line() +
     xlab("Iterations") +
     ylab("Growth rate") +
-    ggtitle("Growth rate") +
+    ggtitle(paste0("Growth rate (\u03BC = ",round(last_mu,3),")")) +
     theme_classic()
   return(p)
 }
 
 plot_protein_fraction <- function( d_c )
 {
-  dl = d_c[,-which(names(d_c)%in%c("condition","iter","t","dt", "h2o"))]
-  dl$sum = rowSums(dl)
+  dl                  = d_c[,-which(names(d_c)%in%c("condition","iter","t","dt", "h2o"))]
+  dl$sum              = rowSums(dl)
   dl$Protein_fraction = dl$Protein/dl$sum
-  dl$iter = d_c$iter
+  dl$iter             = d_c$iter
+  last_prot_fraction  = dl$Protein_fraction[dim(dl)[1]]
   p = ggplot(dl, aes(iter, Protein_fraction)) +
     geom_hline(yintercept=0.54727, color="pink") +
     geom_line() +
     xlab("Iterations") +
     ylab("Protein fraction") +
-    ggtitle("Protein fraction") +
+    ggtitle(paste0("Protein fraction (Pf = ",round(last_prot_fraction,3),", obs = ",0.547,")")) +
     ylim(0,1) +
     theme_classic()
   return(p)
@@ -286,7 +288,7 @@ plot_mass_fractions <- function( mf_data, R2 )
     geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
     #geom_text_repel(aes(label=id), size = 3.5) +
-    annotate("text", x=1e-5, y=5e-1, label=paste0("italic(R)^2", "==", R2), hjust=0, parse=T) +
+    annotate("text", x=1e-5, y=5e-1, label=paste0("italic(R)^2", "==", round(R2,2)), hjust=0, parse=T) +
     xlab("Observed") +
     ylab("Simulated") +
     ggtitle("Metabolite mass fractions") +
@@ -330,7 +332,7 @@ plot_proteomics <- function( pr_data, R2 )
     geom_point() +
     geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
-    annotate("text", x=0.001, y=0.05, label=paste0("italic(R)^2", "==", R2), hjust=0, parse=T) +
+    annotate("text", x=0.001, y=0.05, label=paste0("italic(R)^2", "==", round(R2,2)), hjust=0, parse=T) +
     #geom_text_repel(aes(label=id), size = 3.5) +
     xlab("Observed") +
     ylab("Simulated") +
@@ -389,7 +391,7 @@ MF_cor = mass_fractions_cor(d_b)
 PR     = build_proteomics_data(d_p, dim(d_p)[1])
 PR_cor = proteomics_cor(d_p)
 
-p1 = plot_grow_rate(d_state)
+p1 = plot_growth_rate(d_state)
 p2 = plot_protein_fraction(d_c)
 p3 = plot_mass_fractions(MF, MF_cor[3])
 p4 = plot_proteomics(PR, PR_cor[3])
