@@ -37,7 +37,9 @@ from gba import (
     GbaBuilder,
     GbaModel
 )
-from gba.Enumerations import *
-from gba.GbaBuilder import *
-from gba.GbaModel import *
+# from gba.Enumerations import *
+# from gba.Species import *
+# from gba.Reaction import *
+# from gba.GbaBuilder import *
+# from gba.GbaModel import *
 

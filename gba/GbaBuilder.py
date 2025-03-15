@@ -43,7 +43,7 @@ try:
     from .Enumerations import *
     from .Species import Protein, Metabolite
     from .Reaction import Reaction
-    from .GbaModel import GbaModel
+    from .GbaModel import *
 except:
     from Enumerations import *
     from Species import Protein, Metabolite
@@ -278,7 +278,7 @@ class GbaBuilder:
         protein : Protein
             Protein object to add to the model.
         """
-        assert isinstance(protein, Protein), throw_message(MessageType.Error, f"Expected <code>protein</code> to be a Protein, but got <code>{type(protein).__name__}</code>.")
+        #assert isinstance(protein, Protein), throw_message(MessageType.Error, f"Expected <code>protein</code> to be a Protein, but got <code>{type(protein).__name__}</code>.")
         assert protein.id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein.id}</code> already exists.") 
         protein.set_builder(self)
         self.proteins[protein.id] = protein
@@ -304,7 +304,7 @@ class GbaBuilder:
         metabolite : Metabolite
             Metabolite object to add to the model.
         """
-        assert isinstance(metabolite, Metabolite), throw_message(MessageType.Error, f"Expected <code>metabolite</code> to be a Metabolite, but got <code>{type(metabolite).__name__}</code>.") 
+        #assert isinstance(metabolite, Metabolite), throw_message(MessageType.Error, f"Expected <code>metabolite</code> to be a Metabolite, but got <code>{type(metabolite).__name__}</code>.") 
         assert metabolite.id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite.id}</code> already exists.")
         metabolite.set_builder(self)
         self.metabolites[metabolite.id] = metabolite
@@ -330,7 +330,7 @@ class GbaBuilder:
         reaction : Reaction
             Reaction object to add to the model.
         """
-        assert isinstance(reaction, Reaction), throw_message(MessageType.Error, f"Expected <code>reaction</code> to be a Reaction, but got <code>{type(reaction).__name__}</code>.") 
+        #assert isinstance(reaction, Reaction), throw_message(MessageType.Error, f"Expected <code>reaction</code> to be a Reaction, but got <code>{type(reaction).__name__}</code>.") 
         assert reaction.id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction.id}</code> already exists.")
         reaction.set_builder(self)
         self.reactions[reaction.id] = reaction

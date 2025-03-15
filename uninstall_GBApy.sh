@@ -1,5 +1,6 @@
+pip uninstall gba --break-system-packages
 rm -rf dist
 rm -rf build
 rm -rf gba.egg-info
-pip uninstall gba --break-system-packages
+rm -rf gba/__pycache__
 
