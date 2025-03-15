@@ -288,7 +288,7 @@ plot_mass_fractions <- function( mf_data, R2 )
     geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
     #geom_text_repel(aes(label=id), size = 3.5) +
-    annotate("text", x=1e-5, y=5e-1, label=paste0("italic(R)^2", "==", round(R2,2)), hjust=0, parse=T) +
+    annotate("text", x=1e-5, y=5e-1, label=paste0("italic(R)^2", "==", round(R2,4)), hjust=0, parse=T) +
     xlab("Observed") +
     ylab("Simulated") +
     ggtitle("Metabolite mass fractions") +
@@ -332,7 +332,7 @@ plot_proteomics <- function( pr_data, R2 )
     geom_point() +
     geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
-    annotate("text", x=0.001, y=0.05, label=paste0("italic(R)^2", "==", round(R2,2)), hjust=0, parse=T) +
+    annotate("text", x=0.001, y=0.05, label=paste0("italic(R)^2", "==", round(R2,4)), hjust=0, parse=T) +
     #geom_text_repel(aes(label=id), size = 3.5) +
     xlab("Observed") +
     ylab("Simulated") +
@@ -376,7 +376,7 @@ setwd(directory)
 model_path  = "./models"
 output_path = "./output/old_version"
 output_path = "./output"
-model_name  = "mmsyn_nfcr"
+model_name  = "mmsyn_fcr_v1"
 condition   = 1
 
 d_state = read.table(paste0(output_path,"/",model_name,"_",condition,"_state_trajectory.csv"), h=T, sep=";", check.names=F)
@@ -397,7 +397,7 @@ p2 = plot_protein_fraction(d_c)
 p3 = plot_mass_fractions(MF, MF_cor[3])
 p4 = plot_proteomics(PR, PR_cor[3])
 p_mf = plot_mass_fractions_evolution(MF_evol)
-plot_grid(p1, p2, p3, p4, p_mf[[1]], ncol=2)
+plot_grid(p1, p2, p3, p4, p_mf[[1]], p_mf[[3]], ncol=2)
 
 #MF_evol = mass_fraction_evolution(d_b, 100)
 #PR_evol = proteomics_evolution(d_p, 100)
