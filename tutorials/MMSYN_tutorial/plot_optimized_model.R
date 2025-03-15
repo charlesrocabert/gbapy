@@ -376,7 +376,7 @@ setwd(directory)
 model_path  = "./models"
 output_path = "./output/old_version"
 output_path = "./output"
-model_name  = "mmsyn_fcr_v1"
+model_name  = "mmsyn_nfcr"
 condition   = 1
 
 d_state = read.table(paste0(output_path,"/",model_name,"_",condition,"_state_trajectory.csv"), h=T, sep=";", check.names=F)
