@@ -38,11 +38,9 @@ from typing import Optional
 try:
     from .Enumerations import *
     from .Species import *
-    from .GbaBuilder import *
 except:
     from Enumerations import *
     from Species import *
-    from GbaBuilder import *
 
 
 class Reaction:
@@ -151,7 +149,7 @@ class Reaction:
         Convert the reaction to GBA format.
     reset_conversion() -> None
         Reset the conversion of the reaction to GBA format.
-    set_builder( builder: GbaBuilder ) -> None
+    set_builder( builder ) -> None
         Set the GBA builder for the reaction.
     build_dataframe() -> pd.DataFrame
         Build a DataFrame of the reaction

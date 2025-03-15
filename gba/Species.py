@@ -33,6 +33,7 @@ Copyright: © 2024-2025 Charles Rocabert
 import os
 import sys
 import molmass
+import pandas as pd
 from Bio import SeqIO
 from typing import Optional
 import Bio.SeqUtils as SeqUtils
@@ -40,10 +41,8 @@ from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
 try:
     from .Enumerations import *
-    from .GbaBuilder import *
 except:
     from Enumerations import *
-    from GbaBuilder import *
 
 
 class Species:
@@ -72,7 +71,7 @@ class Species:
         Calculate the molecular mass of the species.
     has_missing_mass( verbose: Optional[bool] = False ) -> bool
         Does the species have a missing mass (None or zero)?
-    set_builder( builder: GbaBuilder ) -> None
+    set_builder( builder ) -> None
         Set the reference to the GBA builder.
     build_dataframe() -> pd.DataFrame
         Build a pandas DataFrame with the species data.
