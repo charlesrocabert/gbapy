@@ -34,6 +34,7 @@ import os
 import sys
 import numpy as np
 from typing import Optional
+from IPython.display import display_html
 
 try:
     from .Enumerations import *

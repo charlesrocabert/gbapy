@@ -37,6 +37,7 @@ import pandas as pd
 from Bio import SeqIO
 from typing import Optional
 import Bio.SeqUtils as SeqUtils
+from IPython.display import display_html
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
 try:
