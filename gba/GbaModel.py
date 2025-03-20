@@ -1295,6 +1295,37 @@ class GbaModel:
             throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
+    def generate_LP_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0,
+                                      condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None:
+        """
+        Generate an initial solution using a linear program.
+
+        Parameters
+        ----------
+        max_flux_fraction : Optional[float], default=10.0
+            Maximal flux fraction.
+        rhs_factor : Optional[float], default=10.0
+            Factor dividing the rhs of the mass conservation constraint.
+        condition_id : Optional[str], default="1"
+            Condition identifier.
+        save_f0 : Optional[str], default=None
+            Path to save the initial solution.
+        """
+        solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+        if solved:
+            self.set_condition(condition_id)
+            self.set_f0(self.LP_solution)
+            self.calculate_state()
+            self.check_model_consistency()
+            if self.consistent:
+                throw_message(MessageType.Info, f"Model is consistent with mu = {self.mu}.")
+                if save_f0 is not None:
+                    self.save_f0(path=save_f0)
+            else:
+                throw_message(MessageType.Info, "Model is inconsistent.")
+        else:
+            throw_message(MessageType.Warning, "Impossible to find an initial solution.")
+
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
         Generate random initial solutions.
