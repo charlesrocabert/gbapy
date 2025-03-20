@@ -43,12 +43,14 @@ try:
     from .Enumerations import *
     from .Species import Protein, Metabolite
     from .Reaction import Reaction
+    from .GbaModel import GbaModel
     from .GbaModel import *
 except:
     from Enumerations import *
     from Species import Protein, Metabolite
     from Reaction import Reaction
     from GbaModel import GbaModel
+    from GbaModel import *
 
 
 class GbaBuilder:
@@ -1590,105 +1592,6 @@ class GbaBuilder:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    
-    def create_GBA_model( self, name: Optional[str] = None, verbose: Optional[bool] = False ) -> GbaModel:
-        """
-        Read the GBA model directly from variables.
-
-        Parameters
-        ----------
-        verbose : Optional[bool], default=False
-            Verbose mode.
-        
-        Returns
-        -------
-        GbaModel
-            GBA model.
-        """
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Create the GBA model        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model = None
-        if name is not None:
-            model = GbaModel(name)
-        else:
-            model = GbaModel(self.name)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Load indices                #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.metabolite_ids = list(self.GBA_row_indices.keys())
-        model.x_ids          = list(self.GBA_external_row_indices.keys())
-        model.c_ids          = list(self.GBA_internal_row_indices.keys())+["Protein"]
-        model.reaction_ids   = list(self.GBA_col_indices.keys())
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Load the full M matrix      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.Mx        = self.GBA_M.copy()
-        model.Mx_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Load kcat vectors           #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.kcat_f     = self.GBA_kcat_f.copy()
-        model.kcat_b     = self.GBA_kcat_b.copy()
-        model.reversible = []
-        for j in range(len(model.kcat_b)):
-            if model.kcat_b[j] > 0.0:
-                model.reversible.append(True)
-            else:
-                model.reversible.append(False)
-        model.kcat_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Load KM matrices            #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.KM_f        = self.GBA_KM_f.copy()
-        model.KM_f_loaded = True
-        model.KM_b        = self.GBA_KM_b.copy()
-        model.KM_b_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Load KA and KI matrices     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.KA        = self.GBA_KA.copy()
-        model.KA_loaded = True
-        model.KI        = self.GBA_KI.copy()
-        model.KI_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Load conditions             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.condition_params = ["rho"]+model.x_ids
-        model.condition_ids    = list(self.GBA_conditions.keys())
-        model.conditions       = np.zeros((len(model.condition_params), len(model.condition_ids)))
-        for i in range(len(model.condition_params)):
-            for j in range(len(model.condition_ids)):
-                model.conditions[i,j] = self.GBA_conditions[model.condition_ids[j]][model.condition_params[i]]
-        model.conditions_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Load constant RHS terms     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.constant_rhs        = self.GBA_constant_rhs.copy()
-        model.constant_rhs_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Load constant reactions     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.constant_reactions        = self.GBA_constant_reactions.copy()
-        model.constant_reactions_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Load protein contributions #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.protein_contributions.clear()
-        for r in self.reactions.values():
-            if not r.protein_contributions is None:
-                for item in r.protein_contributions.items():
-                    if r.id not in model.protein_contributions:
-                        model.protein_contributions[r.id] = {item[0]: item[1]}
-                    else:
-                        model.protein_contributions[r.id][item[0]] = item[1]
-        model.protein_contributions_loaded = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Initialize the model       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model.check_model_loading(verbose)
-        model.initialize_model_mathematical_variables()
-        return model
 
     def export_GBA_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1972,21 +1875,20 @@ def throw_message( type: MessageType, message: str ) -> None:
     message : str
         Content of the message.
     """
+    html_str  = "<table>"
+    html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
     if type == MessageType.Plain:
-        display_html("&#10095; "+message, raw=True)
-    else:
-        html_str  = "<table>"
-        html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-        if type == MessageType.Info:
-            html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
-        elif type == MessageType.Warning:
-            html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
-        elif type == MessageType.Error:
-            html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
-        html_str += "<td>"+message+"</td>"
-        html_str += "</tr>"
-        html_str += "</table>"
-        display_html(html_str, raw=True)
+        html_str += "<td><strong>&#10095;</strong></td>"
+    elif type == MessageType.Info:
+        html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
+    elif type == MessageType.Warning:
+        html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
+    elif type == MessageType.Error:
+        html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
+    html_str += "<td>"+message+"</td>"
+    html_str += "</tr>"
+    html_str += "</table>"
+    display_html(html_str, raw=True)
 
 def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
     """

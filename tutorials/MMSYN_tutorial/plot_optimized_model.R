@@ -271,7 +271,7 @@ plot_protein_fraction <- function( d_c )
     xlab("Iterations") +
     ylab("Protein fraction") +
     ggtitle(paste0("Protein fraction (Pf = ",round(last_prot_fraction,3),", obs = ",0.547,")")) +
-    ylim(0,1) +
+    #ylim(0,1) +
     theme_classic()
   return(p)
 }
@@ -366,6 +366,7 @@ plot_proteomics_evolution <- function( pr_evol_data )
   return(list(p1, p2, p3))
 }
 
+
 ##################
 #      MAIN      #
 ##################
@@ -376,7 +377,7 @@ setwd(directory)
 model_path  = "./models"
 output_path = "./output/old_version"
 output_path = "./output"
-model_name  = "mmsyn_fcr_v1"
+model_name  = "mmsyn_fcr_v1_bis"
 condition   = 1
 
 d_state = read.table(paste0(output_path,"/",model_name,"_",condition,"_state_trajectory.csv"), h=T, sep=";", check.names=F)
@@ -392,6 +393,7 @@ MF_evol = mass_fraction_evolution(d_b, 10)
 PR      = build_proteomics_data(d_p, dim(d_p)[1])
 PR_cor  = proteomics_cor(d_p)
 
+MF = filter(MF, id!="fad")
 p1 = plot_growth_rate(d_state)
 p2 = plot_protein_fraction(d_c)
 p3 = plot_mass_fractions(MF, MF_cor[3])
@@ -411,3 +413,4 @@ X = d_f[dim(d_f)[1],-which(names(d_f)%in%c("condition", "iter", "t", "dt"))]
 X = data.frame(names(X), t(X))
 X = X[order(X[,2], decreasing=T),]
 X
+
