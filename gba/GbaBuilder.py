@@ -1350,7 +1350,8 @@ class GbaBuilder:
         return False
     
     def convert( self, ribosome_byproducts: Optional[bool] = False, ribosome_mass_kcat: Optional[float] = 4.55,
-                 ribosome_mass_km: Optional[float] = None, consider_proteome_fraction: Optional[bool] = False ) -> None:
+                 ribosome_mass_km: Optional[float] = None,
+                 consider_proteome_fraction: Optional[bool] = False, proteome_fraction: Optional[float] = None ) -> None:
         """
         Convert the model to a GBA model.
 
@@ -1385,7 +1386,7 @@ class GbaBuilder:
         # 4) Calculate the proteome fraction       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.GBA_modeled_proteome_fraction = 1.0
-        if consider_proteome_fraction:
+        if consider_proteome_fraction and proteome_fraction is None:
             modeled_proteins = []
             for r in self.reactions.values():
                 if r.proteins is not None:
@@ -1394,7 +1395,10 @@ class GbaBuilder:
             modeled_mass                       = sum([self.proteins[p].mass for p in modeled_proteins])
             total_mass                         = sum([self.proteins[p].mass for p in self.proteins])
             self.GBA_modeled_proteome_fraction = modeled_mass/total_mass
-            #self.GBA_modeled_proteome_fraction = len(modeled_proteins)/len(self.proteins)
+        elif consider_proteome_fraction and proteome_fraction is not None:
+            assert proteome_fraction > 0.0 and proteome_fraction <= 1.0, throw_message(MessageType.Error, "Modeled proteome fraction should be between 0 and 1.")
+            self.GBA_modeled_proteome_fraction = proteome_fraction
+        print(self.GBA_modeled_proteome_fraction)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1702,6 +1706,132 @@ class GbaBuilder:
             if not r.protein_contributions is None:
                 for item in r.protein_contributions.items():
                     f.write(r.id+";"+item[0]+";"+str(item[1])+"\n")
+        f.close()
+
+    def write_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of proteins into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_proteins.csv"
+        f        = open(filename, "w")
+        f.write("id;name;mass;sequence;gene;product\n")
+        for p in self.proteins.values():
+            name    = ("" if p.name is None else p.name)
+            gene    = ("" if p.gene is None else p.gene)
+            product = ("" if p.product is None else p.product)
+            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+gene+";"+product+"\n")
+        f.close()
+    
+    def write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of metabolites into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_metabolites.csv"
+        f        = open(filename, "w")
+        f.write("id;name;location;category;mass;formula;kegg_id\n")
+        for m in self.metabolites.values():
+            location = ""
+            if m.species_location == SpeciesLocation.Internal:
+                location = "internal"
+            elif m.species_location == SpeciesLocation.External:
+                location = "external"
+            elif m.species_location == SpeciesLocation.Unknown:
+                location = "unknown"
+            category = ""
+            if m.species_type == SpeciesType.DNA:
+                category = "DNA"
+            elif m.species_type == SpeciesType.RNA:
+                category = "RNA"
+            elif m.species_type == SpeciesType.Protein:
+                category = "protein"
+            elif m.species_type == SpeciesType.SmallMolecule:
+                category = "small molecule"
+            elif m.species_type == SpeciesType.MacroMolecule:
+                category = "large molecule"
+            elif m.species_type == SpeciesType.Unknown:
+                category = "unknown"
+            formula = ("" if m.name is None else m.name)
+            kegg_id = ""
+            if "kegg.compound" in m.annotation:
+                kegg_id = m.annotation["kegg.compound"]
+            f.write(m.id+";"+m.name+";"+location+";"+category+";"+str(m.mass)+";"+formula+";"+kegg_id+"\n")
+        f.close()
+    
+    def write_reactions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of reactions into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_reactions.csv"
+        f        = open(filename, "w")
+        f.write("id;name;type;lb;ub;expression;proteins;GPR;enzyme_mass\n")
+        for r in self.reactions.values():
+            r_type = ""
+            if r.reaction_type == ReactionType.Metabolic:
+                r_type = "metabolic"
+            elif r.reaction_type == ReactionType.Transport:
+                r_type = "transporter"
+            elif r.reaction_type == ReactionType.Exchange:
+                r_type = "exchange"
+            proteins = " + ".join([f"{r.proteins[p_id]} {p_id}" for p_id in r.proteins])
+            GPR      = ("and" if r.GPR == ReactionGPR.AND else "or" if r.GPR == ReactionGPR.OR else "none")
+            f.write(r.id+";"+r.name+";"+r_type+";"+str(r.lb)+";"+str(r.ub)+";"+r.expression+";"+proteins+";"+GPR+";"+str(r.enzyme_mass)+"\n")
+        f.close()
+    
+    def write_kinetic_parameters_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of kinetic parameters into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        #~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Write kcat values #
+        #~~~~~~~~~~~~~~~~~~~~~~#
+        filename = path+"/"+(self.name if name == "" else name)+"_kcat.csv"
+        f        = open(filename, "w")
+        f.write("reaction_id;direction;kcat\n")
+        for r in self.reactions.values():
+            f.write(r.id+";forward;"+str(r.kcat[ReactionDirection.Forward])+"\n")
+            f.write(r.id+";backward;"+str(r.kcat[ReactionDirection.Backward])+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write KM values   #
+        #~~~~~~~~~~~~~~~~~~~~~~#
+        filename = path+"/"+(self.name if name == "" else name)+"_km.csv"
+        f        = open(filename, "w")
+        f.write("reaction_id;metabolite_id;km\n")
+        for r in self.reactions.values():
+            for m_id, km in r.km.items():
+                f.write(r.id+";"+m_id+";"+str(km)+"\n")
         f.close()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
