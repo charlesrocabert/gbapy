@@ -513,15 +513,14 @@ class Reaction:
         if self.metabolites == None or len(self.metabolites) == 0 or not isinstance(self.direction, ReactionDirection):
             return
         self.expression = ""
-        self.expression = " + ".join([str(np.abs(self.metabolites[m_id]))+" "+m_id for m_id in self.metabolites if self.metabolites[m_id] < 0])
+        self.expression = " + ".join([(str(np.abs(self.metabolites[m_id])) if np.abs(self.metabolites[m_id]) > 1 else "")+" "+m_id for m_id in self.metabolites if self.metabolites[m_id] < 0])
         if self.direction == ReactionDirection.Reversible:
             self.expression += " <=> "
         elif self.direction == ReactionDirection.Forward:
             self.expression += " --> "
         elif self.direction == ReactionDirection.Backward:
             self.expression += " <-- "
-        self.expression += " + ".join([str(self.metabolites[m_id])+" "+m_id for m_id in self.metabolites if self.metabolites[m_id] > 0])
-        self.expression  = self.expression.replace(" 1.0 ", "  ")
+        self.expression += " + ".join([(str(self.metabolites[m_id]) if np.abs(self.metabolites[m_id]) > 1 else "")+" "+m_id for m_id in self.metabolites if self.metabolites[m_id] > 0])
     
     def calculate_enzyme_mass( self ) -> None:
         """
