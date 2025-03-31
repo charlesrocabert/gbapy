@@ -61,7 +61,10 @@ class GbaModel:
     """
     Class to manipulate GBA models.
 
-    TO BE COMPLETED
+    Attributes
+    ----------
+    name : str
+        Name of the GBA model.
     """
 
     def __init__( self, name: str ) -> None:
@@ -72,7 +75,157 @@ class GbaModel:
         Parameters
         ----------
         name : str
-            Name of the GBA build.
+            Name of the GBA model.
+        metabolite_ids : list
+            List of all metabolite ids.
+        x_ids : list
+            List of external metabolite ids.
+        c_ids : list
+            List of internal metabolite ids.
+        reaction_ids : list
+            List of reaction ids.
+        condition_ids : list
+            List of condition ids.
+        condition_params : list
+            List of condition parameter ids.
+        Mx : np.array
+            Total mass fraction matrix.
+        M : np.array
+            Internal mass fraction matrix.
+        kcat_f : np.array
+            Forward kcat vector.
+        kcat_b : np.array
+            Backward kcat vector.
+        KM_f : np.array
+            Forward KM matrix.
+        KM_b : np.array
+            Backward KM matrix.
+        KA : np.array
+            KA matrix.
+        KI : np.array
+            KI matrix.
+        rKI : np.array
+            1/KI matrix.
+        reversible : list
+            Indicates if the reaction is reversible.
+        kinetic_model : list
+            Indicates the kinetic model of the reaction.
+        directions : list
+            Indicates the direction of the reaction.
+        conditions : np.array
+            List of conditions.
+        constant_rhs : dict
+            Constant right-hand side terms.
+        constant_reactions : dict
+            Constant reactions.
+        protein_contributions : dict
+            Protein contributions for each reaction.
+        proteomics : dict
+            Predicted proteomics.
+        Mx_loaded : bool
+            Is the mass fraction matrix loaded?
+        kcat_loaded : bool
+            Are the kcat constants loaded?
+        KM_f_loaded : bool
+            Are the KM forward constants loaded?
+        KM_b_loaded : bool
+            Are the KM backward constants loaded?
+        KA_loaded : bool
+            Are the KA constants loaded?
+        KI_loaded : bool
+            Are the KI constants loaded?
+        conditions_loaded : bool
+            Are the conditions loaded?
+        constant_rhs_loaded : bool
+            Are the constant right-hand side terms loaded?
+        constant_reactions_loaded : bool
+            Are the constant reactions loaded?
+        protein_contributions_loaded : bool
+            Are the protein contributions loaded?
+        LP_solution_loaded : bool
+            Is the LP solution loaded?
+        nx : int
+            Number of external metabolites.
+        nc : int
+            Number of internal metabolites.
+        ni : int
+            Total number of metabolites.
+        nj : int
+            Number of reactions.
+        sM : list
+            Columns sum of M.
+        e : list
+            Enzymatic reaction indices.
+        s : list
+            Transport reaction indices.
+        r : int
+            Ribosome reaction index.
+        ne : int
+            Number of enzymatic reactions.
+        ns : int
+            Number of transport reactions.
+        m : list
+            Metabolite indices.
+        a : int
+            Total proteins concentration index.
+        column_rank : int
+            Column rank of M.
+        full_column_rank : bool
+            Does the matrix have full column rank?
+        LP_solution : np.array
+            Linear programming solution.
+        optimal_solutions : dict
+            Optimal f vectors for all conditions.
+        random_solutions : dict
+            Random f vectors.
+        tau_j : np.array
+            Tau values (turnover times).
+        ditau_j : np.array
+            Tau derivative values.
+        x : np.array
+            External metabolite concentrations.
+        c : np.array
+            Internal metabolite concentrations.
+        xc : np.array
+            Metabolite concentrations.
+        v : np.array
+            Fluxes vector.
+        p : np.array
+            Protein concentrations vector.
+        b : np.array
+            Biomass fractions vector.
+        density : float
+            Cell's relative density.
+        mu : float
+            Growth rate.
+        consistent : bool
+            Is the model consistent?
+        adjust_concentrations : bool
+            Adjust concentrations to avoid negative values.
+        condition : str
+            External condition.
+        rho : float
+            Total density.
+        f0 : np.array
+            Initial LP solution.
+        dmu_f : np.array
+            Local mu derivatives with respect to f.
+        GCC_f : np.array
+            Local growth control coefficients with respect to f.
+        f_trunc : np.array
+            Truncated f vector (first element is removed).
+        f : np.array
+            Flux fractions vector.
+        random_data : pd.DataFrame
+            Random solution data for all conditions.
+        optima_data : pd.DataFrame
+            Optima dataframe for all conditions.
+        GA_tracker : pd.DataFrame
+            Gradient ascent trajectory tracker.
+        MC_tracker : pd.DataFrame
+            Monte Carlo with genetic drift tracker.
+        MCMC_tracker : pd.DataFrame
+            MCMC trajectory tracker.
         """
         assert name != "", throw_message(MessageType.Error, "You must provide a name to the GbaModel constructor.")
         self.name = name
