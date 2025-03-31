@@ -44,8 +44,9 @@ setup(
 	long_description              = long_description,
 	long_description_content_type = "text/markdown",
 	url                           = "https://github.com/charlesrocabert/gbapy",
-	author                        = "Charles Rocabert, Furkan Mert",
-	author_email                  = "",
+	author                        = "Charles Rocabert",
+	author_email                  = "charles.rocabert@hhu.de",
+	maintainer                    = "Furkan Mert, Denisa Sufaj",
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Programming Language :: Python :: 3",
