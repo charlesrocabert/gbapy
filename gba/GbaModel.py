@@ -65,6 +65,327 @@ class GbaModel:
     ----------
     name : str
         Name of the GBA model.
+    metabolite_ids : list
+        List of all metabolite ids.
+    x_ids : list
+        List of external metabolite ids.
+    c_ids : list
+        List of internal metabolite ids.
+    reaction_ids : list
+        List of reaction ids.
+    condition_ids : list
+        List of condition ids.
+    condition_params : list
+        List of condition parameter ids.
+    Mx : np.array
+        Total mass fraction matrix.
+    M : np.array
+        Internal mass fraction matrix.
+    kcat_f : np.array
+        Forward kcat vector.
+    kcat_b : np.array
+        Backward kcat vector.
+    KM_f : np.array
+        Forward KM matrix.
+    KM_b : np.array
+        Backward KM matrix.
+    KA : np.array
+        KA matrix.
+    KI : np.array
+        KI matrix.
+    rKI : np.array
+        1/KI matrix.
+    reversible : list
+        Indicates if the reaction is reversible.
+    kinetic_model : list
+        Indicates the kinetic model of the reaction.
+    directions : list
+        Indicates the direction of the reaction.
+    conditions : np.array
+        List of conditions.
+    constant_rhs : dict
+        Constant right-hand side terms.
+    constant_reactions : dict
+        Constant reactions.
+    protein_contributions : dict
+        Protein contributions for each reaction.
+    proteomics : dict
+        Predicted proteomics.
+    Mx_loaded : bool
+        Is the mass fraction matrix loaded?
+    kcat_loaded : bool
+        Are the kcat constants loaded?
+    KM_f_loaded : bool
+        Are the KM forward constants loaded?
+    KM_b_loaded : bool
+        Are the KM backward constants loaded?
+    KA_loaded : bool
+        Are the KA constants loaded?
+    KI_loaded : bool
+        Are the KI constants loaded?
+    conditions_loaded : bool
+        Are the conditions loaded?
+    constant_rhs_loaded : bool
+        Are the constant right-hand side terms loaded?
+    constant_reactions_loaded : bool
+        Are the constant reactions loaded?
+    protein_contributions_loaded : bool
+        Are the protein contributions loaded?
+    LP_solution_loaded : bool
+        Is the LP solution loaded?
+    nx : int
+        Number of external metabolites.
+    nc : int
+        Number of internal metabolites.
+    ni : int
+        Total number of metabolites.
+    nj : int
+        Number of reactions.
+    sM : list
+        Columns sum of M.
+    e : list
+        Enzymatic reaction indices.
+    s : list
+        Transport reaction indices.
+    r : int
+        Ribosome reaction index.
+    ne : int
+        Number of enzymatic reactions.
+    ns : int
+        Number of transport reactions.
+    m : list
+        Metabolite indices.
+    a : int
+        Total proteins concentration index.
+    column_rank : int
+        Column rank of M.
+    full_column_rank : bool
+        Does the matrix have full column rank?
+    LP_solution : np.array
+        Linear programming solution.
+    optimal_solutions : dict
+        Optimal f vectors for all conditions.
+    random_solutions : dict
+        Random f vectors.
+    tau_j : np.array
+        Tau values (turnover times).
+    ditau_j : np.array
+        Tau derivative values.
+    x : np.array
+        External metabolite concentrations.
+    c : np.array
+        Internal metabolite concentrations.
+    xc : np.array
+        Metabolite concentrations.
+    v : np.array
+        Fluxes vector.
+    p : np.array
+        Protein concentrations vector.
+    b : np.array
+        Biomass fractions vector.
+    density : float
+        Cell's relative density.
+    mu : float
+        Growth rate.
+    consistent : bool
+        Is the model consistent?
+    adjust_concentrations : bool
+        Adjust concentrations to avoid negative values.
+    condition : str
+        External condition.
+    rho : float
+        Total density.
+    f0 : np.array
+        Initial LP solution.
+    dmu_f : np.array
+        Local mu derivatives with respect to f.
+    GCC_f : np.array
+        Local growth control coefficients with respect to f.
+    f_trunc : np.array
+        Truncated f vector (first element is removed).
+    f : np.array
+        Flux fractions vector.
+    random_data : pd.DataFrame
+        Random solution data for all conditions.
+    optima_data : pd.DataFrame
+        Optima dataframe for all conditions.
+    GA_tracker : pd.DataFrame
+        Gradient ascent trajectory tracker.
+    MC_tracker : pd.DataFrame
+        Monte Carlo with genetic drift tracker.
+    MCMC_tracker : pd.DataFrame
+        MCMC trajectory tracker.
+    
+    Methods
+    -------
+    read_Mx_from_csv( path: Optional[str] = "." ) -> None
+        Read the mass fraction matrix M from a CSV file.
+    read_kcat_from_csv( path: Optional[str] = "." ) -> None
+        Read the kcat forward and backward constant vectors from a CSV
+        file.
+    read_KM_f_from_csv( path: Optional[str] = "." ) -> None
+        Read the forward Michaelis constant matrix KM from a CSV file.
+    read_KM_b_from_csv( path: Optional[str] = "." ) -> None
+        Read the backward Michaelis constant matrix KM from a CSV file.
+    read_KA_from_csv( path: Optional[str] = "." ) -> None
+        Read the activation constants matrix KA from a CSV file.
+    read_KI_from_csv( path: Optional[str] = "." ) -> None
+        Read the inhibition constants matrix KI from a CSV file.
+    read_conditions_from_csv( path: Optional[str] = "." ) -> None
+        Read the list of conditions from a CSV file.
+    read_constant_rhs_from_csv( path: Optional[str] = "." ) -> None
+        Read the list of constant RHS terms from a CSV file.
+    read_constant_reactions_from_csv( path: Optional[str] = "." ) -> None
+        Read the list of constant reactions from a CSV file.
+    read_protein_contributions_from_csv( path: Optional[str] = "." ) -> None
+        Read the list of protein contributions from a CSV file.
+    read_LP_from_csv( path: Optional[str] = "." ) -> None
+        Read the LP solution from a CSV file (on request).
+    check_model_loading( verbose: Optional[bool] = False ) -> None
+        Check if the model is loaded correctly.
+    initialize_model_mathematical_variables( ) -> None
+        Initialize the model mathematical variables.
+    read_from_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
+        Read the GBA model from CSV files.
+    write_to_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
+        Write the GBA model to CSV files.
+    get_condition( self, condition_id: str, condition_param: str ) -> float
+        Get the value of a condition parameter.
+    get_vector( self, source: str, variable: str ) -> np.array
+        Get the value of a variable from a source.
+    clear_conditions( self ) -> None
+        Clear all external conditions from the GBA model.
+    add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None
+        Add a new condition to the GBA model.
+    clear_constant_rhs( self ) -> None
+        Clear all constant right-hand side terms from the GBA model.
+    add_constant_rhs( self, metabolite_id: str, value: float ) -> None
+        Add a new constant right-hand side term to the GBA model.
+    clear_constant_reactions( self ) -> None
+        Clear all constant reactions from the GBA model.
+    add_constant_reaction( self, reaction_id: str, value: float ) -> None
+        Add a new constant reaction to the GBA model.
+    reset_variables( self ) -> None
+        Reset all variables of the GBA model.
+    set_condition( self, condition_id: str ) -> None
+        Set the current condition of the GBA model.
+    set_f0( self, f0: np.array ) -> None
+        Set the initial LP solution of the GBA model.
+    set_f( self ) -> None
+        Set the flux fractions vector of the GBA model.
+    compute_c( self ) -> None
+        Compute the internal metabolite concentrations.
+    iMM( self, j: int ) -> None
+        Compute the turnover time tau for an irreversible
+        Michaelis-Menten reaction.
+    iMMa( self, j: int ) -> None
+        Compute the turnover time tau for an irreversible
+        Michaelis-Menten reaction with activation.
+        (only one actibitor per reaction)
+    iMMi( self, j: int ) -> None
+        Compute the turnover time tau for an irreversible
+        Michaelis-Menten reaction with inhibition.
+        (only one inhibitor per reaction)
+    iMMia( self, j: int ) -> None
+        Compute the turnover time tau for an irreversible
+        Michaelis-Menten reaction with inhibition and activation.
+        (only one inhibitor and one activator per reaction)
+    rMM( self, j: int ) -> None
+        Compute the turnover time tau for a reversible Michaelis-Menten
+        reaction.
+    compute_tau( self, j: int ) -> None
+        Compute the turnover time tau for a reaction j.
+    diMM( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for an
+        irreversible Michaelis-Menten reaction with respect to
+        metabolite concentrations.
+    diMMa( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for an
+        irreversible Michaelis-Menten reaction with activation
+        with respect to metabolite concentrations.
+    diMMi( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for an
+        irreversible Michaelis-Menten reaction with inhibition
+        with respect to metabolite concentrations.
+    diMMia( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for an
+        irreversible Michaelis-Menten reaction with activation and
+        inhibition with respect to metabolite concentrations.
+    drMM( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for a
+        reversible Michaelis-Menten reaction with respect to
+        metabolite concentrations.
+    compute_dtau( self, j: int ) -> None
+        Compute the derivative of the turnover time tau for a
+        reaction j.
+    compute_mu( self ) -> None
+        Compute the growth rate mu.
+    compute_v( self ) -> None
+        Compute the fluxes v.
+    compute_p( self ) -> None
+        Compute the protein concentrations p.
+    compute_b( self ) -> None
+        Compute the biomass fractions b.
+    compute_density( self ) -> None
+        Compute the cell density (should be equal to 1).
+    compute_dmu_f( self ) -> None
+        Compute the local growth rate gradient with respect to f.
+    compute_GCC_f( self ) -> None
+        Compute the local growth control coefficients with respect to f.
+    calculate_state( self ) -> None
+        Calculate the model state.
+    check_model_consistency( self ) -> None
+        Check the model state's consistency.
+    solve_local_linear_problem( self,max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0 ) -> None
+        Solve the local linear problem to find the initial solution.
+    generate_LP_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0, condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None
+        Generate an initial solution using a linear program.
+    generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None
+        Generate random initial solutions.
+    mutate_f( self, index: int, sigma: float ) -> np.array
+        Mutate one element 'index' of f with a Gaussian standard deviation 'sigma'.
+    calculate_pi( self, selection_coefficient: float, N_e: float ) -> float
+        Calculate the fixation probability pi for a given selection coefficient and effective population size.
+    track_variables( self, variables: list[int], data_dict: dict[str, float] ) -> None
+        Track additional variables.
+    block_reactions( self, block_GCC: Optional[bool] = True ) -> None
+        Block reactions tending to zero.
+    gradient_ascent( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0, initial_dt: Optional[float] = 0.01, track: Optional[bool] = False, variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
+        Run a gradient ascent algorithm to find the optimal flux state.
+    compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01, verbose: Optional[bool] = False ) -> float
+        Compute the optima by gradient ascent for all conditions.
+    MC_simulation( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0, max_iterations: Optional[int] = 100000, sigma: Optional[float] = 0.1, N_e: Optional[float] = 2.5e7, track: Optional[bool] = False, variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
+        Run a Monte Carlo simulation with genetic drift.
+    MCMC_simulation( self, condition_id: Optional[str] = "1", max_iterations: Optional[int] = 100000, sigma: Optional[float] = 0.1, N_e: Optional[float] = 2.5e7, track: Optional[bool] = False , variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
+        Run a Markov Monte Carlo simulation with genetic drift.
+    save_f0( self, path: Optional[str] = "." ) -> None
+        Save the initial flux state to CSV.
+    save_random_solutions( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save the random data to CSV.
+    save_optima( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save the optima data to CSV.
+    save_gradient_ascent_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save the gradient ascent trajectory to CSV.
+    save_MC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save the Monte Carlo trajectory to CSV.
+    save_MCMC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save the Markov Chain Monte Carlo trajectory to CSV.
+    save_all_trajectories( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
+        Save all trajectories to CSV.
+    clear_gradient_ascent_trajectory( self ) -> None
+        Clear the gradient ascent trajectory.
+    clear_MC_trajectory( self ) -> None
+        Clear the Monte Carlo trajectory.
+    clear_MCMC_trajectory( self ) -> None
+        Clear the Markov Chain Monte Carlo trajectory.
+    clear_all_trajectories( self ) -> None
+        Clear all trajectories.
+    summary( self ) -> None
+        Print a summary of the GBA model.
+    create_figure( self, title: str ) -> go.Figure
+        Create a figure for plotting.
+    add_trajectory( self, fig: go.Figure, source: str, x_var: str, y_var: str, x_factor: Optional[float] = 1.0, y_factor: Optional[float] = 1.0, name: Optional[str] = "", data: Optional[pd.DataFrame] = None ) -> None
+        Add a trajectory to a figure.
     """
 
     def __init__( self, name: str ) -> None:
@@ -76,156 +397,6 @@ class GbaModel:
         ----------
         name : str
             Name of the GBA model.
-        metabolite_ids : list
-            List of all metabolite ids.
-        x_ids : list
-            List of external metabolite ids.
-        c_ids : list
-            List of internal metabolite ids.
-        reaction_ids : list
-            List of reaction ids.
-        condition_ids : list
-            List of condition ids.
-        condition_params : list
-            List of condition parameter ids.
-        Mx : np.array
-            Total mass fraction matrix.
-        M : np.array
-            Internal mass fraction matrix.
-        kcat_f : np.array
-            Forward kcat vector.
-        kcat_b : np.array
-            Backward kcat vector.
-        KM_f : np.array
-            Forward KM matrix.
-        KM_b : np.array
-            Backward KM matrix.
-        KA : np.array
-            KA matrix.
-        KI : np.array
-            KI matrix.
-        rKI : np.array
-            1/KI matrix.
-        reversible : list
-            Indicates if the reaction is reversible.
-        kinetic_model : list
-            Indicates the kinetic model of the reaction.
-        directions : list
-            Indicates the direction of the reaction.
-        conditions : np.array
-            List of conditions.
-        constant_rhs : dict
-            Constant right-hand side terms.
-        constant_reactions : dict
-            Constant reactions.
-        protein_contributions : dict
-            Protein contributions for each reaction.
-        proteomics : dict
-            Predicted proteomics.
-        Mx_loaded : bool
-            Is the mass fraction matrix loaded?
-        kcat_loaded : bool
-            Are the kcat constants loaded?
-        KM_f_loaded : bool
-            Are the KM forward constants loaded?
-        KM_b_loaded : bool
-            Are the KM backward constants loaded?
-        KA_loaded : bool
-            Are the KA constants loaded?
-        KI_loaded : bool
-            Are the KI constants loaded?
-        conditions_loaded : bool
-            Are the conditions loaded?
-        constant_rhs_loaded : bool
-            Are the constant right-hand side terms loaded?
-        constant_reactions_loaded : bool
-            Are the constant reactions loaded?
-        protein_contributions_loaded : bool
-            Are the protein contributions loaded?
-        LP_solution_loaded : bool
-            Is the LP solution loaded?
-        nx : int
-            Number of external metabolites.
-        nc : int
-            Number of internal metabolites.
-        ni : int
-            Total number of metabolites.
-        nj : int
-            Number of reactions.
-        sM : list
-            Columns sum of M.
-        e : list
-            Enzymatic reaction indices.
-        s : list
-            Transport reaction indices.
-        r : int
-            Ribosome reaction index.
-        ne : int
-            Number of enzymatic reactions.
-        ns : int
-            Number of transport reactions.
-        m : list
-            Metabolite indices.
-        a : int
-            Total proteins concentration index.
-        column_rank : int
-            Column rank of M.
-        full_column_rank : bool
-            Does the matrix have full column rank?
-        LP_solution : np.array
-            Linear programming solution.
-        optimal_solutions : dict
-            Optimal f vectors for all conditions.
-        random_solutions : dict
-            Random f vectors.
-        tau_j : np.array
-            Tau values (turnover times).
-        ditau_j : np.array
-            Tau derivative values.
-        x : np.array
-            External metabolite concentrations.
-        c : np.array
-            Internal metabolite concentrations.
-        xc : np.array
-            Metabolite concentrations.
-        v : np.array
-            Fluxes vector.
-        p : np.array
-            Protein concentrations vector.
-        b : np.array
-            Biomass fractions vector.
-        density : float
-            Cell's relative density.
-        mu : float
-            Growth rate.
-        consistent : bool
-            Is the model consistent?
-        adjust_concentrations : bool
-            Adjust concentrations to avoid negative values.
-        condition : str
-            External condition.
-        rho : float
-            Total density.
-        f0 : np.array
-            Initial LP solution.
-        dmu_f : np.array
-            Local mu derivatives with respect to f.
-        GCC_f : np.array
-            Local growth control coefficients with respect to f.
-        f_trunc : np.array
-            Truncated f vector (first element is removed).
-        f : np.array
-            Flux fractions vector.
-        random_data : pd.DataFrame
-            Random solution data for all conditions.
-        optima_data : pd.DataFrame
-            Optima dataframe for all conditions.
-        GA_tracker : pd.DataFrame
-            Gradient ascent trajectory tracker.
-        MC_tracker : pd.DataFrame
-            Monte Carlo with genetic drift tracker.
-        MCMC_tracker : pd.DataFrame
-            MCMC trajectory tracker.
         """
         assert name != "", throw_message(MessageType.Error, "You must provide a name to the GbaModel constructor.")
         self.name = name
