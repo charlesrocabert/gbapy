@@ -3,7 +3,7 @@
 *.Rhistory
 *.Rapp.history
 clean_folders.sh
-deprecated/*
+deprecated/
 
 # tutorials under writing
 

@@ -1349,8 +1349,8 @@ class GbaBuilder:
             return True
         return False
     
-    def convert( self, ribosome_byproducts: Optional[bool] = False, ribosome_mass_kcat: Optional[float] = 4.55,
-                 ribosome_mass_km: Optional[float] = None,
+    def convert( self, ribosome_byproducts: Optional[bool] = False,
+                 ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3,
                  consider_proteome_fraction: Optional[bool] = False, proteome_fraction: Optional[float] = None ) -> None:
         """
         Convert the model to a GBA model.
@@ -1365,6 +1365,8 @@ class GbaBuilder:
             Value of the mass normalized KM value.
         consider_proteome_fraction : bool
             Consider the proteome fraction to weight the ribosome reaction.
+        proteome_fraction : float
+            Value of the proteome fraction.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Edit the ribosomal reaction if needed #
@@ -1400,9 +1402,10 @@ class GbaBuilder:
             self.GBA_modeled_proteome_fraction = proteome_fraction
         print(self.GBA_modeled_proteome_fraction)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Check the ribosomal reaction          #
+        # 5) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.GBA_modeled_proteome_fraction
+        if ribosome_mass_kcat is not None:
+            self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.GBA_modeled_proteome_fraction
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
