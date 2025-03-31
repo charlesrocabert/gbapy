@@ -65,6 +65,8 @@ class GbaModel:
     ----------
     name : str
         Name of the GBA model.
+    info : str
+        Info about the model.
     metabolite_ids : list
         List of all metabolite ids.
     x_ids : list
@@ -405,116 +407,119 @@ class GbaModel:
         # 1) GBA model                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+        ### Info ###
+        self.info = ""
+
         ### Identifier lists ###
-        self.metabolite_ids   = [] # List of all metabolite ids 
-        self.x_ids            = [] # List of external metabolite ids
-        self.c_ids            = [] # List of internal metabolite ids
-        self.reaction_ids     = [] # List of reaction ids
-        self.condition_ids    = [] # List of condition ids
-        self.condition_params = [] # List of condition parameter ids
+        self.metabolite_ids   = []
+        self.x_ids            = []
+        self.c_ids            = []
+        self.reaction_ids     = []
+        self.condition_ids    = []
+        self.condition_params = []
 
         ### Model structure ###
-        self.Mx                 = np.array([]) # Total mass fraction matrix
-        self.M                  = np.array([]) # Internal mass fraction matrix
-        self.kcat_f             = np.array([]) # Forward kcat vector
-        self.kcat_b             = np.array([]) # Backward kcat vector
-        self.KM_f               = np.array([]) # Forward KM matrix
-        self.KM_b               = np.array([]) # Backward KM matrix
-        self.KA                 = np.array([]) # KA matrix
-        self.KI                 = np.array([]) # KI matrix
-        self.rKI                = np.array([]) # 1/KI matrix
-        self.reversible         = []           # Indicates if the reaction is reversible
-        self.kinetic_model      = []           # Indicates the kinetic model of the reaction
-        self.directions         = []           # Indicates the direction of the reaction
-        self.conditions         = np.array([]) # List of conditions
-        self.constant_rhs       = {}           # Constant right-hand side terms
-        self.constant_reactions = {}           # Constant reactions
+        self.Mx                 = np.array([])
+        self.M                  = np.array([])
+        self.kcat_f             = np.array([])
+        self.kcat_b             = np.array([])
+        self.KM_f               = np.array([])
+        self.KM_b               = np.array([])
+        self.KA                 = np.array([])
+        self.KI                 = np.array([])
+        self.rKI                = np.array([])
+        self.reversible         = []
+        self.kinetic_model      = []
+        self.directions         = []
+        self.conditions         = np.array([])
+        self.constant_rhs       = {}
+        self.constant_reactions = {}
 
         ### Proteomics ###
-        self.protein_contributions = {} # Protein contributions for each reaction
-        self.proteomics            = {} # Predicted proteomics
+        self.protein_contributions = {}
+        self.proteomics            = {}
 
         ### Loaded objects ###
-        self.Mx_loaded                    = False # Is the mass fraction matrix loaded?
-        self.kcat_loaded                  = False # Are the kcat constants loaded?
-        self.KM_f_loaded                  = False # Are the KM forward constants loaded?
-        self.KM_b_loaded                  = False # Are the KM backward constants loaded?
-        self.KA_loaded                    = False # Are the KA constants loaded?
-        self.KI_loaded                    = False # Are the KI constants loaded?
-        self.conditions_loaded            = False # Are the conditions loaded?
-        self.constant_rhs_loaded          = False # Are the constant right-hand side terms loaded?
-        self.constant_reactions_loaded    = False # Are the constant reactions loaded?
-        self.protein_contributions_loaded = False # Are the protein contributions loaded?
-        self.LP_solution_loaded           = False # Is the LP solution loaded?
+        self.Mx_loaded                    = False
+        self.kcat_loaded                  = False
+        self.KM_f_loaded                  = False
+        self.KM_b_loaded                  = False
+        self.KA_loaded                    = False
+        self.KI_loaded                    = False
+        self.conditions_loaded            = False
+        self.constant_rhs_loaded          = False
+        self.constant_reactions_loaded    = False
+        self.protein_contributions_loaded = False
+        self.LP_solution_loaded           = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) GBA model constants           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Vector lengths ###
-        self.nx = 0 # Number of external metabolites
-        self.nc = 0 # Number of internal metabolites
-        self.ni = 0 # Total number of metabolites
-        self.nj = 0 # Number of reactions
+        self.nx = 0
+        self.nc = 0
+        self.ni = 0
+        self.nj = 0
 
         ### Indices for reactions: s (transport), e (enzymatic), and ribosome r ###
-        self.sM = [] # Columns sum of M
-        self.e  = [] # Enzymatic reaction indices
-        self.s  = [] # Transport reaction indices
-        self.r  = 0  # Ribosome reaction index
-        self.ne = 0  # Number of enzymatic reactions
-        self.ns = 0  # Number of transport reactions
+        self.sM = []
+        self.e  = []
+        self.s  = []
+        self.r  = 0
+        self.ne = 0
+        self.ns = 0
 
         ### Indices: m (metabolite), a (all proteins) ###
-        self.m = [] # Metabolite indices
-        self.a = 0  # Total proteins concentration index
+        self.m = []
+        self.a = 0
 
         ### Matrix column rank ###
-        self.column_rank      = 0     # Column rank of M
-        self.full_column_rank = False # Does the matrix have full column rank?
+        self.column_rank      = 0
+        self.full_column_rank = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.LP_solution       = np.array([]) # Linear programming solution
-        self.optimal_solutions = {}           # Optimal f vectors for all conditions
-        self.random_solutions  = {}           # Random f vectors
+        self.LP_solution       = np.array([])
+        self.optimal_solutions = {}
+        self.random_solutions  = {}
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) GBA model variables           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.tau_j                 = np.array([]) # Tau values (turnover times)
-        self.ditau_j               = np.array([]) # Tau derivative values
-        self.x                     = np.array([]) # External metabolite concentrations
-        self.c                     = np.array([]) # Internal metabolite concentrations
-        self.xc                    = np.array([]) # Metabolite concentrations
-        self.v                     = np.array([]) # Fluxes vector
-        self.p                     = np.array([]) # Protein concentrations vector
-        self.b                     = np.array([]) # Biomass fractions vector
-        self.density               = 0.0          # Cell's relative density
-        self.mu                    = 0.0          # Growth rate
-        self.consistent            = False        # Is the model consistent?
-        self.adjust_concentrations = False        # Adjust concentrations to avoid negative values
+        self.tau_j                 = np.array([])
+        self.ditau_j               = np.array([])
+        self.x                     = np.array([])
+        self.c                     = np.array([])
+        self.xc                    = np.array([])
+        self.v                     = np.array([])
+        self.p                     = np.array([])
+        self.b                     = np.array([])
+        self.density               = 0.0
+        self.mu                    = 0.0
+        self.consistent            = False
+        self.adjust_concentrations = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) GBA model dynamical variables #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.condition = ""           # External condition
-        self.rho       = 0.0          # Total density
-        self.f0        = np.array([]) # Initial LP solution
-        self.dmu_f     = np.array([]) # Local mu derivatives with respect to f
-        self.GCC_f     = np.array([]) # Local growth control coefficients with respect to f
-        self.f_trunc   = np.array([]) # Truncated f vector (first element is removed)
-        self.f         = np.array([]) # Flux fractions vector
+        self.condition = ""
+        self.rho       = 0.0
+        self.f0        = np.array([])
+        self.dmu_f     = np.array([])
+        self.GCC_f     = np.array([])
+        self.f_trunc   = np.array([])
+        self.f         = np.array([])
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.random_data  = pd.DataFrame() # Random solution data for all conditions
-        self.optima_data  = pd.DataFrame() # Optima dataframe for all conditions
-        self.GA_tracker   = pd.DataFrame() # Gradient ascent trajectory tracker
-        self.MC_tracker   = pd.DataFrame() # Monte Carlo with genetic drift tracker
-        self.MCMC_tracker = pd.DataFrame() # MCMC trajectory tracker
+        self.random_data  = pd.DataFrame()
+        self.optima_data  = pd.DataFrame()
+        self.GA_tracker   = pd.DataFrame()
+        self.MC_tracker   = pd.DataFrame()
+        self.MCMC_tracker = pd.DataFrame()
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Model loading methods           #

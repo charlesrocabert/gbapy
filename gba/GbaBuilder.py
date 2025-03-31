@@ -191,6 +191,7 @@ class GbaBuilder:
     create_FBA_biomass_reaction( biomass_id: str, biomass_name: str, biomass_equation: str ) -> None
         Create the FBA biomass reaction.
     """
+    
     def __init__( self, name ):
         """
         Constructor of the GbaBuilder class.
