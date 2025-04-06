@@ -127,6 +127,8 @@ PYK8;protein_0221;1.0
 PYRt2r;spontaneous_protein;1.0
 PdhC_transl;protein_0201;0.33153473181694953
 PdhC_transl;protein_0227;0.6684652681830505
+RNAP;average_protein;1.0
+RNA_degrad;average_protein;1.0
 RPE;protein_0262;1.0
 RPI;protein_0800;1.0
 TALA;average_protein;1.0

@@ -1,8 +1,7 @@
-jupyter execute MMSYN_tutorial_INTRODUCTION.ipynb
-jupyter execute MMSYN_tutorial_STEP_1.ipynb
-jupyter execute MMSYN_tutorial_STEP_2.ipynb
-jupyter execute MMSYN_tutorial_STEP_3.ipynb
-jupyter execute MMSYN_tutorial_STEP_4.ipynb
-jupyter execute MMSYN_tutorial_STEP_5_v1.ipynb
-jupyter execute MMSYN_tutorial_STEP_5_v2.ipynb
+jupyter execute MMSYN_tutorial_introduction.ipynb
+jupyter execute MMSYN_tutorial_1.ipynb
+jupyter execute MMSYN_tutorial_2.ipynb
+jupyter execute MMSYN_tutorial_3.ipynb
+jupyter execute MMSYN_tutorial_4.ipynb
+jupyter execute MMSYN_tutorial_5.ipynb
 
