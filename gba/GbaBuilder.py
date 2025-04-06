@@ -1398,10 +1398,11 @@ class GbaBuilder:
             modeled_mass                       = sum([self.proteins[p].mass for p in modeled_proteins])
             total_mass                         = sum([self.proteins[p].mass for p in self.proteins])
             self.GBA_modeled_proteome_fraction = modeled_mass/total_mass
+            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.GBA_modeled_proteome_fraction:.2f}.")
         elif consider_proteome_fraction and proteome_fraction is not None:
             assert proteome_fraction > 0.0 and proteome_fraction <= 1.0, throw_message(MessageType.Error, "Modeled proteome fraction should be between 0 and 1.")
             self.GBA_modeled_proteome_fraction = proteome_fraction
-        print(self.GBA_modeled_proteome_fraction)
+            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.GBA_modeled_proteome_fraction:.2f}.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
