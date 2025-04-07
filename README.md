@@ -9,6 +9,15 @@
 Documentation coming soon ...
 </p>
 
+## Authors <a name="authors"></a>
+MoRIS is being developed by <a href="https://charlesrocabert.github.io/" target="_blank">Charles Rocabert</a>.
+
+#### Major contributors
+* Furkan Mert
+
+#### Other contributors
+* Denisa Sufaj
+
 ## Copyright <a name="copyright"></a>
 Copyright © 2024-2025 Charles Rocabert, Furkan Mert. All rights reserved.
 
