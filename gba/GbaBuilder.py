@@ -337,6 +337,8 @@ class GbaBuilder:
         assert reaction.id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction.id}</code> already exists.")
         reaction.set_builder(self)
         self.reactions[reaction.id] = reaction
+        if reaction.proteins not in [None, {}] and reaction.GPR is not None:
+            reaction.calculate_enzyme_mass()
     
     def add_reactions( self, reactions_list: list[Reaction] ) -> None:
         """

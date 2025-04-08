@@ -527,6 +527,7 @@ class Reaction:
         Calculate the molecular mass of the enzyme based on its
         composition in proteins.
         """
+        assert self._builder != None, throw_message(MessageType.Error, f"The reaction must be associated to a builder before calculating the enzyme mass.")
         assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.proteins == None:
             return

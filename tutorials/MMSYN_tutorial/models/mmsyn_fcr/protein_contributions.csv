@@ -150,6 +150,11 @@ UPPRT;protein_0798;1.0
 URAt2;spontaneous_protein;1.0
 dUTPase_transl;protein_0201;0.5370267675956966
 dUTPase_transl;protein_0447;0.4629732324043035
+trdoxt;spontaneous_protein;1.0
+AAabc;protein_0876;1.0094834941620952
+AAabc;protein_0878;0.9905165058379048
+tRNAP;average_protein;1.0
+AATRS;protein_0163;1.0
 Ribosome;protein_0025;0.011721308897192575
 Ribosome;protein_0027;0.02119175188621549
 Ribosome;protein_0082;0.011773477919890208
