@@ -33,8 +33,8 @@ Copyright: © 2024-2025 Charles Rocabert, Furkan Mert
 import os
 import sys
 import csv
-import dill
 import time
+import pickle
 import pkgutil
 import numpy as np
 import pandas as pd
@@ -2624,7 +2624,7 @@ def backup_gba_model( model: GbaModel, name: Optional[str] = "", path: Optional[
     else:
         filename = path+"/"+model.name+".gba"
     ofile = open(filename, "wb")
-    dill.dump(model, ofile)
+    pickle.dump(model, ofile)
     ofile.close()
     assert os.path.isfile(filename), throw_message(MessageType.Error, ".gba file creation failed.")
 
@@ -2640,7 +2640,7 @@ def load_gba_model( path: str ) -> GbaModel:
     assert path.endswith(".gba"), throw_message(MessageType.Error, "GBA model file extension is missing.")
     assert os.path.isfile(path), throw_message(MessageType.Error, "GBA model file not found.")
     ifile = open(path, "rb")
-    model = dill.load(ifile)
+    model = pickle.load(ifile)
     ifile.close()
     return model
 

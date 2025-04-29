@@ -32,8 +32,8 @@ Copyright: © 2024-2025 Charles Rocabert
 
 import os
 import sys
-import dill
 import cobra
+import pickle
 import numpy as np
 import pandas as pd
 from typing import Optional
@@ -2048,7 +2048,7 @@ def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Opt
     if path != "":
         filename = path+"/"+filename
     ofile = open(filename, "wb")
-    dill.dump(builder, ofile)
+    pickle.dump(builder, ofile)
     ofile.close()
     assert os.path.isfile(filename), throw_message(MessageType.Error, ".gbabuild file creation failed.")
 
@@ -2063,8 +2063,8 @@ def load_gba_builder( path: str ) -> GbaBuilder:
     """
     assert path.endswith(".gbabuild"), throw_message(MessageType.Error, "GBA builder file extension is missing.")
     assert os.path.isfile(path), throw_message(MessageType.Error, "GBA builder file not found.")
-    ifile = open(path, "rb")
-    builder = dill.load(ifile)
+    ifile   = open(path, "rb")
+    builder = pickle.load(ifile)
     ifile.close()
     return builder
 
