@@ -189,6 +189,8 @@ class GbaModel:
         Cell's relative density.
     mu : float
         Growth rate.
+    doubling_time : float
+        Doubling time.
     consistent : bool
         Is the model consistent?
     adjust_concentrations : bool
@@ -391,7 +393,6 @@ class GbaModel:
     """
 
     def __init__( self, name: str ) -> None:
-
         """
         Constructor of the GbaModel class.
         
@@ -498,6 +499,7 @@ class GbaModel:
         self.b                     = np.array([])
         self.density               = 0.0
         self.mu                    = 0.0
+        self.doubling_time         = 0.0
         self.consistent            = False
         self.adjust_concentrations = False
 
@@ -1506,7 +1508,8 @@ class GbaModel:
         """
         Compute the growth rate mu.
         """
-        self.mu = self.M[self.a,self.r]*self.f[self.r]/(self.tau_j.dot(self.f))
+        self.mu            = self.M[self.a,self.r]*self.f[self.r]/(self.tau_j.dot(self.f))
+        self.doubling_time = np.log(2)/np.log(1+self.mu)
 
     def compute_v( self ) -> None:
         """
@@ -1893,9 +1896,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.GA_tracker.empty:
-                columns = ["label", "condition", "iter", "dt", "t", "mu", "fixed"]
+                columns = ["label", "condition", "iter", "dt", "t", "mu", "doubling_time", "fixed"]
                 self.GA_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "iter": 0, "dt": initial_dt, "t": 0.0, "mu": self.mu, "fixed": 0}
+            data_dict = {"label": label, "condition": condition_id, "iter": 0, "dt": initial_dt, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
             self.track_variables(variables, data_dict)
             data_row        = pd.Series(data=data_dict)
             self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
@@ -1936,7 +1939,7 @@ class GbaModel:
                 dt_counter += 1
                 nb_fixed   += 1
                 if track and nb_iterations%GbaConstants.EXPORT_DATA_COUNT == 0:
-                    data_dict = {"label": label, "condition": condition_id, "iter": nb_iterations, "dt": dt, "t": t, "mu": self.mu, "fixed": nb_fixed}
+                    data_dict = {"label": label, "condition": condition_id, "iter": nb_iterations, "dt": dt, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                     self.track_variables(variables, data_dict)
                     data_row        = pd.Series(data=data_dict)
                     self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
@@ -2078,9 +2081,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MC_tracker.empty:
-                columns = ["label", "condition", "t", "mu", "fixed"]
+                columns = ["label", "condition", "t", "mu", "doubling_time", "fixed"]
                 self.MC_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "fixed": 0}
+            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
             self.track_variables(variables, data_dict)
             data_row        = pd.Series(data=data_dict)
             self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
@@ -2117,7 +2120,7 @@ class GbaModel:
                 t           += 1
                 nb_fixed    += 1
                 if track and nb_iterations % GbaConstants.EXPORT_DATA_COUNT == 0:
-                    data_dict = {"label": label, "condition": condition_id, "t": t, "mu": self.mu, "fixed": nb_fixed}
+                    data_dict = {"label": label, "condition": condition_id, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                     self.track_variables(variables, data_dict)
                     data_row        = pd.Series(data=data_dict)
                     self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
@@ -2197,9 +2200,9 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if track:
             if self.MCMC_tracker.empty:
-                columns           = ["label", "condition", "t", "mu", "fixed"]
+                columns           = ["label", "condition", "t", "mu", "doubling_time", "fixed"]
                 self.MCMC_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "fixed": 0}
+            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
             self.track_variables(variables, data_dict)
             data_row          = pd.Series(data=data_dict)
             self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
@@ -2235,7 +2238,7 @@ class GbaModel:
                 else:
                     nb_fixed += 1
                     if track and nb_iterations % GbaConstants.EXPORT_DATA_COUNT == 0:
-                        data_dict = {"label": label, "condition": condition_id, "t": nb_iterations, "mu": self.mu, "fixed": nb_fixed}
+                        data_dict = {"label": label, "condition": condition_id, "t": nb_iterations, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                         self.track_variables(variables, data_dict)
                         data_row          = pd.Series(data=data_dict)
                         self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)

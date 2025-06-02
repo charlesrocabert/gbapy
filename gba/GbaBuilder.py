@@ -1415,6 +1415,9 @@ class GbaBuilder:
                 self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
     
     def reset_conversion( self ) -> None:
+        """
+        Reset the conversion of the model to a GBA model.
+        """
         for r in self.reactions.values():
             r.reset_conversion()
     
