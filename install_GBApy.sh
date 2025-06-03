@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 pip uninstall gba --break-system-packages
 rm -rf dist
 rm -rf build

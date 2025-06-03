@@ -46,7 +46,7 @@ setup(
 	url                           = "https://github.com/charlesrocabert/gbapy",
 	author                        = "Charles Rocabert",
 	author_email                  = "charles.rocabert@hhu.de",
-	maintainer                    = "Furkan Mert, Denisa Sufaj",
+	maintainer                    = "Furkan Mert",
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Programming Language :: Python :: 3",
@@ -61,7 +61,7 @@ setup(
         'gba.data': [ '**/*.csv', ]
     },
 	python_requires  = ">=3",
-	install_requires = ["numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly"],
+	install_requires = ["argparse", "numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly"],
 	project_urls     = {
 	"Source": "https://github.com/charlesrocabert/gbapy"
 	},
