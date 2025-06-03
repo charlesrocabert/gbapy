@@ -10,7 +10,7 @@ id;name;location;category;mass;formula;kegg_id
 5fthf_c;5-Formyltetrahydrofolate;internal;small molecule;471.424317;5-Formyltetrahydrofolate;C03479
 5fthf_e;5-formyltetrahydrofolate;external;small molecule;471.424317;5-formyltetrahydrofolate;C03479
 5fthfglu3_c;5-formyltetrahydrofolate tri-L-glutamate;internal;small molecule;727.636845;5-formyltetrahydrofolate tri-L-glutamate;C03479
-ACP_R_c;ACP-R;internal;large molecule;8758.797999999999;ACP-R;C00173
+ACP_R_c;ACP-R;internal;large molecule;9187;ACP-R;C00173
 ACP_c;Acyl carrier protein;internal;small molecule;8512.667448998;Acyl carrier protein;C00229
 DNA_c;DNA;internal;DNA;30781.0936638;DNA;C00039
 PdhC_c;PdhC;internal;small molecule;46975.780684;PdhC;
@@ -110,14 +110,14 @@ fa_c;fatty acid;internal;large molecule;268.246;fatty acid;C00162
 fa_e;fatty acid;external;large molecule;268.246;fatty acid;C00162
 fad_c;FAD;internal;small molecule;783.535076996;FAD;C00016
 fdp_c;D-Fructose 1,6-bisphosphate;internal;small molecule;336.084233996;D-Fructose 1,6-bisphosphate;C00354
-fmettrna_c;N-formylmethionyl-tRNA(Met);internal;large molecule;24628.9;N-formylmethionyl-tRNA(Met);C03294
+fmettrna_c;N-formylmethionyl-tRNA(Met);internal;large molecule;25200;N-formylmethionyl-tRNA(Met);C03294
 fmn_c;FMN;internal;small molecule;454.328677998;FMN;C00061
 for_c;Formate;internal;small molecule;45.017491;Formate;C00058
 for_e;Formate;external;small molecule;45.017491;Formate;C00058
 g1p_c;D-Glucose 1-phosphate;internal;small molecule;258.120197998;D-Glucose 1-phosphate;C00103
 g3p_c;Glyceraldehyde 3-phosphate;internal;small molecule;168.042116998;Glyceraldehyde 3-phosphate;C00118
 g6p_c;D-Glucose 6-phosphate;internal;small molecule;258.120197998;D-Glucose 6-phosphate;C00092
-galfur12dgr_c;Gal-DAG;internal;large molecule;756.59;Gal-DAG;C03692
+galfur12dgr_c;Gal-DAG;internal;large molecule;770;Gal-DAG;C03692
 gam6p_c;D-Glucosamine 6-phosphate;internal;small molecule;258.143377998;D-Glucosamine 6-phosphate;C00352
 gam_e;D-Glucosamine;external;small molecule;180.17934200000002;D-Glucosamine;C00329
 gdp_c;GDP;internal;small molecule;440.17718599599993;GDP;C00035
@@ -132,7 +132,7 @@ glu4_e;Tetra-L-glutamate;external;small molecule;530.440343;Tetra-L-glutamate;C0
 glu__L_c;L-Glutamate;internal;small molecule;146.121551;L-Glutamate;C00025
 glu__L_e;L-Glutamate;external;small molecule;146.121551;L-Glutamate;C00025
 glutrna_c;L-Glutamyl-tRNA(Glu);internal;RNA;24605.583505000002;L-Glutamyl-tRNA(Glu);C02987
-glutrnagln_c;L-glutamyl-tRNA(Gln);internal;large molecule;24154.811;L-glutamyl-tRNA(Gln);C06112
+glutrnagln_c;L-glutamyl-tRNA(Gln);internal;large molecule;25150;L-glutamyl-tRNA(Gln);C06112
 gly4_c;Tetra-glycine;internal;small molecule;246.220931;Tetra-glycine;C01960
 gly4_e;Tetra-glycine;external;small molecule;246.220931;Tetra-glycine;C01960
 gly_c;Glycine;internal;small molecule;75.066698;Glycine;C00037
