@@ -294,11 +294,11 @@ if __name__ == "__main__":
     print("#***********************************************************************")
     print("# GBApy (Growth Balance Analysis for Python)")
     print("# Copyright © 2024-2025 Charles Rocabert")
-    print("# Web: https://github.com/charlesrocabert/GBA_Evolution")
+    print("# Web: https://github.com/charlesrocabert/gbapy")
     print("#")
     print("# generate_toy_model.py")
     print("# ---------------------")
-    print("# Generate non full column toy models with a given number of EFMs.")
+    print("# Generate non full column rank toy models with a given number of EFMs.")
     print("# (LOCAL SCRIPT)")
     print("#***********************************************************************")
 
