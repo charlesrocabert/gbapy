@@ -73,7 +73,7 @@ class Species:
     has_missing_mass( verbose: Optional[bool] = False ) -> bool
         Does the species have a missing mass (None or zero)?
     set_builder( builder ) -> None
-        Set the reference to the GBA builder.
+        Set the reference to the CGM builder.
     build_dataframe() -> pd.DataFrame
         Build a pandas DataFrame with the species data.
     summary() -> None
@@ -153,12 +153,12 @@ class Species:
     
     def set_builder( self, builder ) -> None:
         """
-        Set the reference to the GBA builder.
+        Set the reference to the CGM builder.
 
         Parameters
         ----------
-        builder : GbaBuilder
-            Reference to the GBA builder.
+        builder : Builder
+            Reference to the CGM builder.
         """
         self._builder = builder
 

@@ -21,11 +21,11 @@
 #***********************************************************************
 
 """
-Filename: GbaModel.py
+Filename: Model.py
 Author: Charles Rocabert, Furkan Mert
 Date: 2024-10-22
 Description:
-    GbaModel class of the GBApy module.
+    Model class of the GBApy module.
 License: GNU General Public License v3.0
 Copyright: © 2024-2025 Charles Rocabert, Furkan Mert
 """
@@ -57,14 +57,14 @@ env.setParam("OutputFlag", 0)
 env.start()
 
 
-class GbaModel:
+class Model:
     """
-    Class to manipulate GBA models.
+    Class to manipulate cell growth models (CGMs).
 
     Attributes
     ----------
     name : str
-        Name of the GBA model.
+        Name of the model.
     info : str
         Info about the model.
     metabolite_ids : list
@@ -250,33 +250,33 @@ class GbaModel:
     initialize_model_mathematical_variables( ) -> None
         Initialize the model mathematical variables.
     read_from_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Read the GBA model from CSV files.
+        Read the CGM from CSV files.
     write_to_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Write the GBA model to CSV files.
+        Write the CGM to CSV files.
     get_condition( self, condition_id: str, condition_param: str ) -> float
         Get the value of a condition parameter.
     get_vector( self, source: str, variable: str ) -> np.array
         Get the value of a variable from a source.
     clear_conditions( self ) -> None
-        Clear all external conditions from the GBA model.
+        Clear all external conditions from the CGM.
     add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None
-        Add a new condition to the GBA model.
+        Add a new condition to the CGM.
     clear_constant_rhs( self ) -> None
-        Clear all constant right-hand side terms from the GBA model.
+        Clear all constant right-hand side terms from the CGM.
     add_constant_rhs( self, metabolite_id: str, value: float ) -> None
-        Add a new constant right-hand side term to the GBA model.
+        Add a new constant right-hand side term to the CGM.
     clear_constant_reactions( self ) -> None
-        Clear all constant reactions from the GBA model.
+        Clear all constant reactions from the CGM.
     add_constant_reaction( self, reaction_id: str, value: float ) -> None
-        Add a new constant reaction to the GBA model.
+        Add a new constant reaction to the CGM.
     reset_variables( self ) -> None
-        Reset all variables of the GBA model.
+        Reset all variables of the CGM.
     set_condition( self, condition_id: str ) -> None
-        Set the current condition of the GBA model.
+        Set the current condition of the CGM.
     set_f0( self, f0: np.array ) -> None
-        Set the initial LP solution of the GBA model.
+        Set the initial LP solution of the CGM.
     set_f( self ) -> None
-        Set the flux fractions vector of the GBA model.
+        Set the flux fractions vector of the CGM.
     compute_c( self ) -> None
         Compute the internal metabolite concentrations.
     iMM( self, j: int ) -> None
@@ -385,7 +385,7 @@ class GbaModel:
     clear_all_trajectories( self ) -> None
         Clear all trajectories.
     summary( self ) -> None
-        Print a summary of the GBA model.
+        Print a summary of the CGM.
     create_figure( self, title: str ) -> go.Figure
         Create a figure for plotting.
     add_trajectory( self, fig: go.Figure, source: str, x_var: str, y_var: str, x_factor: Optional[float] = 1.0, y_factor: Optional[float] = 1.0, name: Optional[str] = "", data: Optional[pd.DataFrame] = None ) -> None
@@ -394,18 +394,18 @@ class GbaModel:
 
     def __init__( self, name: str ) -> None:
         """
-        Constructor of the GbaModel class.
+        Constructor of the Model class.
         
         Parameters
         ----------
         name : str
-            Name of the GBA model.
+            Name of the CGM.
         """
-        assert name != "", throw_message(MessageType.Error, "You must provide a name to the GbaModel constructor.")
+        assert name != "", throw_message(MessageType.Error, "You must provide a name to the CGM constructor.")
         self.name = name
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) GBA model                     #
+        # 1) CGM                           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Info ###
@@ -454,7 +454,7 @@ class GbaModel:
         self.LP_solution_loaded           = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) GBA model constants           #
+        # 2) CGM constants                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Vector lengths ###
@@ -487,7 +487,7 @@ class GbaModel:
         self.random_solutions  = {}
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) GBA model variables           #
+        # 4) CGM variables                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j                 = np.array([])
         self.ditau_j               = np.array([])
@@ -504,7 +504,7 @@ class GbaModel:
         self.adjust_concentrations = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) GBA model dynamical variables #
+        # 5) CGM dynamical variables       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.condition = ""
         self.rho       = 0.0
@@ -866,7 +866,7 @@ class GbaModel:
         else:
             self.full_column_rank = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) GBA model dynamical variables                       #
+        # 7) CGM dynamical variables                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
@@ -891,26 +891,26 @@ class GbaModel:
         self.directions.clear()
         for j in range(self.nj):
             if (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMM)
+                self.kinetic_model.append(CgmReactionType.iMM)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() > 0):
-                self.kinetic_model.append(GbaReactionType.iMMa)
+                self.kinetic_model.append(CgmReactionType.iMMa)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMMi)
+                self.kinetic_model.append(CgmReactionType.iMMi)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() > 0):
-                self.kinetic_model.append(GbaReactionType.iMMia)
+                self.kinetic_model.append(CgmReactionType.iMMia)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] > 0):
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
-                self.kinetic_model.append(GbaReactionType.rMM)
+                self.kinetic_model.append(CgmReactionType.rMM)
                 self.directions.append(self.directions.append(ReactionDirection.Reversible))
     
     def read_from_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
         """
-        Read the GBA model from CSV files.
+        Read the CGM from CSV files.
 
         Parameters
         ----------
@@ -936,7 +936,7 @@ class GbaModel:
 
     def write_to_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
         """
-        Write the GBA model to CSV files.
+        Write the CGM to CSV files.
 
         Parameters
         ----------
@@ -1108,7 +1108,7 @@ class GbaModel:
 
     def clear_conditions( self ) -> None:
         """
-        Clear all external conditions from the GBA model.
+        Clear all external conditions from the CGM.
         """
         self.condition_ids    = []
         self.condition_params = ["rho"] + self.x_ids
@@ -1116,7 +1116,7 @@ class GbaModel:
     
     def add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
-        Add an external condition to the GBA model.
+        Add an external condition to the CGM.
 
         Parameters
         ----------
@@ -1158,13 +1158,13 @@ class GbaModel:
     
     def clear_constant_rhs( self ) -> None:
         """
-        Clear all constant RHS terms from the GBA model.
+        Clear all constant RHS terms from the CGM.
         """
         self.constant_rhs = {}
     
     def add_constant_rhs( self, metabolite_id: str, value: float ) -> None:
         """
-        Make a GBA metabolite constant in the RHS term for the initial solution.
+        Make a CGM metabolite constant in the RHS term for the initial solution.
 
         Parameters
         ----------
@@ -1179,13 +1179,13 @@ class GbaModel:
     
     def clear_constant_reactions( self ) -> None:
         """
-        Clear all constant reactions from the GBA model.
+        Clear all constant reactions from the CGM.
         """
         self.constant_reactions = {}
     
     def add_constant_reaction( self, reaction_id: str, value: float ) -> None:
         """
-        Make a GBA reaction constant to a given flux value.
+        Make a CGM reaction constant to a given flux value.
 
         Parameters
         ----------
@@ -1232,8 +1232,8 @@ class GbaModel:
             x_name    = self.x_ids[i]
             x_value   = self.get_condition(self.condition, x_name)
             self.x[i] = x_value
-            if self.adjust_concentrations and self.x[i] < GbaConstants.MIN_CONCENTRATION.value:
-                self.x[i] = GbaConstants.MIN_CONCENTRATION.value
+            if self.adjust_concentrations and self.x[i] < CgmConstants.MIN_CONCENTRATION.value:
+                self.x[i] = CgmConstants.MIN_CONCENTRATION.value
 
     def set_f0( self, f0: np.array ) -> None:
         """
@@ -1267,7 +1267,7 @@ class GbaModel:
         """
         self.c = self.rho*self.M.dot(self.f)
         if self.adjust_concentrations:
-            self.c[self.c < GbaConstants.MIN_CONCENTRATION.value] = GbaConstants.MIN_CONCENTRATION.value
+            self.c[self.c < CgmConstants.MIN_CONCENTRATION.value] = CgmConstants.MIN_CONCENTRATION.value
         self.xc = np.concatenate([self.x, self.c])
     
     def iMM( self, j: int ) -> None:
@@ -1358,15 +1358,15 @@ class GbaModel:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == GbaReactionType.iMM:
+        if self.kinetic_model[j] == CgmReactionType.iMM:
             self.iMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMa:
+        elif self.kinetic_model[j] == CgmReactionType.iMMa:
             self.iMMa(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMi:
+        elif self.kinetic_model[j] == CgmReactionType.iMMi:
             self.iMMi(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMia:
+        elif self.kinetic_model[j] == CgmReactionType.iMMia:
             self.iMMia(j)
-        elif self.kinetic_model[j] == GbaReactionType.rMM:
+        elif self.kinetic_model[j] == CgmReactionType.rMM:
             self.rMM(j)
     
     def diMM( self, j: int ) -> None:
@@ -1493,15 +1493,15 @@ class GbaModel:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == GbaReactionType.iMM:
+        if self.kinetic_model[j] == CgmReactionType.iMM:
             self.diMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMa:
+        elif self.kinetic_model[j] == CgmReactionType.iMMa:
             self.diMMa(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMi:
+        elif self.kinetic_model[j] == CgmReactionType.iMMi:
             self.diMMi(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMia:
+        elif self.kinetic_model[j] == CgmReactionType.iMMia:
             self.diMMia(j)
-        elif self.kinetic_model[j] == GbaReactionType.rMM:
+        elif self.kinetic_model[j] == CgmReactionType.rMM:
             self.drMM(j)
     
     def compute_mu( self ) -> None:
@@ -1573,9 +1573,9 @@ class GbaModel:
         """
         Check the model state's consistency.
         """
-        test1 = (np.abs(self.density-1.0) < GbaConstants.DENSITY_TOL.value)
-        test2 = (sum(1 for x in self.c if x < -GbaConstants.NEGATIVE_C_TOL.value) == 0)
-        test3 = (sum(1 for x in self.p if x < -GbaConstants.NEGATIVE_P_TOL.value) == 0)
+        test1 = (np.abs(self.density-1.0) < CgmConstants.DENSITY_TOL.value)
+        test2 = (sum(1 for x in self.c if x < -CgmConstants.NEGATIVE_C_TOL.value) == 0)
+        test3 = (sum(1 for x in self.p if x < -CgmConstants.NEGATIVE_P_TOL.value) == 0)
         self.consistent = True
         if not (test1 and test2 and test3):
             self.consistent = False
@@ -1602,9 +1602,9 @@ class GbaModel:
         rhs_factor : Optional[float], default=100.0
             Factor dividing the rhs of the mass conservation constraint.
         """
-        assert max_flux_fraction > GbaConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > CgmConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
         assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
-        lb_vec = [GbaConstants.MIN_FLUX_FRACTION.value]*self.nj
+        lb_vec = [CgmConstants.MIN_FLUX_FRACTION.value]*self.nj
         ub_vec = [max_flux_fraction]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
@@ -1680,7 +1680,7 @@ class GbaModel:
         assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
         assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
         assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
-        assert max_flux_fraction > GbaConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > CgmConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
         assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
@@ -1700,7 +1700,7 @@ class GbaModel:
             negative_term  = True
             while negative_term:
                 self.f_trunc = np.random.rand(self.nj-1)
-                self.f_trunc = self.f_trunc*(max_flux_fraction-GbaConstants.MIN_FLUX_FRACTION)+GbaConstants.MIN_FLUX_FRACTION
+                self.f_trunc = self.f_trunc*(max_flux_fraction-CgmConstants.MIN_FLUX_FRACTION)+CgmConstants.MIN_FLUX_FRACTION
                 self.set_f()
                 if self.f[0] >= 0.0:
                     negative_term = False
@@ -1743,7 +1743,7 @@ class GbaModel:
         epsilon              = np.random.normal(0.0, sigma, size=1)
         self.f_trunc[index] += epsilon
         self.block_reactions(block_GCC=False)
-        #self.f_trunc[self.f_trunc < GbaConstants.MIN_FLUX_FRACTION] = GbaConstants.MIN_FLUX_FRACTION
+        #self.f_trunc[self.f_trunc < CgmConstants.MIN_FLUX_FRACTION] = CgmConstants.MIN_FLUX_FRACTION
         self.set_f()
         return non_mutated_f
     
@@ -1822,27 +1822,27 @@ class GbaModel:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 1) Reaction is irreversible and positive #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            if self.directions[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= GbaConstants.MIN_FLUX_FRACTION.value:
-                self.f_trunc[j] = GbaConstants.MIN_FLUX_FRACTION.value
+            if self.directions[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= CgmConstants.MIN_FLUX_FRACTION.value:
+                self.f_trunc[j] = CgmConstants.MIN_FLUX_FRACTION.value
                 if block_GCC and self.GCC_f[(j+1)] < 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 2) Reaction is irreversible and negative #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            elif self.directions[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -GbaConstants.MIN_FLUX_FRACTION.value:
-                self.f_trunc[j] = -GbaConstants.MIN_FLUX_FRACTION.value
+            elif self.directions[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -CgmConstants.MIN_FLUX_FRACTION.value:
+                self.f_trunc[j] = -CgmConstants.MIN_FLUX_FRACTION.value
                 if block_GCC and self.GCC_f[(j+1)] > 0.0:
                     self.GCC_f[(j+1)] = 0.0
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 3) Reaction is reversible                #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # elif self.directions[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= GbaConstants.MIN_FLUX_FRACTION.value:
+            # elif self.directions[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= CgmConstants.MIN_FLUX_FRACTION.value:
             #     if block_GCC:
             #         self.GCC_f[(j+1)] = 0.0
             #     if self.f_trunc[j] >= 0.0:
-            #         self.f_trunc[j] = GbaConstants.MIN_FLUX_FRACTION.value
+            #         self.f_trunc[j] = CgmConstants.MIN_FLUX_FRACTION.value
             #     elif self.f_trunc[j] < 0.0:
-            #         self.f_trunc[j] = -GbaConstants.MIN_FLUX_FRACTION.value
+            #         self.f_trunc[j] = -CgmConstants.MIN_FLUX_FRACTION.value
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # 4) Reaction is constant                  #
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1922,7 +1922,7 @@ class GbaModel:
             if verbose and print_period > 0 and nb_iterations%print_period == 0:
                throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (time = {t}, mu = {self.mu}, dt = {dt}).")
             ### 4.1) Test trajectory convergence ###
-            if mu_alteration_counter >= GbaConstants.TRAJECTORY_CONVERGENCE_COUNT.value:
+            if mu_alteration_counter >= CgmConstants.TRAJECTORY_CONVERGENCE_COUNT.value:
                 self.converged = True
                 break
             ### 4.2) Calculate the next step ###
@@ -1938,19 +1938,19 @@ class GbaModel:
                 t           = t + dt
                 dt_counter += 1
                 nb_fixed   += 1
-                if track and nb_iterations%GbaConstants.EXPORT_DATA_COUNT == 0:
+                if track and nb_iterations%CgmConstants.EXPORT_DATA_COUNT == 0:
                     data_dict = {"label": label, "condition": condition_id, "iter": nb_iterations, "dt": dt, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                     self.track_variables(variables, data_dict)
                     data_row        = pd.Series(data=data_dict)
                     self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
                 ### Check if mu changes significantly ###
-                if np.abs(self.mu - previous_mu) < GbaConstants.TRAJECTORY_CONVERGENCE_TOL.value:
+                if np.abs(self.mu - previous_mu) < CgmConstants.TRAJECTORY_CONVERGENCE_TOL.value:
                     mu_alteration_counter += 1
                 else:
                     mu_alteration_counter = 0
                 ### Check if dt is never changing, and possibly increase it ###
-                if dt_counter == GbaConstants.INCREASING_DT_COUNT.value:
-                    dt         = dt*GbaConstants.INCREASING_DT_FACTOR.value
+                if dt_counter == CgmConstants.INCREASING_DT_COUNT.value:
+                    dt         = dt*CgmConstants.INCREASING_DT_FACTOR.value
                     dt_counter = 0
             ### 4.4) If the model is inconsistent: ###
             else:
@@ -1959,11 +1959,11 @@ class GbaModel:
                 self.calculate_state()
                 self.check_model_consistency()
                 assert self.consistent, throw_message(MessageType.Error, "Previous model is not consistent.")
-                if (dt > GbaConstants.MIN_DT):
-                    dt         = dt/GbaConstants.DECREASING_DT_FACTOR.value
+                if (dt > CgmConstants.MIN_DT):
+                    dt         = dt/CgmConstants.DECREASING_DT_FACTOR.value
                     dt_counter = 0
                 else:
-                    throw_message(MessageType.Error, f"Adaptative timestep < {GbaConstants.MIN_DT}.")
+                    throw_message(MessageType.Error, f"Adaptative timestep < {CgmConstants.MIN_DT}.")
                     sys.exit(1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Final algorithm steps    #
@@ -2119,7 +2119,7 @@ class GbaModel:
                 previous_mu  = self.mu
                 t           += 1
                 nb_fixed    += 1
-                if track and nb_iterations % GbaConstants.EXPORT_DATA_COUNT == 0:
+                if track and nb_iterations % CgmConstants.EXPORT_DATA_COUNT == 0:
                     data_dict = {"label": label, "condition": condition_id, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                     self.track_variables(variables, data_dict)
                     data_row        = pd.Series(data=data_dict)
@@ -2237,7 +2237,7 @@ class GbaModel:
                 ### 4.4) Save Mutation for trajectory if fixation occurs ###
                 else:
                     nb_fixed += 1
-                    if track and nb_iterations % GbaConstants.EXPORT_DATA_COUNT == 0:
+                    if track and nb_iterations % CgmConstants.EXPORT_DATA_COUNT == 0:
                         data_dict = {"label": label, "condition": condition_id, "t": nb_iterations, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
                         self.track_variables(variables, data_dict)
                         data_row          = pd.Series(data=data_dict)
@@ -2419,7 +2419,7 @@ class GbaModel:
 
     def summary( self ) -> None:
         """
-        Print a summary of the GBA model.
+        Print a summary of the CGM.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Compile information #
@@ -2442,7 +2442,7 @@ class GbaModel:
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Display tables      #
         #~~~~~~~~~~~~~~~~~~~~~~~~#
-        html_str  = "<h1>GBA model "+self.name+" summary</h1>"
+        html_str  = "<h1>CGM "+self.name+" summary</h1>"
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
@@ -2550,30 +2550,30 @@ def throw_message( type: MessageType, message: str ) -> None:
     html_str += "</table>"
     display_html(html_str, raw=True)
 
-def read_csv_model( name: str, path: Optional[str] = "." ) -> GbaModel:
+def read_csv_model( name: str, path: Optional[str] = "." ) -> Model:
     """
-    Read a GBA model from CSV files.
+    Read a CGM from CSV files.
 
     Parameters
     ----------
     name : str
-        Name of the GBA model.
+        Name of the CGM.
     path : Optional[str], default="."
         Path to the model folder.
 
     Returns
     -------
-    GbaModel
-        The loaded GBA model.
+    Model
+        The loaded CGM.
     """
     assert os.path.exists(path+"/"+name), throw_message(MessageType.Error, "The folder "+path+"/"+name+" does not exist.")
-    model = GbaModel(name)
+    model = Model(name)
     model.read_from_csv(path=path)
     return model
 
 def get_toy_model_path( model_name: str ) -> str:
     """
-    Get the path of a GBA toy model included in the Python package as CSV files.
+    Get the path of a toy CGM included in the Python package as CSV files.
 
     Parameters
     ----------
@@ -2589,9 +2589,9 @@ def get_toy_model_path( model_name: str ) -> str:
     model_path = Path(model_dir , "toy_models/"+model_name)
     return str(model_path)
 
-def read_toy_model( name: str ) -> GbaModel:
+def read_toy_model( name: str ) -> Model:
     """
-    Read a GBA toy model included in the Python package as CSV files.
+    Read a toy CGM included in the Python package as CSV files.
 
     Parameters
     ----------
@@ -2600,22 +2600,22 @@ def read_toy_model( name: str ) -> GbaModel:
 
     Returns
     -------
-    GbaModel
-        The loaded GBA model.
+    Model
+        The loaded CGM.
     """
     model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
     model_path = str(Path(model_dir , "toy_models/"))
     model      = read_csv_model(name=name, path=model_path)
     return model
 
-def backup_gba_model( model: GbaModel, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
+def backup_model( model: Model, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
     """
-    Backup a GBA model in binary format (extension .gba).
+    Backup a CGM in binary format (extension .cgm).
 
     Parameters
     ----------
-    model : GbaModel
-        GBA model to backup.
+    model : Model
+        CGM to backup.
     name : str
         Name of the backup file.
     path : str
@@ -2623,42 +2623,42 @@ def backup_gba_model( model: GbaModel, name: Optional[str] = "", path: Optional[
     """
     filename = ""
     if name != "":
-        filename = path+"/"+name+".gba"
+        filename = path+"/"+name+".cgm"
     else:
-        filename = path+"/"+model.name+".gba"
+        filename = path+"/"+model.name+".cgm"
     ofile = open(filename, "wb")
     pickle.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gba file creation failed.")
+    assert os.path.isfile(filename), throw_message(MessageType.Error, ".cgm file creation failed.")
 
-def load_gba_model( path: str ) -> GbaModel:
+def load_model( path: str ) -> Model:
     """
-    Load a GBA model from a binary file.
+    Load a CGM from a binary file.
 
     Parameters
     ----------
     path : str
-        Path to the GBA model file.
+        Path to the CGM file.
     """
-    assert path.endswith(".gba"), throw_message(MessageType.Error, "GBA model file extension is missing.")
-    assert os.path.isfile(path), throw_message(MessageType.Error, "GBA model file not found.")
+    assert path.endswith(".cgm"), throw_message(MessageType.Error, "CGM file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.Error, "CGM file not found.")
     ifile = open(path, "rb")
     model = pickle.load(ifile)
     ifile.close()
     return model
 
-def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
+def create_model( name: str, path: Optional[str] = ".", cgm_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
     """
-    Create a GBA model from CSV files, and save it as a binary file.
+    Create a CGM from CSV files, and save it as a binary file.
 
     Parameters
     ----------
     name : str
-        Name of the GBA model.
+        Name of the CGM.
     path : Optional[str], default="."
         Path to the binary file.
-    gba_path : Optional[str], default=""
-        Path to save the GBA model.
+    cgm_path : Optional[str], default=""
+        Path to save the CGM.
     save_LP : Optional[bool], default=False
         Save the LP solution.
     save_optima : Optional[bool], default=False
@@ -2695,6 +2695,6 @@ def create_gba_model( name: str, path: Optional[str] = ".", gba_path: Optional[s
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model.reset_variables()
-    backup_gba_model(model=model, name=name, path=gba_path)
+    backup_model(model=model, name=name, path=cgm_path)
     del model
 

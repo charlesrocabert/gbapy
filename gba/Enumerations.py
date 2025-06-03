@@ -94,7 +94,7 @@ class ReactionGPR(enum.Enum):
     AND  = 2
     OR   = 3
 
-class GbaReactionType(enum.Enum):
+class CgmReactionType(enum.Enum):
     """
     Reaction direction enumeration.
     - iMM  : Simple irreversible Michaelis-Menten reaction.
@@ -109,9 +109,9 @@ class GbaReactionType(enum.Enum):
     iMMia = 4
     rMM   = 5
 
-class GbaConstants(float, enum.Enum):
+class CgmConstants(float, enum.Enum):
     """
-    Constant for GBA algorithms.
+    Constant for CGM algorithms.
     - MIN_CONCENTRATION            : Minimum concentration value.
     - MIN_FLUX_FRACTION            : Minimum flux fraction value.
     - MAX_FLUX_FRACTION            : Maximum flux fraction value.
