@@ -21,11 +21,11 @@
 #***********************************************************************
 
 """
-Filename: GbaBuilder.py
+Filename: Builder.py
 Author: Charles Rocabert
 Date: 2024-16-12
 Description:
-    GbaBuilder class of the GBApy module.
+    Builder class of the GBApy module.
 License: GNU General Public License v3.0
 Copyright: © 2024-2025 Charles Rocabert
 """
@@ -43,24 +43,24 @@ try:
     from .Enumerations import *
     from .Species import Protein, Metabolite
     from .Reaction import Reaction
-    from .GbaModel import GbaModel
-    from .GbaModel import *
+    from .Model import Model
+    from .Model import *
 except:
     from Enumerations import *
     from Species import Protein, Metabolite
     from Reaction import Reaction
-    from GbaModel import GbaModel
-    from GbaModel import *
+    from Model import Model
+    from Model import *
 
 
-class GbaBuilder:
+class Builder:
     """
-    Class to manage the construction of GBA models of any size.
+    Class to manage the construction of CGMs of any size.
 
     Attributes
     ----------
     name : str
-        Name of the GBA model build.
+        Name of the CGM build.
     proteins : dict[str, Protein]
         Dictionary of proteins.
     metabolites : dict[str, Metabolite]
@@ -83,36 +83,36 @@ class GbaBuilder:
         FBA stoichiometry matrix.
     FBA_is_built : bool
         Is the FBA model built?
-    GBA_row_indices : dict[str, int]
-        GBA row indices (metabolite ID to index map).
-    GBA_external_row_indices : dict[str, int]
-        GBA external row indices (external metabolite ID to index map).
-    GBA_internal_row_indices : dict[str, int]
-        GBA internal row indices (internal metabolite ID to index map).
-    GBA_col_indices : dict[str, int]
-        GBA column indices (reaction ID to index map).
-    GBA_M : numpy.ndarray
-        GBA complete mass fraction matrix.
-    GBA_kcat_f : numpy.array
-        GBA forward kcat vector.
-    GBA_kcat_b : numpy.array
-        GBA backward kcat vector.
-    GBA_KM_f : numpy.array
-        GBA forward KM vector.
-    GBA_KM_b : numpy.array
-        GBA backward KM vector.
-    GBA_KA : numpy.array
-        GBA activation constant matrix.
-    GBA_KI : numpy.array
-        GBA inhibition constant matrix.
-    GBA_conditions : dict[int, dict[str, float]]
-        GBA conditions matrix.
-    GBA_constant_rhs : dict[str, float]
-        GBA metabolites with a constant RHS term for the initial solution
-    GBA_constant_reactions : dict[str, float]
-        GBA reactions with a constant flux value.
-    GBA_is_built : bool
-        Is the GBA model built?
+    CGM_row_indices : dict[str, int]
+        CGM row indices (metabolite ID to index map).
+    CGM_external_row_indices : dict[str, int]
+        CGM external row indices (external metabolite ID to index map).
+    CGM_internal_row_indices : dict[str, int]
+        CGM internal row indices (internal metabolite ID to index map).
+    CGM_col_indices : dict[str, int]
+        CGM column indices (reaction ID to index map).
+    CGM_M : numpy.ndarray
+        CGM complete mass fraction matrix.
+    CGM_kcat_f : numpy.array
+        CGM forward kcat vector.
+    CGM_kcat_b : numpy.array
+        CGM backward kcat vector.
+    CGM_KM_f : numpy.array
+        CGM forward KM vector.
+    CGM_KM_b : numpy.array
+        CGM backward KM vector.
+    CGM_KA : numpy.array
+        CGM activation constant matrix.
+    CGM_KI : numpy.array
+        CGM inhibition constant matrix.
+    CGM_conditions : dict[int, dict[str, float]]
+        CGM conditions matrix.
+    CGM_constant_rhs : dict[str, float]
+        CGM metabolites with a constant RHS term for the initial solution
+    CGM_constant_reactions : dict[str, float]
+        CGM reactions with a constant flux value.
+    CGM_is_built : bool
+        Is the CGM built?
 
     Methods
     -------
@@ -167,13 +167,13 @@ class GbaBuilder:
     add_inhibition_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
         Add an inhibition constant to a reaction.
     clear_conditions() -> None
-        Clear all external conditions from the GBA model.
+        Clear all external conditions from the CGM.
     add_condition( condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None
-        Add an external condition to the GBA model.
+        Add an external condition to the CGM.
     clear_constant_reactions() -> None
-        Clear all constant reactions from the GBA model.
+        Clear all constant reactions from the CGM.
     add_constant_reaction( reaction_id: str, value: float ) -> None
-        Make GBA reaction constant to a given flux value.
+        Make CGM reaction constant to a given flux value.
     check_model( test_structure: Optional[bool] = False ) -> None
         Detect missing molecular masses, kinetic parameters and connectivity issues in the model.
     detect_missing_mass( verbose: Optional[bool] = False ) -> dict[str, list[str]]
@@ -194,14 +194,14 @@ class GbaBuilder:
     
     def __init__( self, name ):
         """
-        Constructor of the GbaBuilder class.
+        Constructor of the Builder class.
         
         Parameters
         ----------
         name : str
-            Name of the GBA build.
+            Name of the CGM build.
         """
-        assert name != "", throw_message(MessageType.Error, "Empty GBA build name.")
+        assert name != "", throw_message(MessageType.Error, "Empty CGM build name.")
         self.name = name
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Main molecular species and reactions #
@@ -228,29 +228,29 @@ class GbaBuilder:
         self.FBA_inactive_reactions   = []
         self.FBA_is_built             = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) GBA model reconstruction             #
+        # 3) CGM reconstruction                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_row_indices               = {}
-        self.GBA_external_row_indices      = {}
-        self.GBA_internal_row_indices      = {}
-        self.GBA_col_indices               = {}
-        self.GBA_M                         = None
-        self.GBA_intM                      = None
-        self.GBA_kcat_f                    = None
-        self.GBA_kcat_b                    = None
-        self.GBA_KM_f                      = None
-        self.GBA_KM_b                      = None
-        self.GBA_KA                        = None
-        self.GBA_KI                        = None
-        self.GBA_conditions                = {}
-        self.GBA_directions                = {}
-        self.GBA_constant_rhs              = {}
-        self.GBA_constant_reactions        = {}
-        self.GBA_modeled_proteome_fraction = 0.0
-        self.GBA_column_rank               = 0
-        self.GBA_is_full_column_rank       = False
-        self.GBA_dependent_reactions       = []
-        self.GBA_is_built                  = False
+        self.CGM_row_indices               = {}
+        self.CGM_external_row_indices      = {}
+        self.CGM_internal_row_indices      = {}
+        self.CGM_col_indices               = {}
+        self.CGM_M                         = None
+        self.CGM_intM                      = None
+        self.CGM_kcat_f                    = None
+        self.CGM_kcat_b                    = None
+        self.CGM_KM_f                      = None
+        self.CGM_KM_b                      = None
+        self.CGM_KA                        = None
+        self.CGM_KI                        = None
+        self.CGM_conditions                = {}
+        self.CGM_directions                = {}
+        self.CGM_constant_rhs              = {}
+        self.CGM_constant_reactions        = {}
+        self.CGM_modeled_proteome_fraction = 0.0
+        self.CGM_column_rank               = 0
+        self.CGM_is_full_column_rank       = False
+        self.CGM_dependent_reactions       = []
+        self.CGM_is_built                  = False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Getters                  #
@@ -644,18 +644,18 @@ class GbaBuilder:
         value : float
             Activation constant value.
         """
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
-        assert self.GBA_KA is not None, throw_message(MessageType.Error, "Activation constant matrix is not initialized.")
-        assert self.GBA_KA.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid activation constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA model.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, "CGM is not built.")
+        assert self.CGM_KA is not None, throw_message(MessageType.Error, "Activation constant matrix is not initialized.")
+        assert self.CGM_KA.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid activation constant matrix shape.")
+        assert metabolite_id in self.CGM_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the CGM.")
+        assert reaction_id in self.CGM_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the CGM.")
         assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
         assert value > 0.0, throw_message(MessageType.Error, f"The activation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
-        m_index = self.GBA_row_indices[metabolite_id]
-        r_index = self.GBA_col_indices[reaction_id]
-        self.GBA_KA[m_index, r_index] = value
-    
+        m_index                       = self.CGM_row_indices[metabolite_id]
+        r_index                       = self.CGM_col_indices[reaction_id]
+        self.CGM_KA[m_index, r_index] = value
+
     def add_inhibition_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None:
         """
         Add an inhibition constant to a reaction.
@@ -669,27 +669,27 @@ class GbaBuilder:
         value : float
             Inhibition constant value.
         """
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
-        assert self.GBA_KI is not None, throw_message(MessageType.Error, "Inhibition constant matrix is not initialized.")
-        assert self.GBA_KI.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid inhibition constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA model.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, "CGM is not built.")
+        assert self.CGM_KI is not None, throw_message(MessageType.Error, "Inhibition constant matrix is not initialized.")
+        assert self.CGM_KI.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid inhibition constant matrix shape.")
+        assert metabolite_id in self.CGM_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the CGM.")
+        assert reaction_id in self.CGM_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the CGM.")
         assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
         assert value > 0.0, throw_message(MessageType.Error, f"The inhibition constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
-        m_index = self.GBA_row_indices[metabolite_id]
-        r_index = self.GBA_col_indices[reaction_id]
-        self.GBA_KI[m_index, r_index] = value
-    
+        m_index                       = self.CGM_row_indices[metabolite_id]
+        r_index                       = self.CGM_col_indices[reaction_id]
+        self.CGM_KI[m_index, r_index] = value
+
     def clear_conditions( self ) -> None:
         """
-        Clear all external conditions from the GBA model.
+        Clear all external conditions from the CGM.
         """
-        self.GBA_conditions = {}
+        self.CGM_conditions = {}
     
     def add_condition( self, condition_id: str, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
-        Add an external condition to the GBA model.
+        Add an external condition to the CGM.
 
         Parameters
         ----------
@@ -705,8 +705,8 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA model is not built.")
-        assert condition_id not in self.GBA_conditions, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, "CGM is not built.")
+        assert condition_id not in self.CGM_conditions, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
         assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
         assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
         if metabolites is not None:
@@ -716,21 +716,21 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_conditions[condition_id] = {"rho": rho}
-        self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.External})
+        self.CGM_conditions[condition_id] = {"rho": rho}
+        self.CGM_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.External})
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                self.GBA_conditions[condition_id][m_id] = concentration
-    
+                self.CGM_conditions[condition_id][m_id] = concentration
+
     def clear_constant_rhs( self ) -> None:
         """
-        Clear all constant RHS terms from the GBA model.
+        Clear all constant RHS terms from the CGM.
         """
-        self.GBA_constant_rhs = {}
+        self.CGM_constant_rhs = {}
     
     def add_constant_rhs( self, metabolite_id: str, value: float ) -> None:
         """
-        Make a GBA metabolite constant in the RHS term for the initial solution.
+        Make a CGM metabolite constant in the RHS term for the initial solution.
 
         Parameters
         ----------
@@ -739,19 +739,19 @@ class GbaBuilder:
         value : float
             Flux value.
         """
-        assert metabolite_id not in self.GBA_constant_rhs, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is already constant.")
+        assert metabolite_id not in self.CGM_constant_rhs, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is already constant.")
         assert value > 0.0, throw_message(MessageType.Error, f"The constant value must be positive (<code>{metabolite_id}</code>).")
-        self.GBA_constant_rhs[metabolite_id] = value
-    
+        self.CGM_constant_rhs[metabolite_id] = value
+
     def clear_constant_reactions( self ) -> None:
         """
-        Clear all constant reactions from the GBA model.
+        Clear all constant reactions from the CGM.
         """
-        self.GBA_constant_reactions = {}
-    
+        self.CGM_constant_reactions = {}
+
     def add_constant_reaction( self, reaction_id: str, value: float ) -> None:
         """
-        Make a GBA reaction constant to a given flux value.
+        Make a CGM reaction constant to a given flux value.
 
         Parameters
         ----------
@@ -760,12 +760,12 @@ class GbaBuilder:
         value : float
             Flux value.
         """
-        assert reaction_id not in self.GBA_constant_reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is already constant.")
-        self.GBA_constant_reactions[reaction_id] = value
+        assert reaction_id not in self.CGM_constant_reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is already constant.")
+        self.CGM_constant_reactions[reaction_id] = value
     
     def reset_conversion( self ) -> None:
         """
-        Reset the GBA conversion of all reactions in the model.
+        Reset the CGM conversion of all reactions in the model.
         """
         for reaction in self.reactions.values():
             reaction.reset_conversion()
@@ -1274,7 +1274,7 @@ class GbaBuilder:
         self.inactive_reactions = [r_id for r_id in sol if sol[r_id] == 0.0 and not r_id.startswith("EX_")]
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 5) GBA model reconstruction #
+    # 5) CGM reconstruction       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def check_mass_balance( self, verbose: Optional[bool] = False ) -> None:
@@ -1325,17 +1325,17 @@ class GbaBuilder:
         assert r_ribosome.lb == 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a lower bound of 0.")
         assert r_ribosome.ub > 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a positive upper bound.")
         if len(r_ribosome.products) == 1:
-            assert r_ribosome.GBA_metabolites["Protein"] == 1.0, throw_message(MessageType.Error, "Protein coefficient should be 1 in the ribosomal reaction.")
+            assert r_ribosome.CGM_metabolites["Protein"] == 1.0, throw_message(MessageType.Error, "Protein coefficient should be 1 in the ribosomal reaction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Check other reactions               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for r in self.reactions.values():
             if not r.id == "Ribosome":
-                assert "Protein" not in r.GBA_metabolites, throw_message(MessageType.Error, f"Protein metabolite found in reaction <code>{r.id}</code>. Protein metabolite should only be a ribosomal product.")
-    
+                assert "Protein" not in r.CGM_metabolites, throw_message(MessageType.Error, f"Protein metabolite found in reaction <code>{r.id}</code>. Protein metabolite should only be a ribosomal product.")
+
     def check_conversion( self, verbose: Optional[bool] = False ) -> None:
         """
-        Check the conversion of the model to a GBA model.
+        Check the conversion of the model to a CGM.
 
         Parameters
         ----------
@@ -1348,7 +1348,7 @@ class GbaBuilder:
                 is_converted = False
         if is_converted:
             if verbose:
-                throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is converted to a GBA model.")
+                throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is converted to a CGM.")
             return True
         return False
     
@@ -1356,7 +1356,7 @@ class GbaBuilder:
                  ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3,
                  consider_proteome_fraction: Optional[bool] = False, proteome_fraction: Optional[float] = None ) -> None:
         """
-        Convert the model to a GBA model.
+        Convert the model to a CGM.
 
         Parameters
         ----------
@@ -1390,7 +1390,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Calculate the proteome fraction       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_modeled_proteome_fraction = 1.0
+        self.CGM_modeled_proteome_fraction = 1.0
         if consider_proteome_fraction and proteome_fraction is None:
             modeled_proteins = []
             for r in self.reactions.values():
@@ -1399,157 +1399,157 @@ class GbaBuilder:
             modeled_proteins                   = list(set(modeled_proteins))
             modeled_mass                       = sum([self.proteins[p].mass for p in modeled_proteins])
             total_mass                         = sum([self.proteins[p].mass for p in self.proteins])
-            self.GBA_modeled_proteome_fraction = modeled_mass/total_mass
-            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.GBA_modeled_proteome_fraction:.2f}.")
+            self.CGM_modeled_proteome_fraction = modeled_mass/total_mass
+            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
         elif consider_proteome_fraction and proteome_fraction is not None:
             assert proteome_fraction > 0.0 and proteome_fraction <= 1.0, throw_message(MessageType.Error, "Modeled proteome fraction should be between 0 and 1.")
-            self.GBA_modeled_proteome_fraction = proteome_fraction
-            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.GBA_modeled_proteome_fraction:.2f}.")
+            self.CGM_modeled_proteome_fraction = proteome_fraction
+            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if ribosome_mass_kcat is not None:
-            self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.GBA_modeled_proteome_fraction
+            self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.CGM_modeled_proteome_fraction
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
-                self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
-    
+                self.reactions["Ribosome"].CGM_km[m_id] = ribosome_mass_km
+
     def reset_conversion( self ) -> None:
         """
-        Reset the conversion of the model to a GBA model.
+        Reset the conversion of the model to a CGM.
         """
         for r in self.reactions.values():
             r.reset_conversion()
     
-    def build_GBA_indices( self ) -> None:
+    def build_CGM_indices( self ) -> None:
         """
-        Build metabolite and reaction indices for the GBA model
-        (The Protein metabolite is always the last metabolite,
+        Build metabolite and reaction indices for the CGM
+        (the Protein metabolite is always the last metabolite,
         and the Ribosome reaction is always the last reaction).
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Build metabolite indices #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_row_indices.clear()
-        self.GBA_external_row_indices.clear()
-        self.GBA_internal_row_indices.clear()
+        self.CGM_row_indices.clear()
+        self.CGM_external_row_indices.clear()
+        self.CGM_internal_row_indices.clear()
         index = 0
         for m in self.metabolites.values():
             if m.species_location == SpeciesLocation.External and m.id != "Protein":
-                self.GBA_row_indices[m.id]          = index
-                self.GBA_external_row_indices[m.id] = index
+                self.CGM_row_indices[m.id]          = index
+                self.CGM_external_row_indices[m.id] = index
                 index += 1
         for m in self.metabolites.values():
             if m.species_location == SpeciesLocation.Internal and m.id != "Protein":
-                self.GBA_row_indices[m.id]          = index
-                self.GBA_internal_row_indices[m.id] = index
+                self.CGM_row_indices[m.id]          = index
+                self.CGM_internal_row_indices[m.id] = index
                 index += 1
-        self.GBA_row_indices["Protein"] = index
+        self.CGM_row_indices["Protein"] = index
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Build reaction indices   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_col_indices.clear()
+        self.CGM_col_indices.clear()
         index = 0
         for r in self.reactions.values():
             if r.reaction_type == ReactionType.Transport and r.id != "Ribosome":
-                self.GBA_col_indices[r.id] = index
+                self.CGM_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
             if r.reaction_type == ReactionType.Metabolic and r.id != "Ribosome":
-                self.GBA_col_indices[r.id] = index
+                self.CGM_col_indices[r.id] = index
                 index += 1
-        self.GBA_col_indices["Ribosome"] = index
+        self.CGM_col_indices["Ribosome"] = index
 
-    def build_GBA_mass_fraction_matrix( self ) -> None:
+    def build_CGM_mass_fraction_matrix( self ) -> None:
         """
-        Build the GBA mass fraction matrix.
+        Build the CGM mass fraction matrix.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Build the complete mass fraction matrix #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_M = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
+        self.CGM_M = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
         for r in self.reactions.values():
-            for m_id, stoich in r.GBA_metabolites.items():
-                m_index                      = self.GBA_row_indices[m_id]
-                r_index                      = self.GBA_col_indices[r.id]
-                self.GBA_M[m_index, r_index] = stoich
+            for m_id, stoich in r.CGM_metabolites.items():
+                m_index                      = self.CGM_row_indices[m_id]
+                r_index                      = self.CGM_col_indices[r.id]
+                self.CGM_M[m_index, r_index] = stoich
                 if stoich == -0.0:
-                    self.GBA_M[m_index, r_index] = 0.0
+                    self.CGM_M[m_index, r_index] = 0.0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Build the internal mass fraction matrix #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_intM = np.zeros((len(self.GBA_internal_row_indices), len(self.GBA_col_indices)))
-        for i in range(len(self.GBA_internal_row_indices)):
-            m_id = list(self.GBA_internal_row_indices.keys())[i]
-            for j in range(len(self.GBA_col_indices)):
-                self.GBA_intM[i, j] = self.GBA_M[self.GBA_internal_row_indices[m_id], j]
-    
-    def build_GBA_kcat_vectors( self ) -> None:
+        self.CGM_intM = np.zeros((len(self.CGM_internal_row_indices), len(self.CGM_col_indices)))
+        for i in range(len(self.CGM_internal_row_indices)):
+            m_id = list(self.CGM_internal_row_indices.keys())[i]
+            for j in range(len(self.CGM_col_indices)):
+                self.CGM_intM[i, j] = self.CGM_M[self.CGM_internal_row_indices[m_id], j]
+
+    def build_CGM_kcat_vectors( self ) -> None:
         """
-        Build the GBA kcat vectors.
+        Build the CGM kcat vectors.
         """
-        self.GBA_kcat_f = np.zeros(len(self.GBA_col_indices))
-        self.GBA_kcat_b = np.zeros(len(self.GBA_col_indices))
+        self.CGM_kcat_f = np.zeros(len(self.CGM_col_indices))
+        self.CGM_kcat_b = np.zeros(len(self.CGM_col_indices))
         for r in self.reactions.values():
-            r_index                  = self.GBA_col_indices[r.id]
-            self.GBA_kcat_f[r_index] = r.GBA_kcat[ReactionDirection.Forward]
-            self.GBA_kcat_b[r_index] = r.GBA_kcat[ReactionDirection.Backward]
-    
-    def build_GBA_KM_matrices( self ) -> None:
+            r_index                  = self.CGM_col_indices[r.id]
+            self.CGM_kcat_f[r_index] = r.CGM_kcat[ReactionDirection.Forward]
+            self.CGM_kcat_b[r_index] = r.CGM_kcat[ReactionDirection.Backward]
+
+    def build_CGM_KM_matrices( self ) -> None:
         """
-        Build the GBA KM matrices.
+        Build the CGM KM matrices.
         """
-        self.GBA_KM_f = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
-        self.GBA_KM_b = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
+        self.CGM_KM_f = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
+        self.CGM_KM_b = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
         for r in self.reactions.values():
-            for m_id, stoic in r.GBA_metabolites.items():
+            for m_id, stoic in r.CGM_metabolites.items():
                 if stoic < 0.0:
-                    m_index = self.GBA_row_indices[m_id]
-                    r_index = self.GBA_col_indices[r.id]
-                    self.GBA_KM_f[m_index, r_index] = r.GBA_km[m_id]
+                    m_index                         = self.CGM_row_indices[m_id]
+                    r_index                         = self.CGM_col_indices[r.id]
+                    self.CGM_KM_f[m_index, r_index] = r.CGM_km[m_id]
                 elif stoic > 0.0:
-                    m_index = self.GBA_row_indices[m_id]
-                    r_index = self.GBA_col_indices[r.id]
-                    self.GBA_KM_b[m_index, r_index] = r.GBA_km[m_id]
+                    m_index                         = self.CGM_row_indices[m_id]
+                    r_index                         = self.CGM_col_indices[r.id]
+                    self.CGM_KM_b[m_index, r_index] = r.CGM_km[m_id]
     
-    def build_GBA_KA_KI_matrices( self ) -> None:
+    def build_CGM_KA_KI_matrices( self ) -> None:
         """
-        Build the GBA activation and inhibition matrices.
+        Build the CGM activation and inhibition matrices.
         """
-        self.GBA_KA = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
-        self.GBA_KI = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
-    
+        self.CGM_KA = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
+        self.CGM_KI = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
+
     def compute_mass_fraction_matrix_metrics( self ) -> None:
         """
         Compute the mass fraction matrix metrics:
         - Rank of the mass fraction matrix
         - List of dependent reactions
         """
-        self.GBA_column_rank = np.linalg.matrix_rank(self.GBA_intM)
-        if self.GBA_column_rank == self.GBA_intM.shape[1]:
-            self.GBA_is_full_column_rank = True
-        lambdas, V                   =  np.linalg.qr(self.GBA_intM)
+        self.CGM_column_rank = np.linalg.matrix_rank(self.CGM_intM)
+        if self.CGM_column_rank == self.CGM_intM.shape[1]:
+            self.CGM_is_full_column_rank = True
+        lambdas, V                   =  np.linalg.qr(self.CGM_intM)
         linearly_independent_indices = np.abs(np.diag(V)) >= 1e-10
         indices                      = np.where(linearly_independent_indices == False)[0]
-        r_ids                        = list(self.GBA_col_indices.keys())
-        self.GBA_dependent_reactions = [r_id for i, r_id in enumerate(r_ids) if i in indices]
+        r_ids                        = list(self.CGM_col_indices.keys())
+        self.CGM_dependent_reactions = [r_id for i, r_id in enumerate(r_ids) if i in indices]
     
-    def build_GBA_variables( self ) -> None:
+    def build_CGM_variables( self ) -> None:
         """
-        Build the GBA variables.
+        Build the CGM variables.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        self.build_GBA_indices()
-        self.build_GBA_mass_fraction_matrix()
-        self.build_GBA_kcat_vectors()
-        self.build_GBA_KM_matrices()
-        self.build_GBA_KA_KI_matrices()
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to CGM units. Convert the model before building CGM variables.")
+        self.build_CGM_indices()
+        self.build_CGM_mass_fraction_matrix()
+        self.build_CGM_kcat_vectors()
+        self.build_CGM_KM_matrices()
+        self.build_CGM_KA_KI_matrices()
         self.compute_mass_fraction_matrix_metrics()
-        self.GBA_is_built = True
-    
-    def convert_GBA_reaction_to_forward_irreversible( self, reaction_id: str, direction: ReactionDirection ) -> None:
+        self.CGM_is_built = True
+
+    def convert_CGM_reaction_to_forward_irreversible( self, reaction_id: str, direction: ReactionDirection ) -> None:
         """
-        Convert the GBA reaction to a forward irreversible reaction.
+        Convert the CGM reaction to a forward irreversible reaction.
 
         Parameters
         ----------
@@ -1558,24 +1558,24 @@ class GbaBuilder:
         direction : ReactionDirection
             Wanted direction of the reaction.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist")
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to CGM units. Convert the model before building CGM variables.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, f"The CGM <code>{self.name}</code> is not built")
+        assert reaction_id in self.CGM_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist")
         assert direction != ReactionDirection.Reversible, throw_message(MessageType.Error, "The wanted direction should be irreversible")
-        j = self.GBA_col_indices[reaction_id]
+        j = self.CGM_col_indices[reaction_id]
         if direction == ReactionDirection.Forward:
-            self.GBA_kcat_b[j] = 0.0
-            self.GBA_KM_b[:,j] = 0.0
+            self.CGM_kcat_b[j] = 0.0
+            self.CGM_KM_b[:,j] = 0.0
         elif direction == ReactionDirection.Backward:
-            self.GBA_M[:,j]    = -self.GBA_M[:,j]
-            self.GBA_kcat_f[j] = self.GBA_kcat_b[j]
-            self.GBA_kcat_b[j] = 0.0
-            self.GBA_KM_f[:,j] = self.GBA_KM_b[:,j]
-            self.GBA_KM_b[:,j] = 0.0
-    
+            self.CGM_M[:,j]    = -self.CGM_M[:,j]
+            self.CGM_kcat_f[j] = self.CGM_kcat_b[j]
+            self.CGM_kcat_b[j] = 0.0
+            self.CGM_KM_f[:,j] = self.CGM_KM_b[:,j]
+            self.CGM_KM_b[:,j] = 0.0
+
     def enforce_directionality( self, fluxes: dict[str, float] ) -> None:
         """
-        Enforce the directionality of the GBA reactions based on a list of fluxes.
+        Enforce the directionality of the CGM reactions based on a list of fluxes.
 
         Parameters
         ----------
@@ -1586,10 +1586,10 @@ class GbaBuilder:
             r_id  = item[0]
             f_val = item[1]
             if r_id in self.reactions and f_val >= 0.0:
-                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.Forward)
+                self.convert_CGM_reaction_to_forward_irreversible(r_id, ReactionDirection.Forward)
             elif r_id in self.reactions and f_val < 0.0:
-                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.Backward)
-    
+                self.convert_CGM_reaction_to_forward_irreversible(r_id, ReactionDirection.Backward)
+
     def adjust_masses( self, metabolites: dict[str, float] ) -> None:
         """
         Adjust the masses of a list of metabolites.
@@ -1607,9 +1607,9 @@ class GbaBuilder:
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def export_GBA_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def export_CGM_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
-        Export the GBA model to a folder in CSV format.
+        Export the CGM model to a folder in CSV format.
 
         Parameters
         ----------
@@ -1618,8 +1618,8 @@ class GbaBuilder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA model <code>{self.name}</code> is not built")
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to CGM units. Convert the model before building CGM variables.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, f"The CGM <code>{self.name}</code> is not built")
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
@@ -1637,42 +1637,42 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        M_df = pd.DataFrame(self.CGM_M, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
-        intM_df = pd.DataFrame(self.GBA_intM, index=self.GBA_internal_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        intM_df = pd.DataFrame(self.CGM_intM, index=self.CGM_internal_row_indices.keys(), columns=self.CGM_col_indices.keys())
         intM_df.to_csv(model_path+"/intM.csv", sep=";")
         del(intM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        kcat_df = pd.DataFrame(self.GBA_kcat_f, index=self.GBA_col_indices.keys(), columns=["forward"])
-        kcat_df["backward"] = self.GBA_kcat_b
-        kcat_df = kcat_df.transpose()
+        kcat_df             = pd.DataFrame(self.CGM_kcat_f, index=self.CGM_col_indices.keys(), columns=["forward"])
+        kcat_df["backward"] = self.CGM_kcat_b
+        kcat_df             = kcat_df.transpose()
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KM_df = pd.DataFrame(self.GBA_KM_f, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        KM_df = pd.DataFrame(self.CGM_KM_f, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KM_df.to_csv(model_path+"/KM_forward.csv", sep=";")
         del(KM_df)
-        KM_df = pd.DataFrame(self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        KM_df = pd.DataFrame(self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
         del(KA_df)
-        KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KI_df.to_csv(model_path+"/KI.csv", sep=";")
         del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        conditions_df = pd.DataFrame(self.GBA_conditions)
+        conditions_df = pd.DataFrame(self.CGM_conditions)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1680,15 +1680,15 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/directions.csv", "w")
         f.write("reaction;direction\n")
-        for j in range(len(self.GBA_col_indices)):
-            if self.GBA_kcat_b[j] == 0.0 and self.GBA_kcat_f[j] > 0.0:
-                f.write(list(self.GBA_col_indices.keys())[j]+";forward\n")
-            elif self.GBA_kcat_b[j] > 0.0 and self.GBA_kcat_f[j] == 0.0:
-                f.write(list(self.GBA_col_indices.keys())[j]+";backward\n")
-            elif self.GBA_kcat_b[j] > 0.0 and self.GBA_kcat_f[j] > 0.0:
-                f.write(list(self.GBA_col_indices.keys())[j]+";reversible\n")
+        for j in range(len(self.CGM_col_indices)):
+            if self.CGM_kcat_b[j] == 0.0 and self.CGM_kcat_f[j] > 0.0:
+                f.write(list(self.CGM_col_indices.keys())[j]+";forward\n")
+            elif self.CGM_kcat_b[j] > 0.0 and self.CGM_kcat_f[j] == 0.0:
+                f.write(list(self.CGM_col_indices.keys())[j]+";backward\n")
+            elif self.CGM_kcat_b[j] > 0.0 and self.CGM_kcat_f[j] > 0.0:
+                f.write(list(self.CGM_col_indices.keys())[j]+";reversible\n")
             else:
-                throw_message(MessageType.Error, f"Unknown direction for reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                throw_message(MessageType.Error, f"Unknown direction for reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
                 sys.exit(1)
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1696,7 +1696,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_rhs.csv", "w")
         f.write("metabolite;value\n")
-        for item in self.GBA_constant_rhs.items():
+        for item in self.CGM_constant_rhs.items():
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1704,7 +1704,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_reactions.csv", "w")
         f.write("reaction;value\n")
-        for item in self.GBA_constant_reactions.items():
+        for item in self.CGM_constant_reactions.items():
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1918,7 +1918,7 @@ class GbaBuilder:
 
     def summary( self ) -> None:
         """
-        Print a summary of the GBA builder.
+        Print a summary of the CGM builder.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Compile information #
@@ -1979,7 +1979,7 @@ class GbaBuilder:
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Display tables      #
         #~~~~~~~~~~~~~~~~~~~~~~~~#
-        html_str  = "<h1>GBA build "+self.name+" summary</h1>"
+        html_str  = "<h1>CGM build "+self.name+" summary</h1>"
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>General</h2>"
@@ -2030,14 +2030,14 @@ def throw_message( type: MessageType, message: str ) -> None:
     html_str += "</table>"
     display_html(html_str, raw=True)
 
-def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
+def backup_builder( builder: Builder, name: Optional[str] = "", path: Optional[str] = "" ) -> None:
     """
-    Backup a GBA builder in binary format (extension .gbabuild).
+    Backup a CGM builder in binary format (extension .cgmbuild).
 
     Parameters
     ----------
-    builder : GbaBuilder
-        GBA builder to backup.
+    builder : Builder
+        CGM builder to backup.
     name : str
         Name of the backup file.
     path : str
@@ -2045,27 +2045,27 @@ def backup_gba_builder( builder: GbaBuilder, name: Optional[str] = "", path: Opt
     """
     filename = ""
     if name != "":
-        filename = name+".gbabuild"
+        filename = name+".cgmbuild"
     else:
-        filename = builder.name+".gbabuild"
+        filename = builder.name+".cgmbuild"
     if path != "":
         filename = path+"/"+filename
     ofile = open(filename, "wb")
     pickle.dump(builder, ofile)
     ofile.close()
-    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gbabuild file creation failed.")
+    assert os.path.isfile(filename), throw_message(MessageType.Error, ".cgmbuild file creation failed.")
 
-def load_gba_builder( path: str ) -> GbaBuilder:
+def load_builder( path: str ) -> Builder:
     """
-    Load a GBA builder from a binary file.
+    Load a CGM builder from a binary file.
 
     Parameters
     ----------
     path : str
-        Path to the GBA builder file.
+        Path to the CGM builder file.
     """
-    assert path.endswith(".gbabuild"), throw_message(MessageType.Error, "GBA builder file extension is missing.")
-    assert os.path.isfile(path), throw_message(MessageType.Error, "GBA builder file not found.")
+    assert path.endswith(".cgmbuild"), throw_message(MessageType.Error, "CGM builder file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.Error, "CGM builder file not found.")
     ifile   = open(path, "rb")
     builder = pickle.load(ifile)
     ifile.close()

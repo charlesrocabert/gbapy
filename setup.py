@@ -61,7 +61,7 @@ setup(
         'gba.data': [ '**/*.csv', ]
     },
 	python_requires  = ">=3",
-	install_requires = ["argparse", "pickle", "numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly"],
+	install_requires = ["numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly"],
 	project_urls     = {
 	"Source": "https://github.com/charlesrocabert/gbapy"
 	},

@@ -34,8 +34,8 @@ from gba import (
     Enumerations,
     Species,
     Reaction,
-    GbaBuilder,
-    GbaModel
+    Builder,
+    Model
 )
 from gba.Enumerations import (
     SpeciesType,
@@ -43,8 +43,8 @@ from gba.Enumerations import (
     ReactionType,
     ReactionDirection,
     ReactionGPR,
-    GbaReactionType,
-    GbaConstants,
+    CgmReactionType,
+    CgmConstants,
     MessageType
 )
 from gba.Species import (
@@ -55,19 +55,19 @@ from gba.Species import (
 from gba.Reaction import (
     Reaction
 )
-from gba.GbaBuilder import (
-    GbaBuilder,
+from gba.Builder import (
+    Builder,
     throw_message,
-    backup_gba_builder,
-    load_gba_builder
+    backup_builder,
+    load_builder
 )
-from gba.GbaModel import (
-    GbaModel,
+from gba.Model import (
+    Model,
     read_csv_model,
     get_toy_model_path,
     read_toy_model,
-    backup_gba_model,
-    load_gba_model,
-    create_gba_model
+    backup_model,
+    load_model,
+    create_model
 )
 
