@@ -835,7 +835,7 @@ class Builder:
                 perc              = len(missing_kcat)/len(self.reactions)*100
                 transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Transport])*100
                 metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Metabolic])*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic).")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic).")
             if len(missing_km) > 0:
                 perc = len(missing_km)/len(self.reactions)*100
                 throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values.")
