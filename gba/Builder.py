@@ -1607,9 +1607,9 @@ class Builder:
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def export_CGM_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def export_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
-        Export the CGM model to a folder in CSV format.
+        Export the CGM to a folder in CSV format.
 
         Parameters
         ----------
@@ -1618,8 +1618,8 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to CGM units. Convert the model before building CGM variables.")
-        assert self.CGM_is_built, throw_message(MessageType.Error, f"The CGM <code>{self.name}</code> is not built")
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building CGM variables.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
