@@ -1354,7 +1354,7 @@ class Builder:
     
     def convert( self, ribosome_byproducts: Optional[bool] = False,
                  ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3,
-                 consider_proteome_fraction: Optional[bool] = False, proteome_fraction: Optional[float] = None ) -> None:
+                 modeled_proteome_fraction: Optional[float] = 1.0 ) -> None:
         """
         Convert the model to a CGM.
 
@@ -1366,10 +1366,8 @@ class Builder:
             Value of the mass normalized kcat value.
         ribosome_mass_km : float
             Value of the mass normalized KM value.
-        consider_proteome_fraction : bool
-            Consider the proteome fraction to weight the ribosome reaction.
-        proteome_fraction : float
-            Value of the proteome fraction.
+        modeled_proteome_fraction : float
+            Value of the modeled proteome fraction.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Edit the ribosomal reaction if needed #
@@ -1381,32 +1379,17 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Convert every reactions               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.CGM_modeled_proteome_fraction = modeled_proteome_fraction
+        if self.CGM_modeled_proteome_fraction != 1.0:
+            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
         for r in self.reactions.values():
-            r.convert()
+            r.convert(1.0)#self.CGM_modeled_proteome_fraction)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.check_ribosomal_reaction_consistency()
+        self.check_ribosomal_reaction_consistency()            
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Calculate the proteome fraction       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_modeled_proteome_fraction = 1.0
-        if consider_proteome_fraction and proteome_fraction is None:
-            modeled_proteins = []
-            for r in self.reactions.values():
-                if r.proteins is not None:
-                    modeled_proteins += list(r.proteins.keys())
-            modeled_proteins                   = list(set(modeled_proteins))
-            modeled_mass                       = sum([self.proteins[p].mass for p in modeled_proteins])
-            total_mass                         = sum([self.proteins[p].mass for p in self.proteins])
-            self.CGM_modeled_proteome_fraction = modeled_mass/total_mass
-            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
-        elif consider_proteome_fraction and proteome_fraction is not None:
-            assert proteome_fraction > 0.0 and proteome_fraction <= 1.0, throw_message(MessageType.Error, "Modeled proteome fraction should be between 0 and 1.")
-            self.CGM_modeled_proteome_fraction = proteome_fraction
-            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Set up ribosomal kinetic parameters   #
+        # 4) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if ribosome_mass_kcat is not None:
             self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.CGM_modeled_proteome_fraction

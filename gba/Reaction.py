@@ -704,12 +704,21 @@ class Reaction:
             return False
         return True
     
-    def convert_kcat_values( self ) -> None:
+    def convert_kcat_values( self, modeled_proteome_fraction: Optional[float] = 1.0 ) -> None:
         """
         Convert the kcat values of the reaction to CGM format (mass units).
+
+        Parameters
+        ----------
+        modeled_proteome_fraction : float
+            Fraction of the modeled proteome to consider for the conversion.
+            Default is 1.0 (100%).
         """
         assert self._builder != None, throw_message(MessageType.Error, f"CGM builder not set for reaction <code>{self.id}</code>.")
         assert self.kcat != None and len(self.kcat) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no kcat values.")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Calculate the total masses #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         reactant_sum = 0.0
         product_sum  = 0.0
         for m_id in self.metabolites:
@@ -718,15 +727,15 @@ class Reaction:
                 reactant_sum += np.abs(self.metabolites[m_id])*w
             else:
                 product_sum += np.abs(self.metabolites[m_id])*w
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Normalize the kcat values       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Normalize the kcat values  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.CGM_kcat = self.kcat.copy()
         for r_dir in self.CGM_kcat:
             if r_dir == ReactionDirection.Forward:
-                self.CGM_kcat[r_dir] *= product_sum/self.enzyme_mass
+                self.CGM_kcat[r_dir] *= product_sum/(self.enzyme_mass/modeled_proteome_fraction)
             elif r_dir == ReactionDirection.Backward:
-                self.CGM_kcat[r_dir] *= reactant_sum/self.enzyme_mass
+                self.CGM_kcat[r_dir] *= reactant_sum/(self.enzyme_mass/modeled_proteome_fraction)
         self.kcat_is_converted = True
     
     def convert_km_values( self ) -> None:
@@ -780,11 +789,17 @@ class Reaction:
         self.check_mass_normalization(verbose=True)
         self.stoichiometry_is_converted = True
     
-    def convert( self ) -> None:
+    def convert( self, modeled_proteome_fraction: Optional[float] = 1.0 ) -> None:
         """
         Convert the reaction to CGM format.
+
+        Parameters
+        ----------
+        modeled_proteome_fraction : float
+            Fraction of the modeled proteome to consider for the conversion.
+            Default is 1.0 (100%).
         """
-        self.convert_kcat_values()
+        self.convert_kcat_values(modeled_proteome_fraction)
         self.convert_km_values()
         self.convert_stoichiometry()
     
