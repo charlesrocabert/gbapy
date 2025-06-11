@@ -1759,7 +1759,7 @@ class Builder:
                 category = "large molecule"
             elif m.species_type == SpeciesType.Unknown:
                 category = "unknown"
-            formula = ("" if m.name is None else m.name)
+            formula = m.formula
             kegg_id = ""
             if "kegg.compound" in m.annotation:
                 kegg_id = m.annotation["kegg.compound"]
