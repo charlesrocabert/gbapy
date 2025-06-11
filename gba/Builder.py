@@ -1396,7 +1396,7 @@ class Builder:
         if self.CGM_modeled_proteome_fraction != 1.0:
             throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
         for r in self.reactions.values():
-            r.convert(1.0)#self.CGM_modeled_proteome_fraction)
+            r.convert()#self.CGM_modeled_proteome_fraction)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
