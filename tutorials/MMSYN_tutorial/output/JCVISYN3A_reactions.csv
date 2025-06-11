@@ -34,7 +34,7 @@ ASP4P;ASP - oligopeptide peptidase;metabolic;0.0;1000.0; asp4_c + 3.0 h2o_c --> 
 ASP4abc;ASP - oligopeptide ABC importer;transporter;0.0;1000.0; asp4_e +  atp_c +  h2o_c -->  adp_c +  asp4_c +  h_c +  pi_c;1.0 protein_0165 + 1.0 protein_0166 + 1.0 protein_0167 + 1.0 protein_0168 + 1.0 protein_0169;and;340197.90989999997
 ASPTRS;Aspartyl-tRNA synthetase;metabolic;0.0;1000.0; asp__L_c +  atp_c +  trnaasp_c -->  amp_c +  asptrna_c +  ppi_c;2.0 protein_0287;none;133189.8016
 ASPt2pr;ASP import via proton symport;transporter;0.0;1000.0; asp__L_e + 2.0 h_e -->  asp__L_c + 2.0 h_c;1.0 protein_0886;none;56967.485199999996
-ATPase;ATPase;transporter;-1000.0;-0.575; adp_c + 4.0 h_e +  pi_c <--  atp_c +  h2o_c + 3.0 h_c;1.0 protein_0789 + 3.0 protein_0790 + 1.0 protein_0791 + 3.0 protein_0792 + 1.0 protein_0793 + 2.0 protein_0794 + 10.0 protein_0795 + 1.0 protein_0796;and;570761.6285
+ATPase;ATPase;transporter;-1000.0;-0.575; adp_c + 4.0 h_e +  pi_c <--  atp_c +  h2o_c + 3.0 h_c;1.0 housekeeping_protein;and;570761.6285
 BPNT;3',5'-bisphosphate nucleotidase;metabolic;0.0;1000.0; h2o_c +  pap_c -->  amp_c +  pi_c;1.0 protein_0139;none;36092.4783
 CA2abc;Calcium transport via ABC system;transporter;0.0;1000.0; atp_c +  ca2_e +  h2o_c -->  adp_c +  ca2_c +  h_c +  pi_c;1.0 protein_0879;none;100905.9807
 CHOLt;Cholestrol transport via diffusion;transporter;-1000.0;1000.0; chsterol_e <=>  chsterol_c;1.0 spontaneous_protein;none;1.0

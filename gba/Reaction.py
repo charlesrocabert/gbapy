@@ -335,6 +335,15 @@ class Reaction:
         del self.proteins[protein_id]
         assert len(self.proteins) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> must have at least one protein.")
     
+    def clear_proteins( self ) -> None:
+        """
+        Clear the proteins of the reaction.
+        """
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        self.proteins              = {}
+        self.enzyme_mass           = None
+        self.protein_contributions = {}
+    
     def rename_metabolite( self, previous_id: str, new_id: str ) -> None:
         """
         Rename a metabolite in the stoichiometry of the reaction.

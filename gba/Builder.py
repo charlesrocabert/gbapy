@@ -1827,6 +1827,27 @@ class Builder:
                 f.write(r.id+";"+m_id+";"+str(km)+"\n")
         f.close()
 
+    def write_protein_contributions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write the list of protein contributions into a CSV file.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_protein_contributions.csv"
+        f        = open(filename, "w")
+        f.write("reaction;protein;contribution\n")
+        for r in self.reactions.values():
+            if r.protein_contributions is not None:
+                for p_id, contribution in r.protein_contributions.items():
+                    f.write(r.id+";"+p_id+";"+str(contribution)+"\n")
+        f.close()
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Utility functions        #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
