@@ -1405,7 +1405,7 @@ class Builder:
         # 4) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if ribosome_mass_kcat is not None:
-            self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat*self.CGM_modeled_proteome_fraction
+            self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat#*self.CGM_modeled_proteome_fraction
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].CGM_km[m_id] = ribosome_mass_km
