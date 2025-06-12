@@ -1715,12 +1715,12 @@ class Builder:
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_proteins.csv"
         f        = open(filename, "w")
-        f.write("id;name;mass;sequence;gene;product\n")
+        f.write("id;name;mass;sequence;length;gene;product\n")
         for p in self.proteins.values():
             name    = ("" if p.name is None else p.name)
             gene    = ("" if p.gene is None else p.gene)
             product = ("" if p.product is None else p.product)
-            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+gene+";"+product+"\n")
+            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+str(len(p.formula))+";"+gene+";"+product+"\n")
         f.close()
     
     def write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
