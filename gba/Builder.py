@@ -1723,6 +1723,25 @@ class Builder:
             f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+str(len(p.formula))+";"+gene+";"+product+"\n")
         f.close()
     
+    def write_ribosomal_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of ribosomal proteins into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_ribosomal_proteins.csv"
+        f        = open(filename, "w")
+        f.write("id;contribution\n")
+        for p_id, contrib in self.reactions["Ribosome"].protein_contributions.items():
+            f.write(p_id+";"+str(contrib)+"\n")
+        f.close()
+    
     def write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
         Write list of metabolites into CSV format.
@@ -1927,9 +1946,14 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Compile information #
         #~~~~~~~~~~~~~~~~~~~~~~~~#
+        modeled_proteins = []
+        for r in self.reactions.values():
+            for p_id in r.proteins:
+                if p_id not in modeled_proteins and not p_id in ["average_protein", "spontaneous_protein", "housekeeping_protein"]:
+                    modeled_proteins.append(p_id)
         df1 = {
-            "Category": ["Proteins", "Metabolites", "Reactions"],
-            "Count": [len(self.proteins), len(self.metabolites), len(self.reactions)]
+            "Category": ["Known proteins", "Modeled proteins", "Metabolites", "Reactions"],
+            "Count": [len(self.proteins), len(modeled_proteins), len(self.metabolites), len(self.reactions)]
         }
         df1 = pd.DataFrame(df1)
         df2 = {
