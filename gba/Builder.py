@@ -105,6 +105,8 @@ class Builder:
         CGM activation constant matrix.
     CGM_KI : numpy.array
         CGM inhibition constant matrix.
+    CGM_KR : numpy.array
+        CGM regulation constant matrix.
     CGM_conditions : dict[int, dict[str, float]]
         CGM conditions matrix.
     CGM_constant_rhs : dict[str, float]
@@ -166,6 +168,8 @@ class Builder:
         Add an activation constant to a reaction.
     add_inhibition_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
         Add an inhibition constant to a reaction.
+    add_regulation_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
+        Add an regulation constant to a reaction.
     clear_conditions() -> None
         Clear all external conditions from the CGM.
     add_condition( condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None
@@ -242,6 +246,7 @@ class Builder:
         self.CGM_KM_b                      = None
         self.CGM_KA                        = None
         self.CGM_KI                        = None
+        self.CGM_KR                        = None
         self.CGM_conditions                = {}
         self.CGM_directions                = {}
         self.CGM_constant_rhs              = {}
@@ -681,6 +686,31 @@ class Builder:
         r_index                       = self.CGM_col_indices[reaction_id]
         self.CGM_KI[m_index, r_index] = value
 
+    def add_regulation_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None:
+        """
+        Add an inhibition constant to a reaction.
+
+        Parameters
+        ----------
+        metabolite_id : str
+            Identifier of the metabolite.
+        reaction_id : str
+            Identifier of the reaction.
+        value : float
+            Inhibition constant value.
+        """
+        assert self.CGM_is_built, throw_message(MessageType.Error, "CGM is not built.")
+        assert self.CGM_KR is not None, throw_message(MessageType.Error, "Regulation constant matrix is not initialized.")
+        assert self.CGM_KR.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid regulation constant matrix shape.")
+        assert metabolite_id in self.CGM_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the CGM.")
+        assert reaction_id in self.CGM_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the CGM.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.Error, f"The regulation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
+        m_index                       = self.CGM_row_indices[metabolite_id]
+        r_index                       = self.CGM_col_indices[reaction_id]
+        self.CGM_KR[m_index, r_index] = value
+    
     def clear_conditions( self ) -> None:
         """
         Clear all external conditions from the CGM.
@@ -1508,12 +1538,13 @@ class Builder:
                     r_index                         = self.CGM_col_indices[r.id]
                     self.CGM_KM_b[m_index, r_index] = r.CGM_km[m_id]
     
-    def build_CGM_KA_KI_matrices( self ) -> None:
+    def build_CGM_KA_KI_KR_matrices( self ) -> None:
         """
         Build the CGM activation and inhibition matrices.
         """
         self.CGM_KA = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
         self.CGM_KI = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
+        self.CGM_KR = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
 
     def compute_mass_fraction_matrix_metrics( self ) -> None:
         """
@@ -1539,7 +1570,7 @@ class Builder:
         self.build_CGM_mass_fraction_matrix()
         self.build_CGM_kcat_vectors()
         self.build_CGM_KM_matrices()
-        self.build_CGM_KA_KI_matrices()
+        self.build_CGM_KA_KI_KR_matrices()
         self.compute_mass_fraction_matrix_metrics()
         self.CGM_is_built = True
 
@@ -1652,6 +1683,9 @@ class Builder:
         KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KI_df.to_csv(model_path+"/KI.csv", sep=";")
         del(KI_df)
+        KR_df = pd.DataFrame(self.CGM_R, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        KR_df.to_csv(model_path+"/KR.csv", sep=";")
+        del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

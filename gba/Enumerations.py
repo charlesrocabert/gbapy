@@ -108,6 +108,7 @@ class CgmReactionType(enum.Enum):
     iMMi  = 3
     iMMia = 4
     rMM   = 5
+    iMMr  = 6
 
 class CgmConstants(float, enum.Enum):
     """
