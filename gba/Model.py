@@ -97,6 +97,8 @@ class Model:
         KI matrix.
     rKI : np.array
         1/KI matrix.
+    KR : np.array
+        KR matrix.
     reversible : list
         Indicates if the reaction is reversible.
     kinetic_model : list
@@ -125,6 +127,8 @@ class Model:
         Are the KA constants loaded?
     KI_loaded : bool
         Are the KI constants loaded?
+    KR_loaded : bool
+        Are the KR constants loaded?
     conditions_loaded : bool
         Are the conditions loaded?
     constant_rhs_loaded : bool
@@ -235,6 +239,8 @@ class Model:
         Read the activation constants matrix KA from a CSV file.
     read_KI_from_csv( path: Optional[str] = "." ) -> None
         Read the inhibition constants matrix KI from a CSV file.
+    read_KR_from_csv( path: Optional[str] = "." ) -> None
+        Read the regulation constants matrix KR from a CSV file.
     read_conditions_from_csv( path: Optional[str] = "." ) -> None
         Read the list of conditions from a CSV file.
     read_constant_rhs_from_csv( path: Optional[str] = "." ) -> None
@@ -429,6 +435,7 @@ class Model:
         self.KA                 = np.array([])
         self.KI                 = np.array([])
         self.rKI                = np.array([])
+        self.KR                 = np.array([])
         self.reversible         = []
         self.kinetic_model      = []
         self.directions         = []
@@ -447,6 +454,7 @@ class Model:
         self.KM_b_loaded                  = False
         self.KA_loaded                    = False
         self.KI_loaded                    = False
+        self.KR_loaded                    = False
         self.conditions_loaded            = False
         self.constant_rhs_loaded          = False
         self.constant_reactions_loaded    = False
@@ -667,6 +675,28 @@ class Model:
             self.KI_loaded = True
             del(df)
 
+    def read_KR_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the regulation constants matrix KR from a CSV file.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        self.KR_loaded = False
+        self.KR        = np.zeros(self.Mx.shape)
+        filename       = path+"/"+self.name+"/KR.csv"
+        if os.path.exists(filename):
+            df             = pd.read_csv(filename, sep=";")
+            metabolites    = list(df["Unnamed: 0"])
+            df             = df.drop(["Unnamed: 0"], axis=1)
+            df.index       = metabolites
+            self.KR        = np.array(df)
+            self.KR        = self.KR.astype(float)
+            self.KR_loaded = True
+            del(df)
+    
     def read_conditions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of conditions from a CSV file.
@@ -800,6 +830,8 @@ class Model:
             throw_message(MessageType.Info, "KA constants not loaded.")
         if not self.KI_loaded:
             throw_message(MessageType.Info, "KI constants not loaded.")
+        if not self.KR_loaded:
+            throw_message(MessageType.Info, "KR constants not loaded.")
         if not self.constant_rhs_loaded:
             throw_message(MessageType.Info, "Constant RHS terms not loaded.")
         if not self.constant_reactions_loaded:
@@ -890,21 +922,24 @@ class Model:
         self.kinetic_model.clear()
         self.directions.clear()
         for j in range(self.nj):
-            if (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() == 0):
+            if (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
                 self.kinetic_model.append(CgmReactionType.iMM)
                 self.directions.append(ReactionDirection.Forward)
-            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() == 0 and self.KA[:,j].sum() > 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
                 self.kinetic_model.append(CgmReactionType.iMMa)
                 self.directions.append(ReactionDirection.Forward)
-            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() == 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
                 self.kinetic_model.append(CgmReactionType.iMMi)
                 self.directions.append(ReactionDirection.Forward)
-            elif (self.kcat_b[j] == 0 and self.KI[:,j].sum() > 0 and self.KA[:,j].sum() > 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
                 self.kinetic_model.append(CgmReactionType.iMMia)
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() > 0):
+                self.kinetic_model.append(CgmReactionType.iMMr)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] > 0):
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
+                assert self.KR[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have regulation (reaction <code>{j}</code>).")
                 self.kinetic_model.append(CgmReactionType.rMM)
                 self.directions.append(self.directions.append(ReactionDirection.Reversible))
     
@@ -926,6 +961,7 @@ class Model:
         self.read_KM_b_from_csv(path)
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
+        self.read_KR_from_csv(path)
         self.read_conditions_from_csv(path)
         self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
@@ -953,7 +989,8 @@ class Model:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv",
+            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv",
+                     "KA.csv", "KI.csv", "KR.csv",
                      "conditions.csv", "directions.csv", "constant_rhs.csv", "constant_reactions.csv",
                      "protein_contributions.csv"]
             for f in files:
@@ -986,7 +1023,7 @@ class Model:
         KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA and KI matrices      #
+        # 5) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
@@ -994,6 +1031,9 @@ class Model:
         KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
         KI_df.to_csv(model_path+"/KI.csv", sep=";")
         del(KI_df)
+        KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
+        KR_df.to_csv(model_path+"/KR.csv", sep=";")
+        del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1260,6 +1300,26 @@ class Model:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Analytical methods              #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    
+    def d_gaussian_kernel( self, x: np.array, mu: float, sigma: float ) -> np.array:
+        """
+        Compute the Gaussian kernel function.
+
+        Parameters
+        ----------
+        x : np.array
+            Input array.
+        mu : float
+            Mean of the Gaussian kernel function.
+        sigma : float
+            Standard deviation of the Gaussian kernel function.
+
+        Returns
+        -------
+        np.array
+            Gaussian kernel values.
+        """
+        return np.exp(-0.5 * ((x - mu)/sigma)**2)
 
     def compute_c( self ) -> None:
         """
@@ -1333,6 +1393,24 @@ class Model:
         term4         = self.kcat_f[j]
         self.tau_j[j] = term1*term2*term3/term4
 
+    def iMMr( self, j: int ) -> None:
+        """
+        Compute the turnover time tau for an irreversible
+        Michaelis-Menten reaction with regulation
+        (only one regulator per reaction)
+
+        Parameters
+        ----------
+        j : int
+            Reaction index.
+        """
+        kr_vec = self.KR[:,j]
+        kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
+        gaussian_term = self.d_gaussian_kernel(self.xc, kr_vec, 10.0)
+        term1         = np.prod(1.0+self.KM_f[:,j]/(self.xc*gaussian_term))
+        term2         = self.kcat_f[j]
+        self.tau_j[j] = term1/term2
+    
     def rMM( self, j: int ) -> None:
         """
         Compute the turnover time tau for a reversible Michaelis-Menten
@@ -1366,6 +1444,8 @@ class Model:
             self.iMMi(j)
         elif self.kinetic_model[j] == CgmReactionType.iMMia:
             self.iMMia(j)
+        elif self.kinetic_model[j] == CgmReactionType.iMMr:
+            self.iMMr(j)
         elif self.kinetic_model[j] == CgmReactionType.rMM:
             self.rMM(j)
     
@@ -1457,6 +1537,31 @@ class Model:
             term5             = (term1*constant2*constant3)+(term2*constant1*constant3)+(term3*term4*constant1*constant2)
             self.ditau_j[j,i] = term5/constant4
 
+    def diMMr( self, j: int ) -> None:
+        """
+        Compute the derivative of the turnover time tau for an
+        irreversible Michaelis-Menten reaction with regulation with
+        respect to metabolite concentrations.
+
+        Parameters
+        ----------
+        j : int
+            Reaction index.
+        """
+        kr_vec = self.KR[:,j]
+        kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
+        gaussian_term = self.d_gaussian_kernel(self.xc, kr_vec, 10.0)
+        constant1     = self.kcat_f[j]
+        for i in range(self.nc):
+            y                 = i+self.nx
+            indices           = np.arange(self.ni) != y
+            term1             = -self.KM_f[y,j]/np.power(self.c[i], 2.0)
+            term2             = (self.KM_f[y,j]+self.c[i])/self.c[i]
+            term3             = (self.c[i]-self.KR[y,j])/100.0
+            term4             = gaussian_term[y]*(term1+term2*term3)
+            term5             = np.prod((self.xc[indices]+self.KM_f[indices,j])/(self.xc[indices]*gaussian_term[indices]))
+            self.ditau_j[j,i] = term4*term5/constant1
+
     def drMM( self, j: int ) -> None:
         """
         Compute the derivative of the turnover time tau for a
@@ -1501,6 +1606,8 @@ class Model:
             self.diMMi(j)
         elif self.kinetic_model[j] == CgmReactionType.iMMia:
             self.diMMia(j)
+        elif self.kinetic_model[j] == CgmReactionType.iMMr:
+            self.diMMr(j)
         elif self.kinetic_model[j] == CgmReactionType.rMM:
             self.drMM(j)
     

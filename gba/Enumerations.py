@@ -107,8 +107,8 @@ class CgmReactionType(enum.Enum):
     iMMa  = 2
     iMMi  = 3
     iMMia = 4
-    rMM   = 5
-    iMMr  = 6
+    iMMr  = 5
+    rMM   = 6
 
 class CgmConstants(float, enum.Enum):
     """

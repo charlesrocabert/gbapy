@@ -234,28 +234,27 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) CGM reconstruction                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_row_indices               = {}
-        self.CGM_external_row_indices      = {}
-        self.CGM_internal_row_indices      = {}
-        self.CGM_col_indices               = {}
-        self.CGM_M                         = None
-        self.CGM_intM                      = None
-        self.CGM_kcat_f                    = None
-        self.CGM_kcat_b                    = None
-        self.CGM_KM_f                      = None
-        self.CGM_KM_b                      = None
-        self.CGM_KA                        = None
-        self.CGM_KI                        = None
-        self.CGM_KR                        = None
-        self.CGM_conditions                = {}
-        self.CGM_directions                = {}
-        self.CGM_constant_rhs              = {}
-        self.CGM_constant_reactions        = {}
-        self.CGM_modeled_proteome_fraction = 0.0
-        self.CGM_column_rank               = 0
-        self.CGM_is_full_column_rank       = False
-        self.CGM_dependent_reactions       = []
-        self.CGM_is_built                  = False
+        self.CGM_row_indices          = {}
+        self.CGM_external_row_indices = {}
+        self.CGM_internal_row_indices = {}
+        self.CGM_col_indices          = {}
+        self.CGM_M                    = None
+        self.CGM_intM                 = None
+        self.CGM_kcat_f               = None
+        self.CGM_kcat_b               = None
+        self.CGM_KM_f                 = None
+        self.CGM_KM_b                 = None
+        self.CGM_KA                   = None
+        self.CGM_KI                   = None
+        self.CGM_KR                   = None
+        self.CGM_conditions           = {}
+        self.CGM_directions           = {}
+        self.CGM_constant_rhs         = {}
+        self.CGM_constant_reactions   = {}
+        self.CGM_column_rank          = 0
+        self.CGM_is_full_column_rank  = False
+        self.CGM_dependent_reactions  = []
+        self.CGM_is_built             = False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Getters                  #
@@ -1396,8 +1395,8 @@ class Builder:
         return False
     
     def convert( self, ribosome_byproducts: Optional[bool] = False,
-                 ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3,
-                 modeled_proteome_fraction: Optional[float] = 1.0 ) -> None:
+                 ribosome_mass_kcat: Optional[float] = 4.55,
+                 ribosome_mass_km: Optional[float] = 8.3 ) -> None:
         """
         Convert the model to a CGM.
 
@@ -1409,8 +1408,6 @@ class Builder:
             Value of the mass normalized kcat value.
         ribosome_mass_km : float
             Value of the mass normalized KM value.
-        modeled_proteome_fraction : float
-            Value of the modeled proteome fraction.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Edit the ribosomal reaction if needed #
@@ -1422,11 +1419,8 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Convert every reactions               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_modeled_proteome_fraction = modeled_proteome_fraction
-        if self.CGM_modeled_proteome_fraction != 1.0:
-            throw_message(MessageType.Info, f"Modeled proteome fraction set to {self.CGM_modeled_proteome_fraction:.2f}.")
         for r in self.reactions.values():
-            r.convert()#self.CGM_modeled_proteome_fraction)
+            r.convert()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check the ribosomal reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1435,7 +1429,7 @@ class Builder:
         # 4) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if ribosome_mass_kcat is not None:
-            self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat#*self.CGM_modeled_proteome_fraction
+            self.reactions["Ribosome"].CGM_kcat[ReactionDirection.Forward] = ribosome_mass_kcat
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].CGM_km[m_id] = ribosome_mass_km
@@ -1642,7 +1636,8 @@ class Builder:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv", "KA.csv", "KI.csv",
+            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv",
+                     "KA.csv", "KI.csv", "KR.csv",
                      "conditions.csv", "directions.csv", "constant_rhs.csv", "constant_reactions.csv",
                      "protein_contributions.csv"]
             for f in files:
@@ -1675,7 +1670,7 @@ class Builder:
         KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA and KI matrices      #
+        # 5) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
@@ -1683,7 +1678,7 @@ class Builder:
         KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KI_df.to_csv(model_path+"/KI.csv", sep=";")
         del(KI_df)
-        KR_df = pd.DataFrame(self.CGM_R, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        KR_df = pd.DataFrame(self.CGM_KR, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KR_df.to_csv(model_path+"/KR.csv", sep=";")
         del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
