@@ -283,6 +283,8 @@ class Model:
         Set the initial LP solution of the CGM.
     set_f( self ) -> None
         Set the flux fractions vector of the CGM.
+    gaussian_kernel( self, x: np.array, mu: float ) -> np.array
+        Compute the Gaussian kernel for a vector x with mean mu.
     compute_c( self ) -> None
         Compute the internal metabolite concentrations.
     iMM( self, j: int ) -> None
@@ -1301,7 +1303,7 @@ class Model:
     # 4) Analytical methods              #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     
-    def d_gaussian_kernel( self, x: np.array, mu: float, sigma: float ) -> np.array:
+    def gaussian_kernel( self, x: np.array, mu: float ) -> np.array:
         """
         Compute the Gaussian kernel function.
 
@@ -1311,15 +1313,13 @@ class Model:
             Input array.
         mu : float
             Mean of the Gaussian kernel function.
-        sigma : float
-            Standard deviation of the Gaussian kernel function.
 
         Returns
         -------
         np.array
             Gaussian kernel values.
         """
-        return np.exp(-0.5 * ((x - mu)/sigma)**2)
+        return np.exp(-0.5 * ((x - mu)/CgmConstants.REGULATION_SIGMA)**2)
 
     def compute_c( self ) -> None:
         """
@@ -1406,7 +1406,7 @@ class Model:
         """
         kr_vec = self.KR[:,j]
         kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
-        gaussian_term = self.d_gaussian_kernel(self.xc, kr_vec, 10.0)
+        gaussian_term = self.gaussian_kernel(self.xc, kr_vec)
         term1         = np.prod(1.0+self.KM_f[:,j]/(self.xc*gaussian_term))
         term2         = self.kcat_f[j]
         self.tau_j[j] = term1/term2
@@ -1550,14 +1550,14 @@ class Model:
         """
         kr_vec = self.KR[:,j]
         kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
-        gaussian_term = self.d_gaussian_kernel(self.xc, kr_vec, 10.0)
+        gaussian_term = self.gaussian_kernel(self.xc, kr_vec)
         constant1     = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
             term1             = -self.KM_f[y,j]/np.power(self.c[i], 2.0)
             term2             = (self.KM_f[y,j]+self.c[i])/self.c[i]
-            term3             = (self.c[i]-self.KR[y,j])/100.0
+            term3             = (self.c[i]-self.KR[y,j])/(CgmConstants.REGULATION_SIGMA**2)
             term4             = gaussian_term[y]*(term1+term2*term3)
             term5             = np.prod((self.xc[indices]+self.KM_f[indices,j])/(self.xc[indices]*gaussian_term[indices]))
             self.ditau_j[j,i] = term4*term5/constant1

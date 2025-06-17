@@ -127,6 +127,7 @@ class CgmConstants(float, enum.Enum):
     - MIN_DT                       : Minimum time step value.
     - PRINT_DATA_COUNT             : Frequency of data printing.
     - EXPORT_DATA_COUNT            : Frequency of data export.
+    - REGULATION_SIGMA             : Width of the regulation Gaussian kernel.
     """
     MIN_CONCENTRATION            = 1e-10
     MIN_FLUX_FRACTION            = 1e-10
@@ -141,6 +142,7 @@ class CgmConstants(float, enum.Enum):
     MIN_DT                       = 1e-100
     PRINT_DATA_COUNT             = 1
     EXPORT_DATA_COUNT            = 1
+    REGULATION_SIGMA             = 2.0
 
 class MessageType(enum.Enum):
     """
