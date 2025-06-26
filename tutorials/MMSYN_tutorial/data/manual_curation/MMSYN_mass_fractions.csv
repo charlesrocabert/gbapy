@@ -4,14 +4,14 @@ RNA;RNA;Macromolecules;16.274
 DNA;DNA;Macromolecules;5.5
 Acyl carrier protein;ACP;Macromolecules;0.018
 dUTPase;dUTPase;Macromolecules;0.003
-Lipogalactan capsule;lgltn;Lipids & capsules;6.368
-Phosphatidylglycerol;pg;Lipids & capsules;2.944
-Cardiolipin;clpn;Lipids & capsules;2.944
-Cholesterol;chsterol;Lipids & capsules;1.534
-Diacylglycerol;12dgr;Lipids & capsules;1.366
-Gal-DAG;galfur12dgr;Lipids & capsules;1.31
-Triacylglycerol;tag;Lipids & capsules;0.549
-Fatty acid;fa;Lipids & capsules;0.549
+Lipogalactan capsule;lgltn;Lipids & capsule;6.368
+Phosphatidylglycerol;pg;Lipids & capsule;2.944
+Cardiolipin;clpn;Lipids & capsule;2.944
+Cholesterol;chsterol;Lipids & capsule;1.534
+Diacylglycerol;12dgr;Lipids & capsule;1.366
+Gal-DAG;galfur12dgr;Lipids & capsule;1.31
+Triacylglycerol;tag;Lipids & capsule;0.549
+Fatty acid;fa;Lipids & capsule;0.549
 Potassium;k;Small molecules & ions;3.285
 Phosphate;pi;Small molecules & ions;0.375
 Chloride;cl;Small molecules & ions;0.198

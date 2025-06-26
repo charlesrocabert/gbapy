@@ -993,7 +993,7 @@ class Model:
         else:
             files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv",
                      "KA.csv", "KI.csv", "KR.csv",
-                     "conditions.csv", "directions.csv", "constant_rhs.csv", "constant_reactions.csv",
+                     "conditions.csv", "constant_rhs.csv", "constant_reactions.csv",
                      "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
@@ -1043,23 +1043,7 @@ class Model:
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the directions              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/directions.csv", "w")
-        f.write("reaction;direction\n")
-        for j in range(len(self.reaction_ids)):
-            if self.kcat_b[j] == 0.0 and self.kcat_f[j] > 0.0:
-                f.write(self.reaction_ids[j]+";forward\n")
-            elif self.kcat_b[j] > 0.0 and self.kcat_f[j] == 0.0:
-                f.write(self.reaction_ids[j]+";backward\n")
-            elif self.kcat_b[j] > 0.0 and self.kcat_f[j] > 0.0:
-                f.write(self.reaction_ids[j]+";reversible\n")
-            else:
-                throw_message(MessageType.Error, f"Unknown direction for reaction <code>{self.reaction_ids[j]}</code>.")
-                sys.exit(1)
-        f.close()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant RHS terms      #
+        # 7) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_rhs.csv", "w")
         f.write("metabolite;value\n")
@@ -1067,7 +1051,7 @@ class Model:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the constant reactions      #
+        # 8) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_reactions.csv", "w")
         f.write("reaction;value\n")
@@ -1075,7 +1059,7 @@ class Model:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save protein contributions       #
+        # 9) Save protein contributions        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
