@@ -97,10 +97,12 @@ class Builder:
         CGM forward kcat vector.
     CGM_kcat_b : numpy.array
         CGM backward kcat vector.
+    CGM_KM : numpy.array
+        CGM KM matrix.
     CGM_KM_f : numpy.array
-        CGM forward KM vector.
+        CGM forward KM matrix.
     CGM_KM_b : numpy.array
-        CGM backward KM vector.
+        CGM backward KM matrix.
     CGM_KA : numpy.array
         CGM activation constant matrix.
     CGM_KI : numpy.array
@@ -1663,11 +1665,14 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KM_df = pd.DataFrame(self.CGM_KM_f, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KM_df.to_csv(model_path+"/KM_forward.csv", sep=";")
-        del(KM_df)
-        KM_df = pd.DataFrame(self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
+        for i in self.CGM_row_indices.values():
+            for j in self.CGM_col_indices.values():
+                if self.CGM_KM_f[i, j] != 0.0:
+                    assert self.CGM_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
+                if self.CGM_KM_b[i, j] != 0.0:
+                    assert self.CGM_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
+        KM_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        KM_df.to_csv(model_path+"/KM.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KA, KI and KR matrices  #

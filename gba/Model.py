@@ -87,6 +87,8 @@ class Model:
         Forward kcat vector.
     kcat_b : np.array
         Backward kcat vector.
+    KM: np.array
+        Complete KM matrix.
     KM_f : np.array
         Forward KM matrix.
     KM_b : np.array
@@ -119,10 +121,8 @@ class Model:
         Is the mass fraction matrix loaded?
     kcat_loaded : bool
         Are the kcat constants loaded?
-    KM_f_loaded : bool
-        Are the KM forward constants loaded?
-    KM_b_loaded : bool
-        Are the KM backward constants loaded?
+    KM_loaded : bool
+        Are the KM constants loaded?
     KA_loaded : bool
         Are the KA constants loaded?
     KI_loaded : bool
@@ -231,10 +231,8 @@ class Model:
     read_kcat_from_csv( path: Optional[str] = "." ) -> None
         Read the kcat forward and backward constant vectors from a CSV
         file.
-    read_KM_f_from_csv( path: Optional[str] = "." ) -> None
-        Read the forward Michaelis constant matrix KM from a CSV file.
-    read_KM_b_from_csv( path: Optional[str] = "." ) -> None
-        Read the backward Michaelis constant matrix KM from a CSV file.
+    read_KM_from_csv( path: Optional[str] = "." ) -> None
+        Read the Michaelis constant matrix KM from a CSV file.
     read_KA_from_csv( path: Optional[str] = "." ) -> None
         Read the activation constants matrix KA from a CSV file.
     read_KI_from_csv( path: Optional[str] = "." ) -> None
@@ -432,6 +430,7 @@ class Model:
         self.M                  = np.array([])
         self.kcat_f             = np.array([])
         self.kcat_b             = np.array([])
+        self.KM                 = np.array([])
         self.KM_f               = np.array([])
         self.KM_b               = np.array([])
         self.KA                 = np.array([])
@@ -592,47 +591,26 @@ class Model:
             self.kcat_loaded = True
             del(df)
 
-    def read_KM_f_from_csv( self, path: Optional[str] = "." ) -> None:
+    def read_KM_from_csv( self, path: Optional[str] = "." ) -> None:
         """
-        Read the forward Michaelis constant matrix KM from a CSV file.
+        Read the Michaelis constant matrix KM from a CSV file.
 
         Parameters
         ----------
         path : str, default="."
             Path to the CSV file.
         """
-        self.KM_f_loaded = False
-        filename         = path+"/"+self.name+"/KM_forward.csv"
+        self.KM_loaded = False
+        filename       = path+"/"+self.name+"/KM.csv"
         if os.path.exists(filename):
-            df               = pd.read_csv(filename, sep=";")
-            df               = df.drop(["Unnamed: 0"], axis=1)
-            df.index         = self.metabolite_ids
-            self.KM_f        = np.array(df)
-            self.KM_f        = self.KM_f.astype(float)
-            self.KM_f_loaded = True
+            df             = pd.read_csv(filename, sep=";")
+            df             = df.drop(["Unnamed: 0"], axis=1)
+            df.index       = self.metabolite_ids
+            self.KM        = np.array(df)
+            self.KM        = self.KM.astype(float)
+            self.KM_loaded = True
             del(df)
 
-    def read_KM_b_from_csv( self, path: Optional[str] = "." ) -> None:
-        """
-        Read the backward Michaelis constant matrix KM from a CSV file.
-
-        Parameters
-        ----------
-        path : str, default="."
-            Path to the CSV file.
-        """
-        self.KM_b_loaded = False
-        self.KM_b        = np.zeros(self.KM_f.shape)
-        filename         = path+"/"+self.name+"/KM_backward.csv"
-        if os.path.exists(filename):
-            df               = pd.read_csv(filename, sep=";")
-            df               = df.drop(["Unnamed: 0"], axis=1)
-            df.index         = self.metabolite_ids
-            self.KM_b        = np.array(df)
-            self.KM_b        = self.KM_b.astype(float)
-            self.KM_b_loaded = True
-            del(df)
-    
     def read_KA_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the activation constants matrix KA from a CSV file.
@@ -824,10 +802,8 @@ class Model:
         """
         assert self.Mx_loaded, throw_message(MessageType.Error, "Mass fraction matrix Mx not loaded.")
         assert self.kcat_loaded, throw_message(MessageType.Error, "kcat constants not loaded.")
-        assert self.KM_f_loaded, throw_message(MessageType.Error, "KM forward constants not loaded.")
+        assert self.KM_loaded, throw_message(MessageType.Error, "KM constants not loaded.")
         assert self.conditions_loaded, throw_message(MessageType.Error, "Conditions not loaded.")
-        if not self.KM_b_loaded:
-            throw_message(MessageType.Info, "KM backward constants not loaded.")
         if not self.KA_loaded:
             throw_message(MessageType.Info, "KA constants not loaded.")
         if not self.KI_loaded:
@@ -847,6 +823,17 @@ class Model:
         """
         Initialize the model mathematical variables.
         """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Forward and backward KM matrices                    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.KM_f = np.zeros(self.Mx.shape)
+        self.KM_b = np.zeros(self.Mx.shape)
+        for i in range(self.Mx.shape[0]):
+            for j in range(self.Mx.shape[1]):
+                if self.Mx[i,j] < 0:
+                    self.KM_f[i,j] = self.KM[i,j]
+                elif self.Mx[i,j] > 0:
+                    self.KM_b[i,j] = self.KM[i,j]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Inverse of KI                                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -959,8 +946,7 @@ class Model:
         assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
         self.read_Mx_from_csv(path)
         self.read_kcat_from_csv(path)
-        self.read_KM_f_from_csv(path)
-        self.read_KM_b_from_csv(path)
+        self.read_KM_from_csv(path)
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
         self.read_KR_from_csv(path)
@@ -991,7 +977,7 @@ class Model:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "intM.csv", "kcat.csv", "KM_forward.csv", "KM_backward.csv",
+            files = ["M.csv", "intM.csv", "kcat.csv", "KM.csv",
                      "KA.csv", "KI.csv", "KR.csv",
                      "conditions.csv", "constant_rhs.csv", "constant_reactions.csv",
                      "protein_contributions.csv"]
@@ -1016,13 +1002,10 @@ class Model:
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the forward KM matrices     #
+        # 4) Write the KM matrix               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KM_df = pd.DataFrame(self.KM_f, index=self.metabolite_ids, columns=self.reaction_ids)
-        KM_df.to_csv(model_path+"/KM_forward.csv", sep=";")
-        del(KM_df)
-        KM_df = pd.DataFrame(self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
-        KM_df.to_csv(model_path+"/KM_backward.csv", sep=";")
+        KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        KM_df.to_csv(model_path+"/KM.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KA, KI and KR matrices  #
