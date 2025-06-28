@@ -4,4 +4,6 @@ cp MMSYN_tutorial_2.ipynb ../../../MMSYN_tutorial/.
 cp MMSYN_tutorial_3.ipynb ../../../MMSYN_tutorial/.
 cp MMSYN_tutorial_4.ipynb ../../../MMSYN_tutorial/.
 cp MMSYN_tutorial_5.ipynb ../../../MMSYN_tutorial/.
+cp -r ./models/mmsyn_fcr_v1 ../../../MMSYN_tutorial/models/.
+cp -r ./models/mmsyn_fcr_v2 ../../../MMSYN_tutorial/models/.
 

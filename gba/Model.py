@@ -1097,7 +1097,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the variables in xlsx       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        with pd.ExcelWriter(file_path) as writer:
+        with pd.ExcelWriter(xls_path) as writer:
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
             KM_df.to_excel(writer, sheet_name="K")
