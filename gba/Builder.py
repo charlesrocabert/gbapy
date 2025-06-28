@@ -37,6 +37,8 @@ import pickle
 import numpy as np
 import pandas as pd
 from typing import Optional
+from pyexcel_xlsx import get_data
+from pyexcel_ods3 import save_data
 from IPython.display import display_html
 
 try:
@@ -1617,7 +1619,7 @@ class Builder:
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def export_model( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
         Export the CGM to a folder in CSV format.
 
@@ -1718,6 +1720,77 @@ class Builder:
                 for item in r.protein_contributions.items():
                     f.write(r.id+";"+item[0]+";"+str(item[1])+"\n")
         f.close()
+
+    def write_to_xlsx( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Export the CGM to a folder in XLSX format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building CGM variables.")
+        assert self.CGM_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
+        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Check the existence of the folder #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        xls_path = path+"/"+(self.name if name == "" else name)+".xlsx"
+        ods_path = path+"/"+(self.name if name == "" else name)+".ods"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write the mass fraction matrix    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        M_df = pd.DataFrame(self.CGM_M, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the kcat vectors            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        kcat_df           = pd.DataFrame(self.CGM_kcat_f, index=self.CGM_col_indices.keys(), columns=["kcat_f"])
+        kcat_df["kcat_b"] = self.CGM_kcat_b
+        kcat_df           = kcat_df.transpose()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Write the forward KM matrices     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        for i in self.CGM_row_indices.values():
+            for j in self.CGM_col_indices.values():
+                if self.CGM_KM_f[i, j] != 0.0:
+                    assert self.CGM_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
+                if self.CGM_KM_b[i, j] != 0.0:
+                    assert self.CGM_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
+        KM_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Write the KA, KI and KR matrices  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Write the conditions              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        conditions_df = pd.DataFrame(self.CGM_conditions)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) Write the variables in xlsx       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        with pd.ExcelWriter(xls_path) as writer:
+            M_df.to_excel(writer, sheet_name="M")
+            kcat_df.to_excel(writer, sheet_name="kcat")
+            KM_df.to_excel(writer, sheet_name="K")
+            KA_df.to_excel(writer, sheet_name="KA")
+            KI_df.to_excel(writer, sheet_name="KI")
+            conditions_df.to_excel(writer, sheet_name="conditions")
+        data_xlsx = get_data(xls_path)
+        save_data(ods_path, data_xlsx)
+        os.system("rm "+xls_path)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Free memory                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        del(M_df)
+        del(kcat_df)
+        del(KM_df)
+        del(KA_df)
+        del(KI_df)
+        del(conditions_df)
 
     def write_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
