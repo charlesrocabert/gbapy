@@ -11,6 +11,10 @@ library("latex2exp")
 library("MASS")
 library("renz")
 
+#-----------------------------------#
+#      DATA ANALYSIS FUNCTIONS      #
+#-----------------------------------#
+
 ### Load a trajectory ###
 load_trajectory <- function( model_name, suffix )
 {
@@ -23,6 +27,24 @@ load_optimum <- function( model_name, suffix )
   d = read.table(paste0("./output/optimization/",model_name,"_",suffix,"_optimum.csv"), h=T, sep=";", check.names=F)
 }
 
+### Load external conditions ###
+load_conditions <- function( model_name )
+{
+  conditions           = read.table(paste0("./models/", model_name, "/conditions.csv"), sep=";", h=T, check.names=F)
+  rownames(conditions) = conditions[,1]
+  conditions           = conditions[,2:ncol(conditions)]
+  return(as.integer(colnames(conditions)))
+}
+
+### Load external conditions ###
+load_external_glucose <- function( model_name )
+{
+  conditions           = read.table(paste0("./models/", model_name, "/conditions.csv"), sep=";", h=T, check.names=F)
+  rownames(conditions) = conditions[,1]
+  conditions           = conditions[,2:ncol(conditions)]
+  return(as.vector(t(conditions["x_glc__D",])))
+}
+
 ### Load the observed mass fractions data ###
 load_observed_mass_fractions <- function()
 {
@@ -33,8 +55,9 @@ load_observed_mass_fractions <- function()
 }
 
 ### Build the mass fraction data ###
-build_mass_fractions_data <- function( model_name, condition, d_b )
+build_mass_fractions_data <- function( model_name, condition )
 {
+  d_b            = load_optimum(model_name, "b")
   i              = which(d_b$condition==condition)
   d_mf           = load_observed_mass_fractions()
   D              = d_b[i,-which(names(d_b)%in%c("condition", "h2o"))]
@@ -56,9 +79,9 @@ build_mass_fractions_data <- function( model_name, condition, d_b )
 }
 
 ### Correlation of mass fraction prediction ###
-mass_fractions_correlation <- function( model_name, condition, d_b )
+mass_fractions_correlation <- function( model_name, condition )
 {
-  D     = build_mass_fractions_data(model_name, condition, d_b)
+  D     = build_mass_fractions_data(model_name, condition)
   reg   = lm(log10(D$sim_fraction)~log10(D$obs_fraction))
   r2    = summary(reg)$adj.r.squared
   pval  = summary(reg)$coefficients[,4][[2]]
@@ -72,20 +95,20 @@ mass_fractions_correlation <- function( model_name, condition, d_b )
 ### Mass fraction prediction through conditions ###
 mass_fractions_by_condition <- function( model_name )
 {
-  d_b      = load_optimum(model_name, "b")
-  cor_vec  = c()
-  pval_vec = c()
-  R2_vec   = c()
-  for(condition in d_b$condition)
+  conditions = load_conditions(model_name)
+  cor_vec    = c()
+  pval_vec   = c()
+  R2_vec     = c()
+  for(condition in conditions)
   {
-    res      = mass_fractions_correlation(model_name, condition, d_b)
+    res      = mass_fractions_correlation(model_name, condition)
     cor_vec  = c(cor_vec, res[1])
     pval_vec = c(pval_vec, res[2])
     R2_vec   = c(R2_vec, res[3])
   }
   D           = data.frame(cor_vec, pval_vec, R2_vec)
   names(D)    = c("r2", "pval", "R2")
-  D$condition = d_b$condition
+  D$condition = conditions
   return(D)
 }
 
@@ -106,7 +129,7 @@ load_protein_contributions <- function( model_name )
   #------------------------------------------------#
   # 1) Load original model's protein contributions #
   #------------------------------------------------#
-  d            = read.table("./output/JCVISYN3A_protein_contributions.csv", h=T, sep=";", check.names=F)
+  d            = read.table("./output/JCVISYN3A_protein_contributions_bis.csv", h=T, sep=";", check.names=F)
   nrow         = length(unique(d$protein))
   ncol         = length(unique(d$reaction))
   M1           = matrix(rep(0.0, nrow*ncol), nrow, ncol)
@@ -214,7 +237,7 @@ calculate_simulated_proteomics <- function( pcontributions, model_name, conditio
 }
 
 ### Calculate the modeled proteome fraction ###
-calculate_modeled_proteome_fraction <- function( model_name )
+calculate_modeled_proteome_fraction <- function( model_name, d_p )
 {
   obs_proteomics = load_observed_proteomics()
   pcontributions = load_protein_contributions(model_name)
@@ -233,8 +256,9 @@ calculate_phi_obs <- function()
 }
 
 ### Build the proteome fraction data ###
-build_proteomics_data <- function( model_name, condition, d_p )
+build_proteomics_data <- function( model_name, condition )
 {
+  d_p            = load_optimum(model_name, "p")
   i              = which(d_p$condition==condition)
   reaction_ids   = names(d_p[,-which(names(d_p)%in%c("condition"))])
   obs_proteomics = load_observed_proteomics()
@@ -257,9 +281,9 @@ build_proteomics_data <- function( model_name, condition, d_p )
 }
 
 ### Correlation of proteomics prediction ###
-proteomics_correlation <- function( model_name, condition, d_p )
+proteomics_correlation <- function( model_name, condition )
 {
-  D     = build_proteomics_data(model_name, condition, d_p)
+  D     = build_proteomics_data(model_name, condition)
   reg   = lm(log10(D$sim_fraction)~log10(D$obs_fraction))
   r2    = summary(reg)$adj.r.squared
   pval  = summary(reg)$coefficients[,4][[2]]
@@ -271,78 +295,112 @@ proteomics_correlation <- function( model_name, condition, d_p )
 }
 
 ### Proteomics prediction through conditions ###
-proteomics_by_condition <- function( model_name, condition )
+proteomics_by_condition <- function( model_name )
 {
-  d_p      = load_optimum(model_name, "p")
-  cor_vec  = c()
-  pval_vec = c()
-  R2_vec   = c()
-  for(condition in d_p$condition)
+  conditions = load_conditions(model_name)
+  cor_vec    = c()
+  pval_vec   = c()
+  R2_vec     = c()
+  for(condition in conditions)
   {
-    res      = proteomics_correlation(model_name, condition, d_p)
+    res      = proteomics_correlation(model_name, condition)
     cor_vec  = c(cor_vec, res[1])
     pval_vec = c(pval_vec, res[2])
     R2_vec   = c(R2_vec, res[3])
   }
   D = data.frame(cor_vec, pval_vec, R2_vec)
   names(D) = c("r2", "pval", "R2")
-  D$condition = d_p$condition
+  D$condition = conditions
   return(D)
 }
 
-### Plot predicted protein fraction ###
-plot_predicted_protein_fraction <- function( d_c )
+#------------------------------#
+#      PLOTTING FUNCTIONS      #
+#------------------------------#
+
+### Plot the growth rate depending on external glucose ###
+plot_growth_rate <- function( model_name )
 {
-  proteins            = c("ACP", "PdhC", "dUTPase", "Protein")
-  dl                  = d_c[,-which(names(d_c)%in%c("condition", "h2o"))]
-  dl$sum              = rowSums(dl)
-  #dl$Protein_fraction = rowSums(dl[,proteins])/dl$sum
-  dl$Protein_fraction = (dl[,"Protein"])/dl$sum
-  dl$condition        = d_c$condition
-  last_prot_fraction  = dl$Protein_fraction[dim(dl)[1]]
-  p = ggplot(dl, aes(condition, Protein_fraction)) +
-    geom_hline(yintercept=0.54727, color="pink") +
+  d_state           = load_optimum(model_name, "state")
+  glc               = load_external_glucose(model_name)
+  d_state$glc       = glc
+  mu_obs            = read.table("./data/wet_experiments/observed_mu.csv", sep=";", h=T)
+  avg_mu_obs        = tapply(log10(mu_obs$mu), mu_obs$glc, mean)
+  avg_mu_obs        = data.frame(as.numeric(names(avg_mu_obs)), 10^as.vector(avg_mu_obs))
+  names(avg_mu_obs) = c("glc", "mu")
+  p = ggplot(d_state, aes(glc, mu)) +
+    geom_point(data=mu_obs, aes(glc, mu), color="cornflowerblue") +
     geom_line() +
-    xlab("Condition") +
-    ylab("Protein fraction") +
-    ggtitle(paste0("Protein fraction (Pf = ",round(last_prot_fraction,3),", obs = ",0.547,")")) +
-    ylim(0,1) +
+    scale_x_log10() + scale_y_log10() +
+    xlab("External glucose concentration") +
+    ylab("Growth rate") +
+    ggtitle("Growth rate") +
     theme_classic()
   return(p)
 }
 
 ### Plot the predicted growth law ###
-plot_predicted_growth_law <- function( d_p, d_state, phi_obs )
+plot_predicted_growth_law <- function( model_name )
 {
-  dl                   = d_p[,-which(names(d_p)%in%c("condition"))]#, "ATPase"))]
+  d_p                  = load_optimum(model_name, "p")
+  d_state              = load_optimum(model_name, "state")
+  phi_obs              = calculate_phi_obs()
+  dl                   = d_p[,-which(names(d_p)%in%c("condition"))]
   dl$sum               = rowSums(dl)
   dl$Ribosome_fraction = dl[,"Ribosome"]/dl$sum
   dl$condition         = d_p$condition
   dl$mu                = d_state$mu
   last_ribosome_fraction  = dl$Ribosome_fraction[dim(dl)[1]]
   p = ggplot(dl, aes(mu, Ribosome_fraction)) +
-    geom_hline(yintercept=phi_obs, col="pink") +
+    geom_point(aes(x=0.34, y=phi_obs), col="cornflowerblue", lwd=3) +
     geom_line() +
     xlab("Growth rate") +
     ylab("Ribosome fraction") +
-    ggtitle(paste0("Ribosome fraction (Rf = ",round(last_ribosome_fraction,3),")")) +
+    ggtitle("Growth law") +
+    theme_classic()
+  return(p)
+}
+
+### Plot predicted protein fraction ###
+plot_predicted_protein_fraction <- function( model_name )
+{
+  d_c                 = load_optimum(model_name, "c")
+  d_state             = load_optimum(model_name, "state")
+  proteins            = c("ACP", "PdhC", "dUTPase", "Protein")
+  dl                  = d_c[,-which(names(d_c)%in%c("condition", "h2o"))]
+  dl$sum              = rowSums(dl)
+  #dl$Protein_fraction = rowSums(dl[,proteins])/dl$sum
+  dl$Protein_fraction = (dl[,"Protein"])/dl$sum
+  dl$condition        = d_c$condition
+  dl$mu               = d_state$mu
+  last_prot_fraction  = dl$Protein_fraction[dim(dl)[1]]
+  p = ggplot(dl, aes(mu, Protein_fraction)) +
+    geom_hline(yintercept=0.54727, color="cornflowerblue", lty=2, lwd=1) +
+    geom_line() +
+    xlab("Growth rate") +
+    ylab("Protein fraction") +
+    ggtitle("Protein fraction") +
+    ylim(0,1) +
     theme_classic()
   return(p)
 }
 
 ### Plot the mass fraction of housekeeping proteins ###
-plot_predicted_housekeeping_fraction <- function( d_p, modeled_pfrac )
+plot_predicted_housekeeping_fraction <- function( model_name )
 {
-  dl       = d_p[,-which(names(d_p)%in%c("condition"))]
-  psum     = rowSums(dl)
-  atpR     = dl$ATPase/psum
-  D        = data.frame(d_p$condition, atpR)
+  d_p           = load_optimum(model_name, "p")
+  d_state       = load_optimum(model_name, "state")
+  modeled_pfrac = calculate_modeled_proteome_fraction(model_name, d_p)
+  dl            = d_p[,-which(names(d_p)%in%c("condition"))]
+  psum          = rowSums(dl)
+  atpR          = dl$ATPase/psum
+  D             = data.frame(d_p$condition, d_state$mu, atpR)
   print(paste0("> Housekeeping fraction = ", atpR[length(atpR)]))
-  names(D) = c("condition", "fraction")
-  p = ggplot(D, aes(condition, fraction)) +
-    geom_hline(yintercept=1-modeled_pfrac, col="pink") +
+  names(D) = c("condition", "mu", "fraction")
+  p = ggplot(D, aes(mu, fraction)) +
+    geom_hline(yintercept=0.5, col="cornflowerblue", lty=2, lwd=1) +
     geom_line() +
-    xlab("Condition") +
+    xlab("Growth rate") +
     ylab("Housekeeping proteins fraction") +
     ggtitle("Housekeeping proteins fraction") +
     theme_classic()
@@ -350,9 +408,11 @@ plot_predicted_housekeeping_fraction <- function( d_p, modeled_pfrac )
 }
   
 ### Plot predicted mass fractions ###
-plot_predicted_mass_fractions <- function( mf_data, R2, r2 )
+plot_predicted_mass_fractions <- function( MF, MF_by_cond )
 {
-  p = ggplot(mf_data, aes(obs_fraction, sim_fraction)) +
+  R2 = filter(MF_by_cond, condition==67)$R2
+  r2 = filter(MF_by_cond, condition==67)$r2
+  p = ggplot(MF, aes(obs_fraction, sim_fraction)) +
     geom_abline(slope=1, intercept=0, color="pink") +
     geom_line(aes(obs_fraction, obsp3), color="grey", lty=2) +
     geom_line(aes(obs_fraction, obsm3), color="grey", lty=2) +
@@ -362,45 +422,45 @@ plot_predicted_mass_fractions <- function( mf_data, R2, r2 )
     #geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
     #geom_text_repel(aes(label=id), size = 3.5) +
-    annotate("text", x=1e-5, y=10, label=paste0("italic(R)^2", "==", round(R2,2)), hjust=0, parse=T) +
-    annotate("text", x=1e-5, y=1, label=paste0("italic(r)^2", "==", round(r2,2)), hjust=0, parse=T) +
+    annotate("text", x=1e-5, y=5, label=paste0("• R2 = ", round(R2,2)), hjust=0) +
+    annotate("text", x=1e-5, y=1, label=paste0("• r2 = ", round(r2,2)), hjust=0) +
     xlab("Observed") +
     ylab("Simulated") +
-    ggtitle("Metabolite mass fractions") +
+    ggtitle("Metabolite mass fractions (5 g/L glucose)") +
     theme_classic()
   return(p)
 }
 
-### Plot mass fraction correlation during optimization ###
-plot_mass_fractions_optimization <- function( mf_evol_data )
+### Plot metabolite mass fraction correlations per condition ###
+plot_mass_fractions_by_condition <- function( MF_by_cond )
 {
-  p1 = ggplot(mf_evol_data, aes(index, r2)) +
+  p1 = ggplot(MF_by_cond, aes(condition, r2)) +
     geom_line() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("Linear regression adj. R-squared") +
     ggtitle("Correlation with observed mass fractions") +
     theme_classic()
-  p2 = ggplot(mf_evol_data, aes(index, pval)) +
+  p2 = ggplot(MF_by_cond, aes(condition, pval)) +
     geom_line() +
     geom_hline(yintercept=0.05, col="pink") +
     scale_y_log10() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("Linear regression p-value") +
     ggtitle("Correlation with observed mass fractions") +
     theme_classic()
-  p3 = ggplot(mf_evol_data, aes(index, R2)) +
+  p3 = ggplot(MF_by_cond, aes(condition, R2)) +
     geom_line() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("R2") +
-    ggtitle("R2 with observed mass fractions") +
+    ggtitle("Simulated vs. observed metabolite fractions") +
     theme_classic()
   return(list(p1, p2, p3))
 }
 
 ### Plot predicted proteomics ###
-plot_predicted_proteomics <- function( pr_data, R2, r2 )
+plot_predicted_proteomics <- function( PR, PR_by_cond )
 {
-  p = ggplot(pr_data, aes(obs_fraction, sim_fraction)) +
+  p = ggplot(PR, aes(obs_fraction, sim_fraction)) +
     geom_abline(slope=1, intercept=0, color="pink") +
     geom_line(aes(obs_fraction, obsp3), color="grey", lty=2) +
     geom_line(aes(obs_fraction, obsm3), color="grey", lty=2) +
@@ -409,8 +469,8 @@ plot_predicted_proteomics <- function( pr_data, R2, r2 )
     geom_point() +
     #geom_smooth(method="lm") +
     scale_x_log10() + scale_y_log10() +
-    annotate("text", x=0.001, y=1, label=paste0("italic(R)^2", "==", round(R2,5)), hjust=0, parse=T) +
-    annotate("text", x=0.001, y=0.1, label=paste0("italic(r)^2", "==", round(r2,5)), hjust=0, parse=T) +
+    #annotate("text", x=0.001, y=1, label=paste0("italic(R)^2", "==", round(R2,5)), hjust=0, parse=T) +
+    #annotate("text", x=0.001, y=0.1, label=paste0("italic(r)^2", "==", round(r2,5)), hjust=0, parse=T) +
     #geom_text_repel(aes(label=id), size = 3.5) +
     xlab("Observed") +
     ylab("Simulated") +
@@ -419,32 +479,73 @@ plot_predicted_proteomics <- function( pr_data, R2, r2 )
   return(p)
 }
 
-### Plot proteomics correlation during optimization ###
-plot_proteomics_optimization <- function( pr_evol_data )
+### Plot proteomics correlations per condition ###
+plot_proteomics_by_condition <- function( PR_by_cond )
 {
-  p1 = ggplot(pr_evol_data, aes(index, r2)) +
+  p1 = ggplot(PR_by_cond, aes(condition, r2)) +
     geom_line() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("Linear regression adj. R-squared") +
     ggtitle("Correlation with observed proteomics") +
     theme_classic()
-  p2 = ggplot(pr_evol_data, aes(index, pval)) +
+  p2 = ggplot(PR_by_cond, aes(condition, pval)) +
     geom_line() +
     geom_hline(yintercept=0.05, col="pink") +
     scale_y_log10() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("Linear regression p-value") +
     ggtitle("Correlation with observed proteomics") +
     theme_classic()
-  p3 = ggplot(pr_evol_data, aes(index, R2)) +
+  p3 = ggplot(PR_by_cond, aes(condition, R2)) +
     geom_line() +
-    xlab("Iteration") +
+    xlab("Condition") +
     ylab("R2") +
     ggtitle("R2 with observed proteomics") +
     theme_classic()
   return(list(p1, p2, p3))
 }
 
+### Plot a given flux depending on growth rate ###
+plot_flux <- function( model_name, r_id, title )
+{
+  d_v      = load_optimum(model_name, "f")
+  d_state  = load_optimum(model_name, "state")
+  D        = data.frame(d_state$mu, d_v[,r_id])
+  names(D) = c("mu", "flux")
+  ggplot(D, aes(mu, flux)) +
+    geom_line() +
+    xlab("Growth rate") +
+    ylab("Flux") +
+    ggtitle(title) +
+    theme_classic()
+}
+
+### Plot a given metabolite concentration depending on growth rate ###
+plot_metabolite_concentration <- function( model_name, m_id, title, log )
+{
+  d_c      = load_optimum(model_name, "c")
+  d_state  = load_optimum(model_name, "state")
+  D        = data.frame(d_state$mu, d_c[,m_id])
+  names(D) = c("mu", "concentration")
+  p = ggplot(D, aes(mu, -log10(concentration))) +
+    geom_line() +
+    xlab("Growth rate") +
+    ylab("Concentration") +
+    ggtitle(title) +
+    theme_classic()
+  if (grepl("x", log, fixed=TRUE))
+  {
+    p = p + scale_x_log10()
+  }
+  if (grepl("y", log, fixed=TRUE))
+  {
+    p = p + scale_y_log10()
+  }
+  return(p)
+}
+plot_metabolite_concentration(model_name, "h", "Proton concentration", log="")
+
+### Plot a given protein concentration depending on growth rate ###
 
 ##################
 #      MAIN      #
@@ -460,106 +561,36 @@ data_path  = "../../gbapy/tutorials/MMSYN_tutorial"
 model_name = "mmsyn_fcr_v2"
 
 #---------------------------------#
-# 2) Load simulation data         #
+# 2) Build the different datasets #
 #---------------------------------#
-d_state = read.table(paste0(data_path,"/output/optimization/",model_name,"_state_optimum.csv"), h=T, sep=";", check.names=F)
-d_f     = read.table(paste0(data_path,"/output/optimization/",model_name,"_f_optimum.csv"), h=T, sep=";", check.names=F)
-d_v     = read.table(paste0(data_path,"/output/optimization/",model_name,"_v_optimum.csv"), h=T, sep=";", check.names=F)
-d_p     = read.table(paste0(data_path,"/output/optimization/",model_name,"_p_optimum.csv"), h=T, sep=";", check.names=F)
-d_b     = read.table(paste0(data_path,"/output/optimization/",model_name,"_b_optimum.csv"), h=T, sep=";", check.names=F)
-d_c     = read.table(paste0(data_path,"/output/optimization/",model_name,"_c_optimum.csv"), h=T, sep=";", check.names=F)
+MF_67      = build_mass_fractions_data(model_name, 67)
+MF_by_cond = mass_fractions_by_condition(model_name)
+PR_67      = build_proteomics_data(model_name, 67)
+PR_by_cond = proteomics_by_condition(model_name)
 
 #---------------------------------#
-# 3) Build the different datasets #
+# 3) Build the figures            #
 #---------------------------------#
-cond           = read.table(paste0(data_path, "/models/", model_name, "/conditions.csv"), sep=";", h=T, check.names=F)
-rownames(cond) = cond[,1]
-cond           = cond[,2:ncol(cond)]
-glc_vec        = as.vector(t(conditions["x_glc__D",]))
-mu_obs         = read.table(paste0(data_path, "/data/wet_experiments/observed_mu.csv"), sep=";", h=T)
-MF            = build_mass_fractions_data(data_path, d_b, 67)
-MF_by_cond    = mass_fractions_by_condition(data_path, d_b)
-PR            = build_proteomics_data(data_path, model_name, d_p, 67)
-PR_by_cond    = proteomics_by_condition(data_path, model_name, d_p)
-modeled_pfrac = calculate_modeled_proteome_fraction(data_path, model_name, d_p)
-phi_obs       = calculate_phi_obs(data_path)
+p1 = plot_growth_rate(model_name)
+p2 = plot_predicted_growth_law(model_name)
+p3 = plot_predicted_protein_fraction(model_name)
+p4 = plot_predicted_housekeeping_fraction(model_name)
+p5 = plot_predicted_mass_fractions(MF_67, MF_by_cond)
+p6 = plot_mass_fractions_by_condition(MF_by_cond)[[3]]
+p7 = plot_predicted_proteomics(PR_67, PR_by_cond)
+p8 = plot_proteomics_by_condition(PR_by_cond)[[3]]
 
+p9  = plot_flux(model_name, "Ht", "Proton import rate")
+p10 = plot_metabolite_concentration(model_name, "h", "Proton concentration", log="")
+p11 = plot_flux(model_name, "L_LACt2r", "Lactate excretion rate")
+p12 = plot_metabolite_concentration(model_name, "lac__L", "Lactate concentration", log="")
 
+p13 = plot_flux(model_name, "ATPase", "ATP maintenance rate")
 
-### Load the model results ###
-d_state     = read.table(paste0(output_path, "/", model_name, "_state_optimum.csv"), h=T, sep=";", check.names=F)
-d_b         = read.table(paste0(output_path, "/", model_name,"_b_optimum.csv"), h=T, sep=";", check.names=F)
-d_p         = read.table(paste0(output_path, "/", model_name,"_p_optimum.csv"), h=T, sep=";", check.names=F)
-d_c         = read.table(paste0(output_path, "/", model_name,"_c_optimum.csv"), h=T, sep=";", check.names=F)
-d_state$glc = glc_vec
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, ncol=4)
 
-### Build final datasets ###
-MF_data  = build_mass_fractions_data(d_b, dim(d_b)[1])
-PR_data  = build_proteomics_data(model_path, model_name, d_p, dim(d_p)[1])
-MF_cor   = mass_fractions_correlation(d_b, dim(d_b)[1])
-PR_cor   = proteomics_correlation(model_path, model_name, d_p, dim(d_p)[1])
-MF_cor_D = data.frame()
-PR_cor_D = data.frame()
-for (i in seq(1, dim(d_b)[1]))
-{
-  res      = mass_fractions_correlation(d_b, i)
-  MF_cor_D = rbind(MF_cor_D, res)
-  res      = proteomics_correlation(model_path, model_name, d_p, i)
-  PR_cor_D = rbind(PR_cor_D, res)
-}
-MF_cor_D$condition  = d_b$condition
-MF_cor_D$glc        = glc_vec
-names(MF_cor_D)     = c("r2", "pval", "R2", "condition", "glc")
-PR_cor_D$condition  = d_p$condition
-PR_cor_D$glc        = glc_vec
-names(PR_cor_D)     = c("r2", "pval", "R2", "condition", "glc")
-growth_law_data     = build_growth_law_data(d_p)
-growth_law_data$glc = glc_vec
-growth_law_data$mu  = d_state$mu
+plot_grid(p9, p10, p11, p12)
 
-### Make plots ###
-p1 = ggplot(d_state, aes(glc, mu)) +
-  geom_line() +
-  geom_point(data=Davg, aes(glc, mu, color="Observed")) +
-  scale_x_log10() +
-  scale_y_log10() +
-  xlab("Glucose concentration (g/L)") +
-  ylab("Growth rate") +
-  ggtitle(paste0("Growth rate (max=",round(max(d_state$mu),3),")")) +
-  theme_classic() +
-  theme(legend.position="none")
-
-p2 = plot_predicted_protein_fraction(d_c, d_state)
-
-p3 = plot_predicted_mass_fractions(MF_data, MF_cor[3], MF_cor[1])
-
-p4 = plot_predicted_proteomics(PR_data, PR_cor[3], PR_cor[1])
-
-p5 = ggplot(MF_cor_D, aes(glc, R2)) +
-  geom_line() +
-  scale_x_log10() +
-  xlab("Glucose concentration (g/L)") +
-  ylab(TeX("$R^2$")) +
-  ggtitle(paste0("Metabolite mass fraction correlation (max=",round(MF_cor[3],3),")")) +
-  theme_classic()
-
-rib_prot = c("protein_0025", "protein_0027", "protein_0082", "protein_0137", "protein_0148", "protein_0149", "protein_0198", "protein_0199", "protein_0238", "protein_0294", "protein_0362", "protein_0365", "protein_0422", "protein_0482", "protein_0499", "protein_0500", "protein_0501", "protein_0930", "protein_0526", "protein_0540", "protein_0637", "protein_0638", "protein_0644", "protein_0646", "protein_0647", "protein_0648", "protein_0653", "protein_0654", "protein_0655", "protein_0656", "protein_0657", "protein_0658", "protein_0659", "protein_0660", "protein_0661", "protein_0662", "protein_0663", "protein_0664", "protein_0665", "protein_0666", "protein_0667", "protein_0668", "protein_0669", "protein_0670", "protein_0671", "protein_0672", "protein_0806", "protein_0807", "protein_0809", "protein_0810", "protein_0833", "protein_0932", "protein_0910")
-dprot    = load_observed_proteomics()
-obs_phi  = sum(filter(dprot, protein%in%rib_prot)$obs_mass)/sum(dprot$obs_mass)
-obs_phi
-p6 = ggplot(growth_law_data, aes(mu, Phi)) + #*0.3627)) +
-  geom_line() +
-  geom_point(aes(x=0.34, y=obs_phi, color="Observed Phi")) +
-  #geom_point(aes(x=0.4, y=obs_phi+0.16274/0.54727, color="Observed Phi + rRNA")) +
-  xlab("Growth rate") +
-  ylab(TeX("$\\Phi$ (weighted by 0.36)")) +
-  ggtitle("Growth law") +
-  #scale_y_log10() +
-  theme_classic() +
-  theme(legend.position="none")
-p6
-
-plot_grid(p1, p2, p3, p4, p5, p6, ncol=3, labels="AUTO")
-# ggplot(PR_cor_D, aes(glc, R2)) +
-#   scale_x_log10() +
-#   geom_point()
+p13
+p10
+p9
