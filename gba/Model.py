@@ -603,7 +603,7 @@ class Model:
             Path to the CSV file.
         """
         self.KM_loaded = False
-        filename       = path+"/"+self.name+"/KM.csv"
+        filename       = path+"/"+self.name+"/K.csv"
         if os.path.exists(filename):
             df             = pd.read_csv(filename, sep=";")
             df             = df.drop(["Unnamed: 0"], axis=1)
@@ -979,7 +979,7 @@ class Model:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "intM.csv", "kcat.csv", "KM.csv",
+            files = ["M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv", "KR.csv",
                      "conditions.csv", "constant_rhs.csv", "constant_reactions.csv",
                      "protein_contributions.csv"]
@@ -992,14 +992,11 @@ class Model:
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
-        intM_df = pd.DataFrame(self.M, index=self.c_ids, columns=self.reaction_ids)
-        intM_df.to_csv(model_path+"/intM.csv", sep=";")
-        del(intM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        kcat_df = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["forward"])
-        kcat_df["backward"] = self.kcat_b
+        kcat_df = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
+        kcat_df["kcat_b"] = self.kcat_b
         kcat_df = kcat_df.transpose()
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
@@ -1007,7 +1004,7 @@ class Model:
         # 4) Write the KM matrix               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
-        KM_df.to_csv(model_path+"/KM.csv", sep=";")
+        KM_df.to_csv(model_path+"/K.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KA, KI and KR matrices  #
@@ -1054,9 +1051,9 @@ class Model:
                 f.write(r_id+";"+p_id+";"+str(val)+"\n")
         f.close()
 
-    def write_to_xlsx( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
-        Export the CGM to a folder in XLSX format.
+        Export the CGM to a folder in ODS format.
 
         Parameters
         ----------
