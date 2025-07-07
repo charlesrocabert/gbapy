@@ -956,7 +956,7 @@ class Model:
                 self.kinetic_model.append(CgmReactionType.rMM)
                 self.directions.append(self.directions.append(ReactionDirection.Reversible))
     
-    def read_from_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
+    def read_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the CGM from CSV files.
 
@@ -964,10 +964,9 @@ class Model:
         ----------
         path : str, default="."
             Path to the CSV files.
-        verbose : bool, default=False
-            Verbose mode.
         """
-        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
+        model_path = path+"/"+self.name
+        assert os.path.exists(model_path), throw_message(MessageType.Error, "Folder "+model_path+" does not exist.")
         self.read_Info_from_csv(path)
         self.read_Mx_from_csv(path)
         self.read_kcat_from_csv(path)
@@ -980,7 +979,7 @@ class Model:
         self.read_constant_reactions_from_csv(path)
         self.read_protein_contributions_from_csv(path)
         self.read_LP_from_csv(path)
-        self.check_model_loading(verbose)
+        self.check_model_loading()
         self.initialize_model_mathematical_variables()
 
     def read_from_ods( self, path: Optional[str] = "." ) -> None:
@@ -992,9 +991,24 @@ class Model:
         path : str, default="."
             Path to the ODS files.
         """
-        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
-        model_path = path+"/"+self.name
-        all_sheets = pd.read_excel("A.ods", sheet_name=None, engine="odf", header=None)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Temporarily convert ODS to CSV files #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        filename = path+"/"+self.name+".ods"
+        assert os.path.exists(filename), throw_message(MessageType.Error, "Folder "+filename+" does not exist.")
+        xls = pd.ExcelFile(filename, engine="odf")
+        os.mkdir(self.name)
+        for sheet_name in xls.sheet_names:
+            df = pd.read_excel(xls, sheet_name=sheet_name).fillna("")
+            df.to_csv(self.name+"/"+sheet_name+".csv", sep=";", index=False)
+        # 2) Load the model from the temporary CSV files #
+        self.read_from_csv()
+        self.check_model_loading()
+        self.initialize_model_mathematical_variables()
+        # 3) Delete the temporary files #
+        for sheet_name in xls.sheet_names:
+           os.remove(self.name+"/"+sheet_name+".csv")
+        os.rmdir(self.name)
     
     def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
