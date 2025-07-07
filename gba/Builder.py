@@ -63,6 +63,8 @@ class Builder:
     ----------
     name : str
         Name of the CGM build.
+    info : dict[str, str]
+        Dictionary of information about the model.
     proteins : dict[str, Protein]
         Dictionary of proteins.
     metabolites : dict[str, Metabolite]
@@ -124,6 +126,8 @@ class Builder:
     -------
     which_reaction( metabolite_id: str ) -> list[str]
         Get the reactions in which a metabolite participates.
+    add_info( self, key: str, content: str ) -> None
+        Add an information to the model.
     add_protein( protein: Protein ) -> None
         Add a protein to the model.
     add_proteins( proteins_list: list[Protein] ) -> None
@@ -211,6 +215,7 @@ class Builder:
         """
         assert name != "", throw_message(MessageType.Error, "Empty CGM build name.")
         self.name = name
+        self.info = {}
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Main molecular species and reactions #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -280,6 +285,24 @@ class Builder:
     # 2) Setters                  #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+    def add_info( self, category: str, key: str, content: str ) -> None:
+        """
+        Add a piece of information to the model.
+
+        Parameters
+        ----------
+        category : str
+            Category of the information (e.g., "Description", "Units", "Sheets", "Authors", ...)
+        key : str
+            Key of the information.
+        content : str
+            Content of the information.
+        """
+        if category not in self.info:
+            self.info[category] = {}
+        assert key not in self.info[category], throw_message(MessageType.Error, f"Info key <code>{key}</code> already exists in info category <code>{category}</code>.")
+        self.info[category][key] = content
+    
     def add_protein( self, protein: Protein ) -> None:
         """
         Add a protein to the model.
@@ -802,7 +825,7 @@ class Builder:
         """
         for reaction in self.reactions.values():
             reaction.reset_conversion()
-    
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Model consistency tests  #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1640,21 +1663,36 @@ class Builder:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "kcat.csv", "K.csv",
+            files = ["Info.csv",
+                     "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv", "KR.csv",
-                     "conditions.csv", "constant_rhs.csv", "constant_reactions.csv",
+                     "conditions.csv",
+                     "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the mass fraction matrix    #
+        # 2) Write the information             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rows = []
+        for key, value in self.info.items():
+            rows.append([key, value if isinstance(value, str) else ""])
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    rows.append(["", subkey, subvalue])
+        Info_df         = pd.DataFrame(rows)
+        Info_df.columns = ["", "", ""]
+        Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
+        del(Info_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.CGM_M, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the kcat vectors            #
+        # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.CGM_kcat_f, index=self.CGM_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.CGM_kcat_b
@@ -1662,7 +1700,7 @@ class Builder:
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the forward KM matrices     #
+        # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for i in self.CGM_row_indices.values():
             for j in self.CGM_col_indices.values():
@@ -1674,7 +1712,7 @@ class Builder:
         KM_df.to_csv(model_path+"/K.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA, KI and KR matrices  #
+        # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
@@ -1686,13 +1724,13 @@ class Builder:
         KR_df.to_csv(model_path+"/KR.csv", sep=";")
         del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the conditions              #
+        # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.CGM_conditions)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the constant RHS terms      #
+        # 8) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_rhs.csv", "w")
         f.write("metabolite;value\n")
@@ -1700,7 +1738,7 @@ class Builder:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant reactions      #
+        # 9) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_reactions.csv", "w")
         f.write("reaction;value\n")
@@ -1708,7 +1746,7 @@ class Builder:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Save protein contributions        #
+        # 10) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
@@ -1738,17 +1776,28 @@ class Builder:
         xls_path = path+"/"+(self.name if name == "" else name)+".xlsx"
         ods_path = path+"/"+(self.name if name == "" else name)+".ods"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the mass fraction matrix    #
+        # 2) Write the information             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rows = []
+        for key, value in self.info.items():
+            rows.append([key, value if isinstance(value, str) else ""])
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    rows.append(["", subkey, subvalue])
+        Info_df         = pd.DataFrame(rows)
+        Info_df.columns = ["", "", ""]
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.CGM_M, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the kcat vectors            #
+        # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.CGM_kcat_f, index=self.CGM_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.CGM_kcat_b
         kcat_df           = kcat_df.transpose()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the forward KM matrices     #
+        # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for i in self.CGM_row_indices.values():
             for j in self.CGM_col_indices.values():
@@ -1758,18 +1807,19 @@ class Builder:
                     assert self.CGM_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
         KM_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA, KI and KR matrices  #
+        # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the conditions              #
+        # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.CGM_conditions)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the variables in xlsx       #
+        # 8) Write the variables in xlsx       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with pd.ExcelWriter(xls_path) as writer:
+            Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
             KM_df.to_excel(writer, sheet_name="K")
@@ -1780,8 +1830,9 @@ class Builder:
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Free memory                       #
+        # 9) Free memory                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        del(Info_df)
         del(M_df)
         del(kcat_df)
         del(KM_df)
@@ -2026,6 +2077,38 @@ class Builder:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 8) Summary function         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def information( self ) -> None:
+        """
+        Print the CGM information.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Compile information #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        dfs = {}
+        for category in self.info.keys():
+            data = self.info[category]
+            df = {
+                "Element": [],
+                "Description": []
+            }
+            for key, content in data.items():
+                df["Element"].append(key)
+                df["Description"].append(content)
+            df = pd.DataFrame(df)
+            dfs[category] = df
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Display table       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        html_str  = "<h1>CGM "+self.name+"</h1>"
+        for category, df in dfs.items():
+            html_str += "<table>"
+            html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+            html_str += "<h2 style='text-align: left;'>"+category+"</h2>"
+            html_str += df.to_html(escape=False, index=False)
+            html_str += "</td></tr>"
+            html_str += "</table>"
+        display_html(html_str,raw=True)
 
     def summary( self ) -> None:
         """

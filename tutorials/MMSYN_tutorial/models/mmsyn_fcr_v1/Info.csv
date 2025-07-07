@@ -1,0 +1,18 @@
+General;;
+;Name;JCVI-syn3A
+;Description;Genome-scale CGM of the minimal cell model JCVI-syn3A
+Units;;
+;KM;g/L
+;KA;g/L
+;kcat;1/h ([mass of products]/[mass of protein]/h)
+;rho;g/L
+Sheets;;
+;M;Mass fraction matrix
+;K;Forward Michaelis constant matrix
+;KA;Activation matrix
+;kcat;Turnover numbers
+;conditions;Value of rho and external concentrations at different growth conditions
+;constant_reactions;List of constant reactions
+;constant_rhs;List of pre-defined metabolite abundances in the initial solution
+;f0;Initial solution for the flux fraction vector
+;protein_contributions;Mapping of enzyme to protein mass concentrations

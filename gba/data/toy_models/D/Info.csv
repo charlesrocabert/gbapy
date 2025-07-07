@@ -1,0 +1,12 @@
+General;;
+;Name;D
+;Description;CGM with redundant reactions (rxn3 and rxn4)
+Units;;
+;KM;g/L
+;kcat;1/h ([mass of products]/[mass of protein]/h)
+;rho;g/L
+Sheets;;
+;M;Mass fraction matrix
+;K;Forward Michaelis constant matrix
+;kcat;Turnover numbers
+;conditions;Value of rho and external concentrations at different growth conditions
