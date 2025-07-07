@@ -562,7 +562,7 @@ class Model:
                     self.info[current_category][key.strip()] = content.strip()
             f.close()
             self.Info_loaded = True
-        
+    
     def read_Mx_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the mass fraction matrix M from a CSV file.
@@ -826,21 +826,21 @@ class Model:
         verbose : Optional[bool], default=False
             Print the error messages.
         """
-        if not self.Info_loaded:
+        if not self.Info_loaded and verbose:
             throw_message(MessageType.Info, "Model information is missing.")
-        if not self.KA_loaded:
+        if not self.KA_loaded and verbose:
             throw_message(MessageType.Info, "No KA constants.")
-        if not self.KI_loaded:
+        if not self.KI_loaded and verbose:
             throw_message(MessageType.Info, "No KI constants.")
-        if not self.KR_loaded:
+        if not self.KR_loaded and verbose:
             throw_message(MessageType.Info, "No KR constants.")
-        if not self.constant_rhs_loaded:
+        if not self.constant_rhs_loaded and verbose:
             throw_message(MessageType.Info, "No constant RHS terms.")
-        if not self.constant_reactions_loaded:
+        if not self.constant_reactions_loaded and verbose:
             throw_message(MessageType.Info, "No constant reactions.")
-        if not self.protein_contributions_loaded:
+        if not self.protein_contributions_loaded and verbose:
             throw_message(MessageType.Info, "Protein contributions are missing.")
-        if not self.LP_solution_loaded:
+        if not self.LP_solution_loaded and verbose:
             throw_message(MessageType.Info, "The initial solution is missing.")
     
     def initialize_model_mathematical_variables( self ) -> None:
@@ -964,7 +964,7 @@ class Model:
         ----------
         path : str, default="."
             Path to the CSV files.
-        verbose : Optional[bool], default=False
+        verbose : bool, default=False
             Verbose mode.
         """
         assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
@@ -983,7 +983,20 @@ class Model:
         self.check_model_loading(verbose)
         self.initialize_model_mathematical_variables()
 
-    def write_to_csv( self, path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None:
+    def read_from_ods( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the CGM from ODS files.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the ODS files.
+        """
+        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
+        model_path = path+"/"+self.name
+        all_sheets = pd.read_excel("A.ods", sheet_name=None, engine="odf", header=None)
+    
+    def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
         Write the CGM to CSV files.
 
@@ -991,21 +1004,21 @@ class Model:
         ----------
         path : str, default="."
             Path to the CSV files.
-        verbose : Optional[bool], default=False
-            Verbose mode.        
+        name : str, default=""
+            Name of the CGM. If not provided, the name of the CGM instance will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model_path = path+"/"+self.name
+        model_path = path+"/"+(name if name != "" else self.name)
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv", "KR.csv",
-                     "conditions.csv",
+                     "conditions.csv", "f0.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
@@ -1014,16 +1027,17 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        rows = []
-        for key, value in self.info.items():
-            rows.append([key, value if isinstance(value, str) else ""])
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    rows.append(["", subkey, subvalue])
-        Info_df         = pd.DataFrame(rows)
-        Info_df.columns = ["", "", ""]
-        Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
-        del(Info_df)
+        if len(self.info) > 0:
+            rows = []
+            for key, value in self.info.items():
+                rows.append([key, value if isinstance(value, str) else ""])
+                if isinstance(value, dict):
+                    for subkey, subvalue in value.items():
+                        rows.append(["", subkey, subvalue])
+            Info_df         = pd.DataFrame(rows)
+            Info_df.columns = ["", "", ""]
+            Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
+            del(Info_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1041,21 +1055,24 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KM matrix               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
-        KM_df.to_csv(model_path+"/K.csv", sep=";")
-        del(KM_df)
+        K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        K_df.to_csv(model_path+"/K.csv", sep=";")
+        del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
-        KA_df.to_csv(model_path+"/KA.csv", sep=";")
-        del(KA_df)
-        KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
-        KI_df.to_csv(model_path+"/KI.csv", sep=";")
-        del(KI_df)
-        KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
-        KR_df.to_csv(model_path+"/KR.csv", sep=";")
-        del(KR_df)
+        if np.any(self.KA):
+            KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
+            KA_df.to_csv(model_path+"/KA.csv", sep=";")
+            del(KA_df)
+        if np.any(self.KI):
+            KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+            KI_df.to_csv(model_path+"/KI.csv", sep=";")
+            del(KI_df)
+        if np.any(self.KR):
+            KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
+            KR_df.to_csv(model_path+"/KR.csv", sep=";")
+            del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1065,29 +1082,41 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constant_rhs.csv", "w")
-        f.write("metabolite;value\n")
-        for item in self.constant_rhs.items():
-            f.write(item[0]+";"+str(item[1])+"\n")
-        f.close()
+        if len(self.constant_rhs) > 0:
+            f = open(model_path+"/constant_rhs.csv", "w")
+            f.write("metabolite;value\n")
+            for item in self.constant_rhs.items():
+                f.write(item[0]+";"+str(item[1])+"\n")
+            f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constant_reactions.csv", "w")
-        f.write("reaction;value\n")
-        for item in self.constant_reactions.items():
-            f.write(item[0]+";"+str(item[1])+"\n")
-        f.close()
+        if len(self.constant_reactions) > 0:
+            f = open(model_path+"/constant_reactions.csv", "w")
+            f.write("reaction;value\n")
+            for item in self.constant_reactions.items():
+                f.write(item[0]+";"+str(item[1])+"\n")
+            f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 10) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/protein_contributions.csv", "w")
-        f.write("reaction;protein;contribution\n")
-        for item in self.protein_contributions.items():
-            r_id = item[0]
-            for p_id, val in item[1].items():
-                f.write(r_id+";"+p_id+";"+str(val)+"\n")
-        f.close()
+        if len(self.protein_contributions) > 0:
+            f = open(model_path+"/protein_contributions.csv", "w")
+            f.write("reaction;protein;contribution\n")
+            for item in self.protein_contributions.items():
+                r_id = item[0]
+                for p_id, val in item[1].items():
+                    f.write(r_id+";"+p_id+";"+str(val)+"\n")
+            f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 11) Save the LP solution             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if len(self.LP_solution) > 0:
+            f = open(model_path+"/f0.csv", "w")
+            f.write("reaction;f0\n")
+            for j in range(self.nj):
+                f.write(self.reaction_ids[j]+";"+str(self.LP_solution[j])+"\n")
+            f.close()
 
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1098,25 +1127,27 @@ class Model:
         path : Optional[str], default="."
             Path to the folder.
         name : Optional[str], default=""
-            Name of the folder.
+            Name of the CGM. If not provided, the name of the CGM instance will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        xls_path = path+"/"+(self.name if name == "" else name)+".xlsx"
-        ods_path = path+"/"+(self.name if name == "" else name)+".ods"
+        xls_path = path+"/"+(name if name != "" else self.name)+".xlsx"
+        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        rows = []
-        for key, value in self.info.items():
-            rows.append([key, value if isinstance(value, str) else ""])
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    rows.append(["", subkey, subvalue])
-        Info_df         = pd.DataFrame(rows)
-        Info_df.columns = ["", "", ""]
+        Info_df = None
+        if len(self.info) > 0:
+            rows = []
+            for key, value in self.info.items():
+                rows.append([key, value if isinstance(value, str) else ""])
+                if isinstance(value, dict):
+                    for subkey, subvalue in value.items():
+                        rows.append(["", subkey, subvalue])
+            Info_df         = pd.DataFrame(rows)
+            Info_df.columns = ["", "", ""]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1130,40 +1161,89 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
-        KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+        KA_df = None
+        KI_df = None
+        KR_df = None
+        if np.any(self.KA):
+            KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
+        if np.any(self.KI):
+            KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+        if np.any(self.KR):
+            KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the variables in xlsx       #
+        # 8) Write the constant terms          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        constant_rhs_df       = None
+        constant_reactions_df = None
+        if len(self.constant_rhs) > 0:
+            constant_rhs_df = pd.DataFrame(list(self.constant_rhs.items()), columns=["metabolite", "value"])
+        if len(self.constant_reactions) > 0:
+            constant_reactions_df = pd.DataFrame(list(self.constant_reactions.items()), columns=["reaction", "value"])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the protein contributions   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        protein_contributions_df = None
+        if len(self.protein_contributions) > 0:
+            rows = []
+            for r_id, contributions in self.protein_contributions.items():
+                for p_id, contribution in contributions.items():
+                    rows.append([r_id, p_id, contribution])
+            protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 10) Save the LP solution             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f0_df = None
+        if len(self.LP_solution) > 0:
+            f0_df = pd.DataFrame(self.LP_solution, index=self.reaction_ids, columns=["f0"])
+            f0_df.index.name = "reaction"
+            f0_df.reset_index(inplace=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 11) Write the variables in xlsx      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with pd.ExcelWriter(xls_path) as writer:
-            Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
+            if Info_df is not None:
+                Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
-            KM_df.to_excel(writer, sheet_name="K")
-            KA_df.to_excel(writer, sheet_name="KA")
-            KI_df.to_excel(writer, sheet_name="KI")
+            K_df.to_excel(writer, sheet_name="K")
             conditions_df.to_excel(writer, sheet_name="conditions")
+            if KA_df is not None:
+              KA_df.to_excel(writer, sheet_name="KA")
+            if KR_df is not None:
+                KI_df.to_excel(writer, sheet_name="KI")
+            if constant_rhs_df is not None:
+                constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
+            if constant_reactions_df is not None:
+                constant_reactions_df.to_excel(writer, sheet_name="constant_reactions", index=False)
+            if protein_contributions_df is not None:
+                protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
+            if f0_df is not None:
+                f0_df.to_excel(writer, sheet_name="f0", index=False)
         data_xlsx = get_data(xls_path)
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Free memory                       #
+        # 11) Free memory                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)
         del(kcat_df)
-        del(KM_df)
+        del(K_df)
         del(KA_df)
         del(KI_df)
+        del(KR_df)
         del(conditions_df)
+        del(constant_rhs_df)
+        del(constant_reactions_df)
+        del(protein_contributions_df)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #

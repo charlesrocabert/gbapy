@@ -243,27 +243,28 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) CGM reconstruction                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_row_indices          = {}
-        self.CGM_external_row_indices = {}
-        self.CGM_internal_row_indices = {}
-        self.CGM_col_indices          = {}
-        self.CGM_M                    = None
-        self.CGM_intM                 = None
-        self.CGM_kcat_f               = None
-        self.CGM_kcat_b               = None
-        self.CGM_KM_f                 = None
-        self.CGM_KM_b                 = None
-        self.CGM_KA                   = None
-        self.CGM_KI                   = None
-        self.CGM_KR                   = None
-        self.CGM_conditions           = {}
-        self.CGM_directions           = {}
-        self.CGM_constant_rhs         = {}
-        self.CGM_constant_reactions   = {}
-        self.CGM_column_rank          = 0
-        self.CGM_is_full_column_rank  = False
-        self.CGM_dependent_reactions  = []
-        self.CGM_is_built             = False
+        self.CGM_row_indices           = {}
+        self.CGM_external_row_indices  = {}
+        self.CGM_internal_row_indices  = {}
+        self.CGM_col_indices           = {}
+        self.CGM_M                     = None
+        self.CGM_intM                  = None
+        self.CGM_kcat_f                = None
+        self.CGM_kcat_b                = None
+        self.CGM_KM_f                  = None
+        self.CGM_KM_b                  = None
+        self.CGM_KA                    = None
+        self.CGM_KI                    = None
+        self.CGM_KR                    = None
+        self.CGM_conditions            = {}
+        self.CGM_directions            = {}
+        self.CGM_constant_rhs          = {}
+        self.CGM_constant_reactions    = {}
+        self.CGM_protein_contributions = {}
+        self.CGM_column_rank           = 0
+        self.CGM_is_full_column_rank   = False
+        self.CGM_dependent_reactions   = []
+        self.CGM_is_built              = False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Getters                  #
@@ -1567,6 +1568,15 @@ class Builder:
         self.CGM_KI = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
         self.CGM_KR = np.zeros((len(self.CGM_row_indices), len(self.CGM_col_indices)))
 
+    def compile_protein_contributions( self ) -> None:
+        """
+        Compile the protein contributions from the reactions.
+        """
+        self.CGM_protein_contributions.clear()
+        for r in self.reactions.values():
+            if not r.protein_contributions is None:
+                self.CGM_protein_contributions[r.id] = r.protein_contributions
+
     def compute_mass_fraction_matrix_metrics( self ) -> None:
         """
         Compute the mass fraction matrix metrics:
@@ -1592,6 +1602,7 @@ class Builder:
         self.build_CGM_kcat_vectors()
         self.build_CGM_KM_matrices()
         self.build_CGM_KA_KI_KR_matrices()
+        self.compile_protein_contributions()
         self.compute_mass_fraction_matrix_metrics()
         self.CGM_is_built = True
 
@@ -1651,7 +1662,7 @@ class Builder:
         path : Optional[str], default="."
             Path to the folder.
         name : Optional[str], default=""
-            Name of the folder.
+            Name of the model. If empty, the model name is used.
         """
         assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building CGM variables.")
         assert self.CGM_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
@@ -1659,7 +1670,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        model_path = path+"/"+(self.name if name == "" else name)
+        model_path = path+"/"+(name if name != "" else self.name)
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
@@ -1675,16 +1686,17 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        rows = []
-        for key, value in self.info.items():
-            rows.append([key, value if isinstance(value, str) else ""])
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    rows.append(["", subkey, subvalue])
-        Info_df         = pd.DataFrame(rows)
-        Info_df.columns = ["", "", ""]
-        Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
-        del(Info_df)
+        if len(self.info) > 0:
+            rows = []
+            for key, value in self.info.items():
+                rows.append([key, value if isinstance(value, str) else ""])
+                if isinstance(value, dict):
+                    for subkey, subvalue in value.items():
+                        rows.append(["", subkey, subvalue])
+            Info_df         = pd.DataFrame(rows)
+            Info_df.columns = ["", "", ""]
+            Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
+            del(Info_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1700,7 +1712,7 @@ class Builder:
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the forward KM matrices     #
+        # 5) Write the K matrix                #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for i in self.CGM_row_indices.values():
             for j in self.CGM_col_indices.values():
@@ -1708,21 +1720,24 @@ class Builder:
                     assert self.CGM_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
                 if self.CGM_KM_b[i, j] != 0.0:
                     assert self.CGM_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
-        KM_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KM_df.to_csv(model_path+"/K.csv", sep=";")
-        del(KM_df)
+        K_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        K_df.to_csv(model_path+"/K.csv", sep=";")
+        del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KA_df.to_csv(model_path+"/KA.csv", sep=";")
-        del(KA_df)
-        KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KI_df.to_csv(model_path+"/KI.csv", sep=";")
-        del(KI_df)
-        KR_df = pd.DataFrame(self.CGM_KR, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KR_df.to_csv(model_path+"/KR.csv", sep=";")
-        del(KR_df)
+        if np.any(self.CGM_KA):
+            KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+            KA_df.to_csv(model_path+"/KA.csv", sep=";")
+            del(KA_df)
+        if np.any(self.CGM_KI):
+            KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+            KI_df.to_csv(model_path+"/KI.csv", sep=";")
+            del(KI_df)
+        if np.any(self.CGM_KR):
+            KR_df = pd.DataFrame(self.CGM_KR, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+            KR_df.to_csv(model_path+"/KR.csv", sep=";")
+            del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1732,28 +1747,29 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constant_rhs.csv", "w")
-        f.write("metabolite;value\n")
-        for item in self.CGM_constant_rhs.items():
-            f.write(item[0]+";"+str(item[1])+"\n")
-        f.close()
+        if len(self.CGM_constant_rhs) > 0:
+            f = open(model_path+"/constant_rhs.csv", "w")
+            f.write("metabolite;value\n")
+            for item in self.CGM_constant_rhs.items():
+                f.write(item[0]+";"+str(item[1])+"\n")
+            f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f = open(model_path+"/constant_reactions.csv", "w")
-        f.write("reaction;value\n")
-        for item in self.CGM_constant_reactions.items():
-            f.write(item[0]+";"+str(item[1])+"\n")
-        f.close()
+        if len(self.CGM_constant_reactions) > 0:
+            f = open(model_path+"/constant_reactions.csv", "w")
+            f.write("reaction;value\n")
+            for item in self.CGM_constant_reactions.items():
+                f.write(item[0]+";"+str(item[1])+"\n")
+            f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 10) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
-        for r in self.reactions.values():
-            if not r.protein_contributions is None:
-                for item in r.protein_contributions.items():
-                    f.write(r.id+";"+item[0]+";"+str(item[1])+"\n")
+        for r_id, contributions in self.CGM_protein_contributions.items():
+            for p_id, contribution in contributions.items():
+                f.write(r_id+";"+p_id+";"+str(contribution)+"\n")
         f.close()
 
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -1765,7 +1781,7 @@ class Builder:
         path : Optional[str], default="."
             Path to the folder.
         name : Optional[str], default=""
-            Name of the folder.
+            Name of the model. If empty, the model name is used.
         """
         assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building CGM variables.")
         assert self.CGM_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
@@ -1773,19 +1789,21 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        xls_path = path+"/"+(self.name if name == "" else name)+".xlsx"
-        ods_path = path+"/"+(self.name if name == "" else name)+".ods"
+        xls_path = path+"/"+(name if name != "" else self.name)+".xlsx"
+        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        rows = []
-        for key, value in self.info.items():
-            rows.append([key, value if isinstance(value, str) else ""])
-            if isinstance(value, dict):
-                for subkey, subvalue in value.items():
-                    rows.append(["", subkey, subvalue])
-        Info_df         = pd.DataFrame(rows)
-        Info_df.columns = ["", "", ""]
+        Info_df = None
+        if len(self.info) > 0:
+            rows = []
+            for key, value in self.info.items():
+                rows.append([key, value if isinstance(value, str) else ""])
+                if isinstance(value, dict):
+                    for subkey, subvalue in value.items():
+                        rows.append(["", subkey, subvalue])
+            Info_df         = pd.DataFrame(rows)
+            Info_df.columns = ["", "", ""]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1805,40 +1823,79 @@ class Builder:
                     assert self.CGM_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
                 if self.CGM_KM_b[i, j] != 0.0:
                     assert self.CGM_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.CGM_row_indices.keys())[i]}</code> and reaction <code>{list(self.CGM_col_indices.keys())[j]}</code>.")
-        KM_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        K_df = pd.DataFrame(self.CGM_KM_f+self.CGM_KM_b, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the KA, KI and KR matrices  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the conditions              #
+        # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.CGM_conditions)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the variables in xlsx       #
+        # 7) Write the KA, KI and KR matrices  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        KA_df = None
+        KI_df = None
+        KR_df = None
+        if np.any(self.CGM_KA):
+            KA_df = pd.DataFrame(self.CGM_KA, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        if np.any(self.CGM_KI):
+            KI_df = pd.DataFrame(self.CGM_KI, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        if np.any(self.CGM_KR):
+            KR_df = pd.DataFrame(self.CGM_KR, index=self.CGM_row_indices.keys(), columns=self.CGM_col_indices.keys())
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Write the constant terms          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        constant_rhs_df       = None
+        constant_reactions_df = None
+        if len(self.CGM_constant_rhs) > 0:
+            constant_rhs_df = pd.DataFrame(list(self.CGM_constant_rhs.items()), columns=["metabolite", "value"])
+        if len(self.CGM_constant_reactions) > 0:
+            constant_reactions_df = pd.DataFrame(list(self.CGM_constant_reactions.items()), columns=["reaction", "value"])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the protein contributions   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        protein_contributions_df = None
+        if len(self.CGM_protein_contributions) > 0:
+            rows = []
+            for r_id, contributions in self.CGM_protein_contributions.items():
+                for p_id, contribution in contributions.items():
+                    rows.append([r_id, p_id, contribution])
+            protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the variables in xlsx       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with pd.ExcelWriter(xls_path) as writer:
-            Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
+            if Info_df is not None:
+                Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
-            KM_df.to_excel(writer, sheet_name="K")
-            KA_df.to_excel(writer, sheet_name="KA")
-            KI_df.to_excel(writer, sheet_name="KI")
+            K_df.to_excel(writer, sheet_name="K")
             conditions_df.to_excel(writer, sheet_name="conditions")
+            if KA_df is not None:
+              KA_df.to_excel(writer, sheet_name="KA")
+            if KR_df is not None:
+                KI_df.to_excel(writer, sheet_name="KI")
+            if constant_rhs_df is not None:
+                constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
+            if constant_reactions_df is not None:
+                constant_reactions_df.to_excel(writer, sheet_name="constant_reactions", index=False)
+            if protein_contributions_df is not None:
+                protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
         data_xlsx = get_data(xls_path)
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Free memory                       #
+        # 10) Free memory                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)
         del(kcat_df)
-        del(KM_df)
+        del(K_df)
         del(KA_df)
         del(KI_df)
+        del(KR_df)
         del(conditions_df)
+        del(constant_rhs_df)
+        del(constant_reactions_df)
+        del(protein_contributions_df)
 
     def write_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
