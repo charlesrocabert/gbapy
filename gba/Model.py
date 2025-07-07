@@ -2902,6 +2902,27 @@ def read_csv_model( name: str, path: Optional[str] = "." ) -> Model:
     model.read_from_csv(path=path)
     return model
 
+def read_ods_model( name: str, path: Optional[str] = "." ) -> Model:
+    """
+    Read a CGM from ODS files.
+
+    Parameters
+    ----------
+    name : str
+        Name of the CGM.
+    path : Optional[str], default="."
+        Path to the model folder.
+
+    Returns
+    -------
+    Model
+        The loaded CGM.
+    """
+    assert os.path.exists(path+"/"+name+".ods"), throw_message(MessageType.Error, "The folder "+path+"/"+name+".ods does not exist.")
+    model = Model(name)
+    model.read_from_ods(path=path)
+    return model
+
 def get_toy_model_path( model_name: str ) -> str:
     """
     Get the path of a toy CGM included in the Python package as CSV files.

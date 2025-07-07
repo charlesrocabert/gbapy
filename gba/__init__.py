@@ -64,6 +64,7 @@ from gba.Builder import (
 from gba.Model import (
     Model,
     read_csv_model,
+    read_ods_model,
     get_toy_model_path,
     read_toy_model,
     backup_model,
