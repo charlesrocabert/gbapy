@@ -1,7 +1,20 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/df4ed0db-09c2-4f19-8424-5cd7180905d7" width=150 />
+  <img src="https://github.com/user-attachments/assets/b7933326-5074-4256-8857-58fbe89b6092" width=150 />
 </p>
-<h3 align="center">Growth Balance Analysis for Python.</h3>
+<h3 align="center">Growth Balance Analysis for Python</h3>
+
+<p align="center">
+<br />
+<a href="https://github.com/charlesrocabert/gbapy/releases/latest"><img src="https://img.shields.io/github/release/charlesrocabert/gbapy/all.svg" /></a>&nbsp;
+<a href="https://github.com/charlesrocabert/gbapy/actions/workflows/cmake-multi-platform.yml"><img src="https://github.com/charlesrocabert/gbapy/actions/workflows/cmake-multi-platform.yml/badge.svg" /></a>&nbsp;
+<a href="https://github.com/charlesrocabert/gbapy/LICENSE.html"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
+</p>
+
+<p align="center">
+  <a href="https://www.cs.hhu.de/en/research-groups/computational-cell-biology" target="_blank"><img src="https://github.com/user-attachments/assets/4e4b3b79-0d6a-4328-9c3f-3497401887e4" width=150 /></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.hhu.de/en/" target="_blank"><img src="https://github.com/user-attachments/assets/7db5c8f7-e37a-415f-88c3-1b06a49e1f28" width=150 /></a>
+</p>
 
 -----------------
 
