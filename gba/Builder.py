@@ -2075,7 +2075,7 @@ class Builder:
         f.close()
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 8) Summary function         #
+    # 8) Summary functions        #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def information( self ) -> None:

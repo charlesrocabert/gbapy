@@ -89,8 +89,8 @@ class Model:
         Forward kcat vector.
     kcat_b : np.array
         Backward kcat vector.
-    KM: np.array
-        Complete KM matrix.
+    K: np.array
+        Complete K matrix.
     KM_f : np.array
         Forward KM matrix.
     KM_b : np.array
@@ -123,7 +123,7 @@ class Model:
         Is the mass fraction matrix loaded?
     kcat_loaded : bool
         Are the kcat constants loaded?
-    KM_loaded : bool
+    K_loaded : bool
         Are the KM constants loaded?
     KA_loaded : bool
         Are the KA constants loaded?
@@ -228,13 +228,15 @@ class Model:
     
     Methods
     -------
+    read_Info_from_csv( self, path: Optional[str] = "." ) -> None
+        Read the model information from a CSV file.
     read_Mx_from_csv( path: Optional[str] = "." ) -> None
         Read the mass fraction matrix M from a CSV file.
     read_kcat_from_csv( path: Optional[str] = "." ) -> None
         Read the kcat forward and backward constant vectors from a CSV
         file.
-    read_KM_from_csv( path: Optional[str] = "." ) -> None
-        Read the Michaelis constant matrix KM from a CSV file.
+    read_K_from_csv( path: Optional[str] = "." ) -> None
+        Read the Michaelis constant matrix K from a CSV file.
     read_KA_from_csv( path: Optional[str] = "." ) -> None
         Read the activation constants matrix KA from a CSV file.
     read_KI_from_csv( path: Optional[str] = "." ) -> None
@@ -411,13 +413,11 @@ class Model:
         """
         assert name != "", throw_message(MessageType.Error, "You must provide a name to the CGM constructor.")
         self.name = name
+        self.info = {}
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) CGM                           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-        ### Info ###
-        self.info = ""
 
         ### Identifier lists ###
         self.metabolite_ids   = []
@@ -432,7 +432,7 @@ class Model:
         self.M                  = np.array([])
         self.kcat_f             = np.array([])
         self.kcat_b             = np.array([])
-        self.KM                 = np.array([])
+        self.K                  = np.array([])
         self.KM_f               = np.array([])
         self.KM_b               = np.array([])
         self.KA                 = np.array([])
@@ -451,10 +451,10 @@ class Model:
         self.proteomics            = {}
 
         ### Loaded objects ###
+        self.Info_loaded                  = False
         self.Mx_loaded                    = False
         self.kcat_loaded                  = False
-        self.KM_f_loaded                  = False
-        self.KM_b_loaded                  = False
+        self.K_loaded                     = False
         self.KA_loaded                    = False
         self.KI_loaded                    = False
         self.KR_loaded                    = False
@@ -538,6 +538,31 @@ class Model:
     # 1) Model loading methods           #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+    def read_Info_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the model information from a CSV file.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        self.Info_loaded = False
+        filename         = path+"/"+self.name+"/Info.csv"
+        if os.path.exists(filename):
+            f = open(path+"/"+self.name+"/info.csv", "r")
+            for line in f:
+                parts = line.strip().split(";")
+                parts += [""] * (3 - len(parts))  # pad to ensure 3 elements
+                category, key, content = parts[:3]
+                if category:
+                    current_category = category.strip()
+                    self.info[current_category] = {}
+                elif key and current_category:
+                    self.info[current_category][key.strip()] = content.strip()
+            f.close()
+            self.Info_loaded = True
+        
     def read_Mx_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the mass fraction matrix M from a CSV file.
@@ -547,23 +572,22 @@ class Model:
         path : str, default="."
             Path to the CSV file.
         """
-        self.Mx_loaded = False
         filename       = path+"/"+self.name+"/M.csv"
-        if os.path.exists(filename):
-            df                  = pd.read_csv(filename, sep=";")
-            self.metabolite_ids = self.metabolite_ids+list(df["Unnamed: 0"])
-            self.metabolite_ids = list(dict.fromkeys(self.metabolite_ids))
-            self.c_ids          = self.c_ids+[x for x in self.metabolite_ids if not x.startswith("x_")]
-            self.x_ids          = self.x_ids+[x for x in self.metabolite_ids if x.startswith("x_")]
-            self.x_ids          = list(dict.fromkeys(self.x_ids))
-            self.c_ids          = list(dict.fromkeys(self.c_ids))
-            self.reaction_ids   = list(df.columns)[1:df.shape[1]]
-            df                  = df.drop(["Unnamed: 0"], axis=1)
-            df.index            = self.metabolite_ids
-            self.Mx             = np.array(df)
-            self.Mx             = self.Mx.astype(float)
-            self.Mx_loaded      = True
-            del(df)
+        assert os.path.exists(filename), throw_message(MessageType.Error, "The file M.csv does not exist in the specified path: "+filename)
+        df                  = pd.read_csv(filename, sep=";")
+        self.metabolite_ids = self.metabolite_ids+list(df["Unnamed: 0"])
+        self.metabolite_ids = list(dict.fromkeys(self.metabolite_ids))
+        self.c_ids          = self.c_ids+[x for x in self.metabolite_ids if not x.startswith("x_")]
+        self.x_ids          = self.x_ids+[x for x in self.metabolite_ids if x.startswith("x_")]
+        self.x_ids          = list(dict.fromkeys(self.x_ids))
+        self.c_ids          = list(dict.fromkeys(self.c_ids))
+        self.reaction_ids   = list(df.columns)[1:df.shape[1]]
+        df                  = df.drop(["Unnamed: 0"], axis=1)
+        df.index            = self.metabolite_ids
+        self.Mx             = np.array(df)
+        self.Mx             = self.Mx.astype(float)
+        self.Mx_loaded      = True
+        del(df)
 
     def read_kcat_from_csv( self, path: Optional[str] = "." ) -> None:
         """
@@ -577,41 +601,41 @@ class Model:
         """
         self.kcat_loaded = False
         filename         = path+"/"+self.name+"/kcat.csv"
-        if os.path.exists(filename):
-            df              = pd.read_csv(filename, sep=";")
-            df              = df.drop(["Unnamed: 0"], axis=1)
-            kcat            = np.array(df)
-            kcat            = kcat.astype(float)
-            self.kcat_f     = np.array(kcat[0,:])
-            self.kcat_b     = np.array(kcat[1,:])
-            self.reversible = []
-            for j in range(len(self.kcat_b)):
-                if self.kcat_b[j] > 0.0:
-                    self.reversible.append(True)
-                else:
-                    self.reversible.append(False)
-            self.kcat_loaded = True
-            del(df)
+        assert os.path.exists(filename), throw_message(MessageType.Error, "The file kcat.csv does not exist in the specified path: "+filename)
+        df              = pd.read_csv(filename, sep=";")
+        df              = df.drop(["Unnamed: 0"], axis=1)
+        kcat            = np.array(df)
+        kcat            = kcat.astype(float)
+        self.kcat_f     = np.array(kcat[0,:])
+        self.kcat_b     = np.array(kcat[1,:])
+        self.reversible = []
+        for j in range(len(self.kcat_b)):
+            if self.kcat_b[j] > 0.0:
+                self.reversible.append(True)
+            else:
+                self.reversible.append(False)
+        self.kcat_loaded = True
+        del(df)
 
-    def read_KM_from_csv( self, path: Optional[str] = "." ) -> None:
+    def read_K_from_csv( self, path: Optional[str] = "." ) -> None:
         """
-        Read the Michaelis constant matrix KM from a CSV file.
+        Read the Michaelis constant matrix K from a CSV file.
 
         Parameters
         ----------
         path : str, default="."
             Path to the CSV file.
         """
-        self.KM_loaded = False
+        self.K_loaded = False
         filename       = path+"/"+self.name+"/K.csv"
-        if os.path.exists(filename):
-            df             = pd.read_csv(filename, sep=";")
-            df             = df.drop(["Unnamed: 0"], axis=1)
-            df.index       = self.metabolite_ids
-            self.KM        = np.array(df)
-            self.KM        = self.KM.astype(float)
-            self.KM_loaded = True
-            del(df)
+        assert os.path.exists(filename), throw_message(MessageType.Error, "The file K.csv does not exist in the specified path: "+filename)
+        df            = pd.read_csv(filename, sep=";")
+        df            = df.drop(["Unnamed: 0"], axis=1)
+        df.index      = self.metabolite_ids
+        self.K        = np.array(df)
+        self.K        = self.K.astype(float)
+        self.K_loaded = True
+        del(df)
 
     def read_KA_from_csv( self, path: Optional[str] = "." ) -> None:
         """
@@ -690,16 +714,16 @@ class Model:
         """
         self.conditions_loaded = False
         filename               = path+"/"+self.name+"/conditions.csv"
-        if os.path.exists(filename):
-            df                     = pd.read_csv(filename, sep=";")
-            self.condition_params  = list(df["Unnamed: 0"])
-            self.condition_ids     = list(df.columns)[1:df.shape[1]]
-            self.condition_ids     = [str(int(name)) for name in self.condition_ids]
-            df                     = df.drop(["Unnamed: 0"], axis=1)
-            df.index               = self.condition_params
-            self.conditions        = np.array(df)
-            self.conditions_loaded = True
-            del(df)
+        assert os.path.exists(filename), throw_message(MessageType.Error, "The file conditions.csv does not exist in the specified path: "+filename)
+        df                     = pd.read_csv(filename, sep=";")
+        self.condition_params  = list(df["Unnamed: 0"])
+        self.condition_ids     = list(df.columns)[1:df.shape[1]]
+        self.condition_ids     = [str(int(name)) for name in self.condition_ids]
+        df                     = df.drop(["Unnamed: 0"], axis=1)
+        df.index               = self.condition_params
+        self.conditions        = np.array(df)
+        self.conditions_loaded = True
+        del(df)
 
     def read_constant_rhs_from_csv( self, path: Optional[str] = "." ) -> None:
         """
@@ -802,24 +826,22 @@ class Model:
         verbose : Optional[bool], default=False
             Print the error messages.
         """
-        assert self.Mx_loaded, throw_message(MessageType.Error, "Mass fraction matrix Mx not loaded.")
-        assert self.kcat_loaded, throw_message(MessageType.Error, "kcat constants not loaded.")
-        assert self.KM_loaded, throw_message(MessageType.Error, "KM constants not loaded.")
-        assert self.conditions_loaded, throw_message(MessageType.Error, "Conditions not loaded.")
+        if not self.Info_loaded:
+            throw_message(MessageType.Info, "Model information is missing.")
         if not self.KA_loaded:
-            throw_message(MessageType.Info, "KA constants not loaded.")
+            throw_message(MessageType.Info, "No KA constants.")
         if not self.KI_loaded:
-            throw_message(MessageType.Info, "KI constants not loaded.")
+            throw_message(MessageType.Info, "No KI constants.")
         if not self.KR_loaded:
-            throw_message(MessageType.Info, "KR constants not loaded.")
+            throw_message(MessageType.Info, "No KR constants.")
         if not self.constant_rhs_loaded:
-            throw_message(MessageType.Info, "Constant RHS terms not loaded.")
+            throw_message(MessageType.Info, "No constant RHS terms.")
         if not self.constant_reactions_loaded:
-            throw_message(MessageType.Info, "Constant reactions not loaded.")
+            throw_message(MessageType.Info, "No constant reactions.")
         if not self.protein_contributions_loaded:
-            throw_message(MessageType.Info, "Protein contributions not loaded.")
+            throw_message(MessageType.Info, "Protein contributions are missing.")
         if not self.LP_solution_loaded:
-            throw_message(MessageType.Info, "LP solution not loaded.")
+            throw_message(MessageType.Info, "The initial solution is missing.")
     
     def initialize_model_mathematical_variables( self ) -> None:
         """
@@ -833,9 +855,9 @@ class Model:
         for i in range(self.Mx.shape[0]):
             for j in range(self.Mx.shape[1]):
                 if self.Mx[i,j] < 0:
-                    self.KM_f[i,j] = self.KM[i,j]
+                    self.KM_f[i,j] = self.K[i,j]
                 elif self.Mx[i,j] > 0:
-                    self.KM_b[i,j] = self.KM[i,j]
+                    self.KM_b[i,j] = self.K[i,j]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Inverse of KI                                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -946,9 +968,10 @@ class Model:
             Verbose mode.
         """
         assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, "Folder "+path+"/"+self.name+" does not exist.")
+        self.read_Info_from_csv(path)
         self.read_Mx_from_csv(path)
         self.read_kcat_from_csv(path)
-        self.read_KM_from_csv(path)
+        self.read_K_from_csv(path)
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
         self.read_KR_from_csv(path)
@@ -979,21 +1002,36 @@ class Model:
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         else:
-            files = ["M.csv", "kcat.csv", "K.csv",
+            files = ["Info.csv",
+                     "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv", "KR.csv",
-                     "conditions.csv", "constant_rhs.csv", "constant_reactions.csv",
+                     "conditions.csv",
+                     "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the mass fraction matrix    #
+        # 2) Write the information             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rows = []
+        for key, value in self.info.items():
+            rows.append([key, value if isinstance(value, str) else ""])
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    rows.append(["", subkey, subvalue])
+        Info_df         = pd.DataFrame(rows)
+        Info_df.columns = ["", "", ""]
+        Info_df.to_csv(model_path+"/Info.csv", sep=";", index=False, header=False)
+        del(Info_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the kcat vectors            #
+        # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
         kcat_df["kcat_b"] = self.kcat_b
@@ -1001,13 +1039,13 @@ class Model:
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the KM matrix               #
+        # 5) Write the KM matrix               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
         KM_df.to_csv(model_path+"/K.csv", sep=";")
         del(KM_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA, KI and KR matrices  #
+        # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
         KA_df.to_csv(model_path+"/KA.csv", sep=";")
@@ -1019,13 +1057,13 @@ class Model:
         KR_df.to_csv(model_path+"/KR.csv", sep=";")
         del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the conditions              #
+        # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the constant RHS terms      #
+        # 8) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_rhs.csv", "w")
         f.write("metabolite;value\n")
@@ -1033,7 +1071,7 @@ class Model:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant reactions      #
+        # 9) Write the constant reactions      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/constant_reactions.csv", "w")
         f.write("reaction;value\n")
@@ -1041,7 +1079,7 @@ class Model:
             f.write(item[0]+";"+str(item[1])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Save protein contributions        #
+        # 10) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
@@ -1069,32 +1107,44 @@ class Model:
         xls_path = path+"/"+(self.name if name == "" else name)+".xlsx"
         ods_path = path+"/"+(self.name if name == "" else name)+".ods"
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the mass fraction matrix    #
+        # 2) Write the information             #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rows = []
+        for key, value in self.info.items():
+            rows.append([key, value if isinstance(value, str) else ""])
+            if isinstance(value, dict):
+                for subkey, subvalue in value.items():
+                    rows.append(["", subkey, subvalue])
+        Info_df         = pd.DataFrame(rows)
+        Info_df.columns = ["", "", ""]
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the kcat vectors            #
+        # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
         kcat_df["kcat_b"] = self.kcat_b
         kcat_df           = kcat_df.transpose()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the forward KM matrices     #
+        # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KM_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA, KI and KR matrices  #
+        # 6) Write the KA, KI and KR matrices  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
         KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the conditions              #
+        # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the variables in xlsx       #
+        # 8) Write the variables in xlsx       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with pd.ExcelWriter(xls_path) as writer:
+            Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
             KM_df.to_excel(writer, sheet_name="K")
@@ -1105,8 +1155,9 @@ class Model:
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Free memory                       #
+        # 9) Free memory                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        del(Info_df)
         del(M_df)
         del(kcat_df)
         del(KM_df)
@@ -2568,8 +2619,40 @@ class Model:
         self.clear_MCMC_trajectory()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 7) Summary function         #
+    # 7) Summary functions        #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def information( self ) -> None:
+        """
+        Print the CGM information.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Compile information #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        dfs = {}
+        for category in self.info.keys():
+            data = self.info[category]
+            df = {
+                "Element": [],
+                "Description": []
+            }
+            for key, content in data.items():
+                df["Element"].append(key)
+                df["Description"].append(content)
+            df = pd.DataFrame(df)
+            dfs[category] = df
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Display table       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~#
+        html_str  = "<h1>CGM "+self.name+"</h1>"
+        for category, df in dfs.items():
+            html_str += "<table>"
+            html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
+            html_str += "<h2 style='text-align: left;'>"+category+"</h2>"
+            html_str += df.to_html(escape=False, index=False)
+            html_str += "</td></tr>"
+            html_str += "</table>"
+        display_html(html_str,raw=True)
 
     def summary( self ) -> None:
         """
