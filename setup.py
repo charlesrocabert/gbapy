@@ -58,7 +58,7 @@ setup(
 	keywords     = "constraint-based-modeling growth-balance-analysis systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
 	packages     = find_packages(exclude=["contrib", "docs", "tests"]),
 	package_data = {
-        'gba.data': [ '**/*.csv', ]
+        'gba.data': ['**/*.csv', '**/*.ods']
     },
 	python_requires  = ">=3",
 	install_requires = ["argparse", "numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly", "openpyxl", "pyexcel_ods3", "pyexcel_xlsx"],

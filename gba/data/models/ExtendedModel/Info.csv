@@ -1,0 +1,14 @@
+General;;
+;Name;ExtendedModel
+;Description;Extended Model of Synechocystis
+Units;;
+;Km;g/L
+;kcat;1/h ([mass of products]/[mass of protein]/h)
+;rho;g/L
+Sheets;;
+;M;Mass fraction matrix
+;K;Michaelis constant matrix
+;KA;Activation constant matrix
+;KI;Inhibition constant matrix
+;kcat;Turnover numbers
+;conditions;Value of rho and external concentrations at different growth conditions

@@ -1,0 +1,8 @@
+General;;
+;Name;BaseModel
+;Description;Base Synechocystis model with 4 irreversible reactions
+;Organism;Synechocystis sp. PCC 6803
+Units;;
+;Km;g/L
+;kcat;1/h ([mass of products]/[mass of protein]/h)
+;rho;g/L
