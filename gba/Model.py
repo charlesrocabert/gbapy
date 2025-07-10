@@ -139,8 +139,8 @@ class Model:
         Are the constant reactions loaded?
     protein_contributions_loaded : bool
         Are the protein contributions loaded?
-    LP_solution_loaded : bool
-        Is the LP solution loaded?
+    initial_solution_loaded : bool
+        Is the initial solution loaded?
     nx : int
         Number of external metabolites.
     nc : int
@@ -169,8 +169,8 @@ class Model:
         Column rank of M.
     full_column_rank : bool
         Does the matrix have full column rank?
-    LP_solution : np.array
-        Linear programming solution.
+    initial_solution : np.array
+        Initial solution.
     optimal_solutions : dict
         Optimal f vectors for all conditions.
     random_solutions : dict
@@ -251,8 +251,8 @@ class Model:
         Read the list of constant reactions from a CSV file.
     read_protein_contributions_from_csv( path: Optional[str] = "." ) -> None
         Read the list of protein contributions from a CSV file.
-    read_LP_from_csv( path: Optional[str] = "." ) -> None
-        Read the LP solution from a CSV file (on request).
+    read_initial_solution_from_csv( path: Optional[str] = "." ) -> None
+        Read the initial solution from a CSV file (on request).
     check_model_loading( verbose: Optional[bool] = False ) -> None
         Check if the model is loaded correctly.
     initialize_model_mathematical_variables( ) -> None
@@ -282,7 +282,7 @@ class Model:
     set_condition( self, condition_id: str ) -> None
         Set the current condition of the CGM.
     set_f0( self, f0: np.array ) -> None
-        Set the initial LP solution of the CGM.
+        Set the initial solution f0 of the CGM.
     set_f( self ) -> None
         Set the flux fractions vector of the CGM.
     gaussian_kernel( self, x: np.array, mu: float ) -> np.array
@@ -352,7 +352,7 @@ class Model:
         Check the model state's consistency.
     solve_local_linear_problem( self,max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0 ) -> None
         Solve the local linear problem to find the initial solution.
-    generate_LP_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0, condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None
+    find_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0, condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None
         Generate an initial solution using a linear program.
     generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None
         Generate random initial solutions.
@@ -462,7 +462,7 @@ class Model:
         self.constant_rhs_loaded          = False
         self.constant_reactions_loaded    = False
         self.protein_contributions_loaded = False
-        self.LP_solution_loaded           = False
+        self.initial_solution_loaded      = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) CGM constants                 #
@@ -493,7 +493,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Solutions                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.LP_solution       = np.array([])
+        self.initial_solution  = np.array([])
         self.optimal_solutions = {}
         self.random_solutions  = {}
         
@@ -800,21 +800,21 @@ class Model:
             f.close()
             self.protein_contributions_loaded = True
     
-    def read_LP_from_csv( self, path: Optional[str] = "." ) -> None:
+    def read_initial_solution_from_csv( self, path: Optional[str] = "." ) -> None:
         """
-        Read the LP solution from a CSV file (on request).
+        Read the initial solution from a CSV file (on request).
 
         Parameters
         ----------
         path : str, default="."
             Path to the CSV file.
         """
-        self.LP_solution_loaded = False
-        filename                = path+"/"+self.name+"/f0.csv"
+        self.initial_solution_loaded = False
+        filename                     = path+"/"+self.name+"/f0.csv"
         if os.path.exists(filename):
-            df                      = pd.read_csv(filename, sep=";")
-            self.LP_solution        = np.array(df["f0"])
-            self.LP_solution_loaded = True
+            df                           = pd.read_csv(filename, sep=";")
+            self.initial_solution        = np.array(df["f0"])
+            self.initial_solution_loaded = True
             del(df)
 
     def check_model_loading( self, verbose: Optional[bool] = False ) -> None:
@@ -840,7 +840,7 @@ class Model:
             throw_message(MessageType.Info, "No constant reactions.")
         if not self.protein_contributions_loaded and verbose:
             throw_message(MessageType.Info, "Protein contributions are missing.")
-        if not self.LP_solution_loaded and verbose:
+        if not self.initial_solution_loaded and verbose:
             throw_message(MessageType.Info, "The initial solution is missing.")
     
     def initialize_model_mathematical_variables( self ) -> None:
@@ -978,7 +978,7 @@ class Model:
         self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
         self.read_protein_contributions_from_csv(path)
-        self.read_LP_from_csv(path)
+        self.read_initial_solution_from_csv(path)
         self.check_model_loading()
         self.initialize_model_mathematical_variables()
 
@@ -1123,13 +1123,13 @@ class Model:
                     f.write(r_id+";"+p_id+";"+str(val)+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Save the LP solution             #
+        # 11) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if len(self.LP_solution) > 0:
+        if len(self.initial_solution) > 0:
             f = open(model_path+"/f0.csv", "w")
             f.write("reaction;f0\n")
             for j in range(self.nj):
-                f.write(self.reaction_ids[j]+";"+str(self.LP_solution[j])+"\n")
+                f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
             f.close()
 
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -1212,11 +1212,11 @@ class Model:
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save the LP solution             #
+        # 10) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f0_df = None
-        if len(self.LP_solution) > 0:
-            f0_df = pd.DataFrame(self.LP_solution, index=self.reaction_ids, columns=["f0"])
+        if len(self.initial_solution) > 0:
+            f0_df            = pd.DataFrame(self.initial_solution, index=self.reaction_ids, columns=["f0"])
             f0_df.index.name = "reaction"
             f0_df.reset_index(inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1258,6 +1258,7 @@ class Model:
         del(constant_rhs_df)
         del(constant_reactions_df)
         del(protein_contributions_df)
+        del(f0_df)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #
@@ -1920,14 +1921,14 @@ class Model:
         gpmodel.addConstr(self.sM @ v == 1, name="c2")
         gpmodel.optimize()
         try:
-            self.LP_solution = np.copy(v.X)
+            self.initial_solution = np.copy(v.X)
             return True
         except:
             throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
-    def generate_LP_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0,
-                                      condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None:
+    def find_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0,
+                               condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None:
         """
         Generate an initial solution using a linear program.
 
@@ -1945,7 +1946,7 @@ class Model:
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
         if solved:
             self.set_condition(condition_id)
-            self.set_f0(self.LP_solution)
+            self.set_f0(self.initial_solution)
             self.calculate_state()
             self.check_model_consistency()
             if self.consistent:
@@ -2310,7 +2311,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.optimal_solutions.clear()
         for condition_id in self.condition_ids:
-            self.set_f0(self.LP_solution)
+            self.set_f0(self.initial_solution)
             converged, run_time = self.gradient_ascent(condition_id=condition_id, max_time=max_time, initial_dt=initial_dt)
             data_dict           = {"condition": condition_id, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
             self.track_variables(["f"], data_dict)
@@ -3026,7 +3027,7 @@ def create_model( name: str, path: Optional[str] = ".", cgm_path: Optional[str] 
     if save_LP:
         throw_message(MessageType.Plain, f"Computing LP solution for model {model.name}...")
         model.solve_local_linear_problem()
-        model.set_f0(model.LP_solution)
+        model.set_f0(model.initial_solution)
         model.set_condition("1")
         model.calculate_state()
         model.check_model_consistency()
