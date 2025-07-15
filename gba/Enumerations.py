@@ -42,6 +42,7 @@ class SpeciesType(enum.Enum):
     - Protein      : Protein species (amino-acid sequence available).
     - SmallMolecule: Small molecule species (chemical formula available).
     - MacroMolecule: Macro-molecule species (chemical formula with radical).
+    - Unknown      : Species type is unknown.
     """
     DNA           = 1
     RNA           = 2
@@ -101,6 +102,7 @@ class CgmReactionType(enum.Enum):
     - iMMa : Irreversible Michaelis-Menten reaction with activation.
     - iMMi : Irreversible Michaelis-Menten reaction with inhibition.
     - iMMia: Irreversible Michaelis-Menten reaction with activation and inhibition.
+    - iMMr : Irreversible Michaelis-Menten reaction with regulation.
     - rMM  : Reversible Michaelis-Menten reaction.
     """
     iMM   = 1
@@ -113,12 +115,7 @@ class CgmReactionType(enum.Enum):
 class CgmConstants(float, enum.Enum):
     """
     Constant for CGM algorithms.
-    - MIN_CONCENTRATION            : Minimum concentration value.
-    - MIN_FLUX_FRACTION            : Minimum flux fraction value.
-    - MAX_FLUX_FRACTION            : Maximum flux fraction value.
-    - DENSITY_TOL                  : Density tolerance threshold (|1-rho| < ε).
-    - NEGATIVE_C_TOL               : Negative C tolerance threshold (C > -ε).
-    - NEGATIVE_P_TOL               : Negative P tolerance threshold (P > -ε).
+    - TOL                          : Tolerance value.
     - TRAJECTORY_CONVERGENCE_COUNT : Number of iterations with equal mu values to consider the trajectory stable.
     - TRAJECTORY_CONVERGENCE_TOL   : Mu threshold below which growth rates are considered equal.
     - DECREASING_DT_FACTOR         : Factor by which the time step is decreased when the trajectory is unstable.
@@ -129,19 +126,14 @@ class CgmConstants(float, enum.Enum):
     - EXPORT_DATA_COUNT            : Frequency of data export.
     - REGULATION_SIGMA             : Width of the regulation Gaussian kernel.
     """
-    MIN_CONCENTRATION            = 1e-10
-    MIN_FLUX_FRACTION            = 1e-10
-    DENSITY_TOL                  = 1e-10
-    NEGATIVE_C_TOL               = 1e-10
-    NEGATIVE_P_TOL               = 1e-10
-    TRAJECTORY_CONVERGENCE_COUNT = 100
-    TRAJECTORY_CONVERGENCE_TOL   = 1e-10
+    TOL                          = 1e-10
+    TRAJECTORY_CONVERGENCE_COUNT = 10000
     DECREASING_DT_FACTOR         = 5.0
     INCREASING_DT_FACTOR         = 2.0
     INCREASING_DT_COUNT          = 100
     MIN_DT                       = 1e-100
     PRINT_DATA_COUNT             = 1
-    EXPORT_DATA_COUNT            = 1
+    EXPORT_DATA_COUNT            = 100
     REGULATION_SIGMA             = 2.0
 
 class MessageType(enum.Enum):

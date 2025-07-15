@@ -4,6 +4,12 @@
 *.Rapp.history
 clean_folders.sh
 deprecated/
+tutorials/MMSYN_tutorial/temp/**
+tutorials/MMSYN_tutorial/output/**
+tutorials/MMSYN_tutorial/backup/**
+tutorials/MMSYN_tutorial/hpc_download/**
+tutorials/MMSYN_tutorial/models/**
+tutorials/MMSYN_tutorial/deprecated/**
 
 # tutorials under writing
 

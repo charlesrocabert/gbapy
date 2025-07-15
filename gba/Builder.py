@@ -81,10 +81,24 @@ class Builder:
         Reconstructed FBA solution.
     FBA_row_indices : dict[str, int]
         FBA row indices (metabolite ID to index map).
+    FBA_external_row_indices : dict[str, int]
+        FBA external row indices (metabolite ID to index map).
+    FBA_internal_row_indices : dict[str, int]
+        FBA internal row indices (metabolite ID to index map).
     FBA_col_indices : dict[str, int]
         FBA column indices (reaction ID to index map).
     FBA_S : numpy.ndarray
         FBA stoichiometry matrix.
+    FBA_intS: numpy.ndarray
+        FBA internal stoichiometry matrix.
+    FBA_column_rank: int
+        FBA internal stoichiometry matrix column rank.
+    FBA_is_full_column_rank: bool
+        Is the FBA internal stoichiometry matrix full column rank?
+    FBA_dependent_reactions: list[str]
+        List of linearly dependent reactions in the FBA internal stoichiometry matrix.
+    FBA_inactive_reactions: list[str]
+        List of inactive reactions in the FBA solution.
     FBA_is_built : bool
         Is the FBA model built?
     CGM_row_indices : dict[str, int]
@@ -97,12 +111,12 @@ class Builder:
         CGM column indices (reaction ID to index map).
     CGM_M : numpy.ndarray
         CGM complete mass fraction matrix.
+    CGM_intM : numpy.ndarray
+        CGM internal mass fraction matrix.
     CGM_kcat_f : numpy.array
         CGM forward kcat vector.
     CGM_kcat_b : numpy.array
         CGM backward kcat vector.
-    CGM_KM : numpy.array
-        CGM KM matrix.
     CGM_KM_f : numpy.array
         CGM forward KM matrix.
     CGM_KM_b : numpy.array
@@ -119,6 +133,14 @@ class Builder:
         CGM metabolites with a constant RHS term for the initial solution
     CGM_constant_reactions : dict[str, float]
         CGM reactions with a constant flux value.
+    CGM_protein_contributions: dict[str, float]
+        Enzyme to protein mass concentration mapping.
+    CGM_column_rank: int
+        Internal mass fraction matrix column rank.
+    CGM_is_full_column_rank: bool
+        Is the internal mass fraction matrix full column rank?
+    CGM_dependent_reactions: list[str]
+        List of linearly dependent reaction in the internal mass fraction matrix.
     CGM_is_built : bool
         Is the CGM built?
 
@@ -182,6 +204,10 @@ class Builder:
         Clear all external conditions from the CGM.
     add_condition( condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None
         Add an external condition to the CGM.
+    clear_constant_rhs( self ) -> None
+        Clear the list of constant metabolite fractions in the initial solution.
+    add_constant_rhs( self, metabolite_id: str, value: float ) -> None
+        Add a constant metabolite fraction in the initial solution.
     clear_constant_reactions() -> None
         Clear all constant reactions from the CGM.
     add_constant_reaction( reaction_id: str, value: float ) -> None
@@ -257,7 +283,6 @@ class Builder:
         self.CGM_KI                    = None
         self.CGM_KR                    = None
         self.CGM_conditions            = {}
-        self.CGM_directions            = {}
         self.CGM_constant_rhs          = {}
         self.CGM_constant_reactions    = {}
         self.CGM_protein_contributions = {}
@@ -265,6 +290,7 @@ class Builder:
         self.CGM_is_full_column_rank   = False
         self.CGM_dependent_reactions   = []
         self.CGM_is_built              = False
+        self.CGM_initial_solution      = {}
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Getters                  #
@@ -819,13 +845,6 @@ class Builder:
         """
         assert reaction_id not in self.CGM_constant_reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is already constant.")
         self.CGM_constant_reactions[reaction_id] = value
-    
-    def reset_conversion( self ) -> None:
-        """
-        Reset the CGM conversion of all reactions in the model.
-        """
-        for reaction in self.reactions.values():
-            reaction.reset_conversion()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Model consistency tests  #

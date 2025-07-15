@@ -105,6 +105,8 @@ class Reaction:
         Remove a metabolite from the stoichiometry of the reaction.
     remove_protein( protein_id: str ) -> None
         Remove a protein from the enzyme composition of the reaction.
+    clear_proteins( self ) -> None
+        Delete all proteins from the GPR.
     rename_metabolite( previous_id: str, new_id: str ) -> None
         Rename a metabolite in the stoichiometry of the reaction.
     add_kcat_value( direction: ReactionDirection, kcat_value: float ) -> None
@@ -119,6 +121,8 @@ class Reaction:
         Complete the kcat values of the reaction.
     complete_km_values( km_value: float ) -> None
         Complete the KM values of the reaction.
+    complete( self, kcat_value: float, km_value: float ) -> None
+        Complete kinetic parameter values for the reaction.
     define_direction() -> None
         Define the direction of the reaction based on the lower and upper bounds.
     define_expression() -> None

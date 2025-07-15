@@ -233,8 +233,7 @@ class Model:
     read_Mx_from_csv( path: Optional[str] = "." ) -> None
         Read the mass fraction matrix M from a CSV file.
     read_kcat_from_csv( path: Optional[str] = "." ) -> None
-        Read the kcat forward and backward constant vectors from a CSV
-        file.
+        Read the kcat constant vectors from a CSV file.
     read_K_from_csv( path: Optional[str] = "." ) -> None
         Read the Michaelis constant matrix K from a CSV file.
     read_KA_from_csv( path: Optional[str] = "." ) -> None
@@ -346,7 +345,11 @@ class Model:
         Compute the local growth rate gradient with respect to f.
     compute_GCC_f( self ) -> None
         Compute the local growth control coefficients with respect to f.
-    calculate_state( self ) -> None
+    calculate_first_order_terms( self ) -> None
+        Calculate first order terms of the model state.
+    calculate_second_order_terms( self ) -> None
+        Calculate second order terms of the model state.
+    calculate( self ) -> None
         Calculate the model state.
     check_model_consistency( self ) -> None
         Check the model state's consistency.
@@ -356,50 +359,10 @@ class Model:
         Generate an initial solution using a linear program.
     generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None
         Generate random initial solutions.
-    mutate_f( self, index: int, sigma: float ) -> np.array
-        Mutate one element 'index' of f with a Gaussian standard deviation 'sigma'.
-    calculate_pi( self, selection_coefficient: float, N_e: float ) -> float
-        Calculate the fixation probability pi for a given selection coefficient and effective population size.
-    track_variables( self, variables: list[int], data_dict: dict[str, float] ) -> None
-        Track additional variables.
-    block_reactions( self, block_GCC: Optional[bool] = True ) -> None
-        Block reactions tending to zero.
-    gradient_ascent( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0, initial_dt: Optional[float] = 0.01, track: Optional[bool] = False, variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
-        Run a gradient ascent algorithm to find the optimal flux state.
-    compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01, verbose: Optional[bool] = False ) -> float
-        Compute the optima by gradient ascent for all conditions.
-    MC_simulation( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0, max_iterations: Optional[int] = 100000, sigma: Optional[float] = 0.1, N_e: Optional[float] = 2.5e7, track: Optional[bool] = False, variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
-        Run a Monte Carlo simulation with genetic drift.
-    MCMC_simulation( self, condition_id: Optional[str] = "1", max_iterations: Optional[int] = 100000, sigma: Optional[float] = 0.1, N_e: Optional[float] = 2.5e7, track: Optional[bool] = False , variables: Optional[list[str]] = ["f"], label: Optional[int] = 1, verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]
-        Run a Markov Monte Carlo simulation with genetic drift.
-    save_f0( self, path: Optional[str] = "." ) -> None
-        Save the initial flux state to CSV.
-    save_random_solutions( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save the random data to CSV.
-    save_optima( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save the optima data to CSV.
-    save_gradient_ascent_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save the gradient ascent trajectory to CSV.
-    save_MC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save the Monte Carlo trajectory to CSV.
-    save_MCMC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save the Markov Chain Monte Carlo trajectory to CSV.
-    save_all_trajectories( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None
-        Save all trajectories to CSV.
-    clear_gradient_ascent_trajectory( self ) -> None
-        Clear the gradient ascent trajectory.
-    clear_MC_trajectory( self ) -> None
-        Clear the Monte Carlo trajectory.
-    clear_MCMC_trajectory( self ) -> None
-        Clear the Markov Chain Monte Carlo trajectory.
-    clear_all_trajectories( self ) -> None
-        Clear all trajectories.
+    information( self ) -> None
+        Print some informations about the CGM.
     summary( self ) -> None
         Print a summary of the CGM.
-    create_figure( self, title: str ) -> go.Figure
-        Create a figure for plotting.
-    add_trajectory( self, fig: go.Figure, source: str, x_var: str, y_var: str, x_factor: Optional[float] = 1.0, y_factor: Optional[float] = 1.0, name: Optional[str] = "", data: Optional[pd.DataFrame] = None ) -> None
-        Add a trajectory to a figure.
     """
 
     def __init__( self, name: str ) -> None:
@@ -862,7 +825,7 @@ class Model:
         # 1) Inverse of KI                                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with np.errstate(divide='ignore'):
-            self.rKI                     = 1/self.KI
+            self.rKI                     = 1.0/self.KI
             self.rKI[np.isinf(self.rKI)] = 0.0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Vector lengths                                      #
@@ -997,18 +960,25 @@ class Model:
         filename = path+"/"+self.name+".ods"
         assert os.path.exists(filename), throw_message(MessageType.Error, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
-        os.mkdir(self.name)
+        if not os.path.exists("./temp/"):
+            os.mkdir("./temp/")
+        if not os.path.exists("./temp/"+self.name):
+            os.mkdir("./temp/"+self.name)
         for sheet_name in xls.sheet_names:
             df = pd.read_excel(xls, sheet_name=sheet_name).fillna("")
-            df.to_csv(self.name+"/"+sheet_name+".csv", sep=";", index=False)
+            df.to_csv("./temp/"+self.name+"/"+sheet_name+".csv", sep=";", index=False)
         # 2) Load the model from the temporary CSV files #
-        self.read_from_csv()
+        self.read_from_csv(path="./temp")
         self.check_model_loading()
         self.initialize_model_mathematical_variables()
         # 3) Delete the temporary files #
         for sheet_name in xls.sheet_names:
-           os.remove(self.name+"/"+sheet_name+".csv")
-        os.rmdir(self.name)
+            if os.path.exists("./temp/"+self.name+"/"+sheet_name+".csv"):
+               os.remove("./temp/"+self.name+"/"+sheet_name+".csv")
+            if os.path.exists("./temp/"+self.name+"/f0.csv"):
+                os.remove("./temp/"+self.name+"/f0.csv")
+        os.rmdir("./temp/"+self.name)
+        os.rmdir("./temp/")
     
     def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1131,7 +1101,17 @@ class Model:
             for j in range(self.nj):
                 f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
             f.close()
-
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 12) Save the optimums per condition  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if not self.optima_data.empty:
+            self.optima_data.to_csv(model_path+"/optimal_solutions.csv", sep=';', index=False)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 13) Save random initial solutions    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if not self.random_data.empty:
+            self.random_data.to_csv(model_path+"/random_solutions.csv", sep=';', index=False)
+    
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
         Export the CGM to a folder in ODS format.
@@ -1241,6 +1221,10 @@ class Model:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
             if f0_df is not None:
                 f0_df.to_excel(writer, sheet_name="f0", index=False)
+            if not self.optima_data.empty:
+                self.optima_data.to_excel(writer, sheet_name="optimal_solutions", index=False)
+            if not self.random_data.empty:
+                self.random_data.to_excel(writer, sheet_name="random_solutions", index=False)
         data_xlsx = get_data(xls_path)
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
@@ -1370,7 +1354,6 @@ class Model:
                 else:
                     vec.append(default_concentration)
         self.condition_ids.append(condition_id)
-        # add vec as a new column
         self.conditions = np.column_stack([self.conditions, np.array(vec)]) if self.conditions.size else np.array(vec)
     
     def clear_constant_rhs( self ) -> None:
@@ -1449,8 +1432,8 @@ class Model:
             x_name    = self.x_ids[i]
             x_value   = self.get_condition(self.condition, x_name)
             self.x[i] = x_value
-            if self.adjust_concentrations and self.x[i] < CgmConstants.MIN_CONCENTRATION.value:
-                self.x[i] = CgmConstants.MIN_CONCENTRATION.value
+            if self.adjust_concentrations and self.x[i] < CgmConstants.TOL.value:
+                self.x[i] = CgmConstants.TOL.value
 
     def set_f0( self, f0: np.array ) -> None:
         """
@@ -1465,14 +1448,6 @@ class Model:
         self.f0      = np.copy(f0)
         self.f_trunc = np.copy(self.f0[1:self.nj])
         self.f       = np.copy(self.f0)
-    
-    def set_f( self ) -> None:
-        """
-        Set the flux fraction vector f from the truncated vector
-        f_trunc.
-        """
-        term1  = (1-self.sM[1:].dot(self.f_trunc))/self.sM[0]
-        self.f = np.copy(np.concatenate([np.array([term1]), self.f_trunc]))
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Analytical methods              #
@@ -1520,7 +1495,7 @@ class Model:
         """
         self.c = self.rho*self.M.dot(self.f)
         if self.adjust_concentrations:
-            self.c[self.c < CgmConstants.MIN_CONCENTRATION.value] = CgmConstants.MIN_CONCENTRATION.value
+            self.c[self.c < CgmConstants.TOL.value] = CgmConstants.TOL.value
         self.xc = np.concatenate([self.x, self.c])
     
     def iMM( self, j: int ) -> None:
@@ -1598,7 +1573,7 @@ class Model:
             Reaction index.
         """
         kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
+        kr_vec[kr_vec < CgmConstants.TOL.value] = self.xc[kr_vec < CgmConstants.TOL.value]
         gaussian_kernel = self.log_gaussian_kernel(self.xc, kr_vec)
         term1           = np.prod(1.0+self.KM_f[:,j]/(self.xc*gaussian_kernel))
         term2           = self.kcat_f[j]
@@ -1742,7 +1717,7 @@ class Model:
             Reaction index.
         """
         kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < CgmConstants.MIN_CONCENTRATION.value] = self.xc[kr_vec < CgmConstants.MIN_CONCENTRATION.value]
+        kr_vec[kr_vec < CgmConstants.TOL.value] = self.xc[kr_vec < CgmConstants.TOL.value]
         gaussian_kernel = self.gaussian_kernel(self.xc, kr_vec)
         constant1       = self.kcat_f[j]
         for i in range(self.nc):
@@ -1852,9 +1827,9 @@ class Model:
         """
         self.GCC_f = self.dmu_f-self.dmu_f[0]*(self.sM/self.sM[0])
     
-    def calculate_state( self ) -> None:
+    def calculate_first_order_terms( self ) -> None:
         """
-        Calculate the model state.
+        Calculate the first order terms of the model state.
         """
         self.compute_c()
         for j in range(self.nj):
@@ -1864,18 +1839,30 @@ class Model:
         self.compute_p()
         self.compute_b()
         self.compute_density()
+    
+    def calculate_second_order_terms( self ) -> None:
+        """
+        Calculate the second order terms of the model state.
+        """
         for j in range(self.nj):
             self.compute_dtau(j)
         self.compute_dmu_f()
         self.compute_GCC_f()
+    
+    def calculate( self ) -> None:
+        """
+        Calculate the model state.
+        """
+        self.calculate_first_order_terms()
+        self.calculate_second_order_terms()
 
     def check_model_consistency( self ) -> None:
         """
         Check the model state's consistency.
         """
-        test1 = (np.abs(self.density-1.0) < CgmConstants.DENSITY_TOL.value)
-        test2 = (sum(1 for x in self.c if x < -CgmConstants.NEGATIVE_C_TOL.value) == 0)
-        test3 = (sum(1 for x in self.p if x < -CgmConstants.NEGATIVE_P_TOL.value) == 0)
+        test1 = (np.abs(self.density-1.0) < CgmConstants.TOL.value)
+        test2 = (sum(1 for x in self.c if x < -CgmConstants.TOL.value) == 0)
+        test3 = (sum(1 for x in self.p if x < -CgmConstants.TOL.value) == 0)
         self.consistent = True
         if not (test1 and test2 and test3):
             self.consistent = False
@@ -1884,7 +1871,7 @@ class Model:
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0 ) -> None:
+    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
         """
         Solve the local linear problem to find the initial solution.
 
@@ -1902,10 +1889,17 @@ class Model:
         rhs_factor : Optional[float], default=100.0
             Factor dividing the rhs of the mass conservation constraint.
         """
-        assert max_flux_fraction > CgmConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > CgmConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
         assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
-        lb_vec = [CgmConstants.MIN_FLUX_FRACTION.value]*self.nj
+        lb_vec = []
+        for j in range(self.nj):
+            if self.reversible[j]:
+                lb_vec.append(-max_flux_fraction)
+            else:
+                lb_vec.append(CgmConstants.TOL.value)
+        #lb_vec = [CgmConstants.TOL.value]*self.nj
         ub_vec = [max_flux_fraction]*self.nj
+        print(lb_vec)
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
            lb_vec[r_index] = item[1]
@@ -1928,7 +1922,7 @@ class Model:
             return False
 
     def find_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0,
-                               condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None:
+                               condition_id: Optional[str] = "1" ) -> None:
         """
         Generate an initial solution using a linear program.
 
@@ -1940,19 +1934,15 @@ class Model:
             Factor dividing the rhs of the mass conservation constraint.
         condition_id : Optional[str], default="1"
             Condition identifier.
-        save_f0 : Optional[str], default=None
-            Path to save the initial solution.
         """
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
         if solved:
             self.set_condition(condition_id)
             self.set_f0(self.initial_solution)
-            self.calculate_state()
+            self.calculate()
             self.check_model_consistency()
             if self.consistent:
                 throw_message(MessageType.Info, f"Model is consistent with mu = {self.mu}.")
-                if save_f0 is not None:
-                    self.save_f0(path=save_f0)
             else:
                 throw_message(MessageType.Info, "Model is inconsistent.")
         else:
@@ -1980,7 +1970,7 @@ class Model:
         assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
         assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
         assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
-        assert max_flux_fraction > CgmConstants.MIN_FLUX_FRACTION.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > CgmConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.TOL.value}.")
         assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
@@ -2000,8 +1990,8 @@ class Model:
             negative_term  = True
             while negative_term:
                 self.f_trunc = np.random.rand(self.nj-1)
-                self.f_trunc = self.f_trunc*(max_flux_fraction-CgmConstants.MIN_FLUX_FRACTION)+CgmConstants.MIN_FLUX_FRACTION
-                self.set_f()
+                self.f_trunc = self.f_trunc*(max_flux_fraction-CgmConstants.TOL)+CgmConstants.TOL
+                self.set_f_from_f_trunc()
                 if self.f[0] >= 0.0:
                     negative_term = False
             self.calculate_state()
@@ -2018,704 +2008,8 @@ class Model:
                     throw_message(MessageType.Plain, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 6) Optimization Methods            #
+    # 7) Summary functions               #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-    def mutate_f( self, index: int, sigma: float ) -> np.array:
-        """
-        Mutate one element 'index' of f with a Gaussian standard deviation 'sigma'.
-
-        Parameters
-        ----------
-        index : int
-            Index of the element to mutate.
-        sigma : float
-            Standard deviation of the Gaussian distribution.
-        
-        Returns
-        -------
-        np.array
-            Non-mutated flux fraction vector.
-        """
-        assert index < self.nj, throw_message(MessageType.Error, f"Index <code>{index}</code> is out of bounds.")
-        assert sigma > 0.0, throw_message(MessageType.Error, f"Sigma must be positive.")
-        non_mutated_f        = np.copy(self.f_trunc)
-        epsilon              = np.random.normal(0.0, sigma, size=1)
-        self.f_trunc[index] += epsilon
-        self.block_reactions(block_GCC=False)
-        #self.f_trunc[self.f_trunc < CgmConstants.MIN_FLUX_FRACTION] = CgmConstants.MIN_FLUX_FRACTION
-        self.set_f()
-        return non_mutated_f
-    
-    def calculate_pi( self, selection_coefficient: float, N_e: float ) -> float:
-        """
-        Calculate the fixation probability pi for a given selection coefficient and effective population size.
-
-        Parameters
-        ----------
-        selection_coefficient : float
-            Selection coefficient.
-        N_e : float
-            Effective population size.
-
-        Returns
-        -------
-        float
-            Fixation probability.
-        """
-        pi = 0.0
-        with np.errstate(divide="ignore", over="ignore", invalid="ignore"):
-            if selection_coefficient == 0.0:
-                pi = 1.0/N_e
-            else:
-                pi = (1-np.exp(-2*selection_coefficient)) / (1-np.exp(-2*N_e*selection_coefficient))
-        return pi
-    
-    def track_variables( self, variables: list[int], data_dict: dict[str, float] ) -> None:
-        """
-        Track additional variables.
-
-        Parameters
-        ----------
-        variables : list[int]
-            Variables to track (f, v, p, b, c).
-        data_dict : dict[str, float]
-            Data dictionary.
-        """
-        allowed_variables = ["f", "v", "p", "b", "c"]
-        for variable in variables:
-            assert variable in allowed_variables, throw_message(MessageType.Error, f"Variable <code>{variable}</code> is not allowed.")
-            if variable == "f":
-                for r_id, value in zip(self.reaction_ids, getattr(self, variable)):
-                    data_dict["f_"+r_id] = value
-            elif variable == "v":
-                for r_id, value in zip(self.reaction_ids, getattr(self, variable)):
-                    data_dict["v_"+r_id] = value
-            elif variable == "p":
-                for r_id, value in zip(self.reaction_ids, getattr(self, variable)):
-                    data_dict["p_"+r_id] = value
-            elif variable == "b":
-                for c_id, value in zip(self.c_ids, getattr(self, variable)):
-                    data_dict["b_"+c_id] = value
-            elif variable == "c":
-                for c_id, value in zip(self.c_ids, getattr(self, variable)):
-                    data_dict["c_"+c_id] = value
-
-    def block_reactions( self, block_GCC: Optional[bool] = True ) -> None:
-        """
-        Block reactions tending to zero.
-
-        Description
-        -----------
-        f values tending towards zero are bounded to min value.
-        Corresponding derivative values are set to zero depending
-        on the direction:
-        - f -> 0+ and gcc < 0: f = min_f, gcc = 0
-        - f -> 0- and gcc > 0: f = -min_f, gcc = 0
-
-        Parameters
-        ----------
-        block_GCC : Optional[bool], default=True
-            Block the GCC values.
-        """
-        for j in range(self.nj-1):
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # 1) Reaction is irreversible and positive #
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            if self.directions[j+1] == ReactionDirection.Forward and self.f_trunc[j] <= CgmConstants.MIN_FLUX_FRACTION.value:
-                self.f_trunc[j] = CgmConstants.MIN_FLUX_FRACTION.value
-                if block_GCC and self.GCC_f[(j+1)] < 0.0:
-                    self.GCC_f[(j+1)] = 0.0
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # 2) Reaction is irreversible and negative #
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            elif self.directions[j+1] == ReactionDirection.Backward and self.f_trunc[j] >= -CgmConstants.MIN_FLUX_FRACTION.value:
-                self.f_trunc[j] = -CgmConstants.MIN_FLUX_FRACTION.value
-                if block_GCC and self.GCC_f[(j+1)] > 0.0:
-                    self.GCC_f[(j+1)] = 0.0
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # 3) Reaction is reversible                #
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # elif self.directions[j+1] == ReactionDirection.Reversible and np.abs(self.f_trunc[j]) <= CgmConstants.MIN_FLUX_FRACTION.value:
-            #     if block_GCC:
-            #         self.GCC_f[(j+1)] = 0.0
-            #     if self.f_trunc[j] >= 0.0:
-            #         self.f_trunc[j] = CgmConstants.MIN_FLUX_FRACTION.value
-            #     elif self.f_trunc[j] < 0.0:
-            #         self.f_trunc[j] = -CgmConstants.MIN_FLUX_FRACTION.value
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            # 4) Reaction is constant                  #
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            if self.reaction_ids[(j+1)] in self.constant_reactions:
-                self.f_trunc[j] = self.constant_reactions[self.reaction_ids[(j+1)]]
-                if block_GCC:
-                    self.GCC_f[(j+1)] = 0.0
-    
-    def gradient_ascent( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
-                         initial_dt: Optional[float] = 0.01, track: Optional[bool] = False,
-                         variables: Optional[list[str]] = ["f"], label: Optional[int] = 1,
-                         verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]:
-        """
-        Run a gradient ascent algorithm to find the optimal flux state.
-
-        Parameters
-        ----------
-        condition_id : str, default="1"
-            Condition identifier.
-        max_time : float, default=10.0
-            Maximum time for the algorithm.
-        initial_dt : float, default=0.01
-            Initial time step.
-        track : bool, default=False
-            Track the trajectory of variables.
-        variables : list[str], default=["f"]
-            Additional variables to track.
-        label : int, default=1
-            Label for the trajectory.
-        verbose : bool, default=False
-            Verbose mode.
-        print_period : int, default=0
-            Period for printing the state.
-
-        Returns
-        -------
-        tuple[bool, float]
-            Convergence status and run time.
-        """
-        start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.adjust_concentrations = False
-        self.set_condition(condition_id)
-        self.calculate_state()
-        self.check_model_consistency()
-        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize the tracker   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if track:
-            if self.GA_tracker.empty:
-                columns = ["label", "condition", "iter", "dt", "t", "mu", "doubling_time", "fixed"]
-                self.GA_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "iter": 0, "dt": initial_dt, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
-            self.track_variables(variables, data_dict)
-            data_row        = pd.Series(data=data_dict)
-            self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Initialize the algorithm #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t                     = 0.0
-        dt                    = initial_dt
-        mu_alteration_counter = 0
-        previous_f            = np.copy(self.f_trunc)
-        previous_mu           = self.mu
-        self.converged        = False
-        nb_iterations         = 0
-        nb_fixed              = 0
-        dt_counter            = 0
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Start the main loop      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        while (t < max_time):
-            nb_iterations += 1
-            if verbose and print_period > 0 and nb_iterations%print_period == 0:
-               throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (time = {t}, mu = {self.mu}, dt = {dt}).")
-            ### 4.1) Test trajectory convergence ###
-            if mu_alteration_counter >= CgmConstants.TRAJECTORY_CONVERGENCE_COUNT.value:
-                self.converged = True
-                break
-            ### 4.2) Calculate the next step ###
-            previous_mu = self.mu
-            self.block_reactions()
-            self.f_trunc = self.f_trunc+self.GCC_f[1:]*dt
-            self.set_f()
-            self.calculate_state()
-            self.check_model_consistency()
-            ### 4.3) If the model is consistent: ###
-            if self.consistent and self.mu >= previous_mu:
-                previous_f  = np.copy(self.f_trunc)
-                t           = t + dt
-                dt_counter += 1
-                nb_fixed   += 1
-                if track and nb_iterations%CgmConstants.EXPORT_DATA_COUNT == 0:
-                    data_dict = {"label": label, "condition": condition_id, "iter": nb_iterations, "dt": dt, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
-                    self.track_variables(variables, data_dict)
-                    data_row        = pd.Series(data=data_dict)
-                    self.GA_tracker = pd.concat([self.GA_tracker, data_row.to_frame().T], ignore_index=True)
-                ### Check if mu changes significantly ###
-                if np.abs(self.mu - previous_mu) < CgmConstants.TRAJECTORY_CONVERGENCE_TOL.value:
-                    mu_alteration_counter += 1
-                else:
-                    mu_alteration_counter = 0
-                ### Check if dt is never changing, and possibly increase it ###
-                if dt_counter == CgmConstants.INCREASING_DT_COUNT.value:
-                    dt         = dt*CgmConstants.INCREASING_DT_FACTOR.value
-                    dt_counter = 0
-            ### 4.4) If the model is inconsistent: ###
-            else:
-                self.f_trunc = np.copy(previous_f)
-                self.set_f()
-                self.calculate_state()
-                self.check_model_consistency()
-                assert self.consistent, throw_message(MessageType.Error, "Previous model is not consistent.")
-                if (dt > CgmConstants.MIN_DT):
-                    dt         = dt/CgmConstants.DECREASING_DT_FACTOR.value
-                    dt_counter = 0
-                else:
-                    throw_message(MessageType.Error, f"Adaptative timestep < {CgmConstants.MIN_DT}.")
-                    sys.exit(1)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Final algorithm steps    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        end_time = time.time()
-        run_time = end_time-start_time
-        if t >= max_time:
-            if verbose:
-                throw_message(MessageType.Plain, f"Gradient ascent: maximum time reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
-            return False, run_time
-        else:
-            if verbose:
-                throw_message(MessageType.Plain, f"Gradient ascent: convergence reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
-            return True, run_time
-
-    def compute_optima( self, max_time: Optional[int] = 10, initial_dt: Optional[float] = 0.01,
-                        verbose: Optional[bool] = False ) -> float:
-        """
-        Compute the optima by gradient ascent for all conditions.
-
-        Parameters
-        ----------
-        max_time : Optional[int], default=10
-            Maximum time for the algorithm.
-        initial_dt : Optional[float], default=0.01
-            Initial time step.
-        verbose : Optional[bool], default=False
-            Verbose mode.
-
-        Returns
-        -------
-        float
-            Run time.
-        """
-        start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the optima data frame #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        columns = ["condition", "mu", "density", "converged", "run_time"]
-        for r_id in self.reaction_ids:
-            columns.append("f_"+r_id)
-        self.optima_data = pd.DataFrame(columns=columns)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Calculate the optima             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.optimal_solutions.clear()
-        for condition_id in self.condition_ids:
-            self.set_f0(self.initial_solution)
-            converged, run_time = self.gradient_ascent(condition_id=condition_id, max_time=max_time, initial_dt=initial_dt)
-            data_dict           = {"condition": condition_id, "mu": self.mu, "density": self.density, "converged": int(converged), "run_time": run_time}
-            self.track_variables(["f"], data_dict)
-            data_row                             = pd.Series(data=data_dict)
-            self.optima_data                     = pd.concat([self.optima_data, data_row.to_frame().T], ignore_index=True)
-            self.optimal_solutions[condition_id] = np.copy(self.f)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Return the result                  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        end_time = time.time()
-        run_time = end_time-start_time
-        if verbose:
-            throw_message(MessageType.Plain, f"All optima were computed in {run_time} seconds.")
-        return run_time
-    
-    def MC_simulation( self, condition_id: Optional[str] = "1", max_time: Optional[float] = 10.0,
-                       max_iterations: Optional[int] = 100000, sigma: Optional[float] = 0.1,
-                       N_e: Optional[float] = 2.5e7, track: Optional[bool] = False,
-                       variables: Optional[list[str]] = ["f"], label: Optional[int] = 1,
-                       verbose: Optional[bool] = False, print_period: Optional[int] = 0 ) -> tuple[bool, float]:
-        """
-        Run a Monte Carlo simulation with genetic drift.
-
-        Notes
-        -----
-        The algorithm is based on the Pál & Miklós (1999) model.
-        f(t+1) = f(t) + sigma * dmu/df + epsilon.
-
-        Parameters
-        ----------
-        condition_id : Optional[str], default="1"
-            Condition identifier.
-        max_time : Optional[float], default=10.0
-            Maximum time for the algorithm.
-        max_iterations : Optional[int], default=100000
-            Maximum number of iterations.
-        sigma : Optional[float], default=0.1
-            Standard deviation of the noise.
-        N_e : Optional[float], default=2.5e7
-            Effective population size.
-        track : Optional[bool], default=False
-            Track the trajectory of variables.
-        variables : Optional[list[str]], default=["f"]
-            Additional variables to track.
-        label : Optional[int], default=1
-            Label for the trajectory.
-        verbose : Optional[bool], default=False
-            Verbose mode.
-        print_period : Optional[int], default=0
-            Period for printing the state.
-
-        Returns
-        -------
-        tuple[bool, float]
-            Convergence status and run time.
-        """
-        start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.set_condition(condition_id)
-        self.calculate_state()
-        self.check_model_consistency()
-        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize tracker       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if track:
-            if self.MC_tracker.empty:
-                columns = ["label", "condition", "t", "mu", "doubling_time", "fixed"]
-                self.MC_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
-            self.track_variables(variables, data_dict)
-            data_row        = pd.Series(data=data_dict)
-            self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Initialize the algorithm #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        t             = 0.0
-        previous_f    = np.copy(self.f_trunc)
-        previous_mu   = self.mu
-        nb_iterations = 0
-        nb_fixed      = 0
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Start the loop           #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        while (t < max_time):
-            nb_iterations += 1
-            if verbose and print_period > 0 and nb_iterations%print_period == 0:
-               throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (time = {t}, mu = {self.mu}, fixed = {nb_fixed}).")
-            if nb_iterations >= max_iterations:
-                if verbose:
-                    throw_message(MessageType.Plain, f"Maximum number of iterations reached (condition <code>{condition_id}</code>).")
-                break
-            ### 4.1) Calculate the next step ###
-            self.block_reactions()
-            epsilon      = np.random.normal(0.0, np.sqrt(sigma/(2.0*N_e)), size=self.nj-1)
-            self.f_trunc = self.f_trunc+sigma*self.GCC_f[1:]+epsilon
-            self.set_f()
-            self.calculate_state()
-            self.check_model_consistency()
-            ### 4.2) If the model is consistent: ###
-            if self.consistent and self.mu > 1e-10:# and self.mu >= previous_mu:
-                previous_f   = np.copy(self.f_trunc)
-                previous_mu  = self.mu
-                t           += 1
-                nb_fixed    += 1
-                if track and nb_iterations % CgmConstants.EXPORT_DATA_COUNT == 0:
-                    data_dict = {"label": label, "condition": condition_id, "t": t, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
-                    self.track_variables(variables, data_dict)
-                    data_row        = pd.Series(data=data_dict)
-                    self.MC_tracker = pd.concat([self.MC_tracker, data_row.to_frame().T], ignore_index=True)
-            ### 4.3) If the model is inconsistent: ###
-            else:
-                self.f_trunc = np.copy(previous_f)
-                self.set_f()
-                self.calculate_state()
-                self.check_model_consistency()
-                assert self.consistent, throw_message(MessageType.Error, "Previous model is not consistent.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Final algorithm steps    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        end_time = time.time()
-        run_time = end_time-start_time
-        if nb_fixed == 0 and nb_iterations < max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MC simulation completed with no fixed mutation (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
-            return False, run_time
-        elif nb_fixed > 0 and nb_iterations < max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MC simulation completed (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
-            return True, run_time
-        elif nb_iterations >= max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MC simulation: maximum iterations reached (condition <code>{condition_id}</code>, mu = {round(self.mu, 5)}, nb iterations = {nb_iterations}, nb fixed = {nb_fixed}).")
-            return False, run_time
-
-    def MCMC_simulation( self, condition_id: Optional[str] = "1", max_iterations: Optional[int] = 100000,
-                         sigma: Optional[float] = 0.1, N_e: Optional[float] = 2.5e7,
-                         track: Optional[bool] = False , variables: Optional[list[str]] = ["f"],
-                         label: Optional[int] = 1, verbose: Optional[bool] = False,
-                         print_period: Optional[int] = 0 ) -> tuple[bool, float]:
-        """
-        Run a Markov Monte Carlo simulation with genetic drift.
-
-        Notes
-        -----
-        The algorithm is based on the standard MCMC formulation (Gillespie, 1983).
-
-        Parameters
-        ----------
-        condition_id : Optional[str], default="1"
-            Condition identifier.
-        max_iterations : Optional[int], default=100000
-            Maximum number of iterations.
-        sigma : Optional[float], default=0.1
-            Standard deviation of the noise.
-        N_e : Optional[float], default=2.5e7
-            Effective population size.
-        track : Optional[bool], default=False
-            Track the trajectory of variables.
-        variables : Optional[list[str]], default=["f"]
-            Additional variables to track.
-        label : Optional[int], default=1
-            Label for the trajectory.
-        verbose : Optional[bool], default=False
-            Verbose mode.
-        print_period : Optional[int], default=0
-            Period for printing the state.
-
-        Returns
-        -------
-        tuple[bool, float]
-            Convergence status and run time.
-        """
-        start_time = time.time()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the model      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.set_condition(condition_id)
-        self.calculate_state()
-        self.check_model_consistency()
-        assert self.consistent, throw_message(MessageType.Error, "Initial model is not consistent.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Initialize trackers       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if track:
-            if self.MCMC_tracker.empty:
-                columns           = ["label", "condition", "t", "mu", "doubling_time", "fixed"]
-                self.MCMC_tracker = pd.DataFrame(columns=columns)
-            data_dict = {"label": label, "condition": condition_id, "t": 0.0, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": 0}
-            self.track_variables(variables, data_dict)
-            data_row          = pd.Series(data=data_dict)
-            self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Initialize the algorithm  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        current_mu = self.mu
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Start the MCMC            #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        nb_iterations = 0
-        nb_fixed      = 0
-        while nb_iterations < max_iterations:
-            nb_iterations += 1
-            if verbose and print_period > 0 and nb_iterations%print_period == 0:
-                throw_message(MessageType.Plain, f"Iteration: {nb_iterations} (mu = {self.mu}, fixed = {nb_fixed}).")
-            ### 4.1) Draw reaction to mutate at random ###
-            reaction_index = np.random.randint(len(self.f_trunc))
-            current_mu     = self.mu
-            non_mutated_f  = self.mutate_f(reaction_index, sigma)
-            self.calculate_state()
-            self.check_model_consistency()
-            ### 4.2) Check model consistency and simulate fixation ###
-            if self.consistent:
-                mutated_mu = self.mu
-                s          = 1.0-current_mu/mutated_mu
-                pi         = self.calculate_pi(s, N_e)
-                ### 4.3) Undo Mutation if no fixation occurs ###
-                if np.random.rand() >= pi:
-                    self.f_trunc = np.copy(non_mutated_f)
-                    self.set_f()
-                ### 4.4) Save Mutation for trajectory if fixation occurs ###
-                else:
-                    nb_fixed += 1
-                    if track and nb_iterations % CgmConstants.EXPORT_DATA_COUNT == 0:
-                        data_dict = {"label": label, "condition": condition_id, "t": nb_iterations, "mu": self.mu, "doubling_time": self.doubling_time, "fixed": nb_fixed}
-                        self.track_variables(variables, data_dict)
-                        data_row          = pd.Series(data=data_dict)
-                        self.MCMC_tracker = pd.concat([self.MCMC_tracker, data_row.to_frame().T], ignore_index=True)
-            ### 4.5) Undo Mutation if model is inconsistent ###
-            else:
-                self.f_trunc = np.copy(non_mutated_f)
-                self.set_f()
-            self.calculate_state()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Final algorithm steps     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        end_time = time.time()
-        run_time = end_time-start_time
-        if nb_fixed == 0 and nb_iterations < max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MCMC simulation completed with no fixed mutation (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
-            return False, run_time, nb_fixed
-        elif nb_fixed > 0 and nb_iterations < max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MCMC simulation completed (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
-            return True, run_time, nb_fixed
-        elif nb_iterations >= max_iterations:
-            if verbose:
-                throw_message(MessageType.Plain, f"MCMC simulation: maximum iterations reached (condition={condition_id}, mu={round(self.mu, 5)}, nb iterations={nb_iterations}, nb fixed={nb_fixed}).")
-            return False, run_time, nb_fixed
-
-    def save_f0( self, path: Optional[str] = "." ) -> None:
-        """
-        Save the initial flux state to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the initial flux state.
-        """
-        assert os.path.exists(path+"/"+self.name), throw_message(MessageType.Error, f"Path <code>{path}/{self.name}</code> does not exist.")
-        f = open(path+"/"+self.name+"/f0.csv", "w")
-        f.write("reaction;f0\n")
-        for i in range(self.nj):
-            f.write(self.reaction_ids[i]+";"+str(self.f0[i])+"\n")
-        f.close()
-
-    def save_random_solutions( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save the random data to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectory.
-        label : Optional[str], default=""
-            Label for the trajectory.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        header = path+"/"+self.name
-        if label != "":
-            header += "_"+str(label)
-        if not self.random_data.empty:
-            self.random_data.to_csv(header+"_random_solutions.csv", sep=';', index=False)
-    
-    def save_optima( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save the optima data to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectory.
-        label : Optional[str], default=""
-            Label for the trajectory.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        header = path+"/"+self.name
-        if label != "":
-            header += "_"+str(label)
-        if not self.optima_data.empty:
-            self.optima_data.to_csv(header+"_optima.csv", sep=';', index=False)
-    
-    def save_gradient_ascent_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save the gradient ascent trajectory to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectory.
-        label : Optional[str], default=""
-            Label for the trajectory.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        header = path+"/"+self.name
-        if label != "":
-            header += "_"+str(label)
-        if not self.GA_tracker.empty:
-            self.GA_tracker.to_csv(header+"_GA_trajectory.csv", sep=';', index=False)
-
-    def save_MC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save the Monte Carlo trajectory to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectory.
-        label : Optional[str], default=""
-            Label for the trajectory.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        header = path+"/"+self.name
-        if label != "":
-            header += "_"+str(label)
-        if not self.MC_tracker.empty:
-            self.MC_tracker.to_csv(header+"_MC_trajectory.csv", sep=';', index=False)
-    
-    def save_MCMC_trajectory( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save the Markov Chain Monte Carlo trajectory to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectory.
-        label : Optional[str], default=""
-            Label for the trajectory.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        header = path+"/"+self.name
-        if label != "":
-            header += "_"+str(label)
-        if not self.MCMC_tracker.empty:
-            self.MCMC_tracker.to_csv(header+"_MCMC_trajectory.csv", sep=';', index=False)
-    
-    def save_all_trajectories( self, path: Optional[str] = ".", label: Optional[str] = "" ) -> None:
-        """
-        Save all trajectories to CSV.
-
-        Parameters
-        ----------
-        path : Optional[str], default="."
-            Path to save the trajectories.
-        label : Optional[str], default=""
-            Label for the trajectories.
-        """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"Path <code>{path}</code> does not exist.")
-        self.save_gradient_ascent_trajectory(path, label)
-        self.save_MC_tracker_trajectory(path, label) 
-        self.save_MCMC_trajectory(path, label)
-
-    def clear_gradient_ascent_trajectory( self ) -> None:
-        """
-        Clear the gradient ascent trajectory.
-        """
-        self.GA_tracker = pd.DataFrame()
-    
-    def clear_MC_trajectory( self ) -> None:
-        """
-        Clear the Monte Carlo trajectory.
-        """
-        self.MC_tracker = pd.DataFrame()
-    
-    def clear_MCMC_trajectory( self ) -> None:
-        """
-        Clear the Markov Chain Monte Carlo trajectory.
-        """
-        self.MCMC_tracker = pd.DataFrame()
-    
-    def clear_all_trajectories( self ) -> None:
-        """
-        Clear all trajectories.
-        """
-        self.clear_gradient_ascent_trajectory()
-        self.clear_MC_trajectory()
-        self.clear_MCMC_trajectory()
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 7) Summary functions        #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def information( self ) -> None:
         """
@@ -2791,66 +2085,6 @@ class Model:
         html_str += "</table>"
         display_html(html_str,raw=True)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 8) Graphic generation      #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-    def create_figure( self, title: str ) -> go.Figure:
-        """
-        Create a figure for plotting.
-
-        Parameters
-        ----------
-        title : str
-            Title of the figure.
-
-        Returns
-        -------
-        go.Figure
-            Plotly figure.
-        """
-        fig = go.Figure()
-        fig.update_layout(plot_bgcolor='white', template="plotly_white", title=dict(text=title, x=0.5))
-        fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-        return fig
-    
-    def add_trajectory( self, fig: go.Figure, source: str, x_var: str, y_var: str,
-                        x_factor: Optional[float] = 1.0, y_factor: Optional[float] = 1.0,
-                        name: Optional[str] = "", data: Optional[pd.DataFrame] = None ) -> None:
-        """
-        Add a trajectory to a figure.
-
-        Parameters
-        ----------
-        fig : go.Figure
-            Plotly figure.
-        source : str
-            Source of the trajectory (random, optima, GA, MC, MCMC).
-        x_var : str
-            X-axis variable.
-        y_var : str
-            Y-axis variable.
-        x_factor : Optional[float], default=1.0
-            X-axis factor.
-        y_factor : Optional[float], default=1.0
-            Y-axis factor.
-        name : Optional[str], default=""
-            Name of the trajectory.
-        data : Optional[pd.DataFrame], default=None
-            Data for the trajectory.
-        """
-        assert source in ["random", "optima", "GA", "MC", "MCMC", "data"], throw_message(MessageType.Error, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code> or <code>data</code>.")
-        if source == "data":
-            assert data is not None, throw_message(MessageType.Error, "Data must be provided for source <code>data</code>.")
-        X = None
-        Y = None
-        if data is not None:
-            X = data[x_var].values*x_factor
-            Y = data[y_var].values*y_factor
-        else:
-            X = self.get_vector(source, x_var)*x_factor
-            Y = self.get_vector(source, y_var)*y_factor
-        fig.add_trace(go.Scatter(x=X, y=Y, mode="lines", name=name))
 
 #~~~~~~~~~~~~~~~~~~~#
 # Utility functions #
