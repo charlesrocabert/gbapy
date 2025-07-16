@@ -1,0 +1,993 @@
+# feature	class	assembly	assembly_unit	seq_type	chromosome	genomic_accession	start	end	strand	product_accession	non-redundant_refseq	related_accession	name	symbol	GeneID	locus_tag	feature_interval_length	product_length	attributes
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	1	1353	+					dnaA		JCVISYN3A_0001	1353		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	1	1353	+	AVX54569.1			Chromosomal replication initiator protein	dnaA		JCVISYN3A_0001	1353	450	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	1511	2638	+					dnaN		JCVISYN3A_0002	1128		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	1511	2638	+	AVX54570.1			DNA polymerase III subunit beta	dnaN		JCVISYN3A_0002	1128	375	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	2675	3217	+					rnmV		JCVISYN3A_0003	543		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	2675	3217	+	AVX54571.1			Ribonuclease M5	rnmV		JCVISYN3A_0003	543	180	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	3207	4007	+					ksgA		JCVISYN3A_0004	801		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	3207	4007	+	AVX54572.1			16S rRNA (adenine(1518)-N(6)/adenine(1519)-N(6))-dimethyltransferase	ksgA		JCVISYN3A_0004	801	266	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	4064	5155	+							JCVISYN3A_0005	1092		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	4064	5155	+	AVX54573.1			Uncharacterized protein			JCVISYN3A_0005	1092	363	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	5515	7419	+					gyrB		JCVISYN3A_0006	1905		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	5515	7419	+	AVX54574.1			DNA gyrase subunit B	gyrB		JCVISYN3A_0006	1905	634	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	7435	9939	+					gyrA		JCVISYN3A_0007	2505		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	7435	9939	+	AVX54575.1			DNA gyrase subunit A	gyrA		JCVISYN3A_0007	2505	834	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	9991	10968	-					rnsD; uptD		JCVISYN3A_0008	978		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	9991	10968	-	AVX54576.1			Nucleoside ABC transporter permease	rnsD; uptD		JCVISYN3A_0008	978	325	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	10968	13535	-					rnsC; uptD		JCVISYN3A_0009	2568		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	10968	13535	-	AVX54577.1			Nucleoside ABC transporter permease	rnsC; uptD		JCVISYN3A_0009	2568	855	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	13525	15141	-					rnsA; uptA		JCVISYN3A_0010	1617		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	13525	15141	-	AVX54578.1			Nucleoside ABC transporter ATP-binding protein	rnsA; uptA		JCVISYN3A_0010	1617	538	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	15153	16799	-					rnsB; uptB		JCVISYN3A_0011	1647		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	15153	16799	-	AVX54579.1			Nucleoside ABC transporter substrate-binding protein	rnsB; uptB		JCVISYN3A_0011	1647	548	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	16986	18515	-					metRS		JCVISYN3A_0012	1530		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	16986	18515	-	AVX54580.1			Methionine--tRNA ligase	metRS		JCVISYN3A_0012	1530	509	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	18716	19378	-							JCVISYN3A_0918	663		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	18716	19378	-	AVX54581.1			Imidazoleglycerol-phosphate dehydratase			JCVISYN3A_0918	663	220	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	20416	22335	+					tetM		JCVISYN3A_0913	1920		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	20416	22335	+	AVX54582.1			Tetracycline resistance ribosomal protection protein	tetM		JCVISYN3A_0913	1920	639	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	22769	22996	-					rpsR		JCVISYN3A_0025	228		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	22769	22996	-	AVX54583.1			30S ribosomal protein S18	rpsR		JCVISYN3A_0025	228	75	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	23016	23456	-					priB		JCVISYN3A_0026	441		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	23016	23456	-	AVX54584.1			Single-stranded DNA-binding protein	priB		JCVISYN3A_0026	441	146	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	23468	23881	-					rpsF		JCVISYN3A_0027	414		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	23468	23881	-	AVX54585.1			30S ribosomal protein S6	rpsF		JCVISYN3A_0027	414	137	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	24273	24872	+							JCVISYN3A_0029	600		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	24273	24872	+	AVX54586.1			Uncharacterized FMN-dependent NADH-azoreductase			JCVISYN3A_0029	600	199	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	24909	25943	-							JCVISYN3A_0030	1035		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	24909	25943	-	AVX54587.1			Uncharacterized ABC transporter ATP-binding protein			JCVISYN3A_0030	1035	344	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	26204	29362	-							JCVISYN3A_0033	3159		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	26204	29362	-	AVX54588.1			Uncharacterized protein			JCVISYN3A_0033	3159	1052	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	29509	34896	+							JCVISYN3A_0034	5388		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	29509	34896	+	AVX54589.1			Uncharacterized efflux ABC transporter permease			JCVISYN3A_0034	5388	1795	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	35062	37008	-					ftsH		JCVISYN3A_0039	1947		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	35062	37008	-	AVX54590.1			Membrane anchored AAA+ protease	ftsH		JCVISYN3A_0039	1947	648	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	37240	38445	-					tilS		JCVISYN3A_0040	1206		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	37240	38445	-	AVX54591.1			tRNA lysidine(34) synthetase	tilS		JCVISYN3A_0040	1206	401	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	38448	39275	-							JCVISYN3A_0042	828		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	38448	39275	-	AVX54592.1			Uncharacterized transcriptional regulator			JCVISYN3A_0042	828	275	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	39327	40049	-					yabD		JCVISYN3A_0043	723		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	39327	40049	-	AVX54593.1			Uncharacterized methyltransferase	yabD		JCVISYN3A_0043	723	240	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	40049	40789	-					holA		JCVISYN3A_0044	741		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	40049	40789	-	AVX54594.1			DNA polymerase III subunit delta	holA		JCVISYN3A_0044	741	246	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	40767	41408	-					tmk		JCVISYN3A_0045	642		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	40767	41408	-	AVX54595.1			dTMP kinase	tmk		JCVISYN3A_0045	642	213	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	41411	42001	-					recR		JCVISYN3A_0046	591		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	41411	42001	-	AVX54596.1			Recombination protein	recR		JCVISYN3A_0046	591	196	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	42003	44009	-					dnaX		JCVISYN3A_0047	2007		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	42003	44009	-	AVX54597.1			DNA polymerase III subunit gamma and tau	dnaX		JCVISYN3A_0047	2007	668	
+gene	SRP_RNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	44178	44273	-					ffs		JCVISYN3A_0049	96		
+ncRNA	SRP_RNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	44178	44273	-				Signal recognition particle sRNA small type	ffs		JCVISYN3A_0049	96		
+gene	pseudogene	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	44397	45011	-							JCVISYN3A_0051	615		pseudo
+CDS	without_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	44397	45011	-							JCVISYN3A_0051	615		pseudo
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	45293	45742	-					ahpC		JCVISYN3A_0054	450		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	45293	45742	-	AVX54598.1			Uncharacterized peroxiredoxin	ahpC		JCVISYN3A_0054	450	149	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	46274	47098	+							JCVISYN3A_0060	825		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	46274	47098	+	AVX54599.1			Uncharacterized protein			JCVISYN3A_0060	825	274	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	47181	48449	+					serRS		JCVISYN3A_0061	1269		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	47181	48449	+	AVX54600.1			Serine--tRNA ligase	serRS		JCVISYN3A_0061	1269	422	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	48559	49533	+					dusB		JCVISYN3A_0063	975		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	48559	49533	+	AVX54601.1			Uncharacterized tRNA dihydrouridine synthase	dusB		JCVISYN3A_0063	975	324	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	49536	51038	+					lysRS		JCVISYN3A_0064	1503		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	49536	51038	+	AVX54602.1			Lysine--tRNA ligase	lysRS		JCVISYN3A_0064	1503	500	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	51128	51436	-					trxA		JCVISYN3A_0065	309		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	51128	51436	-	AVX54603.1			Thioredoxin	trxA		JCVISYN3A_0065	309	102	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	51447	52289	-							JCVISYN3A_0066	843		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	51447	52289	-	AVX54604.1			Low specificity hydrolase			JCVISYN3A_0066	843	280	
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	52410	52518	-					rrfA		JCVISYN3A_0067	109		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	52410	52518	-				5S ribosomal RNA	rrfA		JCVISYN3A_0067	109		
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	52580	55493	-					rrlA		JCVISYN3A_0068	2914		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	52580	55493	-				23S ribosomal RNA	rrlA		JCVISYN3A_0068	2914		
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	55713	57247	-					rrsA		JCVISYN3A_0069	1535		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	55713	57247	-				16S ribosomal RNA	rrsA		JCVISYN3A_0069	1535		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	57525	57608	-					tRNA-Leu		JCVISYN3A_0070	84		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	57525	57608	-				tRNA-Leu	tRNA-Leu		JCVISYN3A_0070	84		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	57611	57686	-					tRNA-Lys		JCVISYN3A_0071	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	57611	57686	-				tRNA-Lys	tRNA-Lys		JCVISYN3A_0071	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	58156	59520	-					asnRS		JCVISYN3A_0076	1365		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	58156	59520	-	AVX54605.1			Asparagine--tRNA ligase	asnRS		JCVISYN3A_0076	1365	454	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	59529	60368	-							JCVISYN3A_0077	840		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	59529	60368	-	AVX54606.1			Uncharacterized hydrolase			JCVISYN3A_0077	840	279	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	60404	61360	-					tsaD		JCVISYN3A_0079	957		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	60404	61360	-	AVX54607.1			tRNA (adenosine(37)-N6)-threonylcarbamoyltransferase complex transferase subunit D	tsaD		JCVISYN3A_0079	957	318	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	61455	61676	-							JCVISYN3A_0080	222		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	61455	61676	-	AVX54608.1			Uncharacterized protein			JCVISYN3A_0080	222	73	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	61876	63234	+					mnmE; trmE		JCVISYN3A_0081	1359		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	61876	63234	+	AVX54609.1			tRNA uridine(34) 5-carboxymethylaminomethyl synthesis GTPase	mnmE; trmE		JCVISYN3A_0081	1359	452	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	63285	63530	-					rpsT		JCVISYN3A_0082	246		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	63285	63530	-	AVX54610.1			30S ribosomal protein S20	rpsT		JCVISYN3A_0082	246	81	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	63664	64380	-							JCVISYN3A_0094	717		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	63664	64380	-	AVX54611.1			Uncharacterized protein			JCVISYN3A_0094	717	238	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	64495	67329	-					secA		JCVISYN3A_0095	2835		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	64495	67329	-	AVX54612.1			Preprotein translocase subunit A	secA		JCVISYN3A_0095	2835	944	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	67494	68405	+					yycJ		JCVISYN3A_0097	912		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	67494	68405	+	AVX54613.1			Uncharacterized 5'-3' exonuclease	yycJ		JCVISYN3A_0097	912	303	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	68809	69024	-					xseB		JCVISYN3A_0105	216		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	68809	69024	-	AVX54614.1			Exodeoxyribonuclease VII small subunit	xseB		JCVISYN3A_0105	216	71	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	69014	70423	-					xseA		JCVISYN3A_0106	1410		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	69014	70423	-	AVX54615.1			Exodeoxyribonuclease VII large subunit	xseA		JCVISYN3A_0106	1410	469	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	70425	70823	-					nusB		JCVISYN3A_0107	399		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	70425	70823	-	AVX54616.1			Transcription antitermination factor	nusB		JCVISYN3A_0107	399	132	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	70835	71947	-							JCVISYN3A_0108	1113		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	70835	71947	-	AVX54617.1			Uncharacterized lipoprotein			JCVISYN3A_0108	1113	370	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	71973	72842	-							JCVISYN3A_0109	870		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	71973	72842	-	AVX54618.1			Deoxyribonuclease IV			JCVISYN3A_0109	870	289	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	73088	74437	+					bcsA		JCVISYN3A_0113	1350		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	73088	74437	+	AVX54619.1			Glycolipid synthase A	bcsA		JCVISYN3A_0113	1350	449	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	74511	75431	-					bcsB; cps		JCVISYN3A_0114	921		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	74511	75431	-	AVX54620.1			Glycolipid synthase B	bcsB; cps		JCVISYN3A_0114	921	306	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	75879	76751	-					galU; gtaB		JCVISYN3A_0115	873		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	75879	76751	-	AVX54621.1			UTP--glucose-1-phosphate uridylyltransferase	galU; gtaB		JCVISYN3A_0115	873	290	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	76936	77376	-							JCVISYN3A_0116	441		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	76936	77376	-	AVX54622.1			Uncharacterized protein			JCVISYN3A_0116	441	146	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	77446	78207	+					plsY		JCVISYN3A_0117	762		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	77446	78207	+	AVX54623.1			Acyl-phosphate glycerol 3-phosphate acyltransferase	plsY		JCVISYN3A_0117	762	253	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	78403	79854	+					gluRS		JCVISYN3A_0126	1452		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	78403	79854	+	AVX54624.1			Glutamate--tRNA ligase	gluRS		JCVISYN3A_0126	1452	483	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	79857	81071	+							JCVISYN3A_0127	1215		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	79857	81071	+	AVX54625.1			Uncharacterized phosphohydrolase			JCVISYN3A_0127	1215	404	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	81097	81525	+					rpoE		JCVISYN3A_0128	429		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	81097	81525	+	AVX54626.1			DNA-directed RNA polymerase subunit delta	rpoE		JCVISYN3A_0128	429	142	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	81617	83215	+					pyrG		JCVISYN3A_0129	1599		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	81617	83215	+	AVX54627.1			CTP synthase	pyrG		JCVISYN3A_0129	1599	532	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	83504	84397	+					fbaA		JCVISYN3A_0131	894		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	83504	84397	+	AVX54628.1			Fructose-1,6-bisphosphate aldolase	fbaA		JCVISYN3A_0131	894	297	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	84546	85607	+					ietA		JCVISYN3A_0132	1062		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	84546	85607	+	AVX54629.1			Toxin-antitoxin AAA ATPase	ietA		JCVISYN3A_0132	1062	353	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	85600	87873	+					ietS		JCVISYN3A_0133	2274		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	85600	87873	+	AVX54630.1			Toxin-antitoxin serine protease	ietS		JCVISYN3A_0133	2274	757	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	88733	89011	+					rpmE		JCVISYN3A_0137	279		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	88733	89011	+	AVX54631.1			50S ribosomal protein L31	rpmE		JCVISYN3A_0137	279	92	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	89084	90982	+							JCVISYN3A_0138	1899		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	89084	90982	+	AVX54632.1			Uncharacterized protein			JCVISYN3A_0138	1899	632	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	90992	91942	+					ytqI; orn		JCVISYN3A_0139	951		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	90992	91942	+	AVX54633.1			NanoRNAse	ytqI; orn		JCVISYN3A_0139	951	316	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	91944	92573	+					tdk		JCVISYN3A_0140	630		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	91944	92573	+	AVX54634.1			Thymidine kinase	tdk		JCVISYN3A_0140	630	209	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	92576	93670	+					prfA		JCVISYN3A_0141	1095		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	92576	93670	+	AVX54635.1			Peptide chain release factor 1	prfA		JCVISYN3A_0141	1095	364	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	93663	94511	+					prmC		JCVISYN3A_0142	849		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	93663	94511	+	AVX54636.1			Protein-(glutamine-N5) methyltransferase, release factor-specific	prmC		JCVISYN3A_0142	849	282	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	94520	95992	+							JCVISYN3A_0143	1473		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	94520	95992	+	AVX54637.1			Uncharacterized protein			JCVISYN3A_0143	1473	490	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	96001	96501	+					tsaC		JCVISYN3A_0144	501		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	96001	96501	+	AVX54638.1			tRNA (adenosine(37)-N6)-threonylcarbamoyltransferase complex transferase subunit	tsaC		JCVISYN3A_0144	501	166	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	96616	97530	+							JCVISYN3A_0145	915		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	96616	97530	+	AVX54639.1			Uncharacterized acetyltransferase			JCVISYN3A_0145	915	304	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	97759	98466	+							JCVISYN3A_0146	708		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	97759	98466	+	AVX54640.1			Uncharacterized protein			JCVISYN3A_0146	708	235	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	98466	99995	+					clsA		JCVISYN3A_0147	1530		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	98466	99995	+	AVX54641.1			Cardiolipin synthase	clsA		JCVISYN3A_0147	1530	509	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	100119	100538	+					rpsL		JCVISYN3A_0148	420		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	100119	100538	+	AVX54642.1			30S ribosomal protein S12	rpsL		JCVISYN3A_0148	420	139	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	100625	101092	+					rpsG		JCVISYN3A_0149	468		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	100625	101092	+	AVX54643.1			30S ribosomal protein S7	rpsG		JCVISYN3A_0149	468	155	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	101117	103186	+							JCVISYN3A_0150	2070		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	101117	103186	+	AVX54644.1			Translation elongation factor G			JCVISYN3A_0150	2070	689	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	103318	104505	+							JCVISYN3A_0151	1188		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	103318	104505	+	AVX54645.1			Translation elongation factor Tu			JCVISYN3A_0151	1188	395	
+gene	tmRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	104782	105192	+					ssrA		JCVISYN3A_0158	411		
+tmRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	104782	105192	+				Transfer-messenger RNA	ssrA		JCVISYN3A_0158	411		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	105431	108121	-					alaRS		JCVISYN3A_0163	2691		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	105431	108121	-	AVX54646.1			Alanine--tRNA ligase	alaRS		JCVISYN3A_0163	2691	896	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	108195	108689	-							JCVISYN3A_0164	495		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	108195	108689	-	AVX54647.1			Uncharacterized protein			JCVISYN3A_0164	495	164	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	108907	110151	+					amiC		JCVISYN3A_0165	1245		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	108907	110151	+	AVX54648.1			Oligopeptide ABC transporter permease	amiC		JCVISYN3A_0165	1245	414	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	110167	111177	+							JCVISYN3A_0166	1011		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	110167	111177	+	AVX54649.1			Oligopeptide ABC transporter permease			JCVISYN3A_0166	1011	336	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	111191	112891	+					amiE		JCVISYN3A_0167	1701		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	111191	112891	+	AVX54650.1			Oligopeptide ABC transporter ATP-binding protein	amiE		JCVISYN3A_0167	1701	566	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	112893	114761	+					amiF		JCVISYN3A_0168	1869		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	112893	114761	+	AVX54651.1			Oligopeptide ABC transporter ATP-binding protein	amiF		JCVISYN3A_0168	1869	622	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	114778	117879	+					amiA		JCVISYN3A_0169	3102		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	114778	117879	+	AVX54652.1			Oligopeptide ABC transporter substrate-binding protein	amiA		JCVISYN3A_0169	3102	1033	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	118738	121848	-					potC		JCVISYN3A_0195	3111		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	118738	121848	-	AVX54653.1			Spermidine/putrescine ABC transporter permease	potC		JCVISYN3A_0195	3111	1036	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	121833	122825	-					potB		JCVISYN3A_0196	993		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	121833	122825	-	AVX54654.1			Spermidine/putrescine ABC transporter permease	potB		JCVISYN3A_0196	993	330	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	122825	123880	-					potA		JCVISYN3A_0197	1056		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	122825	123880	-	AVX54655.1			Spermidine/putrescine ABC transporter ATP-binding protein	potA		JCVISYN3A_0197	1056	351	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124254	124613	-					rplT		JCVISYN3A_0198	360		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124254	124613	-	AVX54656.1			50S ribosomal protein L20	rplT		JCVISYN3A_0198	360	119	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124632	124823	-					rpmI		JCVISYN3A_0199	192		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124632	124823	-	AVX54657.1			50S ribosomal protein L35	rpmI		JCVISYN3A_0199	192	63	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124849	125394	-					infC		JCVISYN3A_0200	546		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	124849	125394	-	AVX54658.1			Translation initiation factor IF-3	infC		JCVISYN3A_0200	546	181	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	125583	126185	-					def		JCVISYN3A_0201	603		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	125583	126185	-	AVX54659.1			Peptide deformylase	def		JCVISYN3A_0201	603	200	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	126259	126816	+					rsmD		JCVISYN3A_0202	558		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	126259	126816	+	AVX54660.1			16S rRNA (guanine(966)-N(2))-methyltransferase	rsmD		JCVISYN3A_0202	558	185	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	126819	127712	+					gmk		JCVISYN3A_0203	894		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	126819	127712	+	AVX54661.1			Guanylate kinase	gmk		JCVISYN3A_0203	894	297	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	127920	129275	+					eno		JCVISYN3A_0213	1356		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	127920	129275	+	AVX54662.1			Phosphopyruvate hydratase	eno		JCVISYN3A_0213	1356	451	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	129342	130163	+					pgpA		JCVISYN3A_0214	822		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	129342	130163	+	AVX54663.1			Phosphatidylglycerophosphatase	pgpA		JCVISYN3A_0214	822	273	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	130165	130596	+					yrrK; yqgF		JCVISYN3A_0215	432		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	130165	130596	+	AVX54664.1			Putative pre-16S rRNA nuclease	yrrK; yqgF		JCVISYN3A_0215	432	143	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	130602	131174	+					hptA		JCVISYN3A_0216	573		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	130602	131174	+	AVX54665.1			Hypoxanthine phosphoribosyltransferase	hptA		JCVISYN3A_0216	573	190	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	131274	132791	-					glpK		JCVISYN3A_0218	1518		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	131274	132791	-	AVX54666.1			Glycerol kinase	glpK		JCVISYN3A_0218	1518	505	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	133142	134122	+					pfkA		JCVISYN3A_0220	981		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	133142	134122	+	AVX54667.1			6-Phosphofructokinase	pfkA		JCVISYN3A_0220	981	326	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	134193	135629	+					pyk		JCVISYN3A_0221	1437		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	134193	135629	+	AVX54668.1			Pyruvate kinase	pyk		JCVISYN3A_0221	1437	478	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	135894	137813	+					thrRS		JCVISYN3A_0222	1920		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	135894	137813	+	AVX54669.1			Threonine--tRNA ligase	thrRS		JCVISYN3A_0222	1920	639	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	138324	139649	+					pdhC		JCVISYN3A_0227	1326		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	138324	139649	+	AVX54670.1			Branched-chain alpha-keto acid dehydrogenase subunit E2	pdhC		JCVISYN3A_0227	1326	441	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	139668	141557	+					lpdA		JCVISYN3A_0228	1890		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	139668	141557	+	AVX54671.1			Dihydrolipoyl dehydrogenase	lpdA		JCVISYN3A_0228	1890	629	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	141579	142547	+					pta		JCVISYN3A_0229	969		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	141579	142547	+	AVX54672.1			Phosphate acetyltransferase	pta		JCVISYN3A_0229	969	322	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	142560	143741	+					ackA		JCVISYN3A_0230	1182		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	142560	143741	+	AVX54673.1			Acetate kinase	ackA		JCVISYN3A_0230	1182	393	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	143903	145624	+					ptsI		JCVISYN3A_0233	1722		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	143903	145624	+	AVX54674.1			Phosphoenolpyruvate--protein phosphotransferase	ptsI		JCVISYN3A_0233	1722	573	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	145706	146170	+					crr		JCVISYN3A_0234	465		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	145706	146170	+	AVX54675.1			PTS glucose transporter subunit IIA	crr		JCVISYN3A_0234	465	154	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	146279	146461	+							JCVISYN3A_0235	183		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	146279	146461	+	AVX54676.1			Uncharacterized protein			JCVISYN3A_0235	183	60	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	146578	147204	-					rpsD		JCVISYN3A_0238	627		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	146578	147204	-	AVX54677.1			30S ribosomal protein S4	rpsD		JCVISYN3A_0238	627	208	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	147459	149246	+							JCVISYN3A_0239	1788		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	147459	149246	+	AVX54678.1			Uncharacterized protein			JCVISYN3A_0239	1788	595	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	149254	150441	+					thiI		JCVISYN3A_0240	1188		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	149254	150441	+	AVX54679.1			tRNA 4-thiouridine(8) synthase	thiI		JCVISYN3A_0240	1188	395	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	150614	151204	-					ysxC; yihA		JCVISYN3A_0247	591		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	150614	151204	-	AVX54680.1			Ribosome biogenesis GTP-binding protein	ysxC; yihA		JCVISYN3A_0247	591	196	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	151198	151758	-							JCVISYN3A_0248	561		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	151198	151758	-	AVX54681.1			Uncharacterized protein			JCVISYN3A_0248	561	186	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	151760	152338	-							JCVISYN3A_0249	579		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	151760	152338	-	AVX54682.1			Uncharacterized protein			JCVISYN3A_0249	579	192	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	152341	153030	-							JCVISYN3A_0250	690		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	152341	153030	-	AVX54683.1			Uncharacterized protein			JCVISYN3A_0250	690	229	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	153156	153629	-					greA		JCVISYN3A_0253	474		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	153156	153629	-	AVX54684.1			Transcription elongation factor	greA		JCVISYN3A_0253	474	157	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	153752	155506	-					uvrC		JCVISYN3A_0254	1755		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	153752	155506	-	AVX54685.1			Excinuclease ABC subunit C	uvrC		JCVISYN3A_0254	1755	584	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	155628	157379	-					rnjB		JCVISYN3A_0257	1752		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	155628	157379	-	AVX54686.1			RNase J family beta-CASP ribonuclease	rnjB		JCVISYN3A_0257	1752	583	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	157516	158313	-					nadK		JCVISYN3A_0259	798		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	157516	158313	-	AVX54687.1			NAD(+) kinase	nadK		JCVISYN3A_0259	798	265	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	158424	161042	-					valRS		JCVISYN3A_0260	2619		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	158424	161042	-	AVX54688.1			Valine--tRNA ligase	valRS		JCVISYN3A_0260	2619	872	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	161214	161891	-					rpe		JCVISYN3A_0262	678		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	161214	161891	-	AVX54689.1			Ribulose-phosphate 3-epimerase	rpe		JCVISYN3A_0262	678	225	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	161893	162795	-							JCVISYN3A_0263	903		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	161893	162795	-	AVX54690.1			Ribosome small subunit-dependent GTPase A			JCVISYN3A_0263	903	300	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	162805	163920	-							JCVISYN3A_0264	1116		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	162805	163920	-	AVX54691.1			Uncharacterized serine/threonine protein kinase			JCVISYN3A_0264	1116	371	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	164055	164471	+					tsaE; yjeE		JCVISYN3A_0270	417		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	164055	164471	+	AVX54692.1			tRNA (N6-adenosine(37)-N6)-threonylcarbamoyltransferase complex ATPase	tsaE; yjeE		JCVISYN3A_0270	417	138	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	164473	165036	+					tsaB; yeaZ		JCVISYN3A_0271	564		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	164473	165036	+	AVX54693.1			tRNA N6-adenosine(37)-N6-threonylcarbamoyltransferase complex dimerization subunit	tsaB; yeaZ		JCVISYN3A_0271	564	187	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	165578	165667	+					tRNA-Ser		JCVISYN3A_0280	90		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	165578	165667	+				tRNA-Ser	tRNA-Ser		JCVISYN3A_0280	90		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	165787	166467	+							JCVISYN3A_0281	681		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	165787	166467	+	AVX54694.1			Uncharacterized protein			JCVISYN3A_0281	681	226	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	166448	167872	+					proRS		JCVISYN3A_0282	1425		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	166448	167872	+	AVX54695.1			Proline--tRNA ligase	proRS		JCVISYN3A_0282	1425	474	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	167885	168502	+					rnhA		JCVISYN3A_0283	618		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	167885	168502	+	AVX54696.1			Double-stranded RNA binding RNase HI	rnhA		JCVISYN3A_0283	618	205	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	168527	170329	+					lepA; EF4		JCVISYN3A_0285	1803		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	168527	170329	+	AVX54697.1			Elongation factor 4	lepA; EF4		JCVISYN3A_0285	1803	600	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	170355	171161	+							JCVISYN3A_0286	807		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	170355	171161	+	AVX54698.1			Uncharacterized protein			JCVISYN3A_0286	807	268	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	171178	172902	-					aspRS		JCVISYN3A_0287	1725		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	171178	172902	-	AVX54699.1			Aspartate--tRNA ligase	aspRS		JCVISYN3A_0287	1725	574	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	172911	174155	-					hisRS		JCVISYN3A_0288	1245		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	172911	174155	-	AVX54700.1			Histidine--tRNA ligase	hisRS		JCVISYN3A_0288	1245	414	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	174340	174693	+					rbfA		JCVISYN3A_0289	354		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	174340	174693	+	AVX54701.1			Ribosome-binding factor A	rbfA		JCVISYN3A_0289	354	117	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	174743	175621	+					truB		JCVISYN3A_0290	879		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	174743	175621	+	AVX54702.1			tRNA pseudouridine(55) synthase	truB		JCVISYN3A_0290	879	292	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	175608	176162	+					ribF		JCVISYN3A_0291	555		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	175608	176162	+	AVX54703.1			FAD synthetase	ribF		JCVISYN3A_0291	555	184	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176397	176663	+					rpsO		JCVISYN3A_0294	267		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176397	176663	+	AVX54704.1			30S ribosomal protein S15	rpsO		JCVISYN3A_0294	267	88	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176723	176796	+					tRNA-Gly		JCVISYN3A_0295	74		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176723	176796	+				tRNA-Gly	tRNA-Gly		JCVISYN3A_0295	74		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176894	177538	+							JCVISYN3A_0296	645		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	176894	177538	+	AVX54705.1			Uncharacterized protein			JCVISYN3A_0296	645	214	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	177557	179419	-					infB		JCVISYN3A_0297	1863		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	177557	179419	-	AVX54706.1			Translation initiation factor IF-2	infB		JCVISYN3A_0297	1863	620	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179441	179740	-							JCVISYN3A_0298	300		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179441	179740	-	AVX54707.1			Uncharacterized L7Ae family protein			JCVISYN3A_0298	300	99	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179727	180008	-							JCVISYN3A_0299	282		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179727	180008	-	AVX54708.1			Uncharacterized protein			JCVISYN3A_0299	282	93	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179989	181743	-					nusA		JCVISYN3A_0300	1755		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	179989	181743	-	AVX54709.1			Transcription termination/antitermination protein NusA	nusA		JCVISYN3A_0300	1755	584	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	181752	182246	-					rimP		JCVISYN3A_0301	495		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	181752	182246	-	AVX54710.1			Ribosome assembly cofactor	rimP		JCVISYN3A_0301	495	164	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	182359	183009	-					fre		JCVISYN3A_0302	651		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	182359	183009	-	AVX54711.1			Flavin reductase	fre		JCVISYN3A_0302	651	216	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	183022	187470	-					polC		JCVISYN3A_0303	4449		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	183022	187470	-	AVX54712.1			PolC-type DNA polymerase III	polC		JCVISYN3A_0303	4449	1482	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	187479	188507	-					cdsA		JCVISYN3A_0304	1029		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	187479	188507	-	AVX54713.1			Phosphatidate cytidylyltransferase	cdsA		JCVISYN3A_0304	1029	342	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	188706	189782	-							JCVISYN3A_0305	1077		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	188706	189782	-	AVX54714.1			Uncharacterized metallopeptidase			JCVISYN3A_0305	1077	358	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	190227	191237	+					trpRS		JCVISYN3A_0308	1011		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	190227	191237	+	AVX54715.1			Tryptophan--tRNA ligase	trpRS		JCVISYN3A_0308	1011	336	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	191373	192107	+					ecfS		JCVISYN3A_0314	735		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	191373	192107	+	AVX54716.1			Uncharacterized ECF transporter S component	ecfS		JCVISYN3A_0314	735	244	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	192229	192381	+							JCVISYN3A_0315	153		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	192229	192381	+	AVX54717.1			Uncharacterized protein			JCVISYN3A_0315	153	50	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	192440	194410	+					tkt		JCVISYN3A_0316	1971		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	192440	194410	+	AVX54718.1			Transketolase	tkt		JCVISYN3A_0316	1971	656	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	194426	194671	+							JCVISYN3A_0317	246		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	194426	194671	+	AVX54719.1			Uncharacterized protein			JCVISYN3A_0317	246	81	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	196094	197593	+							JCVISYN3A_0325	1500		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	196094	197593	+	AVX54720.1			Uncharacterized protein			JCVISYN3A_0325	1500	499	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	197611	198372	+							JCVISYN3A_0326	762		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	197611	198372	+	AVX54721.1			Uncharacterized protein			JCVISYN3A_0326	762	253	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	198382	199218	+					scpA		JCVISYN3A_0327	837		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	198382	199218	+	AVX54722.1			Chromosome segregation protein A	scpA		JCVISYN3A_0327	837	278	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	199202	199831	+					scpB		JCVISYN3A_0328	630		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	199202	199831	+	AVX54723.1			Chromosome segregation protein B	scpB		JCVISYN3A_0328	630	209	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	199899	200657	+					rluB		JCVISYN3A_0329	759		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	199899	200657	+	AVX54724.1			Uncharacterized pseudouridine synthase	rluB		JCVISYN3A_0329	759	252	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	200667	201284	+					dgk		JCVISYN3A_0330	618		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	200667	201284	+	AVX54725.1			Deoxyguanosine kinase	dgk		JCVISYN3A_0330	618	205	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	201395	202222	+							JCVISYN3A_0332	828		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	201395	202222	+	AVX54726.1			Uncharacterized protein			JCVISYN3A_0332	828	275	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	202897	203616	+							JCVISYN3A_0338	720		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	202897	203616	+	AVX54727.1			Uncharacterized lipoprotein			JCVISYN3A_0338	720	239	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	204074	204634	-					ppa		JCVISYN3A_0344	561		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	204074	204634	-	AVX54728.1			Inorganic diphosphatase	ppa		JCVISYN3A_0344	561	186	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	204773	205663	+					ecfS		JCVISYN3A_0345	891		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	204773	205663	+	AVX54729.1			Uncharacterized ECF transporter S component	ecfS		JCVISYN3A_0345	891	296	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	205729	206424	+							JCVISYN3A_0346	696		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	205729	206424	+	AVX54730.1			Uncharacterized protein			JCVISYN3A_0346	696	231	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	206433	207095	+					cmk		JCVISYN3A_0347	663		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	206433	207095	+	AVX54731.1			Cytidylate kinase	cmk		JCVISYN3A_0347	663	220	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	207102	208409	+					engA		JCVISYN3A_0348	1308		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	207102	208409	+	AVX54732.1			Ribosome biogenesis GTPase	engA		JCVISYN3A_0348	1308	435	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	208464	208736	+					hupA		JCVISYN3A_0350	273		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	208464	208736	+	AVX54733.1			DNA-binding protein	hupA		JCVISYN3A_0350	273	90	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	208791	209339	+							JCVISYN3A_0352	549		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	208791	209339	+	AVX54734.1			Uncharacterized protein			JCVISYN3A_0352	549	182	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	209403	209780	+							JCVISYN3A_0353	378		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	209403	209780	+	AVX54735.1			Uncharacterized protein			JCVISYN3A_0353	378	125	
+gene	RNase_P_RNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	210198	210537	+					rnpB		JCVISYN3A_0356	340		
+ncRNA	RNase_P_RNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	210198	210537	+				RNase P RNA component class B	rnpB		JCVISYN3A_0356	340		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	210712	212241	+							JCVISYN3A_0359	1530		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	210712	212241	+	AVX54736.1			Ribonuclease Y			JCVISYN3A_0359	1530	509	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	212275	213618	+					ffh		JCVISYN3A_0360	1344		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	212275	213618	+	AVX54737.1			Signal recognition particle protein	ffh		JCVISYN3A_0360	1344	447	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	213622	214089	+					rlmH		JCVISYN3A_0361	468		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	213622	214089	+	AVX54738.1			23S rRNA (pseudouridine(1915)-N3)-methyltransferase	rlmH		JCVISYN3A_0361	468	155	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214180	214458	+					rpsP		JCVISYN3A_0362	279		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214180	214458	+	AVX54739.1			30S ribosomal protein S16	rpsP		JCVISYN3A_0362	279	92	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214490	214984	+					rimM		JCVISYN3A_0363	495		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214490	214984	+	AVX54740.1			16S rRNA processing protein	rimM		JCVISYN3A_0363	495	164	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214986	215708	+					trmD		JCVISYN3A_0364	723		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	214986	215708	+	AVX54741.1			tRNA (guanosine(37)-N1)-methyltransferase	trmD		JCVISYN3A_0364	723	240	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	215710	216093	+					rplS		JCVISYN3A_0365	384		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	215710	216093	+	AVX54742.1			50S ribosomal protein L19	rplS		JCVISYN3A_0365	384	127	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	216192	217142	+					ylqF; rbgA		JCVISYN3A_0366	951		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	216192	217142	+	AVX54743.1			L16-binding dependent 50S subunit-maturation GTPase	ylqF; rbgA		JCVISYN3A_0366	951	316	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	217523	219394	+					ywjA		JCVISYN3A_0371	1872		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	217523	219394	+	AVX54744.1			Flippase A	ywjA		JCVISYN3A_0371	1872	623	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	219410	221263	+					ywjA		JCVISYN3A_0372	1854		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	219410	221263	+	AVX54745.1			Flippase B	ywjA		JCVISYN3A_0372	1854	617	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	221297	222904	+							JCVISYN3A_0373	1608		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	221297	222904	+	AVX54746.1			Uncharacterized protein			JCVISYN3A_0373	1608	535	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	222960	223036	+					tRNA-Arg		JCVISYN3A_0374	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	222960	223036	+				tRNA-Arg	tRNA-Arg		JCVISYN3A_0374	77		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	223090	223830	+							JCVISYN3A_0375	741		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	223090	223830	+	AVX54747.1			Uncharacterized protein			JCVISYN3A_0375	741	246	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	223802	224146	+							JCVISYN3A_0376	345		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	223802	224146	+	AVX54748.1			Uncharacterized protein			JCVISYN3A_0376	345	114	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	224217	225518	+					obgE		JCVISYN3A_0377	1302		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	224217	225518	+	AVX54749.1			Ribosome GTPase	obgE		JCVISYN3A_0377	1302	433	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	225520	226257	+					nadE		JCVISYN3A_0378	738		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	225520	226257	+	AVX54750.1			NAD(+) synthase	nadE		JCVISYN3A_0378	738	245	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	226274	226552	+							JCVISYN3A_0379	279		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	226274	226552	+	AVX54751.1			Uncharacterized protein			JCVISYN3A_0379	279	92	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	226570	227667	+					nadD		JCVISYN3A_0380	1098		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	226570	227667	+	AVX54752.1			Nicotinate (nicotinamide) nucleotide adenylyltransferase	nadD		JCVISYN3A_0380	1098	365	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	227672	228331	+					mtnN		JCVISYN3A_0381	660		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	227672	228331	+	AVX54753.1			5'-Methylthioadenosine nucleosidase	mtnN		JCVISYN3A_0381	660	219	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	228341	228979	+					dnk		JCVISYN3A_0382	639		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	228341	228979	+	AVX54754.1			Deoxynucleoside kinase	dnk		JCVISYN3A_0382	639	212	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	229208	230335	+					mnmA		JCVISYN3A_0387	1128		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	229208	230335	+	AVX54755.1			tRNA 2-thiouridine(34) synthase	mnmA		JCVISYN3A_0387	1128	375	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	230382	230999	+							JCVISYN3A_0388	618		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	230382	230999	+	AVX54756.1			Uncharacterized protein			JCVISYN3A_0388	618	205	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	231075	233219	+							JCVISYN3A_0389	2145		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	231075	233219	+	AVX54757.1			Uncharacterized protein			JCVISYN3A_0389	2145	714	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	233209	234162	+					fmt		JCVISYN3A_0390	954		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	233209	234162	+	AVX54758.1			Methionyl-tRNA formyltransferase	fmt		JCVISYN3A_0390	954	317	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	234249	234803	+					efp		JCVISYN3A_0391	555		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	234249	234803	+	AVX54759.1			Elongation factor P	efp		JCVISYN3A_0391	555	184	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	234821	235123	+							JCVISYN3A_0392	303		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	234821	235123	+	AVX54760.1			Uncharacterized protein			JCVISYN3A_0392	303	100	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	235262	237622	+					lon		JCVISYN3A_0394	2361		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	235262	237622	+	AVX54761.1			Endopeptidase La	lon		JCVISYN3A_0394	2361	786	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	237760	240222	-							JCVISYN3A_0398	2463		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	237760	240222	-	AVX54762.1			Uncharacterized lipoprotein			JCVISYN3A_0398	2463	820	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	240372	245633	+							JCVISYN3A_0399	5262		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	240372	245633	+	AVX54763.1			Uncharacterized efflux ABC transporter permease			JCVISYN3A_0399	5262	1753	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	245681	246232	+							JCVISYN3A_0400	552		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	245681	246232	+	AVX54764.1			Uncharacterized protease			JCVISYN3A_0400	552	183	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	246267	248114	+							JCVISYN3A_0401	1848		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	246267	248114	+	AVX54765.1			Uncharacterized peptidase			JCVISYN3A_0401	1848	615	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	248119	248613	+					ybeY		JCVISYN3A_0402	495		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	248119	248613	+	AVX54766.1			rRNA maturation RNase	ybeY		JCVISYN3A_0402	495	164	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	248617	249522	+					era		JCVISYN3A_0403	906		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	248617	249522	+	AVX54767.1			Ribosome GTPase	era		JCVISYN3A_0403	906	301	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	249522	250271	+					recO		JCVISYN3A_0404	750		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	249522	250271	+	AVX54768.1			DNA repair protein	recO		JCVISYN3A_0404	750	249	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	250335	251705	+					glyRS		JCVISYN3A_0405	1371		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	250335	251705	+	AVX54769.1			Glycine--tRNA ligase	glyRS		JCVISYN3A_0405	1371	456	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	251740	253578	+					dnaG		JCVISYN3A_0406	1839		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	251740	253578	+	AVX54770.1			DNA primase	dnaG		JCVISYN3A_0406	1839	612	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	253581	255101	+					rpoD		JCVISYN3A_0407	1521		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	253581	255101	+	AVX54771.1			RNA polymerase subunit sigma	rpoD		JCVISYN3A_0407	1521	506	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	255101	255778	+					trmK; yqfN		JCVISYN3A_0408	678		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	255101	255778	+	AVX54772.1			Uncharacterized methyltransferase	trmK; yqfN		JCVISYN3A_0408	678	225	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	255765	256541	+							JCVISYN3A_0409	777		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	255765	256541	+	AVX54773.1			Uncharacterized protein			JCVISYN3A_0409	777	258	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	256550	257911	+							JCVISYN3A_0410	1362		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	256550	257911	+	AVX54774.1			Uncharacterized helicase			JCVISYN3A_0410	1362	453	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	257951	259465	+							JCVISYN3A_0411	1515		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	257951	259465	+	AVX54775.1			Uncharacterized protein			JCVISYN3A_0411	1515	504	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	259581	263735	+							JCVISYN3A_0412	4155		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	259581	263735	+	AVX54776.1			Uncharacterized protein			JCVISYN3A_0412	4155	1384	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	263747	264259	+					apt		JCVISYN3A_0413	513		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	263747	264259	+	AVX54777.1			Adenine phosphoribosyltransferase	apt		JCVISYN3A_0413	513	170	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	264342	266606	+					relA		JCVISYN3A_0414	2265		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	264342	266606	+	AVX54778.1			Guanosine-3',5'-bis(diphosphate) 3'-pyrophosphohydrolase	relA		JCVISYN3A_0414	2265	754	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	266643	269609	-					smc		JCVISYN3A_0415	2967		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	266643	269609	-	AVX54779.1			Chromosome segregation protein	smc		JCVISYN3A_0415	2967	988	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	269915	270304	-							JCVISYN3A_0416	390		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	269915	270304	-	AVX54780.1			Uncharacterized protein			JCVISYN3A_0416	390	129	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	270449	271147	-							JCVISYN3A_0418	699		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	270449	271147	-	AVX54781.1			Ribonuclease III			JCVISYN3A_0418	699	232	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	271137	272141	-					plsX		JCVISYN3A_0419	1005		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	271137	272141	-	AVX54782.1			Phosphate acyltransferase	plsX		JCVISYN3A_0419	1005	334	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	272174	273817	-					fakA		JCVISYN3A_0420	1644		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	272174	273817	-	AVX54783.1			Fatty acid kinase subunit A	fakA		JCVISYN3A_0420	1644	547	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	273842	274153	-							JCVISYN3A_0421	312		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	273842	274153	-	AVX54784.1			Uncharacterized protein			JCVISYN3A_0421	312	103	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274322	274519	+					rpmB		JCVISYN3A_0422	198		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274322	274519	+	AVX54785.1			50S ribosomal protein L28	rpmB		JCVISYN3A_0422	198	65	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274583	274667	+					tRNA-Leu		JCVISYN3A_0423	85		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274583	274667	+				tRNA-Leu	tRNA-Leu		JCVISYN3A_0423	85		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274750	275193	+							JCVISYN3A_0424	444		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	274750	275193	+	AVX54786.1			Uncharacterized protein			JCVISYN3A_0424	444	147	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	275282	276412	+					pstS		JCVISYN3A_0425	1131		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	275282	276412	+	AVX54787.1			Phosphate ABC transporter substrate-binding protein	pstS		JCVISYN3A_0425	1131	376	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	276464	278554	+					pstA		JCVISYN3A_0426	2091		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	276464	278554	+	AVX54788.1			Phosphate ABC transporter permease	pstA		JCVISYN3A_0426	2091	696	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	278547	279356	+					pstB		JCVISYN3A_0427	810		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	278547	279356	+	AVX54789.1			Phosphate ABC transporter ATP-binding protein	pstB		JCVISYN3A_0427	810	269	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	279365	280039	+					phoU		JCVISYN3A_0428	675		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	279365	280039	+	AVX54790.1			Phosphate transport system regulatory protein	phoU		JCVISYN3A_0428	675	224	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	280106	281335	+					ftsY		JCVISYN3A_0429	1230		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	280106	281335	+	AVX54791.1			Signal recognition particle-docking protein	ftsY		JCVISYN3A_0429	1230	409	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	281319	281660	+							JCVISYN3A_0430	342		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	281319	281660	+	AVX54792.1			Uncharacterized DNA-binding protein			JCVISYN3A_0430	342	113	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	281648	282421	+							JCVISYN3A_0431	774		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	281648	282421	+	AVX54793.1			Uncharacterized metallophosphoesterase			JCVISYN3A_0431	774	257	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	282631	283794	+					metK		JCVISYN3A_0432	1164		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	282631	283794	+	AVX54794.1			Methionine adenosyltransferase	metK		JCVISYN3A_0432	1164	387	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	283785	284468	+					cutC		JCVISYN3A_0433	684		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	283785	284468	+	AVX54795.1			Uncharacterized protein	cutC		JCVISYN3A_0433	684	227	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	284461	285777	+					rlmFO		JCVISYN3A_0434	1317		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	284461	285777	+	AVX54796.1			23S rRNA (uridine(1939)-m5)-methyltransferase	rlmFO		JCVISYN3A_0434	1317	438	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	285803	286732	+					manA		JCVISYN3A_0435	930		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	285803	286732	+	AVX54797.1			Mannose-6-phosphate isomerase	manA		JCVISYN3A_0435	930	309	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	286805	287785	+					yhaM		JCVISYN3A_0437	981		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	286805	287785	+	AVX54798.1			Putative 3'-5' exoribonuclease	yhaM		JCVISYN3A_0437	981	326	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	287816	288214	-					hinT		JCVISYN3A_0438	399		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	287816	288214	-	AVX54799.1			Uncharacterized protein	hinT		JCVISYN3A_0438	399	132	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	288217	290373	-							JCVISYN3A_0439	2157		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	288217	290373	-	AVX54800.1			Uncharacterized lipoprotein			JCVISYN3A_0439	2157	718	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	290373	293309	-							JCVISYN3A_0440	2937		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	290373	293309	-	AVX54801.1			Uncharacterized lipoprotein			JCVISYN3A_0440	2937	978	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	293512	294750	+					iscS		JCVISYN3A_0441	1239		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	293512	294750	+	AVX54802.1			Cysteine desulfurase	iscS		JCVISYN3A_0441	1239	412	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	294753	295190	+					iscU		JCVISYN3A_0442	438		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	294753	295190	+	AVX54803.1			Iron-sulfur cluster assembly scaffold protein	iscU		JCVISYN3A_0442	438	145	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	295183	295746	+					yggN		JCVISYN3A_0443	564		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	295183	295746	+	AVX54804.1			5-Formyltetrahydrofolate cyclo-ligase	yggN		JCVISYN3A_0443	564	187	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	295767	297662	+							JCVISYN3A_0444	1896		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	295767	297662	+	AVX54805.1			Uncharacterized peptidase			JCVISYN3A_0444	1896	631	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	297882	299165	+					pgi		JCVISYN3A_0445	1284		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	297882	299165	+	AVX54806.1			Glucose-6-phosphate isomerase	pgi		JCVISYN3A_0445	1284	427	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	299198	299701	+					dut		JCVISYN3A_0447	504		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	299198	299701	+	AVX54807.1			dUTP diphosphatase	dut		JCVISYN3A_0447	504	167	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	299718	300485	+							JCVISYN3A_0448	768		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	299718	300485	+	AVX54808.1			Uncharacterized rRNA methyltransferase			JCVISYN3A_0448	768	255	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	300656	302071	+					gapdh		JCVISYN3A_0451	1416		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	300656	302071	+	AVX54809.1			Glyceraldehyde-3-phosphate dehydrogenase	gapdh		JCVISYN3A_0451	1416	471	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	302258	304189	+					parE		JCVISYN3A_0452	1932		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	302258	304189	+	AVX54810.1			DNA topoisomerase IV subunit B	parE		JCVISYN3A_0452	1932	643	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	304191	306887	+					parC		JCVISYN3A_0453	2697		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	304191	306887	+	AVX54811.1			DNA topoisomerase IV subunit A	parC		JCVISYN3A_0453	2697	898	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	307123	308079	-					ldh		JCVISYN3A_0475	957		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	307123	308079	-	AVX54812.1			L-lactate dehydrogenase	ldh		JCVISYN3A_0475	957	318	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	308182	308766	-							JCVISYN3A_0478	585		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	308182	308766	-	AVX54813.1			Uncharacterized protein			JCVISYN3A_0478	585	194	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	308771	310417	-							JCVISYN3A_0479	1647		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	308771	310417	-	AVX54814.1			Uncharacterized peptidase			JCVISYN3A_0479	1647	548	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	310640	311077	-							JCVISYN3A_0481	438		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	310640	311077	-	AVX54815.1			Uncharacterized lipoprotein			JCVISYN3A_0481	438	145	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	311391	311555	+					rpsU		JCVISYN3A_0482	165		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	311391	311555	+	AVX54816.1			30S ribosomal protein S21	rpsU		JCVISYN3A_0482	165	54	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	311816	313171	+							JCVISYN3A_0154	1356		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	311816	313171	+	AVX54817.1			Uncharacterized peptidase			JCVISYN3A_0154	1356	451	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	313335	314684	-							JCVISYN3A_0493	1350		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	313335	314684	-	AVX54818.1			Uncharacterized peptidase			JCVISYN3A_0493	1350	449	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	314840	315520	-					nanE		JCVISYN3A_0494	681		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	314840	315520	-	AVX54819.1			N-acetylmannosamine-6-phosphate 2-epimerase	nanE		JCVISYN3A_0494	681	226	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	315579	316454	-							JCVISYN3A_0495	876		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	315579	316454	-	AVX54820.1			Uncharacterized kinase			JCVISYN3A_0495	876	291	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	316629	316910	-					rpmA		JCVISYN3A_0499	282		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	316629	316910	-	AVX54821.1			50S ribosomal protein L27	rpmA		JCVISYN3A_0499	282	93	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	316912	317226	-					prp;ysxB		JCVISYN3A_0500	315		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	316912	317226	-	AVX54822.1			Maturation protease for ribosomal protein L27	prp;ysxB		JCVISYN3A_0500	315	104	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	317229	317531	-					rplU		JCVISYN3A_0501	303		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	317229	317531	-	AVX54823.1			50S ribosomal protein L21	rplU		JCVISYN3A_0501	303	100	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	317677	318078	-							JCVISYN3A_0503	402		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	317677	318078	-	AVX54824.1			Uncharacterized protein			JCVISYN3A_0503	402	133	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	318101	318988	-					rsmI		JCVISYN3A_0504	888		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	318101	318988	-	AVX54825.1			16S rRNA (cytidine(1402)-2'-O)-methyltransferase	rsmI		JCVISYN3A_0504	888	295	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	319048	319191	-					rpmG		JCVISYN3A_0930	144		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	319048	319191	-	AVX54826.1			50S ribosomal protein L33	rpmG		JCVISYN3A_0930	144	47	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	319364	320437	+							JCVISYN3A_0505	1074		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	319364	320437	+	AVX54827.1			Uncharacterized lipoprotein			JCVISYN3A_0505	1074	357	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320530	320618	-					tRNA-Leu		JCVISYN3A_0506	89		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320530	320618	-				tRNA-Leu	tRNA-Leu		JCVISYN3A_0506	89		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320629	320704	-					tRNA-Lys		JCVISYN3A_0507	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320629	320704	-				tRNA-Lys	tRNA-Lys		JCVISYN3A_0507	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320709	320783	-					tRNA-Gln		JCVISYN3A_0508	75		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320709	320783	-				tRNA-Gln	tRNA-Gln		JCVISYN3A_0508	75		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320790	320873	-					tRNA-Tyr		JCVISYN3A_0509	84		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320790	320873	-				tRNA-Tyr	tRNA-Tyr		JCVISYN3A_0509	84		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320880	320955	-					tRNA-Thr		JCVISYN3A_0510	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	320880	320955	-				tRNA-Thr	tRNA-Thr		JCVISYN3A_0510	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	321082	321705	-							JCVISYN3A_0511	624		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	321082	321705	-	AVX54828.1			Uncharacterized protein			JCVISYN3A_0511	624	207	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	321754	322701	-					plsC		JCVISYN3A_0512	948		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	321754	322701	-	AVX54829.1			Acyl-phosphate glycerol 3-phosphate acyltransferase	plsC		JCVISYN3A_0512	948	315	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	322858	323190	-					acpS		JCVISYN3A_0513	333		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	322858	323190	-	AVX54830.1			ACP synthase	acpS		JCVISYN3A_0513	333	110	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	323250	323732	-					dctD		JCVISYN3A_0515	483		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	323250	323732	-	AVX54831.1			Cytidine deaminase	dctD		JCVISYN3A_0515	483	160	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	323735	325036	-							JCVISYN3A_0516	1302		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	323735	325036	-	AVX54832.1			Uncharacterized protein			JCVISYN3A_0516	1302	433	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	325029	325961	-					rluD		JCVISYN3A_0517	933		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	325029	325961	-	AVX54833.1			Uncharacterized RNA pseudouridine synthase	rluD		JCVISYN3A_0517	933	310	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	325942	326550	-					lspA		JCVISYN3A_0518	609		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	325942	326550	-	AVX54834.1			Lipoprotein signal peptidase	lspA		JCVISYN3A_0518	609	202	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	326541	329288	-					ileRS		JCVISYN3A_0519	2748		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	326541	329288	-	AVX54835.1			Isoleucine--tRNA ligase	ileRS		JCVISYN3A_0519	2748	915	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	329981	330970	-							JCVISYN3A_0520	990		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	329981	330970	-	AVX54836.1			Uncharacterized hydrolase			JCVISYN3A_0520	990	329	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	330983	331399	-					sepF		JCVISYN3A_0521	417		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	330983	331399	-	AVX54837.1			Cell division protein	sepF		JCVISYN3A_0521	417	138	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	331411	332568	-					ftsZ		JCVISYN3A_0522	1158		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	331411	332568	-	AVX54838.1			Cell division protein	ftsZ		JCVISYN3A_0522	1158	385	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	332683	333843	-					ftsA		JCVISYN3A_0523	1161		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	332683	333843	-	AVX54839.1			Cell division protein	ftsA		JCVISYN3A_0523	1161	386	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	333852	334778	-					rsmH; mraW		JCVISYN3A_0524	927		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	333852	334778	-	AVX54840.1			16S rRNA (cytosine(1402)-N(4))-methyltransferase	rsmH; mraW		JCVISYN3A_0524	927	308	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	334787	335188	-					mraZ		JCVISYN3A_0525	402		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	334787	335188	-	AVX54841.1			Cell division/cell wall cluster transcriptional repressor	mraZ		JCVISYN3A_0525	402	133	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	335295	335474	-					rpmF		JCVISYN3A_0526	180		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	335295	335474	-	AVX54842.1			50S ribosomal protein L32	rpmF		JCVISYN3A_0526	180	59	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	335489	336007	-							JCVISYN3A_0527	519		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	335489	336007	-	AVX54843.1			Uncharacterized protein			JCVISYN3A_0527	519	172	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	336007	338391	-					pheRS		JCVISYN3A_0528	2385		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	336007	338391	-	AVX54844.1			Phenylalanine--tRNA ligase subunit beta	pheRS		JCVISYN3A_0528	2385	794	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	338400	339452	-					pheS		JCVISYN3A_0529	1053		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	338400	339452	-	AVX54845.1			Phenylalanine--tRNA ligase subunit alpha	pheS		JCVISYN3A_0529	1053	350	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	339482	340090	-							JCVISYN3A_0530	609		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	339482	340090	-	AVX54846.1			Uncharacterized protein			JCVISYN3A_0530	609	202	
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	340214	340322	-					rrfB		JCVISYN3A_0532	109		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	340214	340322	-				5S ribosomal RNA	rrfB		JCVISYN3A_0532	109		
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	340384	343297	-					rrlB		JCVISYN3A_0533	2914		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	340384	343297	-				23S ribosomal RNA	rrlB		JCVISYN3A_0533	2914		
+gene	rRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	343517	345051	-					rrsB		JCVISYN3A_0534	1535		
+rRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	343517	345051	-				16S ribosomal RNA	rrsB		JCVISYN3A_0534	1535		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	345258	346922	-					argRS		JCVISYN3A_0535	1665		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	345258	346922	-	AVX54847.1			Arginine--tRNA ligase	argRS		JCVISYN3A_0535	1665	554	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	346924	347472	-					frr		JCVISYN3A_0536	549		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	346924	347472	-	AVX54848.1			Ribosome recycling factor	frr		JCVISYN3A_0536	549	182	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	347483	348196	-					pyrH		JCVISYN3A_0537	714		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	347483	348196	-	AVX54849.1			UMP kinase	pyrH		JCVISYN3A_0537	714	237	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	348330	348935	-							JCVISYN3A_0538	606		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	348330	348935	-	AVX54850.1			Uncharacterized protein			JCVISYN3A_0538	606	201	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	348935	349822	-					tsf		JCVISYN3A_0539	888		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	348935	349822	-	AVX54851.1			Translation elongation factor Ts	tsf		JCVISYN3A_0539	888	295	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	349834	350712	-					rpsB		JCVISYN3A_0540	879		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	349834	350712	-	AVX54852.1			30S ribosomal protein S2	rpsB		JCVISYN3A_0540	879	292	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	350920	352038	-					dnaJ		JCVISYN3A_0541	1119		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	350920	352038	-	AVX54853.1			Molecular chaperone	dnaJ		JCVISYN3A_0541	1119	372	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	352102	353877	-					dnaK		JCVISYN3A_0542	1776		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	352102	353877	-	AVX54854.1			Molecular chaperone	dnaK		JCVISYN3A_0542	1776	591	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	353936	354538	-					grpE		JCVISYN3A_0543	603		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	353936	354538	-	AVX54855.1			Nucleotide exchange factor	grpE		JCVISYN3A_0543	603	200	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	354540	355562	-					hrcA		JCVISYN3A_0544	1023		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	354540	355562	-	AVX54856.1			Heat-inducible transcription repressor	hrcA		JCVISYN3A_0544	1023	340	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	355567	357708	-					clpB		JCVISYN3A_0545	2142		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	355567	357708	-	AVX54857.1			ATP-dependent Clp protease subunit B	clpB		JCVISYN3A_0545	2142	713	
+gene	pseudogene	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	357871	358736	-							JCVISYN3A_0546	866		pseudo
+CDS	without_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	357871	358736	-							JCVISYN3A_0546	866		pseudo
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	358736	359281	-							JCVISYN3A_0548	546		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	358736	359281	-	AVX54858.1			tRNA (cytidine(34)-2'-O)-methyltransferase			JCVISYN3A_0548	546	181	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	359294	359896	-					rgdB		JCVISYN3A_0549	603		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	359294	359896	-	AVX54859.1			Non-canonical purine NTP pyrophosphatase	rgdB		JCVISYN3A_0549	603	200	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	360403	361011	+					met14p		JCVISYN3A_0931	609		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	360403	361011	+	AVX54860.1			Adenylyl-sulfate kinase	met14p		JCVISYN3A_0931	609	202	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	361575	362774	-							JCVISYN3A_0592	1200		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	361575	362774	-	AVX54861.1			Uncharacterized protein			JCVISYN3A_0592	1200	399	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	363271	363549	-							JCVISYN3A_0593	279		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	363271	363549	-	AVX54862.1			Uncharacterized protein			JCVISYN3A_0593	279	92	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	363818	363958	-							JCVISYN3A_0599	141		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	363818	363958	-	AVX54863.1			Uncharacterized protein			JCVISYN3A_0599	141	46	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	364772	366604	+					rnjA		JCVISYN3A_0600	1833		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	364772	366604	+	AVX54864.1			Ribonuclease J	rnjA		JCVISYN3A_0600	1833	610	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	366679	367623	+							JCVISYN3A_0601	945		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	366679	367623	+	AVX54865.1			Uncharacterized protein			JCVISYN3A_0601	945	314	
+gene	pseudogene	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	367755	369517	+							JCVISYN3A_0602	1763		pseudo
+CDS	without_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	367755	369517	+							JCVISYN3A_0602	1763		pseudo
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	369520	370188	+							JCVISYN3A_0604	669		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	369520	370188	+	AVX54866.1			Uncharacterized protein			JCVISYN3A_0604	669	222	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	370371	370679	+							JCVISYN3A_0605	309		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	370371	370679	+	AVX54867.1			Uncharacterized protein			JCVISYN3A_0605	309	102	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	370946	372160	-					pgk		JCVISYN3A_0606	1215		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	370946	372160	-	AVX54868.1			Phosphoglycerate kinase	pgk		JCVISYN3A_0606	1215	404	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	372272	373288	-					gapDH		JCVISYN3A_0607	1017		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	372272	373288	-	AVX54869.1			Type I glyceraldehyde-3-phosphate dehydrogenase	gapDH		JCVISYN3A_0607	1017	338	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	373389	374327	-					dnaI		JCVISYN3A_0608	939		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	373389	374327	-	AVX54870.1			Primosomal protein	dnaI		JCVISYN3A_0608	939	312	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	374337	375521	-					dnaB		JCVISYN3A_0609	1185		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	374337	375521	-	AVX54871.1			Chromosome replication initiation protein	dnaB		JCVISYN3A_0609	1185	394	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	375678	376502	-					mutM		JCVISYN3A_0610	825		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	375678	376502	-	AVX54872.1			DNA-formamidopyrimidine glycosylase	mutM		JCVISYN3A_0610	825	274	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	376513	379248	-					polA		JCVISYN3A_0611	2736		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	376513	379248	-	AVX54873.1			DNA polymerase I	polA		JCVISYN3A_0611	2736	911	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	379257	382220	-					dnaE		JCVISYN3A_0612	2964		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	379257	382220	-	AVX54874.1			DNA polymerase III subunit alpha	dnaE		JCVISYN3A_0612	2964	987	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	382415	383659	-					tyrRS		JCVISYN3A_0613	1245		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	382415	383659	-	AVX54875.1			Tyrosine--tRNA ligase	tyrRS		JCVISYN3A_0613	1245	414	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	383668	384729	-					pncB		JCVISYN3A_0614	1062		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	383668	384729	-	AVX54876.1			Nicotinate phosphoribosyltransferase	pncB		JCVISYN3A_0614	1062	353	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	384707	385315	-							JCVISYN3A_0615	609		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	384707	385315	-	AVX54877.1			Uncharacterized protein			JCVISYN3A_0615	609	202	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	385390	386229	+					fakB		JCVISYN3A_0616	840		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	385390	386229	+	AVX54878.1			Fatty acid binding protein	fakB		JCVISYN3A_0616	840	279	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	386240	387091	+					fakB		JCVISYN3A_0617	852		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	386240	387091	+	AVX54879.1			Fatty acid binding protein	fakB		JCVISYN3A_0617	852	283	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387127	387201	-					tRNA-Trp		JCVISYN3A_0618	75		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387127	387201	-				tRNA-Trp	tRNA-Trp		JCVISYN3A_0618	75		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387239	387314	-					tRNA-Trp		JCVISYN3A_0619	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387239	387314	-				tRNA-Trp	tRNA-Trp		JCVISYN3A_0619	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387390	387854	-							JCVISYN3A_0620	465		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387390	387854	-	AVX54880.1			Uncharacterized transcriptional regulator			JCVISYN3A_0620	465	154	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387855	388076	-					acpA		JCVISYN3A_0621	222		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	387855	388076	-	AVX54881.1			Acyl carrier protein	acpA		JCVISYN3A_0621	222	73	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	388100	388462	-							JCVISYN3A_0622	363		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	388100	388462	-	AVX54882.1			Uncharacterized lipoprotein			JCVISYN3A_0622	363	120	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	388449	389519	-							JCVISYN3A_0623	1071		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	388449	389519	-	AVX54883.1			Uncharacterized protein			JCVISYN3A_0623	1071	356	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	389620	389695	-					tRNA-His		JCVISYN3A_0624	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	389620	389695	-				tRNA-His	tRNA-His		JCVISYN3A_0624	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	389882	392296	-					leuRS		JCVISYN3A_0634	2415		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	389882	392296	-	AVX54884.1			Leucine--tRNA ligase	leuRS		JCVISYN3A_0634	2415	804	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	392434	392510	-					tRNA-Ile		JCVISYN3A_0635	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	392434	392510	-				tRNA-Ile	tRNA-Ile		JCVISYN3A_0635	77		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	392583	395372	-							JCVISYN3A_0636	2790		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	392583	395372	-	AVX54885.1			Uncharacterized lipoprotein			JCVISYN3A_0636	2790	929	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	395531	395929	-					rpsI		JCVISYN3A_0637	399		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	395531	395929	-	AVX54886.1			30S ribosomal protein S9	rpsI		JCVISYN3A_0637	399	132	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	395929	396384	-					rplM		JCVISYN3A_0638	456		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	395929	396384	-	AVX54887.1			50S ribosomal protein L13	rplM		JCVISYN3A_0638	456	151	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	396514	400659	-							JCVISYN3A_0639	4146		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	396514	400659	-	AVX54888.1			Uncharacterized efflux ABC transporter permease			JCVISYN3A_0639	4146	1381	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	400754	401509	-					truA		JCVISYN3A_0640	756		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	400754	401509	-	AVX54889.1			tRNA pseudouridine(38-40) synthase	truA		JCVISYN3A_0640	756	251	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	401512	402522	-					ecfT		JCVISYN3A_0641	1011		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	401512	402522	-	AVX54890.1			ECF transporter T component	ecfT		JCVISYN3A_0641	1011	336	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	402536	403447	-					ecfA		JCVISYN3A_0642	912		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	402536	403447	-	AVX54891.1			ECF transporter ATPase	ecfA		JCVISYN3A_0642	912	303	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	403435	404661	-					ecfA		JCVISYN3A_0643	1227		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	403435	404661	-	AVX54892.1			ECF transporter ATPase	ecfA		JCVISYN3A_0643	1227	408	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	404769	405128	-					rplQ		JCVISYN3A_0644	360		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	404769	405128	-	AVX54893.1			50S ribosomal protein L17	rplQ		JCVISYN3A_0644	360	119	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	405148	406101	-					rpoA		JCVISYN3A_0645	954		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	405148	406101	-	AVX54894.1			DNA-directed RNA polymerase subunit alpha	rpoA		JCVISYN3A_0645	954	317	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406105	406494	-					rpsK		JCVISYN3A_0646	390		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406105	406494	-	AVX54895.1			30S ribosomal protein S11	rpsK		JCVISYN3A_0646	390	129	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406520	406885	-					rpsM		JCVISYN3A_0647	366		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406520	406885	-	AVX54896.1			30S ribosomal protein S13	rpsM		JCVISYN3A_0647	366	121	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406922	407035	-					rpmJ		JCVISYN3A_0648	114		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	406922	407035	-	AVX54897.1			50S ribosomal protein L36	rpmJ		JCVISYN3A_0648	114	37	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	407104	407328	-					infA		JCVISYN3A_0649	225		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	407104	407328	-	AVX54898.1			Translation initiation factor IF-1	infA		JCVISYN3A_0649	225	74	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	407340	408095	-					map		JCVISYN3A_0650	756		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	407340	408095	-	AVX54899.1			Type I methionyl aminopeptidase	map		JCVISYN3A_0650	756	251	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	408095	408736	-					adk		JCVISYN3A_0651	642		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	408095	408736	-	AVX54900.1			Adenylate kinase	adk		JCVISYN3A_0651	642	213	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	408864	410312	-					secY		JCVISYN3A_0652	1449		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	408864	410312	-	AVX54901.1			Preprotein translocase subunit	secY		JCVISYN3A_0652	1449	482	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	410312	410749	-					rplO		JCVISYN3A_0653	438		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	410312	410749	-	AVX54902.1			50S ribosomal protein L15	rplO		JCVISYN3A_0653	438	145	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	410768	411532	-					rpsE		JCVISYN3A_0654	765		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	410768	411532	-	AVX54903.1			30S ribosomal protein S5	rpsE		JCVISYN3A_0654	765	254	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	411551	411901	-					rplR		JCVISYN3A_0655	351		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	411551	411901	-	AVX54904.1			50S ribosomal protein L18	rplR		JCVISYN3A_0655	351	116	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	411927	412469	-					rplF		JCVISYN3A_0656	543		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	411927	412469	-	AVX54905.1			50S ribosomal protein L6	rplF		JCVISYN3A_0656	543	180	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	412483	412872	-					rpsH		JCVISYN3A_0657	390		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	412483	412872	-	AVX54906.1			30S ribosomal protein S8	rpsH		JCVISYN3A_0657	390	129	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	412892	413077	-					rpsN		JCVISYN3A_0658	186		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	412892	413077	-	AVX54907.1			30S ribosomal protein S14	rpsN		JCVISYN3A_0658	186	61	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413096	413638	-					rplE		JCVISYN3A_0659	543		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413096	413638	-	AVX54908.1			50S ribosomal protein L5	rplE		JCVISYN3A_0659	543	180	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413657	413983	-					rplX		JCVISYN3A_0660	327		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413657	413983	-	AVX54909.1			50S ribosomal protein L24	rplX		JCVISYN3A_0660	327	108	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413997	414365	-					rplN		JCVISYN3A_0661	369		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	413997	414365	-	AVX54910.1			50S ribosomal protein L14	rplN		JCVISYN3A_0661	369	122	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	414381	414641	-					rpsQ		JCVISYN3A_0662	261		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	414381	414641	-	AVX54911.1			30S ribosomal protein S17	rpsQ		JCVISYN3A_0662	261	86	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	414638	415054	-					rpmC		JCVISYN3A_0663	417		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	414638	415054	-	AVX54912.1			50S ribosomal protein L29	rpmC		JCVISYN3A_0663	417	138	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	415054	415467	-					rplP		JCVISYN3A_0664	414		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	415054	415467	-	AVX54913.1			50S ribosomal protein L16	rplP		JCVISYN3A_0664	414	137	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	415470	416171	-					rpsC		JCVISYN3A_0665	702		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	415470	416171	-	AVX54914.1			30S ribosomal protein S3	rpsC		JCVISYN3A_0665	702	233	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416189	416524	-					rplV		JCVISYN3A_0666	336		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416189	416524	-	AVX54915.1			50S ribosomal protein L22	rplV		JCVISYN3A_0666	336	111	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416548	416814	-					rpsS		JCVISYN3A_0667	267		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416548	416814	-	AVX54916.1			30S ribosomal protein S19	rpsS		JCVISYN3A_0667	267	88	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416836	417684	-					rplB		JCVISYN3A_0668	849		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	416836	417684	-	AVX54917.1			50S ribosomal protein L2	rplB		JCVISYN3A_0668	849	282	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	417739	418023	-					rplW		JCVISYN3A_0669	285		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	417739	418023	-	AVX54918.1			50S ribosomal protein L23	rplW		JCVISYN3A_0669	285	94	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	418023	418649	-					rplD		JCVISYN3A_0670	627		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	418023	418649	-	AVX54919.1			50S ribosomal protein L4	rplD		JCVISYN3A_0670	627	208	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	418662	419333	-					rplC		JCVISYN3A_0671	672		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	418662	419333	-	AVX54920.1			50S ribosomal protein L3	rplC		JCVISYN3A_0671	672	223	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	419409	419717	-					rpsJ		JCVISYN3A_0672	309		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	419409	419717	-	AVX54921.1			30S ribosomal protein S10	rpsJ		JCVISYN3A_0672	309	102	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420560	420635	-					tRNA-Thr		JCVISYN3A_0678	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420560	420635	-				tRNA-Thr	tRNA-Thr		JCVISYN3A_0678	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420648	420723	-					tRNA-Val		JCVISYN3A_0679	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420648	420723	-				tRNA-Val	tRNA-Val		JCVISYN3A_0679	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420731	420806	-					tRNA-Glu		JCVISYN3A_0680	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420731	420806	-				tRNA-Glu	tRNA-Glu		JCVISYN3A_0680	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420814	420889	-					tRNA-Asn		JCVISYN3A_0681	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420814	420889	-				tRNA-Asn	tRNA-Asn		JCVISYN3A_0681	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420991	421857	-					folD		JCVISYN3A_0684	867		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	420991	421857	-	AVX54922.1			Bifunctional 5,10-methylene-tetrahydrofolate dehydrogenase/5,10-methylene-tetrahydrofolate cyclohydrolase	folD		JCVISYN3A_0684	867	288	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	421866	423467	-					natA		JCVISYN3A_0685	1602		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	421866	423467	-	AVX54923.1			Sodium transporter	natA		JCVISYN3A_0685	1602	533	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	423546	424274	+					trkA		JCVISYN3A_0686	729		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	423546	424274	+	AVX54924.1			Potassium transporter	trkA		JCVISYN3A_0686	729	242	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	424301	425740	-					gatB		JCVISYN3A_0687	1440		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	424301	425740	-	AVX54925.1			Glutamyl-tRNA amidotransferase subunit B	gatB		JCVISYN3A_0687	1440	479	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	425742	427199	-					gatA		JCVISYN3A_0688	1458		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	425742	427199	-	AVX54926.1			Glutamyl-tRNA amidotransferase subunit A	gatA		JCVISYN3A_0688	1458	485	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	427199	427495	-					gatC		JCVISYN3A_0689	297		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	427199	427495	-	AVX54927.1			Glutamyl-tRNA amidotransferase subunit C	gatC		JCVISYN3A_0689	297	98	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	427497	429503	-					ligA		JCVISYN3A_0690	2007		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	427497	429503	-	AVX54928.1			DNA ligase (NAD(+))	ligA		JCVISYN3A_0690	2007	668	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	429507	431528	-							JCVISYN3A_0691	2022		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	429507	431528	-	AVX54929.1			Uncharacterized protein			JCVISYN3A_0691	2022	673	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	431531	432439	-							JCVISYN3A_0692	909		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	431531	432439	-	AVX54930.1			Uncharacterized pseudouridine synthase			JCVISYN3A_0692	909	302	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	432442	433410	-							JCVISYN3A_0693	969		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	432442	433410	-	AVX54931.1			Uncharacterized protease			JCVISYN3A_0693	969	322	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	433466	433735	-					ptsH		JCVISYN3A_0694	270		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	433466	433735	-	AVX54932.1			Phosphocarrier protein	ptsH		JCVISYN3A_0694	270	89	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	433800	435968	-					pcrA		JCVISYN3A_0695	2169		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	433800	435968	-	AVX54933.1			ATP-dependent DNA helicase	pcrA		JCVISYN3A_0695	2169	722	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	435985	436740	-							JCVISYN3A_0696	756		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	435985	436740	-	AVX54934.1			Uncharacterized transporter			JCVISYN3A_0696	756	251	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	436740	437696	-							JCVISYN3A_0697	957		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	436740	437696	-	AVX54935.1			Uncharacterized glycosyl transferase			JCVISYN3A_0697	957	318	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	438118	439866	-					thiB		JCVISYN3A_0706	1749		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	438118	439866	-	AVX54936.1			Thiamine ABC transporter permease	thiB		JCVISYN3A_0706	1749	582	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	439830	440579	-					thiQ		JCVISYN3A_0707	750		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	439830	440579	-	AVX54937.1			Thiamine ABC transporter ATP-binding protein	thiQ		JCVISYN3A_0707	750	249	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	440593	442056	-					thiB		JCVISYN3A_0708	1464		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	440593	442056	-	AVX54938.1			Thiamine ABC transporter substrate-binding protein	thiB		JCVISYN3A_0708	1464	487	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	442279	443142	-							JCVISYN3A_0710	864		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	442279	443142	-	AVX54939.1			Uncharacterized hydrolase			JCVISYN3A_0710	864	287	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443479	443555	+					tRNA-Arg		JCVISYN3A_0717	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443479	443555	+				tRNA-Arg	tRNA-Arg		JCVISYN3A_0717	77		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443603	443679	+					tRNA-Pro		JCVISYN3A_0718	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443603	443679	+				tRNA-Pro	tRNA-Pro		JCVISYN3A_0718	77		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443690	443765	+					tRNA-Ala		JCVISYN3A_0719	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443690	443765	+				tRNA-Ala	tRNA-Ala		JCVISYN3A_0719	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443770	443846	+					tRNA-Met		JCVISYN3A_0720	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443770	443846	+				tRNA-Met	tRNA-Met		JCVISYN3A_0720	77		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443858	443934	+					tRNA-Met		JCVISYN3A_0721	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443858	443934	+				tRNA-Met	tRNA-Met		JCVISYN3A_0721	77		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443977	444069	+					tRNA-Ser		JCVISYN3A_0722	93		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	443977	444069	+				tRNA-Ser	tRNA-Ser		JCVISYN3A_0722	93		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444092	444167	+					tRNA-Met		JCVISYN3A_0723	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444092	444167	+				tRNA-Met	tRNA-Met		JCVISYN3A_0723	76		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444170	444246	+					tRNA-Asp		JCVISYN3A_0724	77		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444170	444246	+				tRNA-Asp	tRNA-Asp		JCVISYN3A_0724	77		
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444255	444330	+					tRNA-Phe		JCVISYN3A_0725	76		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444255	444330	+				tRNA-Phe	tRNA-Phe		JCVISYN3A_0725	76		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444438	445172	+					nagB		JCVISYN3A_0726	735		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	444438	445172	+	AVX54940.1			Glucosamine-6-phosphate deaminase	nagB		JCVISYN3A_0726	735	244	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	445270	446016	+					tpiA		JCVISYN3A_0727	747		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	445270	446016	+	AVX54941.1			Triose-phosphate isomerase	tpiA		JCVISYN3A_0727	747	248	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	446009	446845	+							JCVISYN3A_0728	837		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	446009	446845	+	AVX54942.1			Uncharacterized hydrolase			JCVISYN3A_0728	837	278	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	446848	448443	+					pgm		JCVISYN3A_0729	1596		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	446848	448443	+	AVX54943.1			Phosphoglycerate mutase (2,3-diphosphoglycerate-independent)	pgm		JCVISYN3A_0729	1596	531	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	448543	449142	+							JCVISYN3A_0730	600		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	448543	449142	+	AVX54944.1			Uncharacterized protein			JCVISYN3A_0730	600	199	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	449195	449863	-					deoC		JCVISYN3A_0732	669		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	449195	449863	-	AVX54945.1			Deoxyribose-phosphate aldolase	deoC		JCVISYN3A_0732	669	222	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	449875	451551	-					deoB		JCVISYN3A_0733	1677		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	449875	451551	-	AVX54946.1			Phosphopentomutase	deoB		JCVISYN3A_0733	1677	558	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	451915	452568	+					punA		JCVISYN3A_0747	654		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	451915	452568	+	AVX54947.1			Purine-nucleoside phosphorylase	punA		JCVISYN3A_0747	654	217	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	452721	454883	-					nrdE		JCVISYN3A_0771	2163		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	452721	454883	-	AVX54948.1			Ribonucleotide-diphosphate reductase subunit alpha	nrdE		JCVISYN3A_0771	2163	720	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	454870	455343	-					nrdI		JCVISYN3A_0772	474		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	454870	455343	-	AVX54949.1			Ribonucleotide reductase assembly protein	nrdI		JCVISYN3A_0772	474	157	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	455352	456371	-					nrdF		JCVISYN3A_0773	1020		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	455352	456371	-	AVX54950.1			Ribonucleoside-diphosphate reductase subunit beta	nrdF		JCVISYN3A_0773	1020	339	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	456670	456954	+					secG		JCVISYN3A_0774	285		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	456670	456954	+	AVX54951.1			Preprotein translocase subunit	secG		JCVISYN3A_0774	285	94	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	456990	459104	+					rnr		JCVISYN3A_0775	2115		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	456990	459104	+	AVX54952.1			Ribonuclease R	rnr		JCVISYN3A_0775	2115	704	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	459114	459560	+					smpB		JCVISYN3A_0776	447		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	459114	459560	+	AVX54953.1			SsrA-binding protein	smpB		JCVISYN3A_0776	447	148	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	459560	460045	+							JCVISYN3A_0777	486		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	459560	460045	+	AVX54954.1			Uncharacterized protein			JCVISYN3A_0777	486	161	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	460165	460416	+							JCVISYN3A_0778	252		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	460165	460416	+	AVX54955.1			Uncharacterized protein			JCVISYN3A_0778	252	83	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	460467	462704	+					ptsG		JCVISYN3A_0779	2238		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	460467	462704	+	AVX54956.1			PTS sugar transporter	ptsG		JCVISYN3A_0779	2238	745	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	463042	465870	-					mgtA		JCVISYN3A_0787	2829		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	463042	465870	-	AVX54957.1			Magnesium-translocating P-type ATPase	mgtA		JCVISYN3A_0787	2829	942	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	466288	466587	-					atpC		JCVISYN3A_0789	300		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	466288	466587	-	AVX54958.1			F0F1 ATP synthase subunit delta/epsilon	atpC		JCVISYN3A_0789	300	99	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	466587	468014	-					atpD		JCVISYN3A_0790	1428		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	466587	468014	-	AVX54959.1			F0F1 ATP synthase subunit beta	atpD		JCVISYN3A_0790	1428	475	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	468023	468865	-					atpG		JCVISYN3A_0791	843		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	468023	468865	-	AVX54960.1			F0F1 ATP synthase subunit gamma	atpG		JCVISYN3A_0791	843	280	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	468867	470444	-					atpA		JCVISYN3A_0792	1578		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	468867	470444	-	AVX54961.1			F0F1 ATP synthase subunit alpha	atpA		JCVISYN3A_0792	1578	525	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	470456	471001	-					atpD		JCVISYN3A_0793	546		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	470456	471001	-	AVX54962.1			F0F1 ATP synthase subunit delta	atpD		JCVISYN3A_0793	546	181	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471003	471548	-					atpF		JCVISYN3A_0794	546		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471003	471548	-	AVX54963.1			F0F1 ATP synthase subunit B	atpF		JCVISYN3A_0794	546	181	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471577	471882	-					atpE		JCVISYN3A_0795	306		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471577	471882	-	AVX54964.1			F0F1 ATP synthase subunit C	atpE		JCVISYN3A_0795	306	101	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471912	472775	-					atpB		JCVISYN3A_0796	864		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	471912	472775	-	AVX54965.1			F0F1 ATP synthase subunit A	atpB		JCVISYN3A_0796	864	287	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	472775	473173	-							JCVISYN3A_0797	399		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	472775	473173	-	AVX54966.1			Uncharacterized protein			JCVISYN3A_0797	399	132	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	473313	473936	-					upp		JCVISYN3A_0798	624		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	473313	473936	-	AVX54967.1			Uracil phosphoribosyltransferase	upp		JCVISYN3A_0798	624	207	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	474036	475277	-					glyA		JCVISYN3A_0799	1242		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	474036	475277	-	AVX54968.1			Serine hydroxymethyltransferase	glyA		JCVISYN3A_0799	1242	413	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	475261	475704	-					rpiB		JCVISYN3A_0800	444		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	475261	475704	-	AVX54969.1			Ribose 5-phosphate isomerase B	rpiB		JCVISYN3A_0800	444	147	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	475872	479639	-					rpoC		JCVISYN3A_0803	3768		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	475872	479639	-	AVX54970.1			DNA-directed RNA polymerase subunit beta'	rpoC		JCVISYN3A_0803	3768	1255	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	479651	483526	-					rpoB		JCVISYN3A_0804	3876		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	479651	483526	-	AVX54971.1			DNA-directed RNA polymerase subunit beta	rpoB		JCVISYN3A_0804	3876	1291	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	483516	484691	-							JCVISYN3A_0805	1176		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	483516	484691	-	AVX54972.1			Uncharacterized protein			JCVISYN3A_0805	1176	391	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	484862	485230	-					rplG		JCVISYN3A_0806	369		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	484862	485230	-	AVX54973.1			50S ribosomal protein L7/L12	rplG		JCVISYN3A_0806	369	122	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	485299	485796	-					rplJ		JCVISYN3A_0807	498		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	485299	485796	-	AVX54974.1			50S ribosomal protein L10	rplJ		JCVISYN3A_0807	498	165	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	486023	486703	-					rplA		JCVISYN3A_0809	681		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	486023	486703	-	AVX54975.1			50S ribosomal protein L1	rplA		JCVISYN3A_0809	681	226	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	486703	487131	-					rplK		JCVISYN3A_0810	429		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	486703	487131	-	AVX54976.1			50S ribosomal protein L11	rplK		JCVISYN3A_0810	429	142	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	487642	488640	+					galE		JCVISYN3A_0813	999		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	487642	488640	+	AVX54977.1			UDP-glucose 4-epimerase GalE	galE		JCVISYN3A_0813	999	332	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	488654	489841	+					glf		JCVISYN3A_0814	1188		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	488654	489841	+	AVX54978.1			UDP-galactopyranose mutase	glf		JCVISYN3A_0814	1188	395	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	490471	491400	-					whiA		JCVISYN3A_0817	930		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	490471	491400	-	AVX54979.1			Uncharacterized DNA-binding protein	whiA		JCVISYN3A_0817	930	309	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	491413	492843	-					lgt		JCVISYN3A_0818	1431		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	491413	492843	-	AVX54980.1			Diacylglyceryl transferase	lgt		JCVISYN3A_0818	1431	476	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	492852	493784	-					trx		JCVISYN3A_0819	933		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	492852	493784	-	AVX54981.1			Thioredoxin-disulfide reductase	trx		JCVISYN3A_0819	933	310	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	493768	495348	-					lgt		JCVISYN3A_0820	1581		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	493768	495348	-	AVX54982.1			Diacylglyceryl transferase	lgt		JCVISYN3A_0820	1581	526	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	495359	496300	-					hpr; ptsH		JCVISYN3A_0821	942		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	495359	496300	-	AVX54983.1			HPr(Ser) kinase/phosphatase	hpr; ptsH		JCVISYN3A_0821	942	313	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	496384	497058	-					ecfS		JCVISYN3A_0822	675		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	496384	497058	-	AVX54984.1			Uncharacterized ECF transporter S component	ecfS		JCVISYN3A_0822	675	224	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	497075	498190	-					folC		JCVISYN3A_0823	1116		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	497075	498190	-	AVX54985.1			Dihydrofolate synthase	folC		JCVISYN3A_0823	1116	371	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	498183	501023	-					uvrA		JCVISYN3A_0824	2841		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	498183	501023	-	AVX54986.1			Excinuclease ABC subunit A	uvrA		JCVISYN3A_0824	2841	946	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	501032	503029	-					uvrB		JCVISYN3A_0825	1998		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	501032	503029	-	AVX54987.1			Excinuclease ABC subunit B	uvrB		JCVISYN3A_0825	1998	665	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	503314	504264	+					yqeN		JCVISYN3A_0826	951		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	503314	504264	+	AVX54988.1			DNA polymerase III subunit delta	yqeN		JCVISYN3A_0826	951	316	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	504267	505733	+							JCVISYN3A_0827	1467		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	504267	505733	+	AVX54989.1			Uncharacterized protein			JCVISYN3A_0827	1467	488	
+gene	tRNA	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	505899	505973	+					tRNA-Cys		JCVISYN3A_0828	75		
+tRNA		GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	505899	505973	+				tRNA-Cys	tRNA-Cys		JCVISYN3A_0828	75		
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	506111	506371	+							JCVISYN3A_0830	261		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	506111	506371	+	AVX54990.1			Uncharacterized protein			JCVISYN3A_0830	261	86	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	506551	507585	+					prs		JCVISYN3A_0831	1035		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	506551	507585	+	AVX54991.1			Phosphoribosylpyrophosphate synthetase	prs		JCVISYN3A_0831	1035	344	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	508011	508571	+					pth		JCVISYN3A_0832	561		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	508011	508571	+	AVX54992.1			Aminoacyl-tRNA hydrolase	pth		JCVISYN3A_0832	561	186	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	508692	509135	+					rplI		JCVISYN3A_0833	444		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	508692	509135	+	AVX54993.1			50S ribosomal protein L9	rplI		JCVISYN3A_0833	444	147	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	509138	510454	+					dnaC		JCVISYN3A_0834	1317		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	509138	510454	+	AVX54994.1			Replicative DNA helicase	dnaC		JCVISYN3A_0834	1317	438	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	510521	511828	+							JCVISYN3A_0835	1308		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	510521	511828	+	AVX54995.1			Uncharacterized lipoprotein			JCVISYN3A_0835	1308	435	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	511970	512896	+					ecfS		JCVISYN3A_0836	927		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	511970	512896	+	AVX54996.1			Uncharacterized ECF transporter S component	ecfS		JCVISYN3A_0836	927	308	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	512905	514230	+					cysRS		JCVISYN3A_0837	1326		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	512905	514230	+	AVX54997.1			Cysteine--tRNA ligase	cysRS		JCVISYN3A_0837	1326	441	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	514232	514966	+					rlmB		JCVISYN3A_0838	735		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	514232	514966	+	AVX54998.1			23S rRNA (guanosine(2251)-2'-O)-methyltransferase	rlmB		JCVISYN3A_0838	735	244	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515027	515188	+					rpmG		JCVISYN3A_0932	162		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515027	515188	+	AVX54999.1			50S ribosomal protein L33	rpmG		JCVISYN3A_0932	162	53	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515188	515511	+					secE		JCVISYN3A_0839	324		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515188	515511	+	AVX55000.1			Preprotein translocase subunit	secE		JCVISYN3A_0839	324	107	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515528	516169	+					nusG		JCVISYN3A_0840	642		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	515528	516169	+	AVX55001.1			Antitermination protein	nusG		JCVISYN3A_0840	642	213	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	516675	516857	-							JCVISYN3A_0851	183		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	516675	516857	-	AVX55002.1			Uncharacterized lipoprotein			JCVISYN3A_0851	183	60	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	517023	517253	-							JCVISYN3A_0852	231		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	517023	517253	-	AVX55003.1			Uncharacterized protein			JCVISYN3A_0852	231	76	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	517243	517962	-							JCVISYN3A_0853	720		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	517243	517962	-	AVX55004.1			Uncharacterized protein			JCVISYN3A_0853	720	239	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	518165	520126	+					topA		JCVISYN3A_0859	1962		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	518165	520126	+	AVX55005.1			DNA topoisomerase I	topA		JCVISYN3A_0859	1962	653	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	520382	522148	-							JCVISYN3A_0870	1767		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	520382	522148	-	AVX55006.1			Uncharacterized C4-dicarboxylate ABC transporter			JCVISYN3A_0870	1767	588	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	522217	523311	-					ychF		JCVISYN3A_0872	1095		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	522217	523311	-	AVX55007.1			Uncharacterized ATPase	ychF		JCVISYN3A_0872	1095	364	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	523347	523547	-							JCVISYN3A_0873	201		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	523347	523547	-	AVX55008.1			Uncharacterized protein			JCVISYN3A_0873	201	66	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	523549	524244	-					rsmG		JCVISYN3A_0874	696		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	523549	524244	-	AVX55009.1			16S rRNA (guanine(527)-N(7))-methyltransferase	rsmG		JCVISYN3A_0874	696	231	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	524244	524840	-					pgsA		JCVISYN3A_0875	597		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	524244	524840	-	AVX55010.1			CDP-diacylglycerol--glycerol-3-phosphate 3-phosphatidyltransferase	pgsA		JCVISYN3A_0875	597	198	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	524942	526522	-							JCVISYN3A_0876	1581		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	524942	526522	-	AVX55011.1			Uncharacterized amino acid permease			JCVISYN3A_0876	1581	526	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	526669	527349	-							JCVISYN3A_0877	681		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	526669	527349	-	AVX55012.1			Uncharacterized protein			JCVISYN3A_0877	681	226	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	527321	528859	-							JCVISYN3A_0878	1539		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	527321	528859	-	AVX55013.1			Uncharacterized amino acid permease			JCVISYN3A_0878	1539	512	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	528917	531574	-					corA		JCVISYN3A_0879	2658		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	528917	531574	-	AVX55014.1			Magnesium transporter	corA		JCVISYN3A_0879	2658	885	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	531973	533400	-							JCVISYN3A_0881	1428		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	531973	533400	-	AVX55015.1			Uncharacterized MFS transporter			JCVISYN3A_0881	1428	475	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	533864	535753	-					mnmG; gidA		JCVISYN3A_0885	1890		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	533864	535753	-	AVX55016.1			tRNA uridine(34) 5-carboxymethylaminomethyl synthesis enzyme	mnmG; gidA		JCVISYN3A_0885	1890	629	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	535901	537478	-					gltP		JCVISYN3A_0886	1578		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	535901	537478	-	AVX55017.1			Proton-glutamate symporter	gltP		JCVISYN3A_0886	1578	525	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	537498	538841	-					cdr		JCVISYN3A_0887	1344		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	537498	538841	-	AVX55018.1			Coenzyme A Disulfide Reductase	cdr		JCVISYN3A_0887	1344	447	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	539821	540537	-							JCVISYN3A_0906	717		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	539821	540537	-	AVX55019.1			Uncharacterized protein			JCVISYN3A_0906	717	238	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	540537	541331	-							JCVISYN3A_0907	795		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	540537	541331	-	AVX55020.1			Uncharacterized hydrolase			JCVISYN3A_0907	795	264	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	541408	542598	-					yidC		JCVISYN3A_0908	1191		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	541408	542598	-	AVX55021.1			Membrane protein insertase	yidC		JCVISYN3A_0908	1191	396	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	542616	542945	-					rnpA		JCVISYN3A_0909	330		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	542616	542945	-	AVX55022.1			Ribonuclease P protein component	rnpA		JCVISYN3A_0909	330	109	
+gene	protein_coding	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	542952	543086	-					rpmH		JCVISYN3A_0910	135		
+CDS	with_protein	GCA_001708325.2	Primary Assembly	chromosome		CP016816.2	542952	543086	-	AVX55023.1			50S ribosomal protein L34	rpmH		JCVISYN3A_0910	135	44	

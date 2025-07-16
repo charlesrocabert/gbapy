@@ -6,7 +6,6 @@
 # Web: https://github.com/charlesrocabert/gbapy
 # 
 # MIT License
-# -----------
 # 
 # Copyright © 2024-2025 Charles Rocabert. All rights reserved.
 # 
