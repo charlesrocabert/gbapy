@@ -74,12 +74,14 @@ class ReactionType(enum.Enum):
     """
     Reaction type enumeration.
     - Metabolic: Metabolic (internal) reaction.
-    - Transport: Transport (external) reaction.
+    - Transporter: Transport (boundary) reaction.
+    - Spontaneous: Spontaneous (boundary) reaction.
     - Exchange : Exchange reaction (specific to FBA models).
     """
-    Metabolic = 1
-    Transport = 2
-    Exchange  = 3
+    Metabolic   = 1
+    Transport   = 2
+    Spontaneous = 3
+    Exchange    = 4
 
 class ReactionDirection(enum.Enum):
     """

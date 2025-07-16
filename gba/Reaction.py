@@ -63,7 +63,7 @@ class Reaction:
     name : str
         Name of the species.
     reaction_type : ReactionType
-        Type of the reaction (metabolic, transport, exchange).
+        Type of the reaction (metabolic, transport, spontaneous, exchange).
     lb : float
         Lower bound of the reaction.
     ub : float
@@ -191,7 +191,7 @@ class Reaction:
         name : str
             Name of the reaction.
         reaction_type : ReactionType
-            Type of the reaction (metabolic, transport, exchange).
+            Type of the reaction (metabolic, transport, spontaneous, exchange).
         lb : float
             Lower bound of the reaction.
         ub : float
@@ -862,6 +862,7 @@ class Reaction:
         if self.reaction_type is not None:
             df["Type"] = ("Metabolic" if self.reaction_type == ReactionType.Metabolic else
                           "Transport" if self.reaction_type == ReactionType.Transport else
+                          "Spontaneous" if self.reaction_type == ReactionType.Spontaneous else
                           "Exchange" if self.reaction_type == ReactionType.Exchange else
                           "Unknown")
         if self.expression is not None:

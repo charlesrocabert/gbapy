@@ -915,11 +915,13 @@ class Builder:
         if verbose:
             if len(missing_kcat) > 0:
                 transporter_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Transport])
+                spontaneous_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Spontaneous])
                 metabolic_count   = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Metabolic])
                 perc              = len(missing_kcat)/len(self.reactions)*100
                 transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Transport])*100
+                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Spontaneous])*100
                 metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Metabolic])*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {metabolic_perc:.2f}% metabolic).")
+                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
             if len(missing_km) > 0:
                 perc = len(missing_km)/len(self.reactions)*100
                 throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values.")
@@ -1174,7 +1176,7 @@ class Builder:
                 continue
             if len(met_to_rea_connectivity[m_id]["reactant"]) == 0 and len(met_to_rea_connectivity[m_id]["product"]) == 1:
                 r_id = met_to_rea_connectivity[m_id]["product"][0]
-                if self.reactions[r_id].reaction_type == ReactionType.Transport:
+                if self.reactions[r_id].reaction_type in [ReactionType.Transport, ReactionType.Spontaneous]:
                     isolated.append(m_id)
                     if verbose:
                         throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> is isolated (imported only).")
@@ -1236,6 +1238,10 @@ class Builder:
         index = 0
         for r in self.reactions.values():
             if r.reaction_type == ReactionType.Transport:
+                self.FBA_col_indices[r.id] = index
+                index += 1
+        for r in self.reactions.values():
+            if r.reaction_type == ReactionType.Spontaneous:
                 self.FBA_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
@@ -1527,6 +1533,10 @@ class Builder:
         index = 0
         for r in self.reactions.values():
             if r.reaction_type == ReactionType.Transport and r.id != "Ribosome":
+                self.CGM_col_indices[r.id] = index
+                index += 1
+        for r in self.reactions.values():
+            if r.reaction_type == ReactionType.Spontaneous and r.id != "Ribosome":
                 self.CGM_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
@@ -2029,6 +2039,8 @@ class Builder:
                 r_type = "metabolic"
             elif r.reaction_type == ReactionType.Transport:
                 r_type = "transporter"
+            elif r.reaction_type == ReactionType.Spontaneous:
+                r_type = "spontaneous"
             elif r.reaction_type == ReactionType.Exchange:
                 r_type = "exchange"
             proteins = " + ".join([f"{r.proteins[p_id]} {p_id}" for p_id in r.proteins])
@@ -2189,7 +2201,7 @@ class Builder:
             html_str += "<table>"
             html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
             html_str += "<h2 style='text-align: left;'>"+category+"</h2>"
-            html_str += df.to_html(escape=False, index=False)
+            html_str += df.to_html(escape=False, index=False, header=False)
             html_str += "</td></tr>"
             html_str += "</table>"
         display_html(html_str,raw=True)
@@ -2232,15 +2244,17 @@ class Builder:
         }
         df2 = pd.DataFrame(df2)
         df3 = {
-            "Category": ["Metabolic", "Transport", "Exchange"],
+            "Category": ["Metabolic", "Transport", "Spontaneous", "Exchange"],
             "Count": [
                 len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic]),
                 len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport]),
+                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Spontaneous]),
                 len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])
             ],
             "Percentage": [
                 f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic])/len(self.reactions)*100:.2f}%",
                 f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Spontaneous])/len(self.reactions)*100:.2f}%",
                 f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])/len(self.reactions)*100:.2f}%"
             ]
         }
