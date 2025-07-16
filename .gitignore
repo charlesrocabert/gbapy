@@ -11,8 +11,6 @@ tutorials/MMSYN_tutorial/hpc_download/**
 tutorials/MMSYN_tutorial/models/**
 tutorials/MMSYN_tutorial/deprecated/**
 
-# tutorials under writing
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
