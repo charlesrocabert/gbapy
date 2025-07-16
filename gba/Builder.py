@@ -236,8 +236,73 @@ class Builder:
         Detect isolated metabolites.
     create_FBA_biomass_reaction( biomass_id: str, biomass_name: str, biomass_equation: str ) -> None
         Create the FBA biomass reaction.
-    """
+    build_FBA_indices( self ) -> None
+        Build the FBA row and column indices.
+    build_FBA_stoichiometric_matrix( self ) -> None
+        Build the FBA stoichiometric matrix.
+    compute_stoichiometric_matrix_metrics( self ) -> None
+        Compute the metrics of the FBA stoichiometric matrix.
+    build_FBA_model( self, enforced_reactions: Optional[dict[str, float]] = None ) -> None
+        Build the FBA model from the reactions and metabolites.
     
+    adjust_masses( self, metabolites: dict[str, float] ) -> None
+        Adjust the molecular masses of metabolites in the model.
+    check_mass_balance( self, verbose: Optional[bool] = False ) -> None
+        Check the mass balance of the model.
+    check_mass_normalization( self, verbose: Optional[bool] = False ) -> None
+        Check the mass normalization of the model.
+    check_ribosomal_reaction_consistency( self )-> None
+        Check the consistency of the ribosomal reaction.
+    check_conversion( self, verbose: Optional[bool] = False ) -> None
+        Check the conversion of the model to CGM.
+    convert( self, ribosome_byproducts: Optional[bool] = False, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3 ) -> None
+        Convert units to GBA units.
+    reset_conversion( self ) -> None
+        Reset the conversion t oCGM.
+    build_CGM_indices( self ) -> None
+        Build CGM row and column indices.
+    build_CGM_mass_fraction_matrix( self ) -> None
+        Build the CGM complete mass fraction matrix.
+    build_CGM_kcat_vectors( self ) -> None
+        Build the CGM kcat vectors.
+    build_CGM_K_matrices( self ) -> None
+        Build the CGM KM matrix.
+    build_CGM_KA_KI_KR_matrices( self ) -> None
+        Build the CGM KA, KI and KR matrices.
+    compile_protein_contributions( self ) -> None
+        Compile the enzyme to protein mass concentration mapping.
+    compute_mass_fraction_matrix_metrics( self ) -> None
+        Compute the metrics of the CGM internal mass fraction matrix.
+    build_CGM( self ) -> None
+        Wrapper function to build the CGM.
+    convert_CGM_reaction_to_forward_irreversible( self, reaction_id: str, direction: ReactionDirection ) -> None
+        Convert all CGM reactions to forward irreversible.
+    enforce_directionality( self, fluxes: dict[str, float] ) -> None
+        Enforce the directionality of the CGM reactions based on a given flux vector.
+    write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the CGM to CSV format.
+    write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the CGM to ODS format.
+    write_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of proteins to a file.
+    write_ribosomal_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of ribosomal proteins to a file.
+    write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of metabolites to a file.
+    write_reactions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of reactions to a file.
+    write_kinetic_parameters_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of kinetic parameters to a file.
+    write_protein_contributions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
+        Write the list of protein contributions to a file.
+    generate_kinetic_parameter_tables( self, path: Optional[str] = "." )
+        Generate the kinetic parameter tables for external usage.
+    information( self ) -> None
+        Display the information about the CGM build.
+    summary( self ) -> None
+        Summarize the CGM build.  
+    """
+
     def __init__( self, name ):
         """
         Constructor of the Builder class.
@@ -1412,7 +1477,7 @@ class Builder:
         if is_normalized:
             throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is mass normalized")
     
-    def check_ribosomal_reaction_consistency( self ):
+    def check_ribosomal_reaction_consistency( self ) -> None:
         """
         Check the ribosomal reaction consistency of the model
         """
