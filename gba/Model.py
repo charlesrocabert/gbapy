@@ -1879,7 +1879,7 @@ class Model:
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
+    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
         """
         Solve the local linear problem to find the initial solution.
 
@@ -1907,7 +1907,6 @@ class Model:
                 lb_vec.append(CgmConstants.TOL.value)
         #lb_vec = [CgmConstants.TOL.value]*self.nj
         ub_vec = [max_flux_fraction]*self.nj
-        print(lb_vec)
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
            lb_vec[r_index] = item[1]
@@ -1929,7 +1928,7 @@ class Model:
             throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
-    def find_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0,
+    def find_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0,
                                condition_id: Optional[str] = "1" ) -> None:
         """
         Generate an initial solution using a linear program.
