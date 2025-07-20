@@ -24,6 +24,14 @@
 Documentation coming soon ...
 </p>
 
+```ruby
+import gba
+model = gba.read_ods_model(name="my_cgm")
+model.find_initial_solution()
+model.set_condition(condition_id="1")
+model.find_optimum()
+```
+
 ## Copyright <a name="copyright"></a>
 Copyright © 2024-2025 Charles Rocabert, Furkan Mert. All rights reserved.
 
