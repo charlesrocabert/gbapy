@@ -24,7 +24,7 @@
 Documentation coming soon ...
 </p>
 
-```ruby
+```python
 import gba
 model = gba.read_ods_model(name="my_cgm")
 model.find_initial_solution()
