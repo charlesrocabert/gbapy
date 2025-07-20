@@ -46,7 +46,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
 	name                          = "gba",
-	version                       = "0.0.1",
+	version                       = "0.2.0",
 	license                       = "MIT License",
 	description                   = "gbapy (Growth Balance Analysis for Python)",
 	long_description              = long_description,

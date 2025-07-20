@@ -44,6 +44,7 @@ import csv
 import time
 import pickle
 import pkgutil
+import subprocess
 import numpy as np
 import pandas as pd
 import gurobipy as gp
@@ -2014,6 +2015,176 @@ class Model:
                 if verbose:
                     throw_message(MessageType.Plain, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # 6) Optimization functions          #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def build_gbacpp_command_line( self, temporary_name: str, tol: float, stable_count: int, max_iter: float ):
+        """
+        Build the command line for the C++ solver gbacpp.
+
+        Parameters
+        ----------
+        temporary_name : str
+            Name of the temporary model.
+        tol : float
+            Tolerance value
+        stable_count : int
+            Number of iteration with no significant mu change.
+        max_iter : float
+            Maximum number of iterations.
+        
+        Returns
+        -------
+        cmdline
+            The solver command line
+        """
+        cmdline  = "find_cgm_optimum "
+        cmdline += "-path . "
+        cmdline += "-name "+str(temporary_name)+" "
+        cmdline += "-condition "+self.condition+" "
+        cmdline += "-tol "+str(tol)+" "
+        cmdline += "-stable "+str(stable_count)+" "
+        cmdline += "-maxt "+str(max_iter)+" "
+        cmdline += "-print\n"
+        return(cmdline)
+    
+    def read_solver_output( self, solver_output: str ) -> None:
+        """
+        Read the output of the solver and update the model state.
+
+        Parameters
+        ----------
+        solver_output : str
+            Output of the solver.
+
+        Returns
+        -------
+        converged, runtime
+            Tuple containing the convergence status and the runtime.
+        """
+        lines = solver_output.split("\n")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Check the solver output format         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        ### 1.1) Check the dimensionality of the output ###
+        assert len(lines) == 14, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[0].split(" ")) == 2, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[1].split("\t")) == 6, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[2].split("\t")) == 6, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[3].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[4].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[5].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[6].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[7].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[8].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[9].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[10].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[11].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        assert len(lines[12].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        ### 1.2) Check the content of the output ###
+        assert lines[0].startswith("CONDITION "), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.Error, f"Condition mismatch: expected {self.condition}, got {condition_line[1]}.")
+        assert lines[1] == "mu	doubling_time	density	consistent	converged	run_time", throw_message(MessageType.Error, "Invalid solver output format.")
+        ### 1.3) Check f vector ###
+        assert lines[3].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert lines[4].startswith("f\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        r_ids  = lines[3].split("\t")[1:]
+        for i in range(self.nj):
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+        ### 1.4) Check v vector ###
+        assert lines[5].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert lines[6].startswith("v\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        r_ids  = lines[5].split("\t")[1:]
+        for i in range(self.nj):
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+        ### 1.5) Check p vector ###
+        assert lines[7].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert lines[8].startswith("p\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        r_ids  = lines[7].split("\t")[1:]
+        for i in range(self.nj):
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+        ### 1.6) Check b vector ###
+        assert lines[9].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert lines[10].startswith("b\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        met_ids  = lines[9].split("\t")[1:]
+        for i in range(self.nc):
+            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.Error, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
+        ### 1.7) Check c vector ###
+        assert lines[11].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        assert lines[12].startswith("c\t"), throw_message(MessageType.Error, "Invalid solver output format.")
+        met_ids  = lines[11].split("\t")[1:]
+        for i in range(self.nc):
+            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.Error, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Read the model state                   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        line               = lines[2].split("\t")
+        self.mu            = float(line[0])
+        self.doubling_time = float(line[1])
+        self.density       = float(line[2])
+        self.consistent    = bool(int(line[3]))
+        converged          = bool(int(line[4]))
+        run_time           = float(line[5])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Read the variables                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.f = np.array([float(x) for x in lines[4].split("\t")[1:]])
+        self.v = np.array([float(x) for x in lines[6].split("\t")[1:]])
+        self.p = np.array([float(x) for x in lines[8].split("\t")[1:]])
+        self.b = np.array([float(x) for x in lines[10].split("\t")[1:]])
+        self.c = np.array([float(x) for x in lines[12].split("\t")[1:]])
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Returns convergence status and runtime #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        return converged, run_time
+    
+    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000 ):
+        """
+        Find the optimum of the CGM using the gbacpp solver.
+
+        Parameters
+        ----------
+        tol : Optional[float], default=1e-10
+            Tolerance value for the solver.
+        stable : Optional[int], default=10000
+            Number of iterations with no significant mu change to consider convergence.
+        max_iter : Optional[int], default=1000000
+            Maximum number of iterations for the solver.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Write the model in a temporary file with a unique key #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        temporary_name = "temp_"+str(int(time.time()))
+        self.write_to_csv(name=temporary_name)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Run gbacpp solver                                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        cmdline             = self.build_gbacpp_command_line(temporary_name, tol, stable, max_iter)
+        solver_process      = subprocess.Popen([cmdline], stdout=subprocess.PIPE, shell=True)
+        solver_output       = solver_process.stdout.read().decode('utf8')
+        converged, run_time = self.read_solver_output(solver_output)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Remove the temporary files and folder                 #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        assert temporary_name.startswith("temp_"), throw_message(MessageType.Error, "Temporary folder name must start with 'temp_'.")
+        assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.Error, "Temporary folder name must contain a timestamp.")
+        while os.path.exists(temporary_name):
+            files = os.listdir(temporary_name)
+            for file in files:
+                file_path = os.path.join(temporary_name, file)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+            os.rmdir(temporary_name)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Print the result                                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if converged:
+            self.optimal_solutions[self.condition] = np.copy(self.f)
+            throw_message(MessageType.Info, f"Model converged with mu = {self.mu} after {run_time:.2f} seconds.")
+        else:
+            throw_message(MessageType.Warning, f"Model did not converge after {run_time:.2f} seconds.")
+        
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Summary functions               #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
