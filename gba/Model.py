@@ -1929,19 +1929,18 @@ class Model:
             throw_message(MessageType.Error, "Local linear problem could not be solved.")
             return False
 
-    def find_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0,
-                               condition_id: Optional[str] = "1" ) -> None:
+    def find_initial_solution( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
         """
         Generate an initial solution using a linear program.
 
         Parameters
         ----------
+        condition_id : Optional[str], default="1"
+            Condition identifier.
         max_flux_fraction : Optional[float], default=10.0
             Maximal flux fraction.
         rhs_factor : Optional[float], default=10.0
             Factor dividing the rhs of the mass conservation constraint.
-        condition_id : Optional[str], default="1"
-            Condition identifier.
         """
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
         if solved:
@@ -1955,6 +1954,87 @@ class Model:
                 throw_message(MessageType.Info, "Model is inconsistent.")
         else:
             throw_message(MessageType.Warning, "Impossible to find an initial solution.")
+
+    def find_initial_solution_all( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
+        """
+        Generate an initial solution using a linear program and testing it for all conditions.
+
+        Parameters
+        ----------
+        max_flux_fraction : Optional[float], default=10.0
+            Maximal flux fraction.
+        rhs_factor : Optional[float], default=10.0
+            Factor dividing the rhs of the mass conservation constraint.
+
+        Returns
+        -------
+        string
+            "consistent" if the model is consistent with the initial solution,
+            "inconsistent" if the model is inconsistent with the initial solution,
+            "no_solution" if no solution could be found.
+        """
+        solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+        if solved:
+            mu_max = 0.0
+            for condition_id in self.condition_ids:
+                self.set_condition(condition_id)
+                self.set_f0(self.initial_solution)
+                self.calculate()
+                self.check_model_consistency()
+                if not self.consistent:
+                    return "inconsistent", None
+                else:
+                    if self.mu > mu_max:
+                        mu_max = self.mu
+            return "consistent", mu_max
+        else:
+            return "no_solution", None
+
+    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, initial_rhs_factor: Optional[float] = 1000.0 ) -> None:
+        """
+        Find the best initial solution by maximizing the growth rate mu while reducing the rhs factor.
+
+        Parameters
+        ----------
+        max_flux_fraction : Optional[float], default=50.0
+            Maximal flux fraction.
+        initial_rhs_factor : Optional[float], default=1000.0
+            Initial factor dividing the rhs of the mass conservation constraint.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Test the initial parameters   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=initial_rhs_factor)
+        if success == "no_solution":
+            throw_message(MessageType.Error, "No initial solution could be found, consider reducing the max flux fraction.")
+        if success == "inconsistent":
+            throw_message(MessageType.Error, "Model is inconsistent with the initial solution, consider reducing the max flux fraction.")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Run mu maximization algorithm #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rhs_factor       = initial_rhs_factor
+        stop             = False
+        best_rhs_factor  = rhs_factor
+        rhs_factor      -= 1.0
+        while not stop:
+            success, current_mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+            if success != "consistent":
+                stop = True
+                continue
+            if current_mu > mu:
+                mu               = current_mu
+                best_rhs_factor  = rhs_factor
+                rhs_factor      -= 1.0
+                if rhs_factor < 1.0:
+                    stop = True
+                    continue
+            else:
+                stop = True
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Recover the best solution     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=best_rhs_factor)
+        throw_message(MessageType.Info, f"Best initial solution found with mu = {round(mu, 5)}.")
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
