@@ -2164,7 +2164,7 @@ class Model:
         assert len(lines[12].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
         ### 1.2) Check the content of the output ###
         assert lines[0].startswith("CONDITION "), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.Error, f"Condition mismatch: expected {self.condition}, got {condition_line[1]}.")
+        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.Error, f"Condition mismatch: expected {self.condition}, got {lines[0].split(" ")[1]}.")
         assert lines[1] == "mu	doubling_time	density	consistent	converged	run_time", throw_message(MessageType.Error, "Invalid solver output format.")
         ### 1.3) Check f vector ###
         assert lines[3].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
