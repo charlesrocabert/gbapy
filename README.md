@@ -26,7 +26,7 @@ Documentation coming soon ...
 
 ```python
 import gba
-model = gba.read_ods_model(name="my_cgm")
+model = gba.read_ods_model(name="my_model")
 model.find_initial_solution()
 model.set_condition("1")
 model.find_optimum()
