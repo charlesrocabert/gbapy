@@ -97,9 +97,9 @@ class ReactionDirection(enum.Enum):
 class ReactionGPR(enum.Enum):
     """
     Reaction GPR logic enumeration.
-    - And:     Logical AND operator.
-    - Or:      Logical OR operator.
-    - Unknown: Unknown logical operator.
+    - NONE:    No logical operator.
+    - AND:     Logical AND operator.
+    - OR:      Logical OR operator.
     """
     NONE = 1
     AND  = 2
