@@ -73,19 +73,6 @@ class Species:
         Chemical formula of the species.
     mass : float
         Molecular mass of the species.
-
-    Methods
-    -------
-    calculate_mass() -> None
-        Calculate the molecular mass of the species.
-    has_missing_mass( verbose: Optional[bool] = False ) -> bool
-        Does the species have a missing mass (None or zero)?
-    set_builder( builder ) -> None
-        Set the reference to the model builder.
-    build_dataframe() -> pd.DataFrame
-        Build a pandas DataFrame with the species data.
-    summary() -> None
-        Print a summary of the model.
     """
     
     def __init__( self,
@@ -97,7 +84,7 @@ class Species:
                   mass: Optional[float] = None
                 ) -> None:
         """
-        Main constructor of the class
+        Main constructor of the Species class.
 
         Parameters
         ----------
@@ -108,8 +95,8 @@ class Species:
         species_location : SpeciesLocation
             Location of the species in the cell (Internal, External, Unknown).
         species_type : SpeciesType
-            Type of the species (DNA, RNA, Protein, SmallMolecule, MacroMolecule,
-            Unknown).
+            Type of the species (DNA, RNA, Protein, SmallMolecule,
+            MacroMolecule, Unknown).
         formula : str
             Chemical formula of the species.
         mass : float
@@ -232,7 +219,7 @@ class Protein(Species):
                  product: Optional[str] = None
                 ) -> None:
         """
-        Main constructor of the class
+        Main constructor of the Protein class.
 
         Parameters
         ----------
@@ -274,7 +261,7 @@ class Metabolite(Species):
                  annotation: Optional[dict] = None
                 ) -> None:
         """
-        Main constructor of the class
+        Main constructor of the Metabolite class.
 
         Parameters
         ----------
@@ -285,8 +272,8 @@ class Metabolite(Species):
         species_location : SpeciesLocation
             Location of the species in the cell (Internal, External, Unknown).
         species_type : SpeciesType
-            Type of the species (DNA, RNA, Protein, SmallMolecule, MacroMolecule,
-            Unknown).
+            Type of the species (DNA, RNA, Protein, SmallMolecule,
+            MacroMolecule, Unknown).
         formula : str
             Chemical formula of the species.
         mass : float
@@ -308,7 +295,8 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning, MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.Info, MessageType.Warning,
+        MessageType.Error, MessageType.Plain).
     message : str
         Content of the message.
     """

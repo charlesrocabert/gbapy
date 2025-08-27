@@ -91,7 +91,8 @@ class Reaction:
     km : dict[str,float]
         Dictionary containing the KM values of the reaction.
     GBA_metabolites : dict[str,float]
-        Dictionary containing the metabolite IDs and their stoichiometry in GBA format.
+        Dictionary containing the metabolite IDs and their stoichiometry in GBA
+        format.
     GBA_kcat : dict[ReactionDirection,float]
         Dictionary containing the kcat values of the reaction in GBA format.
     GBA_km : dict[str,float]
@@ -102,72 +103,6 @@ class Reaction:
         Are the KM values converted to GBA format?
     stoichiometry_is_converted : bool
         Is the stoichiometry converted to GBA format?
-
-    Methods
-    -------
-    add_metabolites( metabolites: dict[str,float] ) -> None
-        Add metabolites and their stoichiometry to the reaction.
-    add_proteins( proteins: dict[str,float] ) -> None
-        Add proteins and their stoichiometry to the enzyme composition.
-    remove_metabolite( metabolite_id: str ) -> None
-        Remove a metabolite from the stoichiometry of the reaction.
-    remove_protein( protein_id: str ) -> None
-        Remove a protein from the enzyme composition of the reaction.
-    clear_proteins( self ) -> None
-        Delete all proteins from the GPR.
-    rename_metabolite( previous_id: str, new_id: str ) -> None
-        Rename a metabolite in the stoichiometry of the reaction.
-    add_kcat_value( direction: ReactionDirection, kcat_value: float ) -> None
-        Add a kcat value to the reaction.
-    add_km_value( metabolite_id: str, km_value: float ) -> None
-        Add a KM value to the reaction.
-    enforce_kcat_irreversibility() -> None
-        Enforce the irreversibility of the reaction at the level of kcat values.
-    enforce_km_irreversibility() -> None
-        Enforce the irreversibility of the reaction at the level of KM values.
-    complete_kcat_values( kcat_value: float ) -> None
-        Complete the kcat values of the reaction.
-    complete_km_values( km_value: float ) -> None
-        Complete the KM values of the reaction.
-    complete( self, kcat_value: float, km_value: float ) -> None
-        Complete kinetic parameter values for the reaction.
-    define_direction() -> None
-        Define the direction of the reaction based on the lower and upper bounds.
-    define_expression() -> None
-        Define the expression of the reaction based on the metabolite stoichiometry
-        and the direction.
-    calculate_enzyme_mass() -> None
-        Calculate the molecular mass of the enzyme based on its composition in proteins.
-    has_missing_mass( verbose: Optional[bool] = False ) -> bool
-        Does the reaction have a missing enzyme mass (None or zero)?
-    has_missing_kcat_value( verbose: Optional[bool] = False ) -> bool
-        Does the reaction have a missing kcat value?
-    has_missing_km_value( verbose: Optional[bool] = False ) -> bool
-        Does the reaction have a missing KM value?
-    check_mass_balance( verbose: Optional[bool] = False, threshold: Optional[float] = 0.1 ) -> bool
-        Check the mass balance of the reaction.
-    check_mass_normalization( verbose: Optional[bool] = False, threshold: Optional[float] = 1e-8 ) -> bool
-        Check if the mass stoichiometry of the reaction is normalized.
-    check_no_conversion( verbose: Optional[bool] = False ) -> bool
-        Check if the reaction has not been converted to GBA format.
-    check_conversion( verbose: Optional[bool] = False ) -> bool
-        Check if the reaction has been converted to GBA format.
-    convert_kcat_values() -> None
-        Convert the kcat values of the reaction to GBA format (mass units).
-    convert_km_values() -> None
-        Convert the KM values of the reaction to GBA format (mass units).
-    convert_stoichiometry() -> None
-        Convert the stoichiometry of the reaction to GBA format (normalized mass units).
-    convert() -> None
-        Convert the reaction to GBA format.
-    reset_conversion() -> None
-        Reset the conversion of the reaction to GBA format.
-    set_builder( builder ) -> None
-        Set the model builder for the reaction.
-    build_dataframe() -> pd.DataFrame
-        Build a DataFrame of the reaction
-    summary() -> None
-        Print a summary of the reaction.
     """
 
     def __init__( self,
@@ -512,8 +447,8 @@ class Reaction:
     
     def define_direction( self ) -> None:
         """
-        Define the direction of the reaction based on the lower and
-        upper bounds.
+        Define the direction of the reaction based on the lower and upper
+        bounds.
         """
         assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if not isinstance(self.lb, float) or not isinstance(self.ub, float):
@@ -545,8 +480,8 @@ class Reaction:
     
     def calculate_enzyme_mass( self ) -> None:
         """
-        Calculate the molecular mass of the enzyme based on its
-        composition in proteins.
+        Calculate the molecular mass of the enzyme based on its composition in
+        proteins.
         """
         assert self._builder != None, throw_message(MessageType.Error, f"The reaction must be associated to a builder before calculating the enzyme mass.")
         assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
@@ -771,7 +706,8 @@ class Reaction:
     
     def convert_stoichiometry( self ) -> None:
         """
-        Convert the stoichiometry of the reaction to GBA format (normalized mass units).
+        Convert the stoichiometry of the reaction to GBA format (normalized mass
+        units).
         """
         assert self._builder != None, throw_message(MessageType.Error, f"Model builder not set for reaction <code>{self.id}</code>.")
         assert self.metabolites != None and len(self.metabolites) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no metabolites.")
@@ -906,7 +842,8 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning, MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.Info, MessageType.Warning,
+        MessageType.Error, MessageType.Plain).
     message : str
         Content of the message.
     """

@@ -111,7 +111,7 @@ class GbaReactionType(enum.Enum):
     - iMM  : Simple irreversible Michaelis-Menten reaction.
     - iMMa : Irreversible Michaelis-Menten reaction with activation.
     - iMMi : Irreversible Michaelis-Menten reaction with inhibition.
-    - iMMia: Irreversible Michaelis-Menten reaction with activation and inhibition.
+    - iMMia: Irreversible Michaelis-Menten reaction with activation+inhibition.
     - iMMr : Irreversible Michaelis-Menten reaction with regulation.
     - rMM  : Reversible Michaelis-Menten reaction.
     """
@@ -126,11 +126,16 @@ class GbaConstants(float, enum.Enum):
     """
     Constant for GBA algorithms.
     - TOL                          : Tolerance value.
-    - TRAJECTORY_CONVERGENCE_COUNT : Number of iterations with equal mu values to consider the trajectory stable.
-    - TRAJECTORY_CONVERGENCE_TOL   : Mu threshold below which growth rates are considered equal.
-    - DECREASING_DT_FACTOR         : Factor by which the time step is decreased when the trajectory is unstable.
-    - INCREASING_DT_FACTOR         : Factor by which the time step is increased when the trajectory is stable.
-    - INCREASING_DT_COUNT          : Number of iterations with equal mu values to increase the time step.
+    - TRAJECTORY_CONVERGENCE_COUNT : Number of iterations with equal mu values
+                                     to consider the trajectory stable.
+    - TRAJECTORY_CONVERGENCE_TOL   : Mu threshold below which growth rates are
+                                     considered equal.
+    - DECREASING_DT_FACTOR         : Factor by which the time step is decreased
+                                     when the trajectory is unstable.
+    - INCREASING_DT_FACTOR         : Factor by which the time step is increased
+                                     when the trajectory is stable.
+    - INCREASING_DT_COUNT          : Number of iterations with equal mu values
+                                     to increase the time step.
     - MIN_DT                       : Minimum time step value.
     - PRINT_DATA_COUNT             : Frequency of data printing.
     - EXPORT_DATA_COUNT            : Frequency of data export.

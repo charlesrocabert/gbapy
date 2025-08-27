@@ -234,144 +234,6 @@ class Model:
         Monte Carlo with genetic drift tracker.
     MCMC_tracker : pd.DataFrame
         MCMC trajectory tracker.
-    
-    Methods
-    -------
-    read_Info_from_csv( self, path: Optional[str] = "." ) -> None
-        Read the model information from a CSV file.
-    read_Mx_from_csv( path: Optional[str] = "." ) -> None
-        Read the mass fraction matrix M from a CSV file.
-    read_kcat_from_csv( path: Optional[str] = "." ) -> None
-        Read the kcat constant vectors from a CSV file.
-    read_K_from_csv( path: Optional[str] = "." ) -> None
-        Read the Michaelis constant matrix K from a CSV file.
-    read_KA_from_csv( path: Optional[str] = "." ) -> None
-        Read the activation constants matrix KA from a CSV file.
-    read_KI_from_csv( path: Optional[str] = "." ) -> None
-        Read the inhibition constants matrix KI from a CSV file.
-    read_KR_from_csv( path: Optional[str] = "." ) -> None
-        Read the regulation constants matrix KR from a CSV file.
-    read_conditions_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of conditions from a CSV file.
-    read_constant_rhs_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of constant RHS terms from a CSV file.
-    read_constant_reactions_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of constant reactions from a CSV file.
-    read_protein_contributions_from_csv( path: Optional[str] = "." ) -> None
-        Read the list of protein contributions from a CSV file.
-    read_initial_solution_from_csv( path: Optional[str] = "." ) -> None
-        Read the initial solution from a CSV file (on request).
-    check_model_loading( verbose: Optional[bool] = False ) -> None
-        Check if the model is loaded correctly.
-    initialize_model_mathematical_variables( ) -> None
-        Initialize the model mathematical variables.
-    read_from_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Read the model from CSV files.
-    write_to_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Write the model to CSV files.
-    get_condition( self, condition_id: str, condition_param: str ) -> float
-        Get the value of a condition parameter.
-    get_vector( self, source: str, variable: str ) -> np.array
-        Get the value of a variable from a source.
-    clear_conditions( self ) -> None
-        Clear all external conditions from the model.
-    add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None
-        Add a new condition to the model.
-    clear_constant_rhs( self ) -> None
-        Clear all constant right-hand side terms from the model.
-    add_constant_rhs( self, metabolite_id: str, value: float ) -> None
-        Add a new constant right-hand side term to the model.
-    clear_constant_reactions( self ) -> None
-        Clear all constant reactions from the model.
-    add_constant_reaction( self, reaction_id: str, value: float ) -> None
-        Add a new constant reaction to the model.
-    reset_variables( self ) -> None
-        Reset all variables of the model.
-    set_condition( self, condition_id: str ) -> None
-        Set the current condition of the model.
-    set_f0( self, f0: np.array ) -> None
-        Set the initial solution f0 of the model.
-    set_f( self ) -> None
-        Set the flux fractions vector of the model.
-    gaussian_kernel( self, x: np.array, mu: float ) -> np.array
-        Compute the Gaussian kernel for a vector x with mean mu.
-    compute_c( self ) -> None
-        Compute the internal metabolite concentrations.
-    iMM( self, j: int ) -> None
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction.
-    iMMa( self, j: int ) -> None
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with activation.
-        (only one actibitor per reaction)
-    iMMi( self, j: int ) -> None
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with inhibition.
-        (only one inhibitor per reaction)
-    iMMia( self, j: int ) -> None
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with inhibition and activation.
-        (only one inhibitor and one activator per reaction)
-    rMM( self, j: int ) -> None
-        Compute the turnover time tau for a reversible Michaelis-Menten
-        reaction.
-    compute_tau( self, j: int ) -> None
-        Compute the turnover time tau for a reaction j.
-    diMM( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with respect to
-        metabolite concentrations.
-    diMMa( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with activation
-        with respect to metabolite concentrations.
-    diMMi( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with inhibition
-        with respect to metabolite concentrations.
-    diMMia( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with activation and
-        inhibition with respect to metabolite concentrations.
-    drMM( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for a
-        reversible Michaelis-Menten reaction with respect to
-        metabolite concentrations.
-    compute_dtau( self, j: int ) -> None
-        Compute the derivative of the turnover time tau for a
-        reaction j.
-    compute_mu( self ) -> None
-        Compute the growth rate mu.
-    compute_v( self ) -> None
-        Compute the fluxes v.
-    compute_p( self ) -> None
-        Compute the protein concentrations p.
-    compute_b( self ) -> None
-        Compute the biomass fractions b.
-    compute_density( self ) -> None
-        Compute the cell density (should be equal to 1).
-    compute_dmu_f( self ) -> None
-        Compute the local growth rate gradient with respect to f.
-    compute_GCC_f( self ) -> None
-        Compute the local growth control coefficients with respect to f.
-    calculate_first_order_terms( self ) -> None
-        Calculate first order terms of the model state.
-    calculate_second_order_terms( self ) -> None
-        Calculate second order terms of the model state.
-    calculate( self ) -> None
-        Calculate the model state.
-    check_model_consistency( self ) -> None
-        Check the model state's consistency.
-    solve_local_linear_problem( self,max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0 ) -> None
-        Solve the local linear problem to find the initial solution.
-    find_initial_solution( self, max_flux_fraction: Optional[float] = 10.0, rhs_factor: Optional[float] = 10.0, condition_id: Optional[str] = "1", save_f0: Optional[str] = None ) -> None
-        Generate an initial solution using a linear program.
-    generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None
-        Generate random initial solutions.
-    information( self ) -> None
-        Print some informations about the model.
-    summary( self ) -> None
-        Print a summary of the model.
     """
 
     def __init__( self, name: str ) -> None:
@@ -998,7 +860,8 @@ class Model:
         path : str, default="."
             Path to the CSV files.
         name : str, default=""
-            Name of the model. If not provided, the name of the model instance will be used.
+            Name of the model. If not provided, the name of the model instance
+            will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1130,7 +993,8 @@ class Model:
         path : Optional[str], default="."
             Path to the folder.
         name : Optional[str], default=""
-            Name of the model. If not provided, the name of the model instance will be used.
+            Name of the model. If not provided, the name of the model instance
+            will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1509,8 +1373,8 @@ class Model:
     
     def iMM( self, j: int ) -> None:
         """
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction.
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction.
 
         Parameters
         ----------
@@ -1523,9 +1387,8 @@ class Model:
 
     def iMMa( self, j: int ) -> None:
         """
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with activation.
-        (only one actibitor per reaction)
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction with activation (only one activator per reaction).
 
         Parameters
         ----------
@@ -1539,9 +1402,8 @@ class Model:
 
     def iMMi( self, j: int ) -> None:
         """
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with inhibition.
-        (only one inhibitor per reaction)
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction with inhibition (only one inhibitor per reaction).
 
         Parameters
         ----------
@@ -1555,9 +1417,9 @@ class Model:
     
     def iMMia( self, j: int ) -> None:
         """
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with inhibition and activation.
-        (only one inhibitor and one activator per reaction)
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction with inhibition and activation (only one inhibitor and one
+        activator per reaction).
 
         Parameters
         ----------
@@ -1572,9 +1434,8 @@ class Model:
 
     def iMMr( self, j: int ) -> None:
         """
-        Compute the turnover time tau for an irreversible
-        Michaelis-Menten reaction with regulation
-        (only one regulator per reaction)
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction with regulation (only one regulator per reaction).
 
         Parameters
         ----------
@@ -1628,9 +1489,8 @@ class Model:
     
     def diMM( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with respect to
-        metabolite concentrations.
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with respect to metabolite concentrations.
 
         Parameters
         ----------
@@ -1647,9 +1507,9 @@ class Model:
 
     def diMMa( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with activation
-        with respect to metabolite concentrations.
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with activation with respect to metabolite
+        concentrations.
 
         Parameters
         ----------
@@ -1669,9 +1529,9 @@ class Model:
     
     def diMMi( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with inhibition
-        with respect to metabolite concentrations.
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with inhibition with respect to metabolite
+        concentrations.
 
         Parameters
         ----------
@@ -1691,9 +1551,9 @@ class Model:
 
     def diMMia( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with activation and
-        inhibition with respect to metabolite concentrations.
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with activation and inhibition with respect to
+        metabolite concentrations.
 
         Parameters
         ----------
@@ -1716,9 +1576,9 @@ class Model:
 
     def diMMr( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for an
-        irreversible Michaelis-Menten reaction with regulation with
-        respect to metabolite concentrations.
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with regulation with respect to metabolite
+        concentrations.
 
         Parameters
         ----------
@@ -1741,9 +1601,8 @@ class Model:
 
     def drMM( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for a
-        reversible Michaelis-Menten reaction with respect to
-        metabolite concentrations.
+        Compute the derivative of the turnover time tau for a reversible
+        Michaelis-Menten reaction with respect to metabolite concentrations.
 
         Parameters
         ----------
@@ -1767,8 +1626,7 @@ class Model:
     
     def compute_dtau( self, j: int ) -> None:
         """
-        Compute the derivative of the turnover time tau for a reaction
-        j.
+        Compute the derivative of the turnover time tau for a reaction j.
 
         Parameters
         ----------
@@ -1815,8 +1673,7 @@ class Model:
 
     def compute_density( self ) -> None:
         """
-        Compute the cell density.
-        (should be equal to 1)
+        Compute the cell density (should be equal to 1).
         """
         self.density = self.sM.dot(self.f)
 
@@ -1886,10 +1743,10 @@ class Model:
 
         Description
         -----------
-        The local linear problem consists in finding the maximal ribosome
-        flux fraction f^r, with a minimal production of each metabolite.
-        The constraints are mass conservation (M*f = b) and surface flux
-        balance (sM*f = 1).
+        The local linear problem consists in finding the maximal ribosome flux
+        fraction f^r, with a minimal production of each metabolite. The
+        constraints are mass conservation (M*f = b) and surface flux balance
+        (sM*f = 1).
 
         Parameters
         ----------
@@ -1957,7 +1814,8 @@ class Model:
 
     def find_initial_solution_all( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
         """
-        Generate an initial solution using a linear program and testing it for all conditions.
+        Generate an initial solution using a linear program and testing it for
+        all conditions.
 
         Parameters
         ----------
@@ -1969,8 +1827,8 @@ class Model:
         Returns
         -------
         string
-            "consistent" if the model is consistent with the initial solution,
-            "inconsistent" if the model is inconsistent with the initial solution,
+            "consistent" if the model is consistent at the initial solution,
+            "inconsistent" if the model is inconsistent at the initial solution,
             "no_solution" if no solution could be found.
         """
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
@@ -1992,7 +1850,8 @@ class Model:
 
     def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, initial_rhs_factor: Optional[float] = 1000.0 ) -> None:
         """
-        Find the best initial solution by maximizing the growth rate mu while reducing the rhs factor.
+        Find the best initial solution by maximizing the growth rate mu while
+        reducing the rhs factor.
 
         Parameters
         ----------
@@ -2228,7 +2087,8 @@ class Model:
         tol : Optional[float], default=1e-10
             Tolerance value for the solver.
         stable : Optional[int], default=10000
-            Number of iterations with no significant mu change to consider convergence.
+            Number of iterations with no significant mu change to consider
+            convergence.
         max_iter : Optional[int], default=1000000
             Maximum number of iterations for the solver.
         """
@@ -2355,7 +2215,8 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning, MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.Info, MessageType.Warning,
+        MessageType.Error, MessageType.Plain).
     message : str
         Content of the message.
     """
