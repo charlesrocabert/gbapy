@@ -151,156 +151,162 @@ class Builder:
         List of linearly dependent reaction in the internal mass fraction matrix.
     GBA_is_built : bool
         Is the GBA converted model built?
+    GBA_initial_solution : dict[str, float]
+        Initial solution of the GBA model.
 
     Methods
     -------
-    which_reaction( metabolite_id: str ) -> list[str]
+
+    which_reaction( self, metabolite_id: str) -> list[str]
         Get the reactions in which a metabolite participates.
-    add_info( self, key: str, content: str ) -> None
-        Add an information to the model.
-    add_protein( protein: Protein ) -> None
+    add_info( self, category: str, key: str, content: str ) -> None
+        Add a piece of information to the model.
+    add_protein( self, protein: Protein ) -> None
         Add a protein to the model.
-    add_proteins( proteins_list: list[Protein] ) -> None
+    add_proteins( self, proteins_list: list[Protein] ) -> None
         Add a list of proteins to the model.
-    add_metabolite( metabolite: Metabolite ) -> None
+    add_metabolite( self, metabolite: Metabolite ) -> None
         Add a metabolite to the model.
-    add_metabolites( metabolites_list: list[Metabolite] ) -> None
+    add_metabolites( self, metabolites_list: list[Metabolite] ) -> None
         Add a list of metabolites to the model.
-    add_reaction( reaction: Reaction ) -> None
+    add_reaction( self, reaction: Reaction ) -> None
         Add a reaction to the model.
-    add_reactions( reactions_list: list[Reaction] ) -> None
+    add_reactions( self, reactions_list: list[Reaction] ) -> None
         Add a list of reactions to the model.
-    remove_protein( protein_id: str ) -> None
+    remove_protein( self, protein_id: str ) -> None
         Remove a protein from the model.
-    remove_proteins( proteins_list: list[str] ) -> None
+    remove_proteins( self, proteins_list: list[str] ) -> None
         Remove a list of proteins from the model.
-    remove_metabolite( metabolite_id: str ) -> None
+    remove_metabolite( self, metabolite_id: str ) -> None
         Remove a metabolite from the model.
-    remove_metabolites( metabolites_list: list[str] ) -> None
+    remove_metabolites( self, metabolites_list: list[str] ) -> None
         Remove a list of metabolites from the model.
-    remove_reaction( reaction_id: str ) -> None
+    remove_reaction( self, reaction_id: str ) -> None
         Remove a reaction from the model.
-    remove_reactions( reactions_list: list[str] ) -> None
+    remove_reactions( self, reactions_list: list[str] ) -> None
         Remove a list of reactions from the model.
-    rename_metabolite( previous_id: str, new_id: str ) -> None
+    rename_metabolite( self, previous_id: str, new_id: str ) -> None
         Rename a metabolite in the model.
-    rename_reaction( previous_id: str, new_id: str ) -> None
+    rename_reaction( self, previous_id: str, new_id: str ) -> None
         Rename a reaction in the model.
-    create_average_protein( protein_id: str, protein_name: str, proteins_list: list[str] ) -> None
+    create_average_protein( self, protein_id: str, protein_name: str, proteins_list: list[str] ) -> None
         Create an average protein from a list of proteins.
-    create_sum_protein( protein_id: str, protein_name: str, proteins_list: list[str] ) -> None
+    create_sum_protein( self, protein_id: str, protein_name: str, proteins_list: list[str] ) -> None
         Create a sum protein from a list of proteins.
-    create_dummy_protein( protein_id: str, protein_name: str, protein_mass: float ) -> None
+    create_dummy_protein( self, protein_id: str, protein_name: str, protein_mass: float ) -> None
         Create a dummy protein.
-    create_average_metabolite( metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None
+    create_average_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None
         Create an average metabolite from a list of metabolites.
-    create_sum_metabolite( metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None
+    create_sum_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None
         Create a sum metabolite from a list of metabolites.
-    create_dummy_metabolite( metabolite_id: str, metabolite_name: str, metabolite_mass: float ) ->
+    create_dummy_metabolite( self, metabolite_id: str, metabolite_name: str, metabolite_mass: float ) -> None
         Create a dummy metabolite.
-    enforce_kcat_irreversibility() -> None
+    enforce_kcat_irreversibility( self ) -> None
         Enforce the irreversibility of all reactions at the level of kcat values.
-    enforce_km_irreversibility() -> None
+    enforce_km_irreversibility( self ) -> None
         Enforce the irreversibility of all reactions at the level of KM values.
-    add_activation_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
+    add_activation_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None
         Add an activation constant to a reaction.
-    add_inhibition_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
+    add_inhibition_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None
         Add an inhibition constant to a reaction.
-    add_regulation_constant( metabolite_id: str, reaction_id: str, value: float ) -> None
-        Add an regulation constant to a reaction.
-    clear_conditions() -> None
-        Clear all external conditions from the model.
-    add_condition( condition_id: int, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None
-        Add an external condition to the model.
+    add_regulation_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None
+        Add an inhibition constant to a reaction.
+    clear_conditions( self ) -> None
+        Clear all external conditions from the GBA converted model.
+    add_condition( self, condition_id: str, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None
+        Add an external condition to the GBA converted model.
     clear_constant_rhs( self ) -> None
-        Clear the list of constant metabolite fractions in the initial solution.
+        Clear all constant RHS terms from the GBA converted model.
     add_constant_rhs( self, metabolite_id: str, value: float ) -> None
-        Add a constant metabolite fraction in the initial solution.
-    clear_constant_reactions() -> None
-        Clear all constant reactions from the model.
-    add_constant_reaction( reaction_id: str, value: float ) -> None
+        Make a GBA metabolite constant in the RHS term for the initial solution.
+    clear_constant_reactions( self ) -> None
+        Clear all constant reactions from the GBA converted model.
+    add_constant_reaction( self, reaction_id: str, value: float ) -> None
         Make a GBA reaction constant to a given flux value.
-    check_model( test_structure: Optional[bool] = False ) -> None
+    check_model( self, test_structure: Optional[bool] = False ) -> None
         Detect missing molecular masses, kinetic parameters and connectivity issues in the model.
-    detect_missing_mass( verbose: Optional[bool] = False ) -> dict[str, list[str]]
+    detect_missing_mass( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]
         Detect objects with missing molecular masses.
-    detect_missing_kinetic_parameters( verbose: Optional[bool] = False ) -> dict[str, list[str]]
+    detect_missing_kinetic_parameters( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]
         Detect reactions with missing kinetic parameters.
-    detect_missing_connections( verbose: Optional[bool] = False ) -> dict[str, list[str]]
-        Detect reactions with missing connections.
-    detect_unproduced_metabolites( verbose: Optional[bool] = False ) -> dict[str, list[str]]
-        Detect unproduced metabolites.
-    detect_infeasible_loops( verbose: Optional[bool] = False ) -> dict[str, list[str]]
-        Detect infeasible loops.
-    detect_isolated_metabolites( verbose: Optional[bool] = False ) -> dict[str, list[str]]
-        Detect isolated metabolites.
-    create_FBA_biomass_reaction( biomass_id: str, biomass_name: str, biomass_equation: str ) -> None
-        Create the FBA biomass reaction.
+    detect_missing_connections( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]
+        Detect connectivity issues in the model.
+    detect_unproduced_metabolites( self, verbose: Optional[bool] = False ) -> list[str]
+        Detect unproduced metabolites in the model.
+    detect_infeasible_loops( self, verbose: Optional[bool] = False ) -> list[list[str]]
+        Detect infeasible loops breaking the mass balance in the model.
+    detect_isolated_metabolites( self, verbose: Optional[bool] = False ) -> list[str]
+        Detect isolated metabolites in the model (imported but not used).
+    create_FBA_biomass_reaction( self, metabolites: dict[str, float] ) -> None
+        Create FBA biomass function.
     build_FBA_indices( self ) -> None
-        Build the FBA row and column indices.
+        Build metabolite and reaction indices for the FBA model.
     build_FBA_stoichiometric_matrix( self ) -> None
         Build the FBA stoichiometric matrix.
     compute_stoichiometric_matrix_metrics( self ) -> None
-        Compute the metrics of the FBA stoichiometric matrix.
+        Compute the mass fraction matrix metrics.
     build_FBA_model( self, enforced_reactions: Optional[dict[str, float]] = None ) -> None
-        Build the FBA model from the reactions and metabolites.
-    
+        Build the FBA model.
     adjust_masses( self, metabolites: dict[str, float] ) -> None
-        Adjust the molecular masses of metabolites in the model.
+        Adjust the masses of a list of metabolites.
     check_mass_balance( self, verbose: Optional[bool] = False ) -> None
         Check the mass balance of the model.
     check_mass_normalization( self, verbose: Optional[bool] = False ) -> None
         Check the mass normalization of the model.
-    check_ribosomal_reaction_consistency( self )-> None
-        Check the consistency of the ribosomal reaction.
+    check_ribosomal_reaction_consistency( self ) -> None
+        Check the ribosomal reaction consistency of the model.
     check_conversion( self, verbose: Optional[bool] = False ) -> None
         Check the conversion of the model to GBA format.
-    convert( self, ribosome_byproducts: Optional[bool] = False, ribosome_mass_kcat: Optional[float] = 4.55, ribosome_mass_km: Optional[float] = 8.3 ) -> None
-        Convert units to GBA units.
+    convert( self, ribosome_byproducts: Optional[bool] = False,
+                 ribosome_mass_kcat: Optional[float] = 4.55,
+                 ribosome_mass_km: Optional[float] = 8.3 ) -> None
+        Convert the model to GBA format.
     reset_conversion( self ) -> None
-        Reset the GBA conversion.
+        Reset the conversion of the model to GBA format.
     build_GBA_indices( self ) -> None
-        Build GBA row and column indices.
+        Build metabolite and reaction indices for the GBA converted model
+        (Protein metabolite is always the last metabolite,
+         and Ribosome reaction is always the last reaction).
     build_GBA_mass_fraction_matrix( self ) -> None
-        Build the GBA complete mass fraction matrix.
+        Build the model mass fraction matrix.
     build_GBA_kcat_vectors( self ) -> None
         Build the GBA kcat vectors.
-    build_GBA_K_matrices( self ) -> None
-        Build the GBA KM matrix.
+    build_GBA_KM_matrices( self ) -> None
+        Build the GBA KM matrices.
     build_GBA_KA_KI_KR_matrices( self ) -> None
-        Build the GBA KA, KI and KR matrices.
+        Build the GBA activation and inhibition matrices.
     compile_protein_contributions( self ) -> None
-        Compile the enzyme to protein mass concentration mapping.
+        Compile the protein contributions from the reactions.
     compute_mass_fraction_matrix_metrics( self ) -> None
-        Compute the metrics of the model internal mass fraction matrix.
+        Compute the mass fraction matrix metrics.
     build_GBA_model( self ) -> None
-        Wrapper function to build the GBA converted model.
+        Build the GBA converted model.
     convert_GBA_reaction_to_forward_irreversible( self, reaction_id: str, direction: ReactionDirection ) -> None
-        Convert all GBA reactions to forward irreversible.
+        Convert the GBA reaction to a forward irreversible reaction.
     enforce_directionality( self, fluxes: dict[str, float] ) -> None
-        Enforce the directionality of the GBA reactions based on a given flux vector.
+        Enforce the directionality of the GBA reactions based on a list of fluxes.
     write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the model to CSV format.
+        Export the model to a folder in CSV format.
     write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the model to ODS format.
+        Export the model to a folder in ODS format.
     write_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of proteins to a file.
+        Write list of proteins into CSV format.
     write_ribosomal_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of ribosomal proteins to a file.
+        Write list of ribosomal proteins into CSV format.
     write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of metabolites to a file.
+        Write list of metabolites into CSV format.
     write_reactions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of reactions to a file.
+        Write list of reactions into CSV format.
     write_kinetic_parameters_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of kinetic parameters to a file.
+        Write list of kinetic parameters into CSV format.
     write_protein_contributions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None
-        Write the list of protein contributions to a file.
+        Write the list of protein contributions into a CSV file.
     generate_kinetic_parameter_tables( self, path: Optional[str] = "." )
-        Generate the kinetic parameter tables for external usage.
+        Generate the kinetic parameter tables for the model.
     information( self ) -> None
-        Display the information about the model build.
+        Print the model information.
     summary( self ) -> None
-        Summarize the model build.  
+        Print a summary of the model builder.
     """
 
     def __init__( self, name ):
@@ -1479,7 +1485,7 @@ class Builder:
     
     def check_ribosomal_reaction_consistency( self ) -> None:
         """
-        Check the ribosomal reaction consistency of the model
+        Check the ribosomal reaction consistency of the model.
         """
         assert "Ribosome" in self.reactions, throw_message(MessageType.Error, "Ribosomal reaction not found in the model.")
         assert "Protein" in self.metabolites, throw_message(MessageType.Error, "Protein metabolite not found in the reaction.")
@@ -1962,7 +1968,7 @@ class Builder:
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the variables in xlsx       #
+        # 10) Write the variables in xlsx      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with pd.ExcelWriter(xls_path) as writer:
             if Info_df is not None:
@@ -1985,7 +1991,7 @@ class Builder:
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Free memory                      #
+        # 11) Free memory                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)
@@ -2173,7 +2179,7 @@ class Builder:
 
     def generate_kinetic_parameter_tables( self, path: Optional[str] = "." ):
         """
-        Generate the kinetic parameter tables for the model
+        Generate the kinetic parameter tables for the model.
 
         Parameters
         ----------
