@@ -3,7 +3,7 @@
 *.Rhistory
 *.Rapp.history
 clean_folders.sh
-deprecated/
+deprecated/**
 tutorials/MMSYN_CGM_tutorial/temp/**
 tutorials/MMSYN_CGM_tutorial/output/**
 tutorials/MMSYN_CGM_tutorial/backup/**
