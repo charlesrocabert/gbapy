@@ -63,7 +63,7 @@ setup(
 		"Intended Audience :: Science/Research",
 		"Topic :: Scientific/Engineering :: Mathematics",
 	],
-	keywords     = "constraint-based-modeling growth-balance-analysis systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
+	keywords     = "constraint-based-modeling growth-balance-analysis self-replicating-model systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
 	packages     = find_packages(exclude=["contrib", "docs", "tests"]),
 	package_data = {
         'gba.data': ['**/*.csv', '**/*.ods']

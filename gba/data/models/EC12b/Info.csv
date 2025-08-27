@@ -1,6 +1,6 @@
 General;;
 ;Name;EC12b
-;Description;E. coli CGM with 12 reactions
+;Description;E. coli model with 12 reactions
 Units;;
 ;Km;g/L
 ;KA;g/L

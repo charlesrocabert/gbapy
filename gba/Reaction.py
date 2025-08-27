@@ -90,18 +90,18 @@ class Reaction:
         Dictionary containing the kcat values of the reaction.
     km : dict[str,float]
         Dictionary containing the KM values of the reaction.
-    CGM_metabolites : dict[str,float]
-        Dictionary containing the metabolite IDs and their stoichiometry in CGM format.
-    CGM_kcat : dict[ReactionDirection,float]
-        Dictionary containing the kcat values of the reaction in CGM format.
-    CGM_km : dict[str,float]
-        Dictionary containing the KM values of the reaction in CGM format.
+    GBA_metabolites : dict[str,float]
+        Dictionary containing the metabolite IDs and their stoichiometry in GBA format.
+    GBA_kcat : dict[ReactionDirection,float]
+        Dictionary containing the kcat values of the reaction in GBA format.
+    GBA_km : dict[str,float]
+        Dictionary containing the KM values of the reaction in GBA format.
     kcat_is_converted : bool
-        Are the kcat values converted to CGM format?
+        Are the kcat values converted to GBA format?
     km_is_converted : bool
-        Are the KM values converted to CGM format?
+        Are the KM values converted to GBA format?
     stoichiometry_is_converted : bool
-        Is the stoichiometry converted to CGM format?
+        Is the stoichiometry converted to GBA format?
 
     Methods
     -------
@@ -149,21 +149,21 @@ class Reaction:
     check_mass_normalization( verbose: Optional[bool] = False, threshold: Optional[float] = 1e-8 ) -> bool
         Check if the mass stoichiometry of the reaction is normalized.
     check_no_conversion( verbose: Optional[bool] = False ) -> bool
-        Check if the reaction has not been converted to CGM format.
+        Check if the reaction has not been converted to GBA format.
     check_conversion( verbose: Optional[bool] = False ) -> bool
-        Check if the reaction has been converted to CGM format.
+        Check if the reaction has been converted to GBA format.
     convert_kcat_values() -> None
-        Convert the kcat values of the reaction to CGM format (mass units).
+        Convert the kcat values of the reaction to GBA format (mass units).
     convert_km_values() -> None
-        Convert the KM values of the reaction to CGM format (mass units).
+        Convert the KM values of the reaction to GBA format (mass units).
     convert_stoichiometry() -> None
-        Convert the stoichiometry of the reaction to CGM format (normalized mass units).
+        Convert the stoichiometry of the reaction to GBA format (normalized mass units).
     convert() -> None
-        Convert the reaction to CGM format.
+        Convert the reaction to GBA format.
     reset_conversion() -> None
-        Reset the conversion of the reaction to CGM format.
+        Reset the conversion of the reaction to GBA format.
     set_builder( builder ) -> None
-        Set the CGM builder for the reaction.
+        Set the model builder for the reaction.
     build_dataframe() -> pd.DataFrame
         Build a DataFrame of the reaction
     summary() -> None
@@ -240,11 +240,11 @@ class Reaction:
         self.kcat = None
         self.km   = None
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) CGM parameters           #
+        # 6) GBA parameters           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_metabolites            = None
-        self.CGM_kcat                   = None
-        self.CGM_km                     = None
+        self.GBA_metabolites            = None
+        self.GBA_kcat                   = None
+        self.GBA_km                     = None
         self.kcat_is_converted          = False
         self.km_is_converted            = False
         self.stoichiometry_is_converted = False
@@ -270,7 +270,7 @@ class Reaction:
             Dictionary containing the metabolite IDs and their
             stoichiomety.
         """
-        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to CGM format. Consider to reset the conversion."
+        assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
         if metabolites == None:
             return
         if self.metabolites == None:
@@ -296,7 +296,7 @@ class Reaction:
             Dictionary containing the protein IDs and their
             stoichiomety.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if proteins == None:
             return
         if self.proteins == None:
@@ -315,7 +315,7 @@ class Reaction:
         metabolite_id : str
             Identifier of the metabolite to remove.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         assert self.metabolites != None, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no metabolites.")
         assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> not in the stoichiometry of reaction <code>{self.id}</code>.")
         del self.metabolites[metabolite_id]
@@ -341,7 +341,7 @@ class Reaction:
         protein_id : str
             Identifier of the protein to remove.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         assert self.proteins != None, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no proteins.")
         assert protein_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> not in the enzyme composition of reaction <code>{self.id}</code>.")
         del self.proteins[protein_id]
@@ -351,7 +351,7 @@ class Reaction:
         """
         Clear the proteins of the reaction.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         self.proteins              = {}
         self.enzyme_mass           = None
         self.protein_contributions = {}
@@ -367,7 +367,7 @@ class Reaction:
         new_id : str
             New identifier of the metabolite.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         assert previous_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{previous_id}</code> not in the stoichiometry of reaction <code>{self.id}</code>.")
         assert new_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{new_id}</code> already in the stoichiometry of reaction <code>{self.id}</code>.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -402,7 +402,7 @@ class Reaction:
         kcat_value : float
             kcat value to add.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction '{self.id}' has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion.")
         if direction == None or kcat_value == None:
             return
         if self.kcat == None:
@@ -422,7 +422,7 @@ class Reaction:
         km_value : float
             KM value to add.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if metabolite_id == None or km_value == None:
             return
         if self.km == None:
@@ -435,7 +435,7 @@ class Reaction:
         """
         Enforce the irreversibility of the reaction at the level of kcat values.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.kcat == None:
             self.kcat = {}
         if self.direction == ReactionDirection.Forward:
@@ -447,7 +447,7 @@ class Reaction:
         """
         Enforce the irreversibility of the reaction at the level of KM values.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.km == None:
             self.km = {}
         if self.direction == ReactionDirection.Forward:
@@ -466,7 +466,7 @@ class Reaction:
         kcat_value : float
             kcat value to add.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         assert kcat_value >= 0.0, throw_message(MessageType.Error, f"kcat value must be positive or null (reaction <code>{self.id}</code>).")
         if self.kcat == None or len(self.kcat) == 0:
             self.kcat = {ReactionDirection.Backward: kcat_value, ReactionDirection.Forward: kcat_value}
@@ -484,7 +484,7 @@ class Reaction:
         km_value : float
             KM value to add.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         assert km_value >= 0.0, throw_message(MessageType.Error, f"KM value must be positive or null (reaction <code>{self.id}</code>).")
         if self.km == None or len(self.km) == 0:
             self.km = {}
@@ -515,7 +515,7 @@ class Reaction:
         Define the direction of the reaction based on the lower and
         upper bounds.
         """
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if not isinstance(self.lb, float) or not isinstance(self.ub, float):
             return
         assert self.lb <= self.ub, throw_message(MessageType.Error, f"Lower bound must be lower or equal to the upper bound for reaction <code>{self.id}</code>.")
@@ -549,7 +549,7 @@ class Reaction:
         composition in proteins.
         """
         assert self._builder != None, throw_message(MessageType.Error, f"The reaction must be associated to a builder before calculating the enzyme mass.")
-        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to CGM format. Consider to reset the conversion.")
+        assert self.check_no_conversion(), throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
         if self.proteins == None:
             return
         if self.GPR == ReactionGPR.NONE and len(self.proteins) > 1:
@@ -630,7 +630,7 @@ class Reaction:
         return False
     
     #~~~~~~~~~~~~~~~~~~~~~#
-    # 3) CGM routines     #
+    # 3) GBA routines     #
     #~~~~~~~~~~~~~~~~~~~~~#
     
     def check_mass_balance( self, verbose: Optional[bool] = False, threshold: Optional[float] = 0.1 ) -> bool:
@@ -671,11 +671,11 @@ class Reaction:
         """
         reactant_sum = 0.0
         product_sum  = 0.0
-        for m_id in self.CGM_metabolites:
-            if self.CGM_metabolites[m_id] < 0:
-                reactant_sum += np.abs(self.CGM_metabolites[m_id])
-            elif self.CGM_metabolites[m_id] > 0:
-                product_sum += self.CGM_metabolites[m_id]
+        for m_id in self.GBA_metabolites:
+            if self.GBA_metabolites[m_id] < 0:
+                reactant_sum += np.abs(self.GBA_metabolites[m_id])
+            elif self.GBA_metabolites[m_id] > 0:
+                product_sum += self.GBA_metabolites[m_id]
         if np.abs(reactant_sum-1.0) > threshold or np.abs(product_sum-1.0) > threshold:
             if verbose:
                 throw_message(MessageType.Warning, f"Stoichiometry of reaction <code>{self.id}</code> is not normalized (threshold = {threshold}Da).")
@@ -684,7 +684,7 @@ class Reaction:
     
     def check_no_conversion( self, verbose: Optional[bool] = False ) -> bool:
         """
-        Check if the reaction has not been converted to CGM format.
+        Check if the reaction has not been converted to GBA format.
 
         Parameters
         ----------
@@ -699,12 +699,12 @@ class Reaction:
         if self.stoichiometry_is_converted:
             converted = True
         if verbose:
-            throw_message(MessageType.Warning, f"A CGM conversion exists for reaction <code>{self.id}</code>. Consider to reset the conversion.")
+            throw_message(MessageType.Warning, f"A GBA conversion exists for reaction <code>{self.id}</code>. Consider to reset the conversion.")
         return not converted
     
     def check_conversion( self, verbose: Optional[bool] = False ) -> bool:
         """
-        Check if the reaction has been converted to CGM format.
+        Check if the reaction has been converted to GBA format.
 
         Parameters
         ----------
@@ -713,23 +713,23 @@ class Reaction:
         """
         if not self.kcat_is_converted:
             if verbose:
-                throw_message(MessageType.Warning, f"kcat values of reaction <code>{self.id}</code> have not been converted to CGM format.")
+                throw_message(MessageType.Warning, f"kcat values of reaction <code>{self.id}</code> have not been converted to GBA format.")
             return False
         if not self.km_is_converted:
             if verbose:
-                throw_message(MessageType.Warning, f"KM values of reaction <code>{self.id}</code> have not been converted to CGM format.")
+                throw_message(MessageType.Warning, f"KM values of reaction <code>{self.id}</code> have not been converted to GBA format.")
             return False
         if not self.stoichiometry_is_converted:
             if verbose:
-                throw_message(MessageType.Warning, f"Stoichiometry of reaction <code>{self.id}</code> has not been converted to CGM format.")
+                throw_message(MessageType.Warning, f"Stoichiometry of reaction <code>{self.id}</code> has not been converted to GBA format.")
             return False
         return True
     
     def convert_kcat_values( self ) -> None:
         """
-        Convert the kcat values of the reaction to CGM format (mass units).
+        Convert the kcat values of the reaction to GBA format (mass units).
         """
-        assert self._builder != None, throw_message(MessageType.Error, f"CGM builder not set for reaction <code>{self.id}</code>.")
+        assert self._builder != None, throw_message(MessageType.Error, f"Model builder not set for reaction <code>{self.id}</code>.")
         assert self.kcat != None and len(self.kcat) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no kcat values.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Calculate the total masses #
@@ -745,59 +745,59 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Normalize the kcat values  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_kcat = self.kcat.copy()
-        for r_dir in self.CGM_kcat:
+        self.GBA_kcat = self.kcat.copy()
+        for r_dir in self.GBA_kcat:
             if r_dir == ReactionDirection.Forward:
-                self.CGM_kcat[r_dir] *= product_sum/self.enzyme_mass
+                self.GBA_kcat[r_dir] *= product_sum/self.enzyme_mass
             elif r_dir == ReactionDirection.Backward:
-                self.CGM_kcat[r_dir] *= reactant_sum/self.enzyme_mass
+                self.GBA_kcat[r_dir] *= reactant_sum/self.enzyme_mass
         self.kcat_is_converted = True
     
     def convert_km_values( self ) -> None:
         """
-        Convert the KM values of the reaction to CGM format (mass units).
+        Convert the KM values of the reaction to GBA format (mass units).
         """
-        assert self._builder != None, throw_message(MessageType.Error, f"CGM builder not set for reaction <code>{self.id}</code>.")
+        assert self._builder != None, throw_message(MessageType.Error, f"Model builder not set for reaction <code>{self.id}</code>.")
         assert self.km != None and len(self.km) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no KM values.")
         for m_id in self.km:
             assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> not found in the stoichiometry of reaction <code>{self.id}</code>.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Convert KM values to mass units     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_km = self.km.copy()
+        self.GBA_km = self.km.copy()
         for m_id in self.km:
-            self.CGM_km[m_id] *= self._builder.metabolites[m_id].mass
+            self.GBA_km[m_id] *= self._builder.metabolites[m_id].mass
         self.km_is_converted = True
     
     def convert_stoichiometry( self ) -> None:
         """
-        Convert the stoichiometry of the reaction to CGM format (normalized mass units).
+        Convert the stoichiometry of the reaction to GBA format (normalized mass units).
         """
-        assert self._builder != None, throw_message(MessageType.Error, f"CGM builder not set for reaction <code>{self.id}</code>.")
+        assert self._builder != None, throw_message(MessageType.Error, f"Model builder not set for reaction <code>{self.id}</code>.")
         assert self.metabolites != None and len(self.metabolites) > 0, throw_message(MessageType.Error, f"Reaction <code>{self.id}</code> has no metabolites.")
         for m_id in self.metabolites:
             assert m_id in self._builder.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> not found in the list of metabolites.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Convert stoichiometry to mass units #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.CGM_metabolites = self.metabolites.copy()
-        for m_id in self.CGM_metabolites:
-            self.CGM_metabolites[m_id] *= self._builder.metabolites[m_id].mass
+        self.GBA_metabolites = self.metabolites.copy()
+        for m_id in self.GBA_metabolites:
+            self.GBA_metabolites[m_id] *= self._builder.metabolites[m_id].mass
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Normalize the mass stoichiometry    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         reactant_sum = 0.0
         product_sum  = 0.0
-        for m_id in self.CGM_metabolites:
-            if self.CGM_metabolites[m_id] < 0:
-                reactant_sum += np.abs(self.CGM_metabolites[m_id])
-            elif self.CGM_metabolites[m_id] > 0:
-                product_sum += self.CGM_metabolites[m_id]
-        for m_id in self.CGM_metabolites:
-            if self.CGM_metabolites[m_id] < 0:
-                self.CGM_metabolites[m_id] /= reactant_sum
-            elif self.CGM_metabolites[m_id] > 0:
-                self.CGM_metabolites[m_id] /= product_sum
+        for m_id in self.GBA_metabolites:
+            if self.GBA_metabolites[m_id] < 0:
+                reactant_sum += np.abs(self.GBA_metabolites[m_id])
+            elif self.GBA_metabolites[m_id] > 0:
+                product_sum += self.GBA_metabolites[m_id]
+        for m_id in self.GBA_metabolites:
+            if self.GBA_metabolites[m_id] < 0:
+                self.GBA_metabolites[m_id] /= reactant_sum
+            elif self.GBA_metabolites[m_id] > 0:
+                self.GBA_metabolites[m_id] /= product_sum
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Check mass normalization            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -806,7 +806,7 @@ class Reaction:
     
     def convert( self ) -> None:
         """
-        Convert the reaction to CGM format.
+        Convert the reaction to GBA format.
         """
         self.convert_kcat_values()
         self.convert_km_values()
@@ -814,20 +814,20 @@ class Reaction:
     
     def reset_conversion( self ) -> None:
         """
-        Reset the conversion of the reaction to CGM format.
+        Reset the conversion of the reaction to GBA format.
         """
         self.kcat_is_converted          = False
         self.km_is_converted            = False
         self.stoichiometry_is_converted = False
-        if not self.CGM_metabolites is None:
-            self.CGM_metabolites.clear()
-        if not self.CGM_kcat is None:
-            self.CGM_kcat.clear()
-        if not self.CGM_km is None:
-            self.CGM_km.clear()
-        self.CGM_metabolites = None
-        self.CGM_kcat        = None
-        self.CGM_km          = None
+        if not self.GBA_metabolites is None:
+            self.GBA_metabolites.clear()
+        if not self.GBA_kcat is None:
+            self.GBA_kcat.clear()
+        if not self.GBA_km is None:
+            self.GBA_km.clear()
+        self.GBA_metabolites = None
+        self.GBA_kcat        = None
+        self.GBA_km          = None
 
     #~~~~~~~~~~~~~~~~~~~~~#
     # 4) Other methods    #
@@ -835,12 +835,12 @@ class Reaction:
 
     def set_builder( self, builder ) -> None:
         """
-        Set the reference to the CGM builder.
+        Set the reference to the model builder.
 
         Parameters
         ----------
         builder : Builder
-            Reference to the CGM builder.
+            Reference to the model builder.
         """
         self._builder = builder
     

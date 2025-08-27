@@ -1,6 +1,6 @@
 General;;
 ;Name;EC3rev
-;Description;GBA model with three reactions
+;Description;Model with three reactions
 Units;;
 ;Km;g/L
 ;kcat;1/h ([mass of products]/[mass of protein]/h)

@@ -1,6 +1,6 @@
 General;;
 ;Name;A
-;Description;Simplest CGM with two reactions
+;Description;Simplest model with two reactions
 Units;;
 ;KM;g/L
 ;kcat;1/h ([mass of products]/[mass of protein]/h)

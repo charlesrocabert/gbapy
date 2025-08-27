@@ -70,7 +70,7 @@ env.start()
 
 class Model:
     """
-    Class to manipulate cell growth models (CGMs).
+    Class to manipulate models.
 
     Attributes
     ----------
@@ -266,33 +266,33 @@ class Model:
     initialize_model_mathematical_variables( ) -> None
         Initialize the model mathematical variables.
     read_from_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Read the CGM from CSV files.
+        Read the model from CSV files.
     write_to_csv( path: Optional[str] = ".", verbose: Optional[bool] = False ) -> None
-        Write the CGM to CSV files.
+        Write the model to CSV files.
     get_condition( self, condition_id: str, condition_param: str ) -> float
         Get the value of a condition parameter.
     get_vector( self, source: str, variable: str ) -> np.array
         Get the value of a variable from a source.
     clear_conditions( self ) -> None
-        Clear all external conditions from the CGM.
+        Clear all external conditions from the model.
     add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None
-        Add a new condition to the CGM.
+        Add a new condition to the model.
     clear_constant_rhs( self ) -> None
-        Clear all constant right-hand side terms from the CGM.
+        Clear all constant right-hand side terms from the model.
     add_constant_rhs( self, metabolite_id: str, value: float ) -> None
-        Add a new constant right-hand side term to the CGM.
+        Add a new constant right-hand side term to the model.
     clear_constant_reactions( self ) -> None
-        Clear all constant reactions from the CGM.
+        Clear all constant reactions from the model.
     add_constant_reaction( self, reaction_id: str, value: float ) -> None
-        Add a new constant reaction to the CGM.
+        Add a new constant reaction to the model.
     reset_variables( self ) -> None
-        Reset all variables of the CGM.
+        Reset all variables of the model.
     set_condition( self, condition_id: str ) -> None
-        Set the current condition of the CGM.
+        Set the current condition of the model.
     set_f0( self, f0: np.array ) -> None
-        Set the initial solution f0 of the CGM.
+        Set the initial solution f0 of the model.
     set_f( self ) -> None
-        Set the flux fractions vector of the CGM.
+        Set the flux fractions vector of the model.
     gaussian_kernel( self, x: np.array, mu: float ) -> np.array
         Compute the Gaussian kernel for a vector x with mean mu.
     compute_c( self ) -> None
@@ -369,9 +369,9 @@ class Model:
     generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None
         Generate random initial solutions.
     information( self ) -> None
-        Print some informations about the CGM.
+        Print some informations about the model.
     summary( self ) -> None
-        Print a summary of the CGM.
+        Print a summary of the model.
     """
 
     def __init__( self, name: str ) -> None:
@@ -381,14 +381,14 @@ class Model:
         Parameters
         ----------
         name : str
-            Name of the CGM.
+            Name of the model.
         """
-        assert name != "", throw_message(MessageType.Error, "You must provide a name to the CGM constructor.")
+        assert name != "", throw_message(MessageType.Error, "You must provide a name to the model constructor.")
         self.name = name
         self.info = {}
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) CGM                           #
+        # 1) Model                         #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Identifier lists ###
@@ -437,7 +437,7 @@ class Model:
         self.initial_solution_loaded      = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) CGM constants                 #
+        # 2) Model constants               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Vector lengths ###
@@ -470,7 +470,7 @@ class Model:
         self.random_solutions  = {}
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) CGM variables                 #
+        # 4) Model variables               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j                 = np.array([])
         self.ditau_j               = np.array([])
@@ -487,7 +487,7 @@ class Model:
         self.adjust_concentrations = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) CGM dynamical variables       #
+        # 5) Model dynamical variables     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.condition = ""
         self.rho       = 0.0
@@ -883,7 +883,7 @@ class Model:
         else:
             self.full_column_rank = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) CGM dynamical variables                             #
+        # 7) Model dynamical variables                           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
@@ -908,29 +908,29 @@ class Model:
         self.directions.clear()
         for j in range(self.nj):
             if (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(CgmReactionType.iMM)
+                self.kinetic_model.append(GbaReactionType.iMM)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(CgmReactionType.iMMa)
+                self.kinetic_model.append(GbaReactionType.iMMa)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(CgmReactionType.iMMi)
+                self.kinetic_model.append(GbaReactionType.iMMi)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(CgmReactionType.iMMia)
+                self.kinetic_model.append(GbaReactionType.iMMia)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() > 0):
-                self.kinetic_model.append(CgmReactionType.iMMr)
+                self.kinetic_model.append(GbaReactionType.iMMr)
                 self.directions.append(ReactionDirection.Forward)
             elif (self.kcat_b[j] > 0):
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
                 assert self.KR[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have regulation (reaction <code>{j}</code>).")
-                self.kinetic_model.append(CgmReactionType.rMM)
+                self.kinetic_model.append(GbaReactionType.rMM)
                 self.directions.append(self.directions.append(ReactionDirection.Reversible))
     
     def read_from_csv( self, path: Optional[str] = "." ) -> None:
         """
-        Read the CGM from CSV files.
+        Read the model from CSV files.
 
         Parameters
         ----------
@@ -956,7 +956,7 @@ class Model:
 
     def read_from_ods( self, path: Optional[str] = "." ) -> None:
         """
-        Read the CGM from ODS files.
+        Read the model from ODS files.
 
         Parameters
         ----------
@@ -991,14 +991,14 @@ class Model:
     
     def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
-        Write the CGM to CSV files.
+        Write the model to CSV files.
 
         Parameters
         ----------
         path : str, default="."
             Path to the CSV files.
         name : str, default=""
-            Name of the CGM. If not provided, the name of the CGM instance will be used.
+            Name of the model. If not provided, the name of the model instance will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1123,14 +1123,14 @@ class Model:
     
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
-        Export the CGM to a folder in ODS format.
+        Export the model to a folder in ODS format.
 
         Parameters
         ----------
         path : Optional[str], default="."
             Path to the folder.
         name : Optional[str], default=""
-            Name of the CGM. If not provided, the name of the CGM instance will be used.
+            Name of the model. If not provided, the name of the model instance will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1318,7 +1318,7 @@ class Model:
 
     def clear_conditions( self ) -> None:
         """
-        Clear all external conditions from the CGM.
+        Clear all external conditions from the model.
         """
         self.condition_ids    = []
         self.condition_params = ["rho"] + self.x_ids
@@ -1326,7 +1326,7 @@ class Model:
     
     def add_condition( self, condition_id: str, rho: float, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
-        Add an external condition to the CGM.
+        Add an external condition to the model.
 
         Parameters
         ----------
@@ -1367,13 +1367,13 @@ class Model:
     
     def clear_constant_rhs( self ) -> None:
         """
-        Clear all constant RHS terms from the CGM.
+        Clear all constant RHS terms from the model.
         """
         self.constant_rhs = {}
     
     def add_constant_rhs( self, metabolite_id: str, value: float ) -> None:
         """
-        Make a CGM metabolite constant in the RHS term for the initial solution.
+        Make a metabolite constant in the RHS term for the initial solution.
 
         Parameters
         ----------
@@ -1388,13 +1388,13 @@ class Model:
     
     def clear_constant_reactions( self ) -> None:
         """
-        Clear all constant reactions from the CGM.
+        Clear all constant reactions from the model.
         """
         self.constant_reactions = {}
     
     def add_constant_reaction( self, reaction_id: str, value: float ) -> None:
         """
-        Make a CGM reaction constant to a given flux value.
+        Make a reaction constant to a given flux value.
 
         Parameters
         ----------
@@ -1441,8 +1441,8 @@ class Model:
             x_name    = self.x_ids[i]
             x_value   = self.get_condition(self.condition, x_name)
             self.x[i] = x_value
-            if self.adjust_concentrations and self.x[i] < CgmConstants.TOL.value:
-                self.x[i] = CgmConstants.TOL.value
+            if self.adjust_concentrations and self.x[i] < GbaConstants.TOL.value:
+                self.x[i] = GbaConstants.TOL.value
 
     def set_f0( self, f0: np.array ) -> None:
         """
@@ -1478,7 +1478,7 @@ class Model:
         np.array
             Gaussian term values.
         """
-        return (x - mu)/(CgmConstants.REGULATION_SIGMA*x)**2
+        return (x - mu)/(GbaConstants.REGULATION_SIGMA*x)**2
     
     def gaussian_kernel( self, x: np.array, mu: float ) -> np.array:
         """
@@ -1496,7 +1496,7 @@ class Model:
         np.array
             Gaussian kernel values.
         """
-        return np.exp(-0.5 * ((x - mu)/(CgmConstants.REGULATION_SIGMA*x))**2)
+        return np.exp(-0.5 * ((x - mu)/(GbaConstants.REGULATION_SIGMA*x))**2)
 
     def compute_c( self ) -> None:
         """
@@ -1504,7 +1504,7 @@ class Model:
         """
         self.c = self.rho*self.M.dot(self.f)
         if self.adjust_concentrations:
-            self.c[self.c < CgmConstants.TOL.value] = CgmConstants.TOL.value
+            self.c[self.c < GbaConstants.TOL.value] = GbaConstants.TOL.value
         self.xc = np.concatenate([self.x, self.c])
     
     def iMM( self, j: int ) -> None:
@@ -1582,7 +1582,7 @@ class Model:
             Reaction index.
         """
         kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < CgmConstants.TOL.value] = self.xc[kr_vec < CgmConstants.TOL.value]
+        kr_vec[kr_vec < GbaConstants.TOL.value] = self.xc[kr_vec < GbaConstants.TOL.value]
         gaussian_kernel = self.log_gaussian_kernel(self.xc, kr_vec)
         term1           = np.prod(1.0+self.KM_f[:,j]/(self.xc*gaussian_kernel))
         term2           = self.kcat_f[j]
@@ -1613,17 +1613,17 @@ class Model:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == CgmReactionType.iMM:
+        if self.kinetic_model[j] == GbaReactionType.iMM:
             self.iMM(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMa:
+        elif self.kinetic_model[j] == GbaReactionType.iMMa:
             self.iMMa(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMi:
+        elif self.kinetic_model[j] == GbaReactionType.iMMi:
             self.iMMi(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMia:
+        elif self.kinetic_model[j] == GbaReactionType.iMMia:
             self.iMMia(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMr:
+        elif self.kinetic_model[j] == GbaReactionType.iMMr:
             self.iMMr(j)
-        elif self.kinetic_model[j] == CgmReactionType.rMM:
+        elif self.kinetic_model[j] == GbaReactionType.rMM:
             self.rMM(j)
     
     def diMM( self, j: int ) -> None:
@@ -1726,7 +1726,7 @@ class Model:
             Reaction index.
         """
         kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < CgmConstants.TOL.value] = self.xc[kr_vec < CgmConstants.TOL.value]
+        kr_vec[kr_vec < GbaConstants.TOL.value] = self.xc[kr_vec < GbaConstants.TOL.value]
         gaussian_kernel = self.gaussian_kernel(self.xc, kr_vec)
         constant1       = self.kcat_f[j]
         for i in range(self.nc):
@@ -1775,17 +1775,17 @@ class Model:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == CgmReactionType.iMM:
+        if self.kinetic_model[j] == GbaReactionType.iMM:
             self.diMM(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMa:
+        elif self.kinetic_model[j] == GbaReactionType.iMMa:
             self.diMMa(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMi:
+        elif self.kinetic_model[j] == GbaReactionType.iMMi:
             self.diMMi(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMia:
+        elif self.kinetic_model[j] == GbaReactionType.iMMia:
             self.diMMia(j)
-        elif self.kinetic_model[j] == CgmReactionType.iMMr:
+        elif self.kinetic_model[j] == GbaReactionType.iMMr:
             self.diMMr(j)
-        elif self.kinetic_model[j] == CgmReactionType.rMM:
+        elif self.kinetic_model[j] == GbaReactionType.rMM:
             self.drMM(j)
     
     def compute_mu( self ) -> None:
@@ -1869,9 +1869,9 @@ class Model:
         """
         Check the model state's consistency.
         """
-        test1 = (np.abs(self.density-1.0) < CgmConstants.TOL.value)
-        test2 = (sum(1 for x in self.c if x < -CgmConstants.TOL.value) == 0)
-        test3 = (sum(1 for x in self.p if x < -CgmConstants.TOL.value) == 0)
+        test1 = (np.abs(self.density-1.0) < GbaConstants.TOL.value)
+        test2 = (sum(1 for x in self.c if x < -GbaConstants.TOL.value) == 0)
+        test3 = (sum(1 for x in self.p if x < -GbaConstants.TOL.value) == 0)
         self.consistent = True
         if not (test1 and test2 and test3):
             self.consistent = False
@@ -1898,15 +1898,15 @@ class Model:
         rhs_factor : Optional[float], default=100.0
             Factor dividing the rhs of the mass conservation constraint.
         """
-        assert max_flux_fraction > CgmConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
         assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
         lb_vec = []
         for j in range(self.nj):
             if self.reversible[j]:
                 lb_vec.append(-max_flux_fraction)
             else:
-                lb_vec.append(CgmConstants.TOL.value)
-        #lb_vec = [CgmConstants.TOL.value]*self.nj
+                lb_vec.append(GbaConstants.TOL.value)
+        #lb_vec = [GbaConstants.TOL.value]*self.nj
         ub_vec = [max_flux_fraction]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
@@ -2058,7 +2058,7 @@ class Model:
         assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
         assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
         assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
-        assert max_flux_fraction > CgmConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {CgmConstants.TOL.value}.")
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
         assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
@@ -2078,7 +2078,7 @@ class Model:
             negative_term  = True
             while negative_term:
                 self.f_trunc = np.random.rand(self.nj-1)
-                self.f_trunc = self.f_trunc*(max_flux_fraction-CgmConstants.TOL)+CgmConstants.TOL
+                self.f_trunc = self.f_trunc*(max_flux_fraction-GbaConstants.TOL)+GbaConstants.TOL
                 self.set_f_from_f_trunc()
                 if self.f[0] >= 0.0:
                     negative_term = False
@@ -2119,7 +2119,7 @@ class Model:
         cmdline
             The solver command line
         """
-        cmdline  = "find_cgm_optimum "
+        cmdline  = "find_model_optimum "
         cmdline += "-path . "
         cmdline += "-name "+str(temporary_name)+" "
         cmdline += "-condition "+self.condition+" "
@@ -2221,7 +2221,7 @@ class Model:
     
     def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000 ):
         """
-        Find the optimum of the CGM using the gbacpp solver.
+        Find the optimum of the model using the gbacpp solver.
 
         Parameters
         ----------
@@ -2271,7 +2271,7 @@ class Model:
 
     def information( self ) -> None:
         """
-        Print the CGM information.
+        Print the model information.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Compile information #
@@ -2291,7 +2291,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Display table       #
         #~~~~~~~~~~~~~~~~~~~~~~~~#
-        html_str  = "<h1>CGM "+self.name+"</h1>"
+        html_str  = "<h1>Model "+self.name+"</h1>"
         for category, df in dfs.items():
             html_str += "<table>"
             html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
@@ -2303,7 +2303,7 @@ class Model:
 
     def summary( self ) -> None:
         """
-        Print a summary of the CGM.
+        Print a summary of the model.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Compile information #
@@ -2326,7 +2326,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Display tables      #
         #~~~~~~~~~~~~~~~~~~~~~~~~#
-        html_str  = "<h1>CGM "+self.name+" summary</h1>"
+        html_str  = "<h1>Model "+self.name+" summary</h1>"
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
@@ -2376,19 +2376,19 @@ def throw_message( type: MessageType, message: str ) -> None:
 
 def read_csv_model( name: str, path: Optional[str] = "." ) -> Model:
     """
-    Read a CGM from CSV files.
+    Read a model from CSV files.
 
     Parameters
     ----------
     name : str
-        Name of the CGM.
+        Name of the model.
     path : Optional[str], default="."
         Path to the model folder.
 
     Returns
     -------
     Model
-        The loaded CGM.
+        The loaded model.
     """
     assert os.path.exists(path+"/"+name), throw_message(MessageType.Error, "The folder "+path+"/"+name+" does not exist.")
     model = Model(name)
@@ -2397,19 +2397,19 @@ def read_csv_model( name: str, path: Optional[str] = "." ) -> Model:
 
 def read_ods_model( name: str, path: Optional[str] = "." ) -> Model:
     """
-    Read a CGM from ODS files.
+    Read a model from ODS files.
 
     Parameters
     ----------
     name : str
-        Name of the CGM.
+        Name of the model.
     path : Optional[str], default="."
         Path to the model folder.
 
     Returns
     -------
     Model
-        The loaded CGM.
+        The loaded model.
     """
     assert os.path.exists(path+"/"+name+".ods"), throw_message(MessageType.Error, "The folder "+path+"/"+name+".ods does not exist.")
     model = Model(name)
@@ -2418,7 +2418,7 @@ def read_ods_model( name: str, path: Optional[str] = "." ) -> Model:
 
 def get_toy_model_path( model_name: str ) -> str:
     """
-    Get the path of a toy CGM included in the Python package as CSV files.
+    Get the path of a toy model included in the Python package as CSV files.
 
     Parameters
     ----------
@@ -2436,7 +2436,7 @@ def get_toy_model_path( model_name: str ) -> str:
 
 def read_toy_model( name: str ) -> Model:
     """
-    Read a toy CGM included in the Python package as CSV files.
+    Read a toy model included in the Python package as CSV files.
 
     Parameters
     ----------
@@ -2446,7 +2446,7 @@ def read_toy_model( name: str ) -> Model:
     Returns
     -------
     Model
-        The loaded CGM.
+        The loaded model.
     """
     model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
     model_path = str(Path(model_dir , "toy_models/"))
@@ -2455,12 +2455,12 @@ def read_toy_model( name: str ) -> Model:
 
 def backup_model( model: Model, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
     """
-    Backup a CGM in binary format (extension .cgm).
+    Backup a model in binary format (extension .gba).
 
     Parameters
     ----------
     model : Model
-        CGM to backup.
+        Model to backup.
     name : str
         Name of the backup file.
     path : str
@@ -2468,42 +2468,42 @@ def backup_model( model: Model, name: Optional[str] = "", path: Optional[str] = 
     """
     filename = ""
     if name != "":
-        filename = path+"/"+name+".cgm"
+        filename = path+"/"+name+".gba"
     else:
-        filename = path+"/"+model.name+".cgm"
+        filename = path+"/"+model.name+".gba"
     ofile = open(filename, "wb")
     pickle.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), throw_message(MessageType.Error, ".cgm file creation failed.")
+    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gba file creation failed.")
 
 def load_model( path: str ) -> Model:
     """
-    Load a CGM from a binary file.
+    Load a model from a binary file.
 
     Parameters
     ----------
     path : str
-        Path to the CGM file.
+        Path to the model file.
     """
-    assert path.endswith(".cgm"), throw_message(MessageType.Error, "CGM file extension is missing.")
-    assert os.path.isfile(path), throw_message(MessageType.Error, "CGM file not found.")
+    assert path.endswith(".gba"), throw_message(MessageType.Error, "Model file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.Error, "Model file not found.")
     ifile = open(path, "rb")
     model = pickle.load(ifile)
     ifile.close()
     return model
 
-def create_model( name: str, path: Optional[str] = ".", cgm_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
+def create_model( name: str, path: Optional[str] = ".", model_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
     """
-    Create a CGM from CSV files, and save it as a binary file.
+    Create a model from CSV files, and save it as a binary file.
 
     Parameters
     ----------
     name : str
-        Name of the CGM.
+        Name of the model.
     path : Optional[str], default="."
         Path to the binary file.
-    cgm_path : Optional[str], default=""
-        Path to save the CGM.
+    model_path : Optional[str], default=""
+        Path to save the model.
     save_LP : Optional[bool], default=False
         Save the LP solution.
     save_optima : Optional[bool], default=False
@@ -2540,6 +2540,6 @@ def create_model( name: str, path: Optional[str] = ".", cgm_path: Optional[str] 
     # 4) Clean model and dump binary backup       #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     model.reset_variables()
-    backup_model(model=model, name=name, path=cgm_path)
+    backup_model(model=model, name=name, path=model_path)
     del model
 

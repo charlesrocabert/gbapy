@@ -105,7 +105,7 @@ class ReactionGPR(enum.Enum):
     AND  = 2
     OR   = 3
 
-class CgmReactionType(enum.Enum):
+class GbaReactionType(enum.Enum):
     """
     Reaction direction enumeration.
     - iMM  : Simple irreversible Michaelis-Menten reaction.
@@ -122,9 +122,9 @@ class CgmReactionType(enum.Enum):
     iMMr  = 5
     rMM   = 6
 
-class CgmConstants(float, enum.Enum):
+class GbaConstants(float, enum.Enum):
     """
-    Constant for CGM algorithms.
+    Constant for GBA algorithms.
     - TOL                          : Tolerance value.
     - TRAJECTORY_CONVERGENCE_COUNT : Number of iterations with equal mu values to consider the trajectory stable.
     - TRAJECTORY_CONVERGENCE_TOL   : Mu threshold below which growth rates are considered equal.

@@ -1,6 +1,6 @@
 General;;
 ;Name;D
-;Description;CGM with redundant reactions (rxn3 and rxn4)
+;Description;Model with redundant reactions (rxn3 and rxn4)
 Units;;
 ;KM;g/L
 ;kcat;1/h ([mass of products]/[mass of protein]/h)

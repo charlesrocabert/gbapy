@@ -51,8 +51,8 @@ from gba.Enumerations import (
     ReactionType,
     ReactionDirection,
     ReactionGPR,
-    CgmReactionType,
-    CgmConstants,
+    GbaReactionType,
+    GbaConstants,
     MessageType
 )
 from gba.Species import (
