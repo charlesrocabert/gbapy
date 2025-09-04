@@ -1750,12 +1750,12 @@ class Model:
 
         Parameters
         ----------
-        max_flux_fraction : Optional[float], default=10.0
+        max_flux_fraction : Optional[float], default=50.0
             Maximal flux fraction.
-        rhs_factor : Optional[float], default=100.0
+        rhs_factor : Optional[float], default=1000.0
             Factor dividing the rhs of the mass conservation constraint.
         """
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.MIN_FLUX_FRACTION.value}.")
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
         assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
         lb_vec = []
         for j in range(self.nj):
