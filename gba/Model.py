@@ -1640,22 +1640,12 @@ class Model:
             else:
                 lb_vec.append(GbaConstants.TOL.value)
         ub_vec = [max_flux_fraction]*self.nj
-        ##################
-        #lb_vec = [GbaConstants.TOL.value]*self.nj
-        #lb_vec[2] = GbaConstants.TOL.value
-        #lb_vec[6] = -max_flux_fraction
-        #ub_vec[5] = -GbaConstants.TOL.value
-        #ub_vec[6] = -GbaConstants.TOL.value
-        #print(lb_vec)
-        #print(ub_vec)
-        ####################
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
            lb_vec[r_index] = item[1]
            ub_vec[r_index] = item[1]
         gpmodel = gp.Model(env=env)
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
-        #min_b   = 1/self.nc/rhs_factor
         min_b   = 1/rhs_factor
         rhs     = np.repeat(min_b, self.nc)
         for m_id, value in self.constant_rhs.items():
