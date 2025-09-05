@@ -65,10 +65,10 @@ class Species:
     name : str
         Name of the species.
     species_location : SpeciesLocation
-        Location of the species in the cell (Internal, External, Unknown).
+        Location of the species in the cell (INTERNAL, EXTERNAL, UNKNOWN).
     species_type : SpeciesType
-        Type of the species (DNA, RNA, Protein, SmallMolecule, MacroMolecule,
-        Unknown).
+        Type of the species (DNA, RNA, PROTEIN, SMALLMOLECULE, MACROMOLECULE,
+        UNKNOWN).
     formula : str
         Chemical formula of the species.
     mass : float
@@ -93,10 +93,10 @@ class Species:
         name : str
             Name of the species.
         species_location : SpeciesLocation
-            Location of the species in the cell (Internal, External, Unknown).
+            Location of the species in the cell (INTERNAL, EXTERNAL, UNKNOWN).
         species_type : SpeciesType
-            Type of the species (DNA, RNA, Protein, SmallMolecule,
-            MacroMolecule, Unknown).
+            Type of the species (DNA, RNA, PROTEIN, SMALLMOLECULE,
+            MACROMOLECULE, UNKNOWN).
         formula : str
             Chemical formula of the species.
         mass : float
@@ -118,18 +118,18 @@ class Species:
             self.mass = SeqUtils.molecular_weight(self.formula, "DNA")
         elif self.species_type == SpeciesType.RNA and self.formula not in ["", None]:
             self.mass = SeqUtils.molecular_weight(self.formula, "RNA")
-        elif self.species_type == SpeciesType.Protein and self.formula not in ["", None]:
+        elif self.species_type == SpeciesType.PROTEIN and self.formula not in ["", None]:
             self.mass = ProteinAnalysis(self.formula).molecular_weight()
-        elif self.species_type == SpeciesType.SmallMolecule and self.formula not in ["", None]:
+        elif self.species_type == SpeciesType.SMALLMOLECULE and self.formula not in ["", None]:
             self.mass = molmass.Formula(self.formula).mass
-        elif self.species_type in [SpeciesType.MacroMolecule, SpeciesType.Unknown] and self.formula not in ["", None]:
+        elif self.species_type in [SpeciesType.MACROMOLECULE, SpeciesType.UNKNOWN] and self.formula not in ["", None]:
             try:
                 formula   = self.formula.replace("R", "")
                 self.mass = (molmass.Formula(formula).mass if formula != "" else 0.0)
             except:
-                throw_message(MessageType.Warning, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
+                throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
         else:
-            throw_message(MessageType.Warning, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
+            throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
 
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """
@@ -142,7 +142,7 @@ class Species:
         """
         if self.mass == None or self.mass == 0.0:
             if verbose:
-                throw_message(MessageType.Warning, f"Mass of species <code>{self.id}</code> is missing.")
+                throw_message(MessageType.WARNING, f"Mass of species <code>{self.id}</code> is missing.")
             return True
         return False
     
@@ -170,15 +170,15 @@ class Species:
         if self.name is not None:
             df["Name"] = self.name
         if self.species_location is not None:
-            df["Location"] = ("Internal" if self.species_location == SpeciesLocation.Internal else
-                              "External" if self.species_location == SpeciesLocation.External else
+            df["Location"] = ("Internal" if self.species_location == SpeciesLocation.INTERNAL else
+                              "External" if self.species_location == SpeciesLocation.EXTERNAL else
                               "Unknown")
         if self.species_type is not None:
             df["Type"] = ("DNA" if self.species_type == SpeciesType.DNA else
                           "RNA" if self.species_type == SpeciesType.RNA else
-                          "Protein" if self.species_type == SpeciesType.Protein else
-                          "Small molecule" if self.species_type == SpeciesType.SmallMolecule else
-                          "Macro-molecule" if self.species_type == SpeciesType.MacroMolecule else
+                          "Protein" if self.species_type == SpeciesType.PROTEIN else
+                          "Small molecule" if self.species_type == SpeciesType.SMALLMOLECULE else
+                          "Macro-molecule" if self.species_type == SpeciesType.MACROMOLECULE else
                           "Unknown")
         if self.formula is not None and self.formula != "":
             text = self.formula
@@ -236,7 +236,7 @@ class Protein(Species):
         product : str
             Product of the gene (description).
         """
-        super().__init__(id, name, SpeciesLocation.Internal, SpeciesType.Protein, sequence, mass)
+        super().__init__(id, name, SpeciesLocation.INTERNAL, SpeciesType.PROTEIN, sequence, mass)
         self.gene    = gene
         self.product = product
 
@@ -270,10 +270,10 @@ class Metabolite(Species):
         name : str
             Name of the species.
         species_location : SpeciesLocation
-            Location of the species in the cell (Internal, External, Unknown).
+            Location of the species in the cell (INTERNAL, EXTERNAL, UNKNOWN).
         species_type : SpeciesType
-            Type of the species (DNA, RNA, Protein, SmallMolecule,
-            MacroMolecule, Unknown).
+            Type of the species (DNA, RNA, PROTEIN, SMALLMOLECULE,
+            MACROMOLECULE, UNKNWON).
         formula : str
             Chemical formula of the species.
         mass : float
@@ -295,20 +295,20 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning,
-        MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.INFO, MessageType.WARNING,
+        MessageType.ERROR, MessageType.PLAIN).
     message : str
         Content of the message.
     """
     html_str  = "<table>"
     html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-    if type == MessageType.Plain:
+    if type == MessageType.PLAIN:
         html_str += "<td><strong>&#10095;</strong></td>"
-    elif type == MessageType.Info:
+    elif type == MessageType.INFO:
         html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
-    elif type == MessageType.Warning:
+    elif type == MessageType.WARNING:
         html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
-    elif type == MessageType.Error:
+    elif type == MessageType.ERROR:
         html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
     html_str += "<td>"+message+"</td>"
     html_str += "</tr>"

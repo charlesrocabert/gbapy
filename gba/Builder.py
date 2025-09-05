@@ -166,7 +166,7 @@ class Builder:
         name : str
             Name of the model build.
         """
-        assert name != "", throw_message(MessageType.Error, "Empty model build name.")
+        assert name != "", throw_message(MessageType.ERROR, "Empty model build name.")
         self.name = name
         self.info = {}
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -232,7 +232,7 @@ class Builder:
         metabolite_id : str
             Identifier of the metabolite.
         """
-        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         return [r_id for r_id, reaction in self.reactions.items() if metabolite_id in reaction.metabolites]
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -255,7 +255,7 @@ class Builder:
         """
         if category not in self.info:
             self.info[category] = {}
-        assert key not in self.info[category], throw_message(MessageType.Error, f"Info key <code>{key}</code> already exists in info category <code>{category}</code>.")
+        assert key not in self.info[category], throw_message(MessageType.ERROR, f"Info key <code>{key}</code> already exists in info category <code>{category}</code>.")
         self.info[category][key] = content
     
     def add_protein( self, protein: Protein ) -> None:
@@ -267,8 +267,8 @@ class Builder:
         protein : Protein
             Protein object to add to the model.
         """
-        #assert isinstance(protein, Protein), throw_message(MessageType.Error, f"Expected <code>protein</code> to be a Protein, but got <code>{type(protein).__name__}</code>.")
-        assert protein.id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein.id}</code> already exists.") 
+        #assert isinstance(protein, Protein), throw_message(MessageType.ERROR, f"Expected <code>protein</code> to be a Protein, but got <code>{type(protein).__name__}</code>.")
+        assert protein.id not in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{protein.id}</code> already exists.") 
         protein.set_builder(self)
         self.proteins[protein.id] = protein
     
@@ -293,8 +293,8 @@ class Builder:
         metabolite : Metabolite
             Metabolite object to add to the model.
         """
-        #assert isinstance(metabolite, Metabolite), throw_message(MessageType.Error, f"Expected <code>metabolite</code> to be a Metabolite, but got <code>{type(metabolite).__name__}</code>.") 
-        assert metabolite.id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite.id}</code> already exists.")
+        #assert isinstance(metabolite, Metabolite), throw_message(MessageType.ERROR, f"Expected <code>metabolite</code> to be a Metabolite, but got <code>{type(metabolite).__name__}</code>.") 
+        assert metabolite.id not in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite.id}</code> already exists.")
         metabolite.set_builder(self)
         self.metabolites[metabolite.id] = metabolite
     
@@ -319,8 +319,8 @@ class Builder:
         reaction : Reaction
             Reaction object to add to the model.
         """
-        #assert isinstance(reaction, Reaction), throw_message(MessageType.Error, f"Expected <code>reaction</code> to be a Reaction, but got <code>{type(reaction).__name__}</code>.") 
-        assert reaction.id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction.id}</code> already exists.")
+        #assert isinstance(reaction, Reaction), throw_message(MessageType.ERROR, f"Expected <code>reaction</code> to be a Reaction, but got <code>{type(reaction).__name__}</code>.") 
+        assert reaction.id not in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction.id}</code> already exists.")
         reaction.set_builder(self)
         self.reactions[reaction.id] = reaction
         if reaction.proteins not in [None, {}] and reaction.GPR is not None:
@@ -347,7 +347,7 @@ class Builder:
         protein_id : str
             Identifier of the protein to remove.
         """
-        assert protein_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> does not exist.")
+        assert protein_id in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{protein_id}</code> does not exist.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Remove the protein from the main dictionary #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -380,7 +380,7 @@ class Builder:
         metabolite_id : str
             Identifier of the metabolite to remove.
         """
-        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Remove the metabolite from the main dictionary #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -413,7 +413,7 @@ class Builder:
         reaction_id : str
             Identifier of the reaction to remove.
         """
-        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist.")
         del self.reactions[reaction_id]
     
     def remove_reactions( self, reactions_list: list[str] ) -> None:
@@ -439,8 +439,8 @@ class Builder:
         new_id : str
             New identifier of the metabolite.
         """
-        assert previous_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{previous_id}</code> does not exist.")
-        assert new_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{new_id}</code> already exists.")
+        assert previous_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{previous_id}</code> does not exist.")
+        assert new_id not in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{new_id}</code> already exists.")
         #~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Manage reactions   #
         #~~~~~~~~~~~~~~~~~~~~~~~#
@@ -466,8 +466,8 @@ class Builder:
         new_id : str
             New identifier of the reaction.
         """
-        assert previous_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{previous_id}</code> does not exist.")
-        assert new_id not in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{new_id}</code> already exists.")
+        assert previous_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{previous_id}</code> does not exist.")
+        assert new_id not in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{new_id}</code> already exists.")
         self.reactions[new_id]    = self.reactions.pop(previous_id)
         self.reactions[new_id].id = new_id
     
@@ -484,15 +484,15 @@ class Builder:
         proteins_list : list[str]
             List of protein identifiers to average.    
         """
-        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
-        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
-        assert len(proteins_list) > 0, throw_message(MessageType.Error, "Empty list of proteins.")
+        assert protein_id != "", throw_message(MessageType.ERROR, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{protein_id}</code> already exists.")
+        assert len(proteins_list) > 0, throw_message(MessageType.ERROR, "Empty list of proteins.")
         for p_id in proteins_list:
-            assert p_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> does not exist.")
+            assert p_id in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{p_id}</code> does not exist.")
         avg_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         avg_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])/len(proteins_list)
         self.add_protein(avg_protein)
-        throw_message(MessageType.Info, f"Created average protein <code>{protein_id}</code> ({round(avg_protein.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created average protein <code>{protein_id}</code> ({round(avg_protein.mass,2)} Da).")
     
     def create_sum_protein( self, protein_id: str, protein_name: str, proteins_list: list[str] ) -> None:
         """
@@ -507,15 +507,15 @@ class Builder:
         proteins_list : list[str]
             List of protein identifiers to sum.
         """
-        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
-        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
-        assert len(proteins_list) > 0, throw_message(MessageType.Error, "Empty list of proteins.")
+        assert protein_id != "", throw_message(MessageType.ERROR, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{protein_id}</code> already exists.")
+        assert len(proteins_list) > 0, throw_message(MessageType.ERROR, "Empty list of proteins.")
         for p_id in proteins_list:
-            assert p_id in self.proteins, throw_message(MessageType.Error, f"Protein <code>{p_id}</code> does not exist.")
+            assert p_id in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{p_id}</code> does not exist.")
         sum_protein      = Protein(id=protein_id, name=protein_name, sequence="", mass=0.0)
         sum_protein.mass = np.sum([self.proteins[p_id].mass for p_id in proteins_list])
         self.add_protein(sum_protein)
-        throw_message(MessageType.Info, f"Created sum protein <code>{protein_id}</code> ({round(sum_protein.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created sum protein <code>{protein_id}</code> ({round(sum_protein.mass,2)} Da).")
     
     def create_dummy_protein( self, protein_id: str, protein_name: str, protein_mass: float ) -> None:
         """
@@ -530,12 +530,12 @@ class Builder:
         protein_mass : float
             Mass of the dummy protein.
         """
-        assert protein_id != "", throw_message(MessageType.Error, "Empty protein identifier.")
-        assert protein_id not in self.proteins, throw_message(MessageType.Error, f"Protein <code>{protein_id}</code> already exists.")
-        assert protein_mass > 0.0, throw_message(MessageType.Error, "Invalid protein mass.")
+        assert protein_id != "", throw_message(MessageType.ERROR, "Empty protein identifier.")
+        assert protein_id not in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{protein_id}</code> already exists.")
+        assert protein_mass > 0.0, throw_message(MessageType.ERROR, "Invalid protein mass.")
         dummy_protein = Protein(id=protein_id, name=protein_name, sequence="", mass=protein_mass)
         self.add_protein(dummy_protein)
-        throw_message(MessageType.Info, f"Created dummy protein <code>{protein_id}</code> ({round(dummy_protein.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created dummy protein <code>{protein_id}</code> ({round(dummy_protein.mass,2)} Da).")
 
     def create_average_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -550,15 +550,15 @@ class Builder:
         metabolites_list : list[str]
             List of metabolite identifiers to average.
         """
-        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
-        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
-        assert len(metabolites_list) > 0, throw_message(MessageType.Error, "Empty list of metabolites.")
+        assert metabolite_id != "", throw_message(MessageType.ERROR, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert len(metabolites_list) > 0, throw_message(MessageType.ERROR, "Empty list of metabolites.")
         for m_id in metabolites_list:
-            assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
+            assert m_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> does not exist.")
         avg_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         avg_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])/len(metabolites_list)
         self.add_metabolite(avg_metabolite)
-        throw_message(MessageType.Info, f"Created average metabolite <code>{metabolite_id}</code> ({round(avg_metabolite.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created average metabolite <code>{metabolite_id}</code> ({round(avg_metabolite.mass,2)} Da).")
     
     def create_sum_metabolite( self, metabolite_id: str, metabolite_name: str, metabolites_list: list[str] ) -> None:
         """
@@ -573,15 +573,15 @@ class Builder:
         metabolites_list : list[str]
             List of metabolite identifiers to sum.
         """
-        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
-        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
-        assert len(metabolites_list) > 0, throw_message(MessageType.Error, "Empty list of metabolites.")
+        assert metabolite_id != "", throw_message(MessageType.ERROR, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert len(metabolites_list) > 0, throw_message(MessageType.ERROR, "Empty list of metabolites.")
         for m_id in metabolites_list:
-            assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
+            assert m_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> does not exist.")
         sum_metabolite      = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=0.0)
         sum_metabolite.mass = np.sum([self.metabolites[m_id].mass for m_id in metabolites_list])
         self.add_metabolite(sum_metabolite)
-        throw_message(MessageType.Info, f"Created sum metabolite <code>{metabolite_id}</code> ({round(sum_metabolite.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created sum metabolite <code>{metabolite_id}</code> ({round(sum_metabolite.mass,2)} Da).")
     
     def create_dummy_metabolite( self, metabolite_id: str, metabolite_name: str, metabolite_mass: float ) -> None:
         """
@@ -596,12 +596,12 @@ class Builder:
         metabolite_mass : float
             Mass of the dummy metabolite.
         """
-        assert metabolite_id != "", throw_message(MessageType.Error, "Empty metabolite identifier.")
-        assert metabolite_id not in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> already exists.")
-        assert metabolite_mass > 0.0, throw_message(MessageType.Error, "Invalid metabolite mass.")
+        assert metabolite_id != "", throw_message(MessageType.ERROR, "Empty metabolite identifier.")
+        assert metabolite_id not in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> already exists.")
+        assert metabolite_mass > 0.0, throw_message(MessageType.ERROR, "Invalid metabolite mass.")
         dummy_metabolite = Metabolite(id=metabolite_id, name=metabolite_name, formula="", mass=metabolite_mass)
         self.add_metabolite(dummy_metabolite)
-        throw_message(MessageType.Info, f"Created dummy metabolite <code>{metabolite_id}</code> ({round(dummy_metabolite.mass,2)} Da).")
+        throw_message(MessageType.INFO, f"Created dummy metabolite <code>{metabolite_id}</code> ({round(dummy_metabolite.mass,2)} Da).")
     
     def enforce_kcat_irreversibility( self ) -> None:
         """
@@ -631,14 +631,14 @@ class Builder:
         value : float
             Activation constant value.
         """
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA converted model is not built.")
-        assert self.GBA_KA is not None, throw_message(MessageType.Error, "Activation constant matrix is not initialized.")
-        assert self.GBA_KA.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid activation constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
-        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
-        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
-        assert value > 0.0, throw_message(MessageType.Error, f"The activation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
+        assert self.GBA_KA is not None, throw_message(MessageType.ERROR, "Activation constant matrix is not initialized.")
+        assert self.GBA_KA.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.ERROR, "Invalid activation constant matrix shape.")
+        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.ERROR, f"The activation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
         m_index                       = self.GBA_row_indices[metabolite_id]
         r_index                       = self.GBA_col_indices[reaction_id]
         self.GBA_KA[m_index, r_index] = value
@@ -656,14 +656,14 @@ class Builder:
         value : float
             Inhibition constant value.
         """
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA converted model is not built.")
-        assert self.GBA_KI is not None, throw_message(MessageType.Error, "Inhibition constant matrix is not initialized.")
-        assert self.GBA_KI.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid inhibition constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
-        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
-        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
-        assert value > 0.0, throw_message(MessageType.Error, f"The inhibition constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
+        assert self.GBA_KI is not None, throw_message(MessageType.ERROR, "Inhibition constant matrix is not initialized.")
+        assert self.GBA_KI.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.ERROR, "Invalid inhibition constant matrix shape.")
+        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.ERROR, f"The inhibition constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
         m_index                       = self.GBA_row_indices[metabolite_id]
         r_index                       = self.GBA_col_indices[reaction_id]
         self.GBA_KI[m_index, r_index] = value
@@ -681,14 +681,14 @@ class Builder:
         value : float
             Inhibition constant value.
         """
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA converted model is not built.")
-        assert self.GBA_KR is not None, throw_message(MessageType.Error, "Regulation constant matrix is not initialized.")
-        assert self.GBA_KR.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.Error, "Invalid regulation constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
-        assert metabolite_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> does not exist.")
-        assert reaction_id in self.reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist.")
-        assert value > 0.0, throw_message(MessageType.Error, f"The regulation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
+        assert self.GBA_KR is not None, throw_message(MessageType.ERROR, "Regulation constant matrix is not initialized.")
+        assert self.GBA_KR.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.ERROR, "Invalid regulation constant matrix shape.")
+        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
+        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
+        assert reaction_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist.")
+        assert value > 0.0, throw_message(MessageType.ERROR, f"The regulation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
         m_index                       = self.GBA_row_indices[metabolite_id]
         r_index                       = self.GBA_col_indices[reaction_id]
         self.GBA_KR[m_index, r_index] = value
@@ -717,19 +717,19 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert self.GBA_is_built, throw_message(MessageType.Error, "GBA converted model is not built.")
-        assert condition_id not in self.GBA_conditions, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
-        assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
-        assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
+        assert condition_id not in self.GBA_conditions, throw_message(MessageType.ERROR, f"Condition <code>{condition_id}</code> already exists.")
+        assert rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
+        assert default_concentration >= 0.0, throw_message(MessageType.ERROR, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolites, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
-                assert concentration >= 0.0, throw_message(MessageType.Error, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
+                assert m_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> does not exist.")
+                assert concentration >= 0.0, throw_message(MessageType.ERROR, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.GBA_conditions[condition_id] = {"rho": rho}
-        self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.External})
+        self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.EXTERNAL})
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
                 self.GBA_conditions[condition_id][m_id] = concentration
@@ -751,8 +751,8 @@ class Builder:
         value : float
             Flux value.
         """
-        assert metabolite_id not in self.GBA_constant_rhs, throw_message(MessageType.Error, f"Metabolite <code>{metabolite_id}</code> is already constant.")
-        assert value > 0.0, throw_message(MessageType.Error, f"The constant value must be positive (<code>{metabolite_id}</code>).")
+        assert metabolite_id not in self.GBA_constant_rhs, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> is already constant.")
+        assert value > 0.0, throw_message(MessageType.ERROR, f"The constant value must be positive (<code>{metabolite_id}</code>).")
         self.GBA_constant_rhs[metabolite_id] = value
 
     def clear_constant_reactions( self ) -> None:
@@ -772,7 +772,7 @@ class Builder:
         value : float
             Flux value.
         """
-        assert reaction_id not in self.GBA_constant_reactions, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> is already constant.")
+        assert reaction_id not in self.GBA_constant_reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> is already constant.")
         self.GBA_constant_reactions[reaction_id] = value
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -812,15 +812,15 @@ class Builder:
         if verbose:
             if len(v_proteins) > 0:
                 perc = len(v_proteins)/len(self.proteins)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of proteins with missing mass.")
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of proteins with missing mass.")
             if len(v_metabolites) > 0:
                 perc = len(v_metabolites)/len(self.metabolites)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of metabolites with missing mass.")
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of metabolites with missing mass.")
             if len(v_enzymes) > 0:
                 perc = len(v_enzymes)/len(self.reactions)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of enzymes with missing mass.")
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of enzymes with missing mass.")
             if len(v_proteins)==0 and len(v_metabolites)==0 and len(v_enzymes)==0:
-                throw_message(MessageType.Info, "No missing mass in the model.")
+                throw_message(MessageType.INFO, "No missing mass in the model.")
         return {"proteins": v_proteins, "metabolites": v_metabolites, "enzymes": v_enzymes}
     
     def detect_missing_kinetic_parameters( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -836,19 +836,19 @@ class Builder:
         missing_km   = [r.id for r in self.reactions.values() if r.has_missing_km_value()]
         if verbose:
             if len(missing_kcat) > 0:
-                transporter_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Transport])
-                spontaneous_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Spontaneous])
-                metabolic_count   = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.Metabolic])
+                transporter_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.TRANSPORT])
+                spontaneous_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.SPONTANEOUS])
+                metabolic_count   = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.METABOLIC])
                 perc              = len(missing_kcat)/len(self.reactions)*100
-                transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Transport])*100
-                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Spontaneous])*100
-                metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.Metabolic])*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
+                transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.TRANSPORT])*100
+                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.SPONTANEOUS])*100
+                metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.METABOLIC])*100
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
             if len(missing_km) > 0:
                 perc = len(missing_km)/len(self.reactions)*100
-                throw_message(MessageType.Warning, f"{perc:.2f}% of reactions with missing KM values.")
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing KM values.")
             if len(missing_kcat)==0 and len(missing_km)==0:
-                throw_message(MessageType.Info, "No missing kinetic parameters in the model.")
+                throw_message(MessageType.INFO, "No missing kinetic parameters in the model.")
         return {"kcat": missing_kcat, "km": missing_km}
     
     def detect_missing_connections( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
@@ -890,21 +890,21 @@ class Builder:
                 m_to_r_vec.append(m_id)
                 connectivity_error = True
                 if verbose:
-                    throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> has no associated reaction.")
+                    throw_message(MessageType.WARNING, f"Metabolite <code>{m_id}</code> has no associated reaction.")
         for r_id in reaction_to_protein_map:
             if len(reaction_to_protein_map[r_id]) == 0:
                 r_to_p_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated protein.")
+                    throw_message(MessageType.WARNING, f"Reaction <code>{r_id}</code> has no associated protein.")
         for r_id in reaction_to_metabolite_map:
             if len(reaction_to_metabolite_map[r_id]) == 0:
                 r_to_m_vec.append(r_id)
                 if verbose:
                     connectivity_error = True
-                    throw_message(MessageType.Warning, f"Reaction <code>{r_id}</code> has no associated metabolite.")
+                    throw_message(MessageType.WARNING, f"Reaction <code>{r_id}</code> has no associated metabolite.")
         if not connectivity_error and verbose:
-            throw_message(MessageType.Info, "No connectivity issues in the model.")
+            throw_message(MessageType.INFO, "No connectivity issues in the model.")
         return {"protein_to_reaction":    p_to_r_vec,
                 "metabolite_to_reaction": m_to_r_vec,
                 "reaction_to_protein":    r_to_p_vec,
@@ -925,7 +925,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.Forward:
+            if ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -935,7 +935,7 @@ class Builder:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.Backward:
+            elif ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -945,7 +945,7 @@ class Builder:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.Reversible:
+            elif ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
@@ -961,12 +961,12 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect unproduced metabolites       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        not_produced = [m_id for m_id in met_to_met_connectivity if len(met_to_met_connectivity[m_id]["previous"]) == 0 and self.metabolites[m_id].species_location == SpeciesLocation.Internal]
+        not_produced = [m_id for m_id in met_to_met_connectivity if len(met_to_met_connectivity[m_id]["previous"]) == 0 and self.metabolites[m_id].species_location == SpeciesLocation.INTERNAL]
         if verbose:
             if len(not_produced) == 0:
-                throw_message(MessageType.Info, "No unproduced metabolites in the model.")
+                throw_message(MessageType.INFO, "No unproduced metabolites in the model.")
             for m_id in not_produced:
-                throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> is not produced by any reaction.")
+                throw_message(MessageType.WARNING, f"Metabolite <code>{m_id}</code> is not produced by any reaction.")
         return not_produced
     
     def detect_infeasible_loops( self, verbose: Optional[bool] = False ) -> list[list[str]]:
@@ -985,7 +985,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.Forward:
+            if ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -997,7 +997,7 @@ class Builder:
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.Backward:
+            elif ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -1009,7 +1009,7 @@ class Builder:
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.Reversible:
+            elif ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
@@ -1029,11 +1029,11 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect infeasible loops             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        in_a_loop = [m_id for m_id in met_to_met_connectivity if len(list(set(met_to_met_connectivity[m_id]["previous"]).intersection(met_to_met_connectivity[m_id]["next"]))) > 0 and self.metabolites[m_id].species_location == SpeciesLocation.Internal]
+        in_a_loop = [m_id for m_id in met_to_met_connectivity if len(list(set(met_to_met_connectivity[m_id]["previous"]).intersection(met_to_met_connectivity[m_id]["next"]))) > 0 and self.metabolites[m_id].species_location == SpeciesLocation.INTERNAL]
         pairs     = []
         for m_id in in_a_loop:
             common_ids = list(set(met_to_met_connectivity[m_id]["previous"]).intersection(met_to_met_connectivity[m_id]["next"]))
-            common_ids = [id for id in common_ids if self.metabolites[id].species_location == SpeciesLocation.Internal]
+            common_ids = [id for id in common_ids if self.metabolites[id].species_location == SpeciesLocation.INTERNAL]
             for c_id in common_ids:
                 m_reactant = met_to_rea_connectivity[m_id]["reactant"]
                 c_reactant = met_to_rea_connectivity[c_id]["reactant"]
@@ -1044,9 +1044,9 @@ class Builder:
                         pairs.append([m_id, c_id])
         if verbose:
             if len(pairs) == 0:
-                throw_message(MessageType.Info, "No infeasible loops in the model.")
+                throw_message(MessageType.INFO, "No infeasible loops in the model.")
             for m_id, c_id in pairs:
-                throw_message(MessageType.Warning, f"Infeasible loop between <code>{m_id}</code> and <code>{c_id}</code>.")
+                throw_message(MessageType.WARNING, f"Infeasible loop between <code>{m_id}</code> and <code>{c_id}</code>.")
         return pairs
 
     def detect_isolated_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
@@ -1064,7 +1064,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.Forward:
+            if ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1072,7 +1072,7 @@ class Builder:
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.Backward:
+            elif ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1080,7 +1080,7 @@ class Builder:
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.Reversible:
+            elif ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1094,16 +1094,16 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         isolated = []
         for m_id in met_to_rea_connectivity:
-            if self.metabolites[m_id].species_location == SpeciesLocation.External:
+            if self.metabolites[m_id].species_location == SpeciesLocation.EXTERNAL:
                 continue
             if len(met_to_rea_connectivity[m_id]["reactant"]) == 0 and len(met_to_rea_connectivity[m_id]["product"]) == 1:
                 r_id = met_to_rea_connectivity[m_id]["product"][0]
-                if self.reactions[r_id].reaction_type in [ReactionType.Transport, ReactionType.Spontaneous]:
+                if self.reactions[r_id].reaction_type in [ReactionType.TRANSPORT, ReactionType.SPONTANEOUS]:
                     isolated.append(m_id)
                     if verbose:
-                        throw_message(MessageType.Warning, f"Metabolite <code>{m_id}</code> is isolated (imported only).")
+                        throw_message(MessageType.WARNING, f"Metabolite <code>{m_id}</code> is isolated (imported only).")
         if verbose and len(isolated) == 0:
-            throw_message(MessageType.Info, "No isolated metabolites in the model.")
+            throw_message(MessageType.INFO, "No isolated metabolites in the model.")
         return isolated
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1120,7 +1120,7 @@ class Builder:
             Dictionary of metabolites and their coefficients.
         """
         self.FBA_biomass_reaction = Reaction(id="BIOMASS", name="Biomass function",
-                                             reaction_type=ReactionType.Metabolic,
+                                             reaction_type=ReactionType.METABOLIC,
                                              lb=0.0, ub=1000.0,
                                              GPR=ReactionGPR.NONE)
         self.FBA_biomass_reaction.set_builder(self)
@@ -1144,12 +1144,12 @@ class Builder:
         self.FBA_internal_row_indices.clear()
         index = 0
         for m in self.metabolites.values():
-            if m.species_location == SpeciesLocation.External:
+            if m.species_location == SpeciesLocation.EXTERNAL:
                 self.FBA_row_indices[m.id]          = index
                 self.FBA_external_row_indices[m.id] = index
                 index += 1
         for m in self.metabolites.values():
-            if m.species_location == SpeciesLocation.Internal:
+            if m.species_location == SpeciesLocation.INTERNAL:
                 self.FBA_row_indices[m.id]          = index
                 self.FBA_internal_row_indices[m.id] = index
                 index += 1
@@ -1159,15 +1159,15 @@ class Builder:
         self.FBA_col_indices.clear()
         index = 0
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Transport:
+            if r.reaction_type == ReactionType.TRANSPORT:
                 self.FBA_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Spontaneous:
+            if r.reaction_type == ReactionType.SPONTANEOUS:
                 self.FBA_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Metabolic:
+            if r.reaction_type == ReactionType.METABOLIC:
                 self.FBA_col_indices[r.id] = index
                 index += 1
     
@@ -1229,16 +1229,16 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         cobra_metabolites = {}
         for m_item in self.metabolites.items():
-            if m_item[1].species_location == SpeciesLocation.External:
+            if m_item[1].species_location == SpeciesLocation.EXTERNAL:
                 m = cobra.Metabolite(m_item[0], compartment="e")
                 self.FBA_model.add_metabolites([m])
                 cobra_metabolites[m_item[0]] = m
-            elif m_item[1].species_location == SpeciesLocation.Internal:
+            elif m_item[1].species_location == SpeciesLocation.INTERNAL:
                 m = cobra.Metabolite(m_item[0], compartment="c")
                 self.FBA_model.add_metabolites([m])
                 cobra_metabolites[m_item[0]] = m
             else:
-                throw_message(MessageType.Error, "Unknown species location for metabolite <code>{m_id}</code>.")
+                throw_message(MessageType.ERROR, "Unknown species location for metabolite <code>{m_id}</code>.")
                 sys.exit(1)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Add reactions                     #
@@ -1264,7 +1264,7 @@ class Builder:
         # 5) Add the FBA wrapper reactions     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for m_item in self.metabolites.items():
-            if m_item[1].species_location == SpeciesLocation.External:
+            if m_item[1].species_location == SpeciesLocation.EXTERNAL:
                 self.FBA_model.add_boundary(cobra_metabolites[m_item[0]], type="exchange")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Solve the FBA models              #
@@ -1316,7 +1316,7 @@ class Builder:
             if not reaction.check_mass_balance(verbose):
                 is_balanced = False
         if is_balanced:
-            throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is mass balanced.")
+            throw_message(MessageType.INFO, f"Model build <code>{self.name}</code> is mass balanced.")
 
     def check_mass_normalization( self, verbose: Optional[bool] = False ) -> None:
         """
@@ -1332,31 +1332,31 @@ class Builder:
             if not reaction.check_mass_normalization(verbose):
                 is_normalized = False
         if is_normalized:
-            throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is mass normalized")
+            throw_message(MessageType.INFO, f"Model build <code>{self.name}</code> is mass normalized")
     
     def check_ribosomal_reaction_consistency( self ) -> None:
         """
         Check the ribosomal reaction consistency of the model.
         """
-        assert "Ribosome" in self.reactions, throw_message(MessageType.Error, "Ribosomal reaction not found in the model.")
-        assert "Protein" in self.metabolites, throw_message(MessageType.Error, "Protein metabolite not found in the reaction.")
+        assert "Ribosome" in self.reactions, throw_message(MessageType.ERROR, "Ribosomal reaction not found in the model.")
+        assert "Protein" in self.metabolites, throw_message(MessageType.ERROR, "Protein metabolite not found in the reaction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the ribosomal reaction itself #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         r_ribosome = self.reactions["Ribosome"]
-        assert "Protein" in r_ribosome.products, throw_message(MessageType.Error, "Protein metabolite not found in the ribosomal reaction.")
-        assert r_ribosome.kcat[ReactionDirection.Backward] == 0.0, throw_message(MessageType.Error, "Ribosomal reaction should be forward irreversible.")
-        assert r_ribosome.direction == ReactionDirection.Forward, throw_message(MessageType.Error, "Ribosomal reaction should be forward irreversible.")
-        assert r_ribosome.lb == 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a lower bound of 0.")
-        assert r_ribosome.ub > 0.0, throw_message(MessageType.Error, "Ribosomal reaction should have a positive upper bound.")
+        assert "Protein" in r_ribosome.products, throw_message(MessageType.ERROR, "Protein metabolite not found in the ribosomal reaction.")
+        assert r_ribosome.kcat[ReactionDirection.BACKWARD] == 0.0, throw_message(MessageType.ERROR, "Ribosomal reaction should be forward irreversible.")
+        assert r_ribosome.direction == ReactionDirection.FORWARD, throw_message(MessageType.ERROR, "Ribosomal reaction should be forward irreversible.")
+        assert r_ribosome.lb == 0.0, throw_message(MessageType.ERROR, "Ribosomal reaction should have a lower bound of 0.")
+        assert r_ribosome.ub > 0.0, throw_message(MessageType.ERROR, "Ribosomal reaction should have a positive upper bound.")
         if len(r_ribosome.products) == 1:
-            assert r_ribosome.GBA_metabolites["Protein"] == 1.0, throw_message(MessageType.Error, "Protein coefficient should be 1 in the ribosomal reaction.")
+            assert r_ribosome.GBA_metabolites["Protein"] == 1.0, throw_message(MessageType.ERROR, "Protein coefficient should be 1 in the ribosomal reaction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Check other reactions               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for r in self.reactions.values():
             if not r.id == "Ribosome":
-                assert "Protein" not in r.GBA_metabolites, throw_message(MessageType.Error, f"Protein metabolite found in reaction <code>{r.id}</code>. Protein metabolite should only be a ribosomal product.")
+                assert "Protein" not in r.GBA_metabolites, throw_message(MessageType.ERROR, f"Protein metabolite found in reaction <code>{r.id}</code>. Protein metabolite should only be a ribosomal product.")
 
     def check_conversion( self, verbose: Optional[bool] = False ) -> None:
         """
@@ -1373,7 +1373,7 @@ class Builder:
                 is_converted = False
         if is_converted:
             if verbose:
-                throw_message(MessageType.Info, f"Model build <code>{self.name}</code> is converted to GBA format.")
+                throw_message(MessageType.INFO, f"Model build <code>{self.name}</code> is converted to GBA format.")
             return True
         return False
     
@@ -1412,7 +1412,7 @@ class Builder:
         # 4) Set up ribosomal kinetic parameters   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if ribosome_mass_kcat is not None:
-            self.reactions["Ribosome"].GBA_kcat[ReactionDirection.Forward] = ribosome_mass_kcat
+            self.reactions["Ribosome"].GBA_kcat[ReactionDirection.FORWARD] = ribosome_mass_kcat
         if ribosome_mass_km is not None:
             for m_id in self.reactions["Ribosome"].reactants:
                 self.reactions["Ribosome"].GBA_km[m_id] = ribosome_mass_km
@@ -1438,12 +1438,12 @@ class Builder:
         self.GBA_internal_row_indices.clear()
         index = 0
         for m in self.metabolites.values():
-            if m.species_location == SpeciesLocation.External and m.id != "Protein":
+            if m.species_location == SpeciesLocation.EXTERNAL and m.id != "Protein":
                 self.GBA_row_indices[m.id]          = index
                 self.GBA_external_row_indices[m.id] = index
                 index += 1
         for m in self.metabolites.values():
-            if m.species_location == SpeciesLocation.Internal and m.id != "Protein":
+            if m.species_location == SpeciesLocation.INTERNAL and m.id != "Protein":
                 self.GBA_row_indices[m.id]          = index
                 self.GBA_internal_row_indices[m.id] = index
                 index += 1
@@ -1454,15 +1454,15 @@ class Builder:
         self.GBA_col_indices.clear()
         index = 0
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Transport and r.id != "Ribosome":
+            if r.reaction_type == ReactionType.TRANSPORT and r.id != "Ribosome":
                 self.GBA_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Spontaneous and r.id != "Ribosome":
+            if r.reaction_type == ReactionType.SPONTANEOUS and r.id != "Ribosome":
                 self.GBA_col_indices[r.id] = index
                 index += 1
         for r in self.reactions.values():
-            if r.reaction_type == ReactionType.Metabolic and r.id != "Ribosome":
+            if r.reaction_type == ReactionType.METABOLIC and r.id != "Ribosome":
                 self.GBA_col_indices[r.id] = index
                 index += 1
         self.GBA_col_indices["Ribosome"] = index
@@ -1499,8 +1499,8 @@ class Builder:
         self.GBA_kcat_b = np.zeros(len(self.GBA_col_indices))
         for r in self.reactions.values():
             r_index                  = self.GBA_col_indices[r.id]
-            self.GBA_kcat_f[r_index] = r.GBA_kcat[ReactionDirection.Forward]
-            self.GBA_kcat_b[r_index] = r.GBA_kcat[ReactionDirection.Backward]
+            self.GBA_kcat_f[r_index] = r.GBA_kcat[ReactionDirection.FORWARD]
+            self.GBA_kcat_b[r_index] = r.GBA_kcat[ReactionDirection.BACKWARD]
 
     def build_GBA_KM_matrices( self ) -> None:
         """
@@ -1555,7 +1555,7 @@ class Builder:
         """
         Build the GBA converted model.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         self.build_GBA_indices()
         self.build_GBA_mass_fraction_matrix()
         self.build_GBA_kcat_vectors()
@@ -1576,15 +1576,15 @@ class Builder:
         direction : ReactionDirection
             Wanted direction of the reaction.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        assert self.GBA_is_built, throw_message(MessageType.Error, f"The GBA converted model <code>{self.name}</code> is not built")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.Error, f"Reaction <code>{reaction_id}</code> does not exist")
-        assert direction != ReactionDirection.Reversible, throw_message(MessageType.Error, "The wanted direction should be irreversible")
+        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The GBA converted model <code>{self.name}</code> is not built")
+        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist")
+        assert direction != ReactionDirection.REVERSIBLE, throw_message(MessageType.ERROR, "The wanted direction should be irreversible")
         j = self.GBA_col_indices[reaction_id]
-        if direction == ReactionDirection.Forward:
+        if direction == ReactionDirection.FORWARD:
             self.GBA_kcat_b[j] = 0.0
             self.GBA_KM_b[:,j] = 0.0
-        elif direction == ReactionDirection.Backward:
+        elif direction == ReactionDirection.BACKWARD:
             self.GBA_M[:,j]    = -self.GBA_M[:,j]
             self.GBA_kcat_f[j] = self.GBA_kcat_b[j]
             self.GBA_kcat_b[j] = 0.0
@@ -1605,9 +1605,9 @@ class Builder:
             r_id  = item[0]
             f_val = item[1]
             if r_id in self.reactions and f_val >= 0.0:
-                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.Forward)
+                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.FORWARD)
             elif r_id in self.reactions and f_val < 0.0:
-                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.Backward)
+                self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.BACKWARD)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Export functions         #
@@ -1624,9 +1624,9 @@ class Builder:
         name : Optional[str], default=""
             Name of the model. If empty, the model name is used.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        assert self.GBA_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1677,9 +1677,9 @@ class Builder:
         for i in self.GBA_row_indices.values():
             for j in self.GBA_col_indices.values():
                 if self.GBA_KM_f[i, j] != 0.0:
-                    assert self.GBA_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                    assert self.GBA_KM_b[i, j] == 0.0, throw_message(MessageType.ERROR, f"Backward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
                 if self.GBA_KM_b[i, j] != 0.0:
-                    assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                    assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.ERROR, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         K_df.to_csv(model_path+"/K.csv", sep=";")
         del(K_df)
@@ -1743,9 +1743,9 @@ class Builder:
         name : Optional[str], default=""
             Name of the model. If empty, the model name is used.
         """
-        assert self.check_conversion(), throw_message(MessageType.Error, "The model is not converted to GBA units. Convert the model before building GBA variables.")
-        assert self.GBA_is_built, throw_message(MessageType.Error, f"The model <code>{self.name}</code> is not built")
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1780,9 +1780,9 @@ class Builder:
         for i in self.GBA_row_indices.values():
             for j in self.GBA_col_indices.values():
                 if self.GBA_KM_f[i, j] != 0.0:
-                    assert self.GBA_KM_b[i, j] == 0.0, throw_message(MessageType.Error, f"Backward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                    assert self.GBA_KM_b[i, j] == 0.0, throw_message(MessageType.ERROR, f"Backward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
                 if self.GBA_KM_b[i, j] != 0.0:
-                    assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.Error, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
+                    assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.ERROR, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
@@ -1868,7 +1868,7 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_proteins.csv"
         f        = open(filename, "w")
         f.write("id;name;mass;sequence;length;gene;product\n")
@@ -1890,7 +1890,7 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_ribosomal_proteins.csv"
         f        = open(filename, "w")
         f.write("id;contribution\n")
@@ -1909,30 +1909,30 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_metabolites.csv"
         f        = open(filename, "w")
         f.write("id;name;location;category;mass;formula;kegg_id\n")
         for m in self.metabolites.values():
             location = ""
-            if m.species_location == SpeciesLocation.Internal:
+            if m.species_location == SpeciesLocation.INTERNAL:
                 location = "internal"
-            elif m.species_location == SpeciesLocation.External:
+            elif m.species_location == SpeciesLocation.EXTERNAL:
                 location = "external"
-            elif m.species_location == SpeciesLocation.Unknown:
+            elif m.species_location == SpeciesLocation.UNKNOWN:
                 location = "unknown"
             category = ""
             if m.species_type == SpeciesType.DNA:
                 category = "DNA"
             elif m.species_type == SpeciesType.RNA:
                 category = "RNA"
-            elif m.species_type == SpeciesType.Protein:
+            elif m.species_type == SpeciesType.PROTEIN:
                 category = "protein"
-            elif m.species_type == SpeciesType.SmallMolecule:
+            elif m.species_type == SpeciesType.SMALLMOLECULE:
                 category = "small molecule"
-            elif m.species_type == SpeciesType.MacroMolecule:
+            elif m.species_type == SpeciesType.MACROMOLECULE:
                 category = "large molecule"
-            elif m.species_type == SpeciesType.Unknown:
+            elif m.species_type == SpeciesType.UNKNOWN:
                 category = "unknown"
             formula = m.formula
             kegg_id = ""
@@ -1952,19 +1952,19 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_reactions.csv"
         f        = open(filename, "w")
         f.write("id;name;type;lb;ub;expression;proteins;GPR;enzyme_mass\n")
         for r in self.reactions.values():
             r_type = ""
-            if r.reaction_type == ReactionType.Metabolic:
+            if r.reaction_type == ReactionType.METABOLIC:
                 r_type = "metabolic"
-            elif r.reaction_type == ReactionType.Transport:
+            elif r.reaction_type == ReactionType.TRANSPORT:
                 r_type = "transporter"
-            elif r.reaction_type == ReactionType.Spontaneous:
+            elif r.reaction_type == ReactionType.SPONTANEOUS:
                 r_type = "spontaneous"
-            elif r.reaction_type == ReactionType.Exchange:
+            elif r.reaction_type == ReactionType.EXCHANGE:
                 r_type = "exchange"
             proteins = " + ".join([f"{r.proteins[p_id]} {p_id}" for p_id in r.proteins])
             GPR      = ("and" if r.GPR == ReactionGPR.AND else "or" if r.GPR == ReactionGPR.OR else "none")
@@ -1982,7 +1982,7 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write kcat values #
         #~~~~~~~~~~~~~~~~~~~~~~#
@@ -1990,8 +1990,8 @@ class Builder:
         f        = open(filename, "w")
         f.write("reaction_id;direction;kcat\n")
         for r in self.reactions.values():
-            f.write(r.id+";forward;"+str(r.kcat[ReactionDirection.Forward])+"\n")
-            f.write(r.id+";backward;"+str(r.kcat[ReactionDirection.Backward])+"\n")
+            f.write(r.id+";forward;"+str(r.kcat[ReactionDirection.FORWARD])+"\n")
+            f.write(r.id+";backward;"+str(r.kcat[ReactionDirection.BACKWARD])+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write KM values   #
@@ -2015,7 +2015,7 @@ class Builder:
         name : Optional[str], default=""
             Name of the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_protein_contributions.csv"
         f        = open(filename, "w")
         f.write("reaction;protein;contribution\n")
@@ -2038,7 +2038,7 @@ class Builder:
         path : Optional[str], default="."
             Path to the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Generate kcat prediction table #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2149,50 +2149,50 @@ class Builder:
         df2 = {
             "Category": ["Small molecules", "Macro-molecules", "DNA(s)", "RNA(s)", "Proteins", "Unknown"],
             "Count": [
-                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SmallMolecule]),
-                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MacroMolecule]),
+                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SMALLMOLECULE]),
+                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MACROMOLECULE]),
                 len([x for x in self.metabolites.values() if x.species_type == SpeciesType.DNA]),
                 len([x for x in self.metabolites.values() if x.species_type == SpeciesType.RNA]),
-                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Protein]),
-                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Unknown])
+                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.PROTEIN]),
+                len([x for x in self.metabolites.values() if x.species_type == SpeciesType.UNKNOWN])
             ],
             "Percentage": [
-                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SmallMolecule])/len(self.metabolites)*100:.2f}%",
-                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MacroMolecule])/len(self.metabolites)*100:.2f}%",
+                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.SMALLMOLECULE])/len(self.metabolites)*100:.2f}%",
+                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.MACROMOLECULE])/len(self.metabolites)*100:.2f}%",
                 f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.DNA])/len(self.metabolites)*100:.2f}%",
                 f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.RNA])/len(self.metabolites)*100:.2f}%",
-                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Protein])/len(self.metabolites)*100:.2f}%",
-                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.Unknown])/len(self.metabolites)*100:.2f}%"
+                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.PROTEIN])/len(self.metabolites)*100:.2f}%",
+                f"{len([x for x in self.metabolites.values() if x.species_type == SpeciesType.UNKNOWN])/len(self.metabolites)*100:.2f}%"
             ]
         }
         df2 = pd.DataFrame(df2)
         df3 = {
             "Category": ["Metabolic", "Transport", "Spontaneous", "Exchange"],
             "Count": [
-                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic]),
-                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport]),
-                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Spontaneous]),
-                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])
+                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.METABOLIC]),
+                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.TRANSPORT]),
+                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.SPONTANEOUS]),
+                len([x for x in self.reactions.values() if x.reaction_type == ReactionType.EXCHANGE])
             ],
             "Percentage": [
-                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Metabolic])/len(self.reactions)*100:.2f}%",
-                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Transport])/len(self.reactions)*100:.2f}%",
-                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Spontaneous])/len(self.reactions)*100:.2f}%",
-                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.Exchange])/len(self.reactions)*100:.2f}%"
+                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.METABOLIC])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.TRANSPORT])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.SPONTANEOUS])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.reaction_type == ReactionType.EXCHANGE])/len(self.reactions)*100:.2f}%"
             ]
         }
         df3 = pd.DataFrame(df3)
         df4 = {
             "Category": ["Forward", "Backward", "Reversible"],
             "Count": [
-                len([x for x in self.reactions.values() if x.direction == ReactionDirection.Forward]),
-                len([x for x in self.reactions.values() if x.direction == ReactionDirection.Backward]),
-                len([x for x in self.reactions.values() if x.direction == ReactionDirection.Reversible])
+                len([x for x in self.reactions.values() if x.direction == ReactionDirection.FORWARD]),
+                len([x for x in self.reactions.values() if x.direction == ReactionDirection.BACKWARD]),
+                len([x for x in self.reactions.values() if x.direction == ReactionDirection.REVERSIBLE])
             ],
             "Percentage": [
-                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Forward])/len(self.reactions)*100:.2f}%",
-                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Backward])/len(self.reactions)*100:.2f}%",
-                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.Reversible])/len(self.reactions)*100:.2f}%"
+                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.FORWARD])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.BACKWARD])/len(self.reactions)*100:.2f}%",
+                f"{len([x for x in self.reactions.values() if x.direction == ReactionDirection.REVERSIBLE])/len(self.reactions)*100:.2f}%"
             ]
         }
         df4 = pd.DataFrame(df4)
@@ -2231,20 +2231,20 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning,
-        MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.INFO, MessageType.WARNING,
+        MessageType.ERROR, MessageType.PLAIN).
     message : str
         Content of the message.
     """
     html_str  = "<table>"
     html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-    if type == MessageType.Plain:
+    if type == MessageType.PLAIN:
         html_str += "<td><strong>&#10095;</strong></td>"
-    elif type == MessageType.Info:
+    elif type == MessageType.INFO:
         html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
-    elif type == MessageType.Warning:
+    elif type == MessageType.WARNING:
         html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
-    elif type == MessageType.Error:
+    elif type == MessageType.ERROR:
         html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
     html_str += "<td>"+message+"</td>"
     html_str += "</tr>"
@@ -2274,7 +2274,7 @@ def backup_builder( builder: Builder, name: Optional[str] = "", path: Optional[s
     ofile = open(filename, "wb")
     pickle.dump(builder, ofile)
     ofile.close()
-    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gbabuild file creation failed.")
+    assert os.path.isfile(filename), throw_message(MessageType.ERROR, ".gbabuild file creation failed.")
 
 def load_builder( path: str ) -> Builder:
     """
@@ -2285,8 +2285,8 @@ def load_builder( path: str ) -> Builder:
     path : str
         Path to the model builder file.
     """
-    assert path.endswith(".gbabuild"), throw_message(MessageType.Error, "Model builder file extension is missing.")
-    assert os.path.isfile(path), throw_message(MessageType.Error, "Model builder file not found.")
+    assert path.endswith(".gbabuild"), throw_message(MessageType.ERROR, "Model builder file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.ERROR, "Model builder file not found.")
     ifile   = open(path, "rb")
     builder = pickle.load(ifile)
     ifile.close()

@@ -245,7 +245,7 @@ class Model:
         name : str
             Name of the model.
         """
-        assert name != "", throw_message(MessageType.Error, "You must provide a name to the model constructor.")
+        assert name != "", throw_message(MessageType.ERROR, "You must provide a name to the model constructor.")
         self.name = name
         self.info = {}
 
@@ -407,7 +407,7 @@ class Model:
             Path to the CSV file.
         """
         filename       = path+"/"+self.name+"/M.csv"
-        assert os.path.exists(filename), throw_message(MessageType.Error, "The file M.csv does not exist in the specified path: "+filename)
+        assert os.path.exists(filename), throw_message(MessageType.ERROR, "The file M.csv does not exist in the specified path: "+filename)
         df                  = pd.read_csv(filename, sep=";")
         self.metabolite_ids = self.metabolite_ids+list(df["Unnamed: 0"])
         self.metabolite_ids = list(dict.fromkeys(self.metabolite_ids))
@@ -435,7 +435,7 @@ class Model:
         """
         self.kcat_loaded = False
         filename         = path+"/"+self.name+"/kcat.csv"
-        assert os.path.exists(filename), throw_message(MessageType.Error, "The file kcat.csv does not exist in the specified path: "+filename)
+        assert os.path.exists(filename), throw_message(MessageType.ERROR, "The file kcat.csv does not exist in the specified path: "+filename)
         df              = pd.read_csv(filename, sep=";")
         df              = df.drop(["Unnamed: 0"], axis=1)
         kcat            = np.array(df)
@@ -462,7 +462,7 @@ class Model:
         """
         self.K_loaded = False
         filename       = path+"/"+self.name+"/K.csv"
-        assert os.path.exists(filename), throw_message(MessageType.Error, "The file K.csv does not exist in the specified path: "+filename)
+        assert os.path.exists(filename), throw_message(MessageType.ERROR, "The file K.csv does not exist in the specified path: "+filename)
         df            = pd.read_csv(filename, sep=";")
         df            = df.drop(["Unnamed: 0"], axis=1)
         df.index      = self.metabolite_ids
@@ -548,7 +548,7 @@ class Model:
         """
         self.conditions_loaded = False
         filename               = path+"/"+self.name+"/conditions.csv"
-        assert os.path.exists(filename), throw_message(MessageType.Error, "The file conditions.csv does not exist in the specified path: "+filename)
+        assert os.path.exists(filename), throw_message(MessageType.ERROR, "The file conditions.csv does not exist in the specified path: "+filename)
         df                     = pd.read_csv(filename, sep=";")
         self.condition_params  = list(df["Unnamed: 0"])
         self.condition_ids     = list(df.columns)[1:df.shape[1]]
@@ -661,21 +661,21 @@ class Model:
             Print the error messages.
         """
         if not self.Info_loaded and verbose:
-            throw_message(MessageType.Info, "Model information is missing.")
+            throw_message(MessageType.INFO, "Model information is missing.")
         if not self.KA_loaded and verbose:
-            throw_message(MessageType.Info, "No KA constants.")
+            throw_message(MessageType.INFO, "No KA constants.")
         if not self.KI_loaded and verbose:
-            throw_message(MessageType.Info, "No KI constants.")
+            throw_message(MessageType.INFO, "No KI constants.")
         if not self.KR_loaded and verbose:
-            throw_message(MessageType.Info, "No KR constants.")
+            throw_message(MessageType.INFO, "No KR constants.")
         if not self.constant_rhs_loaded and verbose:
-            throw_message(MessageType.Info, "No constant RHS terms.")
+            throw_message(MessageType.INFO, "No constant RHS terms.")
         if not self.constant_reactions_loaded and verbose:
-            throw_message(MessageType.Info, "No constant reactions.")
+            throw_message(MessageType.INFO, "No constant reactions.")
         if not self.protein_contributions_loaded and verbose:
-            throw_message(MessageType.Info, "Protein contributions are missing.")
+            throw_message(MessageType.INFO, "Protein contributions are missing.")
         if not self.initial_solution_loaded and verbose:
-            throw_message(MessageType.Info, "The initial solution is missing.")
+            throw_message(MessageType.INFO, "The initial solution is missing.")
     
     def initialize_model_mathematical_variables( self ) -> None:
         """
@@ -770,25 +770,25 @@ class Model:
         self.directions.clear()
         for j in range(self.nj):
             if (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMM)
-                self.directions.append(ReactionDirection.Forward)
+                self.kinetic_model.append(GbaReactionType.IMM)
+                self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMMa)
-                self.directions.append(ReactionDirection.Forward)
+                self.kinetic_model.append(GbaReactionType.IMMA)
+                self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMMi)
-                self.directions.append(ReactionDirection.Forward)
+                self.kinetic_model.append(GbaReactionType.IMMI)
+                self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
-                self.kinetic_model.append(GbaReactionType.iMMia)
+                self.kinetic_model.append(GbaReactionType.IMMIA)
             elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() > 0):
-                self.kinetic_model.append(GbaReactionType.iMMr)
-                self.directions.append(ReactionDirection.Forward)
+                self.kinetic_model.append(GbaReactionType.IMMR)
+                self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] > 0):
-                assert self.KA[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
-                assert self.KI[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
-                assert self.KR[:,j].sum() == 0, throw_message(MessageType.Error, f"Reversible Michaelis-Menten reaction cannot have regulation (reaction <code>{j}</code>).")
-                self.kinetic_model.append(GbaReactionType.rMM)
-                self.directions.append(self.directions.append(ReactionDirection.Reversible))
+                assert self.KA[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
+                assert self.KI[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
+                assert self.KR[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have regulation (reaction <code>{j}</code>).")
+                self.kinetic_model.append(GbaReactionType.RMM)
+                self.directions.append(self.directions.append(ReactionDirection.REVERSIBLE))
     
     def read_from_csv( self, path: Optional[str] = "." ) -> None:
         """
@@ -800,7 +800,7 @@ class Model:
             Path to the CSV files.
         """
         model_path = path+"/"+self.name
-        assert os.path.exists(model_path), throw_message(MessageType.Error, "Folder "+model_path+" does not exist.")
+        assert os.path.exists(model_path), throw_message(MessageType.ERROR, "Folder "+model_path+" does not exist.")
         self.read_Info_from_csv(path)
         self.read_Mx_from_csv(path)
         self.read_kcat_from_csv(path)
@@ -829,7 +829,7 @@ class Model:
         # 1) Temporarily convert ODS to CSV files #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         filename = path+"/"+self.name+".ods"
-        assert os.path.exists(filename), throw_message(MessageType.Error, "Folder "+filename+" does not exist.")
+        assert os.path.exists(filename), throw_message(MessageType.ERROR, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
         if not os.path.exists("./temp/"):
             os.mkdir("./temp/")
@@ -863,7 +863,7 @@ class Model:
             Name of the model. If not provided, the name of the model instance
             will be used.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -996,7 +996,7 @@ class Model:
             Name of the model. If not provided, the name of the model instance
             will be used.
         """
-        assert os.path.exists(path), throw_message(MessageType.Error, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1137,8 +1137,8 @@ class Model:
         float
             Condition parameter value.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier <code>{condition_id}</code>.")
-        assert condition_param in self.condition_params, throw_message(MessageType.Error, f"Unknown condition parameter <code>{condition_param}</code>.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier <code>{condition_id}</code>.")
+        assert condition_param in self.condition_params, throw_message(MessageType.ERROR, f"Unknown condition parameter <code>{condition_param}</code>.")
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
@@ -1159,21 +1159,21 @@ class Model:
         np.array
             Vector of the variable.
         """
-        assert source in ["random", "optima", "GA", "MC", "MCMC"], throw_message(MessageType.Error, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code>.")
+        assert source in ["random", "optima", "GA", "MC", "MCMC"], throw_message(MessageType.ERROR, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code>.")
         if source == "random":
-            assert not self.random_data.empty, throw_message(MessageType.Error, "No data available for random solutions.")
+            assert not self.random_data.empty, throw_message(MessageType.ERROR, "No data available for random solutions.")
             return self.random_data[variable].values
         elif source == "optima":
-            assert not self.optima_data.empty, throw_message(MessageType.Error, "No data available for optima.")
+            assert not self.optima_data.empty, throw_message(MessageType.ERROR, "No data available for optima.")
             return self.optima_data[variable].values
         elif source == "GA":
-            assert not self.GA_tracker.empty, throw_message(MessageType.Error, "No data available for gradient ascent.")
+            assert not self.GA_tracker.empty, throw_message(MessageType.ERROR, "No data available for gradient ascent.")
             return self.GA_tracker[variable].values
         elif source == "MC":
-            assert not self.MC_tracker.empty, throw_message(MessageType.Error, "No data available for Monte Carlo.")
+            assert not self.MC_tracker.empty, throw_message(MessageType.ERROR, "No data available for Monte Carlo.")
             return self.MC_tracker[variable].values
         elif source == "MCMC":
-            assert not self.MCMC_tracker.empty, throw_message(MessageType.Error, "No data available for MCMC.")
+            assert not self.MCMC_tracker.empty, throw_message(MessageType.ERROR, "No data available for MCMC.")
             return self.MCMC_tracker[variable].values
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1206,14 +1206,14 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert condition_id not in self.condition_ids, throw_message(MessageType.Error, f"Condition <code>{condition_id}</code> already exists.")
-        assert rho > 0.0, throw_message(MessageType.Error, "The total density must be positive.")
-        assert default_concentration >= 0.0, throw_message(MessageType.Error, "The default concentration must be positive.")
+        assert condition_id not in self.condition_ids, throw_message(MessageType.ERROR, f"Condition <code>{condition_id}</code> already exists.")
+        assert rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
+        assert default_concentration >= 0.0, throw_message(MessageType.ERROR, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolite_ids, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> does not exist.")
-                assert m_id in self.condition_params, throw_message(MessageType.Error, f"Metabolite <code>{m_id}</code> is not a condition parameter.")
-                assert concentration >= 0.0, throw_message(MessageType.Error, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
+                assert m_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> does not exist.")
+                assert m_id in self.condition_params, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> is not a condition parameter.")
+                assert concentration >= 0.0, throw_message(MessageType.ERROR, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1246,8 +1246,8 @@ class Model:
         value : float
             Flux value.
         """
-        assert metabolite_id in self.metabolite_ids, throw_message(MessageType.Error, f"Unknown metabolite identifier <code>{metabolite_id}</code>.")
-        assert value >= 0.0, throw_message(MessageType.Error, "The constant value must be positive.")
+        assert metabolite_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Unknown metabolite identifier <code>{metabolite_id}</code>.")
+        assert value >= 0.0, throw_message(MessageType.ERROR, "The constant value must be positive.")
         self.constant_rhs[metabolite_id] = value
     
     def clear_constant_reactions( self ) -> None:
@@ -1267,7 +1267,7 @@ class Model:
         value : float
             Flux value.
         """
-        assert reaction_id in self.reaction_ids, throw_message(MessageType.Error, f"Unknown reaction identifier <code>{reaction_id}</code>.")
+        assert reaction_id in self.reaction_ids, throw_message(MessageType.ERROR, f"Unknown reaction identifier <code>{reaction_id}</code>.")
         self.constant_reactions[reaction_id] = value
     
     def reset_variables( self ) -> None:
@@ -1298,7 +1298,7 @@ class Model:
         condition_id : str
             External condition identifier.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.Error, "Unknown condition identifier <code>{condition_id}</code>.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, "Unknown condition identifier <code>{condition_id}</code>.")
         self.condition = condition_id
         self.rho       = self.get_condition(self.condition, "rho")
         for i in range(self.nx):
@@ -1317,7 +1317,7 @@ class Model:
         f0 : np.array
             Initial flux fraction vector.
         """
-        assert len(f0) == self.nj, throw_message(MessageType.Error, "Incorrect f0 length.")
+        assert len(f0) == self.nj, throw_message(MessageType.ERROR, "Incorrect f0 length.")
         self.f0      = np.copy(f0)
         self.f_trunc = np.copy(self.f0[1:self.nj])
         self.f       = np.copy(self.f0)
@@ -1326,42 +1326,6 @@ class Model:
     # 4) Analytical methods              #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     
-    def gaussian_term( self, x: np.array, mu: float ) -> np.array:
-        """
-        Compute the Gaussian term.
-
-        Parameters
-        ----------
-        x : np.array
-            Input array.
-        mu : float
-            Mean of the Gaussian kernel function.
-
-        Returns
-        -------
-        np.array
-            Gaussian term values.
-        """
-        return (x - mu)/(GbaConstants.REGULATION_SIGMA*x)**2
-    
-    def gaussian_kernel( self, x: np.array, mu: float ) -> np.array:
-        """
-        Compute the Gaussian kernel function.
-
-        Parameters
-        ----------
-        x : np.array
-            Input array.
-        mu : float
-            Mean of the Gaussian kernel function.
-
-        Returns
-        -------
-        np.array
-            Gaussian kernel values.
-        """
-        return np.exp(-0.5 * ((x - mu)/(GbaConstants.REGULATION_SIGMA*x))**2)
-
     def compute_c( self ) -> None:
         """
         Compute the internal metabolite concentrations.
@@ -1431,23 +1395,6 @@ class Model:
         term3         = np.prod(1.0+self.KM_f[:,j]/self.xc)
         term4         = self.kcat_f[j]
         self.tau_j[j] = term1*term2*term3/term4
-
-    def iMMr( self, j: int ) -> None:
-        """
-        Compute the turnover time tau for an irreversible Michaelis-Menten
-        reaction with regulation (only one regulator per reaction).
-
-        Parameters
-        ----------
-        j : int
-            Reaction index.
-        """
-        kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < GbaConstants.TOL.value] = self.xc[kr_vec < GbaConstants.TOL.value]
-        gaussian_kernel = self.log_gaussian_kernel(self.xc, kr_vec)
-        term1           = np.prod(1.0+self.KM_f[:,j]/(self.xc*gaussian_kernel))
-        term2           = self.kcat_f[j]
-        self.tau_j[j]   = term1/term2
     
     def rMM( self, j: int ) -> None:
         """
@@ -1459,12 +1406,12 @@ class Model:
         j : int
             Reaction index.
         """
-        term1         = self.kcat_f[j]
-        term2         = np.prod(1+self.KM_f[:,j]/self.xc)
-        term3         = self.kcat_b[j]
-        term4         = np.prod(1+self.KM_b[:,j]/self.xc)
-        self.tau_j[j] = 1.0/(term1/term2-term3/term4)
-    
+        kcatf         = self.kcat_f[j]
+        prodf         = np.prod(1+self.KM_f[:,j]/self.xc)
+        kcatb         = self.kcat_b[j]
+        prodb         = np.prod(1+self.KM_b[:,j]/self.xc)
+        self.tau_j[j] = 1.0/(kcatf/prodf-kcatb/prodb)
+
     def compute_tau( self, j: int ) -> None:
         """
         Compute the turnover time tau for a reaction j.
@@ -1474,17 +1421,15 @@ class Model:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == GbaReactionType.iMM:
+        if self.kinetic_model[j] == GbaReactionType.IMM:
             self.iMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMa:
+        elif self.kinetic_model[j] == GbaReactionType.IMMA:
             self.iMMa(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMi:
+        elif self.kinetic_model[j] == GbaReactionType.IMMI:
             self.iMMi(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMia:
+        elif self.kinetic_model[j] == GbaReactionType.IMMIA:
             self.iMMia(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMr:
-            self.iMMr(j)
-        elif self.kinetic_model[j] == GbaReactionType.rMM:
+        elif self.kinetic_model[j] == GbaReactionType.RMM:
             self.rMM(j)
     
     def diMM( self, j: int ) -> None:
@@ -1574,31 +1519,6 @@ class Model:
             term5             = (term1*constant2*constant3)+(term2*constant1*constant3)+(term3*term4*constant1*constant2)
             self.ditau_j[j,i] = term5/constant4
 
-    def diMMr( self, j: int ) -> None:
-        """
-        Compute the derivative of the turnover time tau for an irreversible
-        Michaelis-Menten reaction with regulation with respect to metabolite
-        concentrations.
-
-        Parameters
-        ----------
-        j : int
-            Reaction index.
-        """
-        kr_vec = self.KR[:,j]
-        kr_vec[kr_vec < GbaConstants.TOL.value] = self.xc[kr_vec < GbaConstants.TOL.value]
-        gaussian_kernel = self.gaussian_kernel(self.xc, kr_vec)
-        constant1       = self.kcat_f[j]
-        for i in range(self.nc):
-            y                 = i+self.nx
-            indices           = np.arange(self.ni) != y
-            term1             = -self.KM_f[y,j]/self.c[i]**2
-            term2             = (self.KM_f[y,j]+self.c[i])/self.c[i]
-            term3             = self.gaussian_term(self.c[i], kr_vec[y])
-            term4             = gaussian_kernel[y]*(term1+term2*term3)
-            term5             = np.prod((self.xc[indices]+self.KM_f[indices,j])/(self.xc[indices]*gaussian_kernel[indices]))
-            self.ditau_j[j,i] = term4*term5/constant1
-
     def drMM( self, j: int ) -> None:
         """
         Compute the derivative of the turnover time tau for a reversible
@@ -1609,21 +1529,21 @@ class Model:
         j : int
             Reaction index.
         """
-        constant1 = self.kcat_f[j]
-        constant2 = self.kcat_b[j]
-        constant3 = np.prod(1+self.KM_f[:,j]/self.xc)
-        constant4 = np.prod(1+self.KM_b[:,j]/self.xc)
+        kcatf = self.kcat_f[j]
+        kcatb = self.kcat_b[j]
+        prodf = np.prod(1+self.KM_f[:,j]/self.xc)
+        prodb = np.prod(1+self.KM_b[:,j]/self.xc)
+        tau_j = 1.0/(kcatf/prodf-kcatb/prodb)
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
+            prodf             = np.prod(1 + self.KM_f[indices,j]/self.xc[indices])
+            prodb             = np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
             term1             = self.KM_f[y,j] / np.power(self.c[i] + self.KM_f[y,j], 2.0)
             term2             = self.KM_b[y,j] / np.power(self.c[i] + self.KM_b[y,j], 2.0)
-            term3             = np.prod(1 + self.KM_f[indices,j]/self.xc[indices])
-            term4             = np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
-            term5             = term1*constant1/term3-term2*constant2/term4
-            term6             = constant1/constant3-constant2/constant4
-            self.ditau_j[j,i] = -term5/np.power(term6, 2.0)
-    
+            term3             = kcatf/prodf*term1 - kcatb/prodb*term2
+            self.ditau_j[j,i] = -term3*np.power(tau_j, 2.0)
+
     def compute_dtau( self, j: int ) -> None:
         """
         Compute the derivative of the turnover time tau for a reaction j.
@@ -1633,17 +1553,15 @@ class Model:
         j : int
             Reaction index.
         """
-        if self.kinetic_model[j] == GbaReactionType.iMM:
+        if self.kinetic_model[j] == GbaReactionType.IMM:
             self.diMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMa:
+        elif self.kinetic_model[j] == GbaReactionType.IMMA:
             self.diMMa(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMi:
+        elif self.kinetic_model[j] == GbaReactionType.IMMI:
             self.diMMi(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMia:
+        elif self.kinetic_model[j] == GbaReactionType.IMMIA:
             self.diMMia(j)
-        elif self.kinetic_model[j] == GbaReactionType.iMMr:
-            self.diMMr(j)
-        elif self.kinetic_model[j] == GbaReactionType.rMM:
+        elif self.kinetic_model[j] == GbaReactionType.RMM:
             self.drMM(j)
     
     def compute_mu( self ) -> None:
@@ -1755,23 +1673,32 @@ class Model:
         rhs_factor : Optional[float], default=1000.0
             Factor dividing the rhs of the mass conservation constraint.
         """
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
-        assert rhs_factor > 0.0, throw_message(MessageType.Error, "RHS factor must be positive.")
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
+        assert rhs_factor > 0.0, throw_message(MessageType.ERROR, "RHS factor must be positive.")
         lb_vec = []
         for j in range(self.nj):
             if self.reversible[j]:
                 lb_vec.append(-max_flux_fraction)
             else:
                 lb_vec.append(GbaConstants.TOL.value)
-        #lb_vec = [GbaConstants.TOL.value]*self.nj
         ub_vec = [max_flux_fraction]*self.nj
+        ##################
+        #lb_vec = [GbaConstants.TOL.value]*self.nj
+        #lb_vec[2] = GbaConstants.TOL.value
+        #lb_vec[6] = -max_flux_fraction
+        #ub_vec[5] = -GbaConstants.TOL.value
+        #ub_vec[6] = -GbaConstants.TOL.value
+        #print(lb_vec)
+        #print(ub_vec)
+        ####################
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
            lb_vec[r_index] = item[1]
            ub_vec[r_index] = item[1]
         gpmodel = gp.Model(env=env)
         v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
-        min_b   = 1/self.nc/rhs_factor
+        #min_b   = 1/self.nc/rhs_factor
+        min_b   = 1/rhs_factor
         rhs     = np.repeat(min_b, self.nc)
         for m_id, value in self.constant_rhs.items():
             rhs[self.c_ids.index(m_id)] = value
@@ -1783,7 +1710,7 @@ class Model:
             self.initial_solution = np.copy(v.X)
             return True
         except:
-            throw_message(MessageType.Error, "Local linear problem could not be solved.")
+            throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
             return False
 
     def find_initial_solution( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
@@ -1806,11 +1733,11 @@ class Model:
             self.calculate()
             self.check_model_consistency()
             if self.consistent:
-                throw_message(MessageType.Info, f"Model is consistent with mu = {self.mu}.")
+                throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
             else:
-                throw_message(MessageType.Info, "Model is inconsistent.")
+                throw_message(MessageType.INFO, "Model is inconsistent.")
         else:
-            throw_message(MessageType.Warning, "Impossible to find an initial solution.")
+            throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
     def find_initial_solution_all( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
         """
@@ -1865,9 +1792,9 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=initial_rhs_factor)
         if success == "no_solution":
-            throw_message(MessageType.Error, "No initial solution could be found, consider reducing the max flux fraction.")
+            throw_message(MessageType.ERROR, "No initial solution could be found, consider reducing the max flux fraction.")
         if success == "inconsistent":
-            throw_message(MessageType.Error, "Model is inconsistent with the initial solution, consider reducing the max flux fraction.")
+            throw_message(MessageType.ERROR, "Model is inconsistent with the initial solution, consider reducing the max flux fraction.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Run mu maximization algorithm #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1893,7 +1820,7 @@ class Model:
         # 4) Recover the best solution     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=best_rhs_factor)
-        throw_message(MessageType.Info, f"Best initial solution found with mu = {round(mu, 5)}.")
+        throw_message(MessageType.INFO, f"Best initial solution found with mu = {round(mu, 5)}.")
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
@@ -1914,11 +1841,11 @@ class Model:
         verbose : Optional[bool], default=False
             Verbose mode.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.Error, f"Unknown condition identifier (<code>{condition_id}</code>).")
-        assert nb_solutions > 0, throw_message(MessageType.Error, f"Number of solutions must be greater than 0.")
-        assert max_trials >= nb_solutions, throw_message(MessageType.Error, f"Number of trials must be greater than the number of solutions.")
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.Error, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
-        assert min_mu >= 0.0, throw_message(MessageType.Error, f"Minimal growth rate must be positive.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier (<code>{condition_id}</code>).")
+        assert nb_solutions > 0, throw_message(MessageType.ERROR, f"Number of solutions must be greater than 0.")
+        assert max_trials >= nb_solutions, throw_message(MessageType.ERROR, f"Number of trials must be greater than the number of solutions.")
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
+        assert min_mu >= 0.0, throw_message(MessageType.ERROR, f"Minimal growth rate must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1952,7 +1879,7 @@ class Model:
                 self.random_data                 = pd.concat([self.random_data, data_row.to_frame().T], ignore_index=True)
                 self.random_solutions[solutions] = np.copy(self.f)
                 if verbose:
-                    throw_message(MessageType.Plain, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
+                    throw_message(MessageType.PLAIN, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Optimization functions          #
@@ -2003,58 +1930,81 @@ class Model:
             Tuple containing the convergence status and the runtime.
         """
         lines = solver_output.split("\n")
+        if len(lines) < 14:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the solver output format         #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         ### 1.1) Check the dimensionality of the output ###
-        assert len(lines) == 14, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[0].split(" ")) == 2, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[1].split("\t")) == 6, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[2].split("\t")) == 6, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[3].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[4].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[5].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[6].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[7].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[8].split("\t")) == self.nj+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[9].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[10].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[11].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
-        assert len(lines[12].split("\t")) == self.nc+1, throw_message(MessageType.Error, "Invalid solver output format.")
+        tests = [len(lines[0].split(" ")) == 2,
+                 len(lines[1].split("\t")) == 6,
+                 len(lines[2].split("\t")) == 6,
+                 len(lines[3].split("\t")) == self.nj+1,
+                 len(lines[4].split("\t")) == self.nj+1,
+                 len(lines[5].split("\t")) == self.nj+1,
+                 len(lines[6].split("\t")) == self.nj+1,
+                 len(lines[7].split("\t")) == self.nj+1,
+                 len(lines[8].split("\t")) == self.nj+1,
+                 len(lines[9].split("\t")) == self.nc+1,
+                 len(lines[10].split("\t")) == self.nc+1,
+                 len(lines[11].split("\t")) == self.nc+1,
+                 len(lines[12].split("\t")) == self.nc+1]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
         ### 1.2) Check the content of the output ###
-        assert lines[0].startswith("CONDITION "), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.Error, f"Condition mismatch: expected {self.condition}, got {lines[0].split(" ")[1]}.")
-        assert lines[1] == "mu	doubling_time	density	consistent	converged	run_time", throw_message(MessageType.Error, "Invalid solver output format.")
+        tests = [lines[0].startswith("CONDITION "),
+                 lines[1] == "mu	doubling_time	density	consistent	converged	run_time"]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.ERROR, f"Condition mismatch: expected {self.condition}, got {lines[0].split(" ")[1]}.")
         ### 1.3) Check f vector ###
-        assert lines[3].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert lines[4].startswith("f\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        r_ids  = lines[3].split("\t")[1:]
+        tests = [lines[3].startswith("variable\t"),
+                 lines[4].startswith("f\t")]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        r_ids = lines[3].split("\t")[1:]
         for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
         ### 1.4) Check v vector ###
-        assert lines[5].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert lines[6].startswith("v\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        r_ids  = lines[5].split("\t")[1:]
+        tests = [lines[5].startswith("variable\t"),
+                 lines[6].startswith("v\t")]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        r_ids = lines[5].split("\t")[1:]
         for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
         ### 1.5) Check p vector ###
-        assert lines[7].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert lines[8].startswith("p\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        r_ids  = lines[7].split("\t")[1:]
+        tests = [lines[7].startswith("variable\t"),
+                 lines[8].startswith("p\t")]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        r_ids = lines[7].split("\t")[1:]
         for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.Error, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
+            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
         ### 1.6) Check b vector ###
-        assert lines[9].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert lines[10].startswith("b\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        met_ids  = lines[9].split("\t")[1:]
+        tests = [lines[9].startswith("variable\t"),
+                 lines[10].startswith("b\t")]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        met_ids = lines[9].split("\t")[1:]
         for i in range(self.nc):
-            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.Error, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
+            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.ERROR, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
         ### 1.7) Check c vector ###
-        assert lines[11].startswith("variable\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        assert lines[12].startswith("c\t"), throw_message(MessageType.Error, "Invalid solver output format.")
-        met_ids  = lines[11].split("\t")[1:]
+        tests = [lines[11].startswith("variable\t"),
+                 lines[12].startswith("c\t")]
+        if False in tests:
+            throw_message(MessageType.WARNING, "Solver failed.")
+            return None, None
+        met_ids = lines[11].split("\t")[1:]
         for i in range(self.nc):
-            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.Error, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
+            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.ERROR, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Read the model state                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2078,7 +2028,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         return converged, run_time
     
-    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000 ):
+    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = True ) -> bool:
         """
         Find the optimum of the model using the gbacpp solver.
 
@@ -2091,6 +2041,15 @@ class Model:
             convergence.
         max_iter : Optional[int], default=1000000
             Maximum number of iterations for the solver.
+        verbose : Optional[bool], default=True
+            Verbose mode.
+        
+        Returns
+        -------
+        converged : bool
+            True if the model converged, False otherwise.
+        run_time : float
+            Time taken by the solver in seconds.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write the model in a temporary file with a unique key #
@@ -2103,12 +2062,14 @@ class Model:
         cmdline             = self.build_gbacpp_command_line(temporary_name, tol, stable, max_iter)
         solver_process      = subprocess.Popen([cmdline], stdout=subprocess.PIPE, shell=True)
         solver_output       = solver_process.stdout.read().decode('utf8')
+        converged           = False
+        run_time            = 0.0
         converged, run_time = self.read_solver_output(solver_output)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Remove the temporary files and folder                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert temporary_name.startswith("temp_"), throw_message(MessageType.Error, "Temporary folder name must start with 'temp_'.")
-        assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.Error, "Temporary folder name must contain a timestamp.")
+        assert temporary_name.startswith("temp_"), throw_message(MessageType.ERROR, "Temporary folder name must start with 'temp_'.")
+        assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.ERROR, "Temporary folder name must contain a timestamp.")
         while os.path.exists(temporary_name):
             files = os.listdir(temporary_name)
             for file in files:
@@ -2119,11 +2080,17 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Print the result                                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if converged:
-            self.optimal_solutions[self.condition] = np.copy(self.f)
-            throw_message(MessageType.Info, f"Model converged with mu = {self.mu} after {run_time:.2f} seconds.")
+        if converged is not None:
+            if converged:
+                self.optimal_solutions[self.condition] = np.copy(self.f)
+                if verbose:
+                    throw_message(MessageType.INFO, f"Model converged with mu = {self.mu} after {run_time:.2f} seconds.")
+            else:
+                if verbose:
+                    throw_message(MessageType.WARNING, f"Model did not converge after {run_time:.2f} seconds.")
+            return True
         else:
-            throw_message(MessageType.Warning, f"Model did not converge after {run_time:.2f} seconds.")
+            return False
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Summary functions               #
@@ -2215,20 +2182,20 @@ def throw_message( type: MessageType, message: str ) -> None:
     Parameters
     ----------
     type : MessageType
-        Type of message (MessageType.Info, MessageType.Warning,
-        MessageType.Error, MessageType.Plain).
+        Type of message (MessageType.INFO, MessageType.WARNING,
+        MessageType.ERROR, MessageType.PLAIN).
     message : str
         Content of the message.
     """
     html_str  = "<table>"
     html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-    if type == MessageType.Plain:
+    if type == MessageType.PLAIN:
         html_str += "<td><strong>&#10095;</strong></td>"
-    elif type == MessageType.Info:
+    elif type == MessageType.INFO:
         html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
-    elif type == MessageType.Warning:
+    elif type == MessageType.WARNING:
         html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
-    elif type == MessageType.Error:
+    elif type == MessageType.ERROR:
         html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
     html_str += "<td>"+message+"</td>"
     html_str += "</tr>"
@@ -2251,7 +2218,7 @@ def read_csv_model( name: str, path: Optional[str] = "." ) -> Model:
     Model
         The loaded model.
     """
-    assert os.path.exists(path+"/"+name), throw_message(MessageType.Error, "The folder "+path+"/"+name+" does not exist.")
+    assert os.path.exists(path+"/"+name), throw_message(MessageType.ERROR, "The folder "+path+"/"+name+" does not exist.")
     model = Model(name)
     model.read_from_csv(path=path)
     return model
@@ -2272,7 +2239,7 @@ def read_ods_model( name: str, path: Optional[str] = "." ) -> Model:
     Model
         The loaded model.
     """
-    assert os.path.exists(path+"/"+name+".ods"), throw_message(MessageType.Error, "The folder "+path+"/"+name+".ods does not exist.")
+    assert os.path.exists(path+"/"+name+".ods"), throw_message(MessageType.ERROR, "The folder "+path+"/"+name+".ods does not exist.")
     model = Model(name)
     model.read_from_ods(path=path)
     return model
@@ -2335,7 +2302,7 @@ def backup_model( model: Model, name: Optional[str] = "", path: Optional[str] = 
     ofile = open(filename, "wb")
     pickle.dump(model, ofile)
     ofile.close()
-    assert os.path.isfile(filename), throw_message(MessageType.Error, ".gba file creation failed.")
+    assert os.path.isfile(filename), throw_message(MessageType.ERROR, ".gba file creation failed.")
 
 def load_model( path: str ) -> Model:
     """
@@ -2346,8 +2313,8 @@ def load_model( path: str ) -> Model:
     path : str
         Path to the model file.
     """
-    assert path.endswith(".gba"), throw_message(MessageType.Error, "Model file extension is missing.")
-    assert os.path.isfile(path), throw_message(MessageType.Error, "Model file not found.")
+    assert path.endswith(".gba"), throw_message(MessageType.ERROR, "Model file extension is missing.")
+    assert os.path.isfile(path), throw_message(MessageType.ERROR, "Model file not found.")
     ifile = open(path, "rb")
     model = pickle.load(ifile)
     ifile.close()
@@ -2378,7 +2345,7 @@ def create_model( name: str, path: Optional[str] = ".", model_path: Optional[str
     # 2) Compute and save f0 if requested         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_LP:
-        throw_message(MessageType.Plain, f"Computing LP solution for model {model.name}...")
+        throw_message(MessageType.PLAIN, f"Computing LP solution for model {model.name}...")
         model.solve_local_linear_problem()
         model.set_f0(model.initial_solution)
         model.set_condition("1")
@@ -2387,13 +2354,13 @@ def create_model( name: str, path: Optional[str] = ".", model_path: Optional[str
         if model.consistent:
             model.save_f0(path=path)
         else:
-            throw_message(MessageType.Error, "Model is inconsistent with condition 1. f0 vector cannot be saved.")
+            throw_message(MessageType.ERROR, "Model is inconsistent with condition 1. f0 vector cannot be saved.")
             sys.exit(1)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Compute and save optima if requested     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     if save_optima:
-        throw_message(MessageType.Plain, f"Computing optima for model {model.name}...")
+        throw_message(MessageType.PLAIN, f"Computing optima for model {model.name}...")
         if not save_LP:
             model.read_LP_from_csv(path=path)
         model.compute_optima(max_time=10000, initial_dt=0.01)

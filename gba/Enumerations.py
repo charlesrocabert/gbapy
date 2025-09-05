@@ -54,10 +54,10 @@ class SpeciesType(enum.Enum):
     """
     DNA           = 1
     RNA           = 2
-    Protein       = 3
-    SmallMolecule = 4
-    MacroMolecule = 5
-    Unknown       = 6
+    PROTEIN       = 3
+    SMALLMOLECULE = 4
+    MACROMOLECULE = 5
+    UNKNOWN       = 6
 
 class SpeciesLocation(enum.Enum):
     """
@@ -66,9 +66,9 @@ class SpeciesLocation(enum.Enum):
     - External: Species located outside the cell.
     - Unknown : Species location is unknown.
     """
-    Internal = 1
-    External = 2
-    Unknown  = 3
+    INTERNAL = 1
+    EXTERNAL = 2
+    UNKNOWN  = 3
 
 class ReactionType(enum.Enum):
     """
@@ -78,10 +78,10 @@ class ReactionType(enum.Enum):
     - Spontaneous: Spontaneous (boundary) reaction.
     - Exchange : Exchange reaction (specific to FBA models).
     """
-    Metabolic   = 1
-    Transport   = 2
-    Spontaneous = 3
-    Exchange    = 4
+    METABOLIC   = 1
+    TRANSPORT   = 2
+    SPONTANEOUS = 3
+    EXCHANGE    = 4
 
 class ReactionDirection(enum.Enum):
     """
@@ -90,9 +90,9 @@ class ReactionDirection(enum.Enum):
     - Backward  : Backward reaction.
     - Reversible: Reversible reaction.
     """
-    Forward    = 1
-    Backward   = 2
-    Reversible = 3
+    FORWARD    = 1
+    BACKWARD   = 2
+    REVERSIBLE = 3
 
 class ReactionGPR(enum.Enum):
     """
@@ -115,52 +115,29 @@ class GbaReactionType(enum.Enum):
     - iMMr : Irreversible Michaelis-Menten reaction with regulation.
     - rMM  : Reversible Michaelis-Menten reaction.
     """
-    iMM   = 1
-    iMMa  = 2
-    iMMi  = 3
-    iMMia = 4
-    iMMr  = 5
-    rMM   = 6
+    IMM   = 1
+    IMMA  = 2
+    IMMI  = 3
+    IMMIA = 4
+    RMM   = 6
 
 class GbaConstants(float, enum.Enum):
     """
     Constant for GBA algorithms.
-    - TOL                          : Tolerance value.
-    - TRAJECTORY_CONVERGENCE_COUNT : Number of iterations with equal mu values
-                                     to consider the trajectory stable.
-    - TRAJECTORY_CONVERGENCE_TOL   : Mu threshold below which growth rates are
-                                     considered equal.
-    - DECREASING_DT_FACTOR         : Factor by which the time step is decreased
-                                     when the trajectory is unstable.
-    - INCREASING_DT_FACTOR         : Factor by which the time step is increased
-                                     when the trajectory is stable.
-    - INCREASING_DT_COUNT          : Number of iterations with equal mu values
-                                     to increase the time step.
-    - MIN_DT                       : Minimum time step value.
-    - PRINT_DATA_COUNT             : Frequency of data printing.
-    - EXPORT_DATA_COUNT            : Frequency of data export.
-    - REGULATION_SIGMA             : Width of the regulation Gaussian kernel.
+    - TOL: Tolerance value.
     """
-    TOL                          = 1e-10
-    TRAJECTORY_CONVERGENCE_COUNT = 10000
-    DECREASING_DT_FACTOR         = 5.0
-    INCREASING_DT_FACTOR         = 2.0
-    INCREASING_DT_COUNT          = 100
-    MIN_DT                       = 1e-100
-    PRINT_DATA_COUNT             = 1
-    EXPORT_DATA_COUNT            = 100
-    REGULATION_SIGMA             = 2.0
+    TOL = 1e-10
 
 class MessageType(enum.Enum):
     """
     Message type.
-    - Info    : Throw an information message.
-    - Warning : Throw a warning message.
-    - Error   : Throw an error message.
-    - Plain   : Throw a plain message.
+    - INFO    : Throw an information message.
+    - WARNING : Throw a warning message.
+    - ERROR   : Throw an error message.
+    - PLAIN   : Throw a plain message.
     """
-    Info    = 1
-    Warning = 2
-    Error   = 3
-    Plain   = 4
+    INFO    = 1
+    WARNING = 2
+    ERROR   = 3
+    PLAIN   = 4
 
