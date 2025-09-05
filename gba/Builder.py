@@ -134,8 +134,6 @@ class Builder:
         GBA activation constant matrix.
     GBA_KI : numpy.array
         GBA inhibition constant matrix.
-    GBA_KR : numpy.array
-        GBA regulation constant matrix.
     GBA_conditions : dict[int, dict[str, float]]
         GBA conditions matrix.
     GBA_constant_rhs : dict[str, float]
@@ -208,7 +206,6 @@ class Builder:
         self.GBA_KM_b                  = None
         self.GBA_KA                    = None
         self.GBA_KI                    = None
-        self.GBA_KR                    = None
         self.GBA_conditions            = {}
         self.GBA_constant_rhs          = {}
         self.GBA_constant_reactions    = {}
@@ -668,31 +665,6 @@ class Builder:
         r_index                       = self.GBA_col_indices[reaction_id]
         self.GBA_KI[m_index, r_index] = value
 
-    def add_regulation_constant( self, metabolite_id: str, reaction_id: str, value: float ) -> None:
-        """
-        Add an inhibition constant to a reaction.
-
-        Parameters
-        ----------
-        metabolite_id : str
-            Identifier of the metabolite.
-        reaction_id : str
-            Identifier of the reaction.
-        value : float
-            Inhibition constant value.
-        """
-        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
-        assert self.GBA_KR is not None, throw_message(MessageType.ERROR, "Regulation constant matrix is not initialized.")
-        assert self.GBA_KR.shape == (len(self.metabolites), len(self.reactions)), throw_message(MessageType.ERROR, "Invalid regulation constant matrix shape.")
-        assert metabolite_id in self.GBA_row_indices, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> is not listed in the GBA converted model.")
-        assert reaction_id in self.GBA_col_indices, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> is not listed in the GBA converted model.")
-        assert metabolite_id in self.metabolites, throw_message(MessageType.ERROR, f"Metabolite <code>{metabolite_id}</code> does not exist.")
-        assert reaction_id in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction_id}</code> does not exist.")
-        assert value > 0.0, throw_message(MessageType.ERROR, f"The regulation constant value must be positive (<code>{metabolite_id}</code>, <code>{reaction_id}</code>).")
-        m_index                       = self.GBA_row_indices[metabolite_id]
-        r_index                       = self.GBA_col_indices[reaction_id]
-        self.GBA_KR[m_index, r_index] = value
-    
     def clear_conditions( self ) -> None:
         """
         Clear all external conditions from the GBA converted model.
@@ -1519,13 +1491,12 @@ class Builder:
                     r_index                         = self.GBA_col_indices[r.id]
                     self.GBA_KM_b[m_index, r_index] = r.GBA_km[m_id]
     
-    def build_GBA_KA_KI_KR_matrices( self ) -> None:
+    def build_GBA_KA_KI_matrices( self ) -> None:
         """
         Build the GBA activation and inhibition matrices.
         """
         self.GBA_KA = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
         self.GBA_KI = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
-        self.GBA_KR = np.zeros((len(self.GBA_row_indices), len(self.GBA_col_indices)))
 
     def compile_protein_contributions( self ) -> None:
         """
@@ -1560,7 +1531,7 @@ class Builder:
         self.build_GBA_mass_fraction_matrix()
         self.build_GBA_kcat_vectors()
         self.build_GBA_KM_matrices()
-        self.build_GBA_KA_KI_KR_matrices()
+        self.build_GBA_KA_KI_matrices()
         self.compile_protein_contributions()
         self.compute_mass_fraction_matrix_metrics()
         self.GBA_is_built = True
@@ -1636,7 +1607,7 @@ class Builder:
         else:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
-                     "KA.csv", "KI.csv", "KR.csv",
+                     "KA.csv", "KI.csv",
                      "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
@@ -1684,7 +1655,7 @@ class Builder:
         K_df.to_csv(model_path+"/K.csv", sep=";")
         del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the KA, KI and KR matrices  #
+        # 6) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if np.any(self.GBA_KA):
             KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
@@ -1694,10 +1665,6 @@ class Builder:
             KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
-        if np.any(self.GBA_KR):
-            KR_df = pd.DataFrame(self.GBA_KR, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
-            KR_df.to_csv(model_path+"/KR.csv", sep=";")
-            del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1789,17 +1756,14 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.GBA_conditions)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the KA, KI and KR matrices  #
+        # 7) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = None
         KI_df = None
-        KR_df = None
         if np.any(self.GBA_KA):
             KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         if np.any(self.GBA_KI):
             KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
-        if np.any(self.GBA_KR):
-            KR_df = pd.DataFrame(self.GBA_KR, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant terms          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1831,7 +1795,7 @@ class Builder:
             conditions_df.to_excel(writer, sheet_name="conditions")
             if KA_df is not None:
               KA_df.to_excel(writer, sheet_name="KA")
-            if KR_df is not None:
+            if KI_df is not None:
                 KI_df.to_excel(writer, sheet_name="KI")
             if constant_rhs_df is not None:
                 constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
@@ -1851,7 +1815,6 @@ class Builder:
         del(K_df)
         del(KA_df)
         del(KI_df)
-        del(KR_df)
         del(conditions_df)
         del(constant_rhs_df)
         del(constant_reactions_df)

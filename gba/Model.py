@@ -110,8 +110,6 @@ class Model:
         KI matrix.
     rKI : np.array
         1/KI matrix.
-    KR : np.array
-        KR matrix.
     reversible : list
         Indicates if the reaction is reversible.
     kinetic_model : list
@@ -138,8 +136,6 @@ class Model:
         Are the KA constants loaded?
     KI_loaded : bool
         Are the KI constants loaded?
-    KR_loaded : bool
-        Are the KR constants loaded?
     conditions_loaded : bool
         Are the conditions loaded?
     constant_rhs_loaded : bool
@@ -272,7 +268,6 @@ class Model:
         self.KA                 = np.array([])
         self.KI                 = np.array([])
         self.rKI                = np.array([])
-        self.KR                 = np.array([])
         self.reversible         = []
         self.kinetic_model      = []
         self.directions         = []
@@ -291,7 +286,6 @@ class Model:
         self.K_loaded                     = False
         self.KA_loaded                    = False
         self.KI_loaded                    = False
-        self.KR_loaded                    = False
         self.conditions_loaded            = False
         self.constant_rhs_loaded          = False
         self.constant_reactions_loaded    = False
@@ -515,28 +509,6 @@ class Model:
             self.KI_loaded = True
             del(df)
 
-    def read_KR_from_csv( self, path: Optional[str] = "." ) -> None:
-        """
-        Read the regulation constants matrix KR from a CSV file.
-
-        Parameters
-        ----------
-        path : str, default="."
-            Path to the CSV file.
-        """
-        self.KR_loaded = False
-        self.KR        = np.zeros(self.Mx.shape)
-        filename       = path+"/"+self.name+"/KR.csv"
-        if os.path.exists(filename):
-            df             = pd.read_csv(filename, sep=";")
-            metabolites    = list(df["Unnamed: 0"])
-            df             = df.drop(["Unnamed: 0"], axis=1)
-            df.index       = metabolites
-            self.KR        = np.array(df)
-            self.KR        = self.KR.astype(float)
-            self.KR_loaded = True
-            del(df)
-    
     def read_conditions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of conditions from a CSV file.
@@ -666,8 +638,6 @@ class Model:
             throw_message(MessageType.INFO, "No KA constants.")
         if not self.KI_loaded and verbose:
             throw_message(MessageType.INFO, "No KI constants.")
-        if not self.KR_loaded and verbose:
-            throw_message(MessageType.INFO, "No KR constants.")
         if not self.constant_rhs_loaded and verbose:
             throw_message(MessageType.INFO, "No constant RHS terms.")
         if not self.constant_reactions_loaded and verbose:
@@ -769,24 +739,21 @@ class Model:
         self.kinetic_model.clear()
         self.directions.clear()
         for j in range(self.nj):
-            if (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
+            if (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0):
                 self.kinetic_model.append(GbaReactionType.IMM)
                 self.directions.append(ReactionDirection.FORWARD)
-            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() == 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() == 0):
                 self.kinetic_model.append(GbaReactionType.IMMA)
                 self.directions.append(ReactionDirection.FORWARD)
-            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() > 0):
                 self.kinetic_model.append(GbaReactionType.IMMI)
                 self.directions.append(ReactionDirection.FORWARD)
-            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() > 0 and self.KR[:,j].sum() == 0):
+            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() > 0 and self.KI[:,j].sum() > 0):
                 self.kinetic_model.append(GbaReactionType.IMMIA)
-            elif (self.kcat_b[j] == 0 and self.KA[:,j].sum() == 0 and self.KI[:,j].sum() == 0 and self.KR[:,j].sum() > 0):
-                self.kinetic_model.append(GbaReactionType.IMMR)
                 self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] > 0):
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
-                assert self.KR[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have regulation (reaction <code>{j}</code>).")
                 self.kinetic_model.append(GbaReactionType.RMM)
                 self.directions.append(self.directions.append(ReactionDirection.REVERSIBLE))
     
@@ -807,7 +774,6 @@ class Model:
         self.read_K_from_csv(path)
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
-        self.read_KR_from_csv(path)
         self.read_conditions_from_csv(path)
         self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
@@ -873,7 +839,7 @@ class Model:
         else:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
-                     "KA.csv", "KI.csv", "KR.csv",
+                     "KA.csv", "KI.csv",
                      "conditions.csv", "f0.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
@@ -915,7 +881,7 @@ class Model:
         K_df.to_csv(model_path+"/K.csv", sep=";")
         del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the KA, KI and KR matrices  #
+        # 6) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if np.any(self.KA):
             KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
@@ -925,10 +891,6 @@ class Model:
             KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
-        if np.any(self.KR):
-            KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
-            KR_df.to_csv(model_path+"/KR.csv", sep=";")
-            del(KR_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1030,17 +992,14 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the KA, KI and KR matrices  #
+        # 6) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = None
         KI_df = None
-        KR_df = None
         if np.any(self.KA):
             KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
         if np.any(self.KI):
             KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
-        if np.any(self.KR):
-            KR_df = pd.DataFrame(self.KR, index=self.metabolite_ids, columns=self.reaction_ids)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1084,7 +1043,7 @@ class Model:
             conditions_df.to_excel(writer, sheet_name="conditions")
             if KA_df is not None:
               KA_df.to_excel(writer, sheet_name="KA")
-            if KR_df is not None:
+            if KI_df is not None:
                 KI_df.to_excel(writer, sheet_name="KI")
             if constant_rhs_df is not None:
                 constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
@@ -1110,7 +1069,6 @@ class Model:
         del(K_df)
         del(KA_df)
         del(KI_df)
-        del(KR_df)
         del(conditions_df)
         del(constant_rhs_df)
         del(constant_reactions_df)
