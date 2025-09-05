@@ -755,7 +755,7 @@ class Model:
                 assert self.KA[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
                 assert self.KI[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
                 self.kinetic_model.append(GbaReactionType.RMM)
-                self.directions.append(self.directions.append(ReactionDirection.REVERSIBLE))
+                self.directions.append(ReactionDirection.REVERSIBLE)
     
     def read_from_csv( self, path: Optional[str] = "." ) -> None:
         """
