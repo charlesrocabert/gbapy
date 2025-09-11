@@ -2,7 +2,7 @@
 # coding: utf-8
 
 #***********************************************************************
-# gbapy (Growth Balance Analysis for Python)
+# gbapy (growth balance analysis for Python)
 # Web: https://github.com/charlesrocabert/gbapy
 # Copyright © 2024-2025 Charles Rocabert.
 # 
@@ -21,7 +21,7 @@
 #***********************************************************************
 
 
-"""gbapy (Growth Balance Analysis for Python).
+"""gbapy (growth balance analysis for Python).
 
 See:
 https://github.com/charlesrocabert/gbapy

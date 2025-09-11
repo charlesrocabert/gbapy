@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #***********************************************************************
-# gbapy (Growth Balance Analysis for Python)
+# gbapy (growth balance analysis for Python)
 # Web: https://github.com/charlesrocabert/gbapy
 # Copyright © 2024-2025 Charles Rocabert.
 # 
