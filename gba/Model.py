@@ -202,15 +202,15 @@ class Model:
         External condition.
     rho : float
         Total density.
-    f0 : np.array
+    q0 : np.array
         Initial LP solution.
-    dmu_f : np.array
-        Local mu derivatives with respect to f.
-    GCC_f : np.array
-        Local growth control coefficients with respect to f.
-    f_trunc : np.array
-        Truncated f vector (first element is removed).
-    f : np.array
+    dmu_q : np.array
+        Local mu derivatives with respect to q.
+    GCC_q : np.array
+        Local growth control coefficients with respect to q.
+    q_trunc : np.array
+        Truncated q vector (first element is removed).
+    q : np.array
         Flux fractions vector.
     random_data : pd.DataFrame
         Random solution data for all conditions.
@@ -339,11 +339,11 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.condition = ""
         self.rho       = 0.0
-        self.f0        = np.array([])
-        self.dmu_f     = np.array([])
-        self.GCC_f     = np.array([])
-        self.f_trunc   = np.array([])
-        self.f         = np.array([])
+        self.q0        = np.array([])
+        self.dmu_q     = np.array([])
+        self.GCC_q     = np.array([])
+        self.q_trunc   = np.array([])
+        self.q         = np.array([])
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Trackers                      #
@@ -608,10 +608,10 @@ class Model:
             Path to the CSV file.
         """
         self.initial_solution_loaded = False
-        filename                     = path+"/"+self.name+"/f0.csv"
+        filename                     = path+"/"+self.name+"/q0.csv"
         if os.path.exists(filename):
             df                           = pd.read_csv(filename, sep=";")
-            self.initial_solution        = np.array(df["f0"])
+            self.initial_solution        = np.array(df["q0"])
             self.initial_solution_loaded = True
             del(df)
 
@@ -720,11 +720,11 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Evolutionary variables                              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.f0      = np.zeros(self.nj)
-        self.dmu_f   = np.zeros(self.nj)
-        self.GCC_f   = np.zeros(self.nj)
-        self.f_trunc = np.zeros(self.nj-1)
-        self.f       = np.zeros(self.nj)
+        self.q0      = np.zeros(self.nj)
+        self.dmu_q   = np.zeros(self.nj)
+        self.GCC_q   = np.zeros(self.nj)
+        self.q_trunc = np.zeros(self.nj-1)
+        self.q       = np.zeros(self.nj)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Define the kinetic model of each reaction           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -804,8 +804,8 @@ class Model:
         for sheet_name in xls.sheet_names:
             if os.path.exists("./temp/"+self.name+"/"+sheet_name+".csv"):
                os.remove("./temp/"+self.name+"/"+sheet_name+".csv")
-            if os.path.exists("./temp/"+self.name+"/f0.csv"):
-                os.remove("./temp/"+self.name+"/f0.csv")
+            if os.path.exists("./temp/"+self.name+"/q0.csv"):
+                os.remove("./temp/"+self.name+"/q0.csv")
         os.rmdir("./temp/"+self.name)
         os.rmdir("./temp/")
     
@@ -832,7 +832,7 @@ class Model:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv",
-                     "conditions.csv", "f0.csv",
+                     "conditions.csv", "q0.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
@@ -922,8 +922,8 @@ class Model:
         # 11) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.initial_solution) > 0:
-            f = open(model_path+"/f0.csv", "w")
-            f.write("reaction;f0\n")
+            f = open(model_path+"/q0.csv", "w")
+            f.write("reaction;q0\n")
             for j in range(self.nj):
                 f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
             f.close()
@@ -1018,11 +1018,11 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 10) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        f0_df = None
+        q0_df = None
         if len(self.initial_solution) > 0:
-            f0_df            = pd.DataFrame(self.initial_solution, index=self.reaction_ids, columns=["f0"])
-            f0_df.index.name = "reaction"
-            f0_df.reset_index(inplace=True)
+            q0_df            = pd.DataFrame(self.initial_solution, index=self.reaction_ids, columns=["q0"])
+            q0_df.index.name = "reaction"
+            q0_df.reset_index(inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 11) Write the variables in xlsx      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1043,8 +1043,8 @@ class Model:
                 constant_reactions_df.to_excel(writer, sheet_name="constant_reactions", index=False)
             if protein_contributions_df is not None:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
-            if f0_df is not None:
-                f0_df.to_excel(writer, sheet_name="f0", index=False)
+            if q0_df is not None:
+                q0_df.to_excel(writer, sheet_name="q0", index=False)
             if not self.optima_data.empty:
                 self.optima_data.to_excel(writer, sheet_name="optimal_solutions", index=False)
             if not self.random_data.empty:
@@ -1065,7 +1065,7 @@ class Model:
         del(constant_rhs_df)
         del(constant_reactions_df)
         del(protein_contributions_df)
-        del(f0_df)
+        del(q0_df)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #
@@ -1232,11 +1232,11 @@ class Model:
         self.v       = np.zeros(self.nj)
         self.p       = np.zeros(self.nj)
         self.b       = np.zeros(self.nc)
-        self.f0      = np.zeros(self.nj)
-        self.dmu_f   = np.zeros(self.nj)
-        self.GCC_f   = np.zeros(self.nj)
-        self.f_trunc = np.zeros(self.nj-1)
-        self.f       = np.zeros(self.nj)
+        self.q0      = np.zeros(self.nj)
+        self.dmu_q   = np.zeros(self.nj)
+        self.GCC_q   = np.zeros(self.nj)
+        self.q_trunc = np.zeros(self.nj-1)
+        self.q       = np.zeros(self.nj)
     
     def set_condition( self, condition_id: str ) -> None:
         """
@@ -1258,19 +1258,19 @@ class Model:
             if self.adjust_concentrations and self.x[i] < GbaConstants.TOL.value:
                 self.x[i] = GbaConstants.TOL.value
 
-    def set_f0( self, f0: np.array ) -> None:
+    def set_q0( self, q0: np.array ) -> None:
         """
-        Set the initial flux fraction vector f0.
+        Set the initial flux fraction vector q0.
         
         Parameters
         ----------
-        f0 : np.array
+        q0 : np.array
             Initial flux fraction vector.
         """
-        assert len(f0) == self.nj, throw_message(MessageType.ERROR, "Incorrect f0 length.")
-        self.f0      = np.copy(f0)
-        self.f_trunc = np.copy(self.f0[1:self.nj])
-        self.f       = np.copy(self.f0)
+        assert len(q0) == self.nj, throw_message(MessageType.ERROR, "Incorrect q0 length.")
+        self.q0      = np.copy(q0)
+        self.q_trunc = np.copy(self.q0[1:self.nj])
+        self.q       = np.copy(self.q0)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) Analytical methods              #
@@ -1280,7 +1280,7 @@ class Model:
         """
         Compute the internal metabolite concentrations.
         """
-        self.c = self.rho*self.M.dot(self.f)
+        self.c = self.rho*self.M.dot(self.q)
         if self.adjust_concentrations:
             self.c[self.c < GbaConstants.TOL.value] = GbaConstants.TOL.value
         self.xc = np.concatenate([self.x, self.c])
@@ -1518,14 +1518,14 @@ class Model:
         """
         Compute the growth rate mu.
         """
-        self.mu            = self.M[self.a,self.r]*self.f[self.r]/(self.tau_j.dot(self.f))
+        self.mu            = self.M[self.a,self.r]*self.q[self.r]/(self.tau_j.dot(self.q))
         self.doubling_time = np.log(2)/np.log(1+self.mu)
 
     def compute_v( self ) -> None:
         """
         Compute the fluxes v.
         """
-        self.v = self.mu*self.rho*self.f
+        self.v = self.mu*self.rho*self.q
 
     def compute_p( self ) -> None:
         """
@@ -1537,29 +1537,29 @@ class Model:
         """
         Compute the biomass fractions b.
         """
-        self.b = self.M.dot(self.f)
+        self.b = self.M.dot(self.q)
 
     def compute_density( self ) -> None:
         """
         Compute the cell density (should be equal to 1).
         """
-        self.density = self.sM.dot(self.f)
+        self.density = self.sM.dot(self.q)
 
-    def compute_dmu_f( self ) -> None:
+    def compute_dmu_q( self ) -> None:
         """
-        Compute the local growth rate gradient with respect to f.
+        Compute the local growth rate gradient with respect to q.
         """
         term1      = np.power(self.mu, 2)/self.b[self.a]
         term2      = self.M[self.a,:]/self.mu
-        term3      = self.f.T.dot(self.rho*self.ditau_j.dot(self.M))
+        term3      = self.q.T.dot(self.rho*self.ditau_j.dot(self.M))
         term4      = self.tau_j
-        self.dmu_f = term1*(term2-term3-term4)
+        self.dmu_q = term1*(term2-term3-term4)
 
-    def compute_GCC_f( self ) -> None:
+    def compute_GCC_q( self ) -> None:
         """
-        Compute the local growth control coefficients with respect to f.
+        Compute the local growth control coefficients with respect to q.
         """
-        self.GCC_f = self.dmu_f-self.dmu_f[0]*(self.sM/self.sM[0])
+        self.GCC_q = self.dmu_q-self.dmu_q[0]*(self.sM/self.sM[0])
     
     def calculate_first_order_terms( self ) -> None:
         """
@@ -1580,8 +1580,8 @@ class Model:
         """
         for j in range(self.nj):
             self.compute_dtau(j)
-        self.compute_dmu_f()
-        self.compute_GCC_f()
+        self.compute_dmu_q()
+        self.compute_GCC_q()
     
     def calculate( self ) -> None:
         """
@@ -1612,9 +1612,9 @@ class Model:
         Description
         -----------
         The local linear problem consists in finding the maximal ribosome flux
-        fraction f^r, with a minimal production of each metabolite. The
-        constraints are mass conservation (M*f = b) and surface flux balance
-        (sM*f = 1).
+        fraction q^r, with a minimal production of each metabolite. The
+        constraints are mass conservation (M*q = b) and surface flux balance
+        (sM*q = 1).
 
         Parameters
         ----------
@@ -1669,7 +1669,7 @@ class Model:
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
         if solved:
             self.set_condition(condition_id)
-            self.set_f0(self.initial_solution)
+            self.set_q0(self.initial_solution)
             self.calculate()
             self.check_model_consistency()
             if self.consistent:
@@ -1703,7 +1703,7 @@ class Model:
             mu_max = 0.0
             for condition_id in self.condition_ids:
                 self.set_condition(condition_id)
-                self.set_f0(self.initial_solution)
+                self.set_q0(self.initial_solution)
                 self.calculate()
                 self.check_model_consistency()
                 if not self.consistent:
@@ -1803,21 +1803,21 @@ class Model:
             trials        += 1
             negative_term  = True
             while negative_term:
-                self.f_trunc = np.random.rand(self.nj-1)
-                self.f_trunc = self.f_trunc*(max_flux_fraction-GbaConstants.TOL)+GbaConstants.TOL
-                self.set_f_from_f_trunc()
-                if self.f[0] >= 0.0:
+                self.q_trunc = np.random.rand(self.nj-1)
+                self.q_trunc = self.q_trunc*(max_flux_fraction-GbaConstants.TOL)+GbaConstants.TOL
+                self.set_q_from_q_trunc()
+                if self.q[0] >= 0.0:
                     negative_term = False
             self.calculate_state()
             self.check_model_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 solutions += 1
                 data_dict  = {"condition": condition_id, "mu": self.mu, "density": self.density}
-                for reaction_id, fluxfraction in zip(self.reaction_ids, self.f):
+                for reaction_id, fluxfraction in zip(self.reaction_ids, self.q):
                     data_dict[reaction_id] = fluxfraction
                 data_row                         = pd.Series(data=data_dict)
                 self.random_data                 = pd.concat([self.random_data, data_row.to_frame().T], ignore_index=True)
-                self.random_solutions[solutions] = np.copy(self.f)
+                self.random_solutions[solutions] = np.copy(self.q)
                 if verbose:
                     throw_message(MessageType.PLAIN, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
 
@@ -1958,7 +1958,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Read the variables                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.f = np.array([float(x) for x in lines[4].split("\t")[1:]])
+        self.q = np.array([float(x) for x in lines[4].split("\t")[1:]])
         self.v = np.array([float(x) for x in lines[6].split("\t")[1:]])
         self.p = np.array([float(x) for x in lines[8].split("\t")[1:]])
         self.b = np.array([float(x) for x in lines[10].split("\t")[1:]])
@@ -2022,7 +2022,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if converged is not None:
             if converged:
-                self.optimal_solutions[self.condition] = np.copy(self.f)
+                self.optimal_solutions[self.condition] = np.copy(self.q)
                 if verbose:
                     throw_message(MessageType.INFO, f"Model converged with mu = {self.mu} after {run_time:.2f} seconds.")
             else:
@@ -2259,55 +2259,4 @@ def load_model( path: str ) -> Model:
     model = pickle.load(ifile)
     ifile.close()
     return model
-
-def create_model( name: str, path: Optional[str] = ".", model_path: Optional[str] = ".", save_LP: Optional[bool] = False, save_optima: Optional[bool] = False ) -> None:
-    """
-    Create a model from CSV files, and save it as a binary file.
-
-    Parameters
-    ----------
-    name : str
-        Name of the model.
-    path : Optional[str], default="."
-        Path to the binary file.
-    model_path : Optional[str], default=""
-        Path to save the model.
-    save_LP : Optional[bool], default=False
-        Save the LP solution.
-    save_optima : Optional[bool], default=False
-        Save the optima.
-    """
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 1) Create and load the model from CSV files #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    model = read_csv_model(name=name, path=path)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 2) Compute and save f0 if requested         #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if save_LP:
-        throw_message(MessageType.PLAIN, f"Computing LP solution for model {model.name}...")
-        model.solve_local_linear_problem()
-        model.set_f0(model.initial_solution)
-        model.set_condition("1")
-        model.calculate_state()
-        model.check_model_consistency()
-        if model.consistent:
-            model.save_f0(path=path)
-        else:
-            throw_message(MessageType.ERROR, "Model is inconsistent with condition 1. f0 vector cannot be saved.")
-            sys.exit(1)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 3) Compute and save optima if requested     #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if save_optima:
-        throw_message(MessageType.PLAIN, f"Computing optima for model {model.name}...")
-        if not save_LP:
-            model.read_LP_from_csv(path=path)
-        model.compute_optima(max_time=10000, initial_dt=0.01)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 4) Clean model and dump binary backup       #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    model.reset_variables()
-    backup_model(model=model, name=name, path=model_path)
-    del model
 
