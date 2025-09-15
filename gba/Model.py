@@ -615,6 +615,40 @@ class Model:
             self.initial_solution_loaded = True
             del(df)
 
+    def read_optimal_solutions_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the optimal solutions from a CSV file (on request).
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        filename = path+"/"+self.name+"/qopt.csv"
+        if os.path.exists(filename):
+            self.optima_data       = pd.read_csv(filename, sep=";")
+            self.optimal_solutions = {
+                str(int(row['condition'])): row.drop(['condition', 'mu']).to_numpy()
+                for _, row in self.optima_data.iterrows()
+            }
+
+    def read_random_solutions_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the random solutions from a CSV file (on request).
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        filename = path+"/"+self.name+"/qrandom.csv"
+        if os.path.exists(filename):
+            self.random_data      = pd.read_csv(filename, sep=";")
+            self.random_solutions = {
+                str(int(row['condition'])): row.drop(['condition', 'mu']).to_numpy()
+                for _, row in self.random_data.iterrows()
+            }
+
     def check_model_loading( self, verbose: Optional[bool] = False ) -> None:
         """
         Check if the model is loaded correctly.
@@ -771,6 +805,8 @@ class Model:
         self.read_constant_reactions_from_csv(path)
         self.read_protein_contributions_from_csv(path)
         self.read_initial_solution_from_csv(path)
+        self.read_optimal_solutions_from_csv(path)
+        self.read_random_solutions_from_csv(path)
         self.check_model_loading()
         self.initialize_model_mathematical_variables()
 
