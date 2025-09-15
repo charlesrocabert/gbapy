@@ -38,6 +38,7 @@ from gba import (
     Model
 )
 from gba.Enumerations import (
+    GeneEssentiality,
     SpeciesType,
     SpeciesLocation,
     ReactionType,

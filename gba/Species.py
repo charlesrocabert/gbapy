@@ -179,6 +179,15 @@ class Species:
             df["Formula"] = text
         if self.mass is not None:
             df["Mass"] = self.mass
+        if "gene" in self.__dict__:
+            df["Gene"] = (self.gene if self.gene is not None else "-")
+        if "product" in self.__dict__:
+            df["Product"] = (self.product if self.product is not None else "-")
+        if "essentiality" in self.__dict__:
+            df["Essentiality"] = ("Essential" if self.essentiality == GeneEssentiality.ESSENTIAL else
+                                  "Quasi-essential" if self.essentiality == GeneEssentiality.QUASI_ESSENTIAL else
+                                  "Non-essential" if self.essentiality == GeneEssentiality.NON_ESSENTIAL else
+                                  "Unknown")
         return pd.DataFrame.from_dict(df, orient="index", columns=[self.id])
     
     def summary( self ) -> None:
@@ -200,6 +209,9 @@ class Protein(Species):
         Gene encoding the protein.
     product : str
         Product of the gene (description).
+    essentiality : GeneEssentiality
+        Essentiality of the protein (essential, quasi-essential,
+        non-essential, unknown).
     """
     
     def __init__( self,
@@ -208,7 +220,8 @@ class Protein(Species):
                  sequence: Optional[str] = None,
                  mass: Optional[float] = None,
                  gene: Optional[str] = None,
-                 product: Optional[str] = None
+                 product: Optional[str] = None,
+                 essentiality: Optional[GeneEssentiality] = None
                 ) -> None:
         """
         Main constructor of the Protein class.
@@ -227,10 +240,14 @@ class Protein(Species):
             Gene encoding the protein.
         product : str
             Product of the gene (description).
+        essentiality : GeneEssentiality
+            Essentiality of the protein (essential, quasi-essential,
+            non-essential, unknown).
         """
         super().__init__(id, name, SpeciesLocation.INTERNAL, SpeciesType.PROTEIN, sequence, mass)
-        self.gene    = gene
-        self.product = product
+        self.gene         = gene
+        self.product      = product
+        self.essentiality = essentiality
 
 class Metabolite(Species):
     """

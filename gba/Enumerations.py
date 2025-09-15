@@ -34,15 +34,28 @@ import os
 import sys
 import enum
 
+class GeneEssentiality(enum.Enum):
+    """
+    Gene essentiality enumeration.
+    - ESSENTIAL      : Gene is essential.
+    - QUASI_ESSENTIAL: Gene is quasi-essential.
+    - NON_ESSENTIAL  : Gene is non-essential.
+    - UNKNOWN        : Gene essentiality is unknown.
+    """
+    ESSENTIAL       = 1
+    QUASI_ESSENTIAL = 2
+    NON_ESSENTIAL   = 3
+    UNKNOWN         = 4
+
 class SpeciesType(enum.Enum):
     """
     Species type enumeration.
     - DNA          : DNA species (DNA sequence available).
     - RNA          : RNA species (RNA sequence available).
-    - Protein      : Protein species (amino-acid sequence available).
-    - SmallMolecule: Small molecule species (chemical formula available).
-    - MacroMolecule: Macro-molecule species (chemical formula with radical).
-    - Unknown      : Species type is unknown.
+    - PROTEIN      : Protein species (amino-acid sequence available).
+    - SMALLMOLECULE: Small molecule species (chemical formula available).
+    - MACROMOLECULE: Macro-molecule species (chemical formula with radical).
+    - UNKNOWN      : Species type is unknown.
     """
     DNA           = 1
     RNA           = 2
@@ -54,9 +67,9 @@ class SpeciesType(enum.Enum):
 class SpeciesLocation(enum.Enum):
     """
     Species location enumeration.
-    - Internal: Species located inside the cell.
-    - External: Species located outside the cell.
-    - Unknown : Species location is unknown.
+    - INTERNAL: Species located inside the cell.
+    - EXTERNAL: Species located outside the cell.
+    - UNKNOWN : Species location is unknown.
     """
     INTERNAL = 1
     EXTERNAL = 2
@@ -65,10 +78,10 @@ class SpeciesLocation(enum.Enum):
 class ReactionType(enum.Enum):
     """
     Reaction type enumeration.
-    - Metabolic: Metabolic (internal) reaction.
-    - Transporter: Transport (boundary) reaction.
-    - Spontaneous: Spontaneous (boundary) reaction.
-    - Exchange : Exchange reaction (specific to FBA models).
+    - METABOLIC:   Metabolic (internal) reaction.
+    - TRANSPORT:   Transport (boundary) reaction.
+    - SPONTANEOUS: Spontaneous (boundary) reaction.
+    - EXCHANGE :   Exchange reaction (specific to FBA models).
     """
     METABOLIC   = 1
     TRANSPORT   = 2
@@ -78,9 +91,9 @@ class ReactionType(enum.Enum):
 class ReactionDirection(enum.Enum):
     """
     Reaction direction enumeration.
-    - Forward   : Forward reaction.
-    - Backward  : Backward reaction.
-    - Reversible: Reversible reaction.
+    - FORWARD   : Forward reaction.
+    - BACKWARD  : Backward reaction.
+    - REVERSIBLE: Reversible reaction.
     """
     FORWARD    = 1
     BACKWARD   = 2
@@ -89,9 +102,9 @@ class ReactionDirection(enum.Enum):
 class ReactionGPR(enum.Enum):
     """
     Reaction GPR logic enumeration.
-    - NONE:    No logical operator.
-    - AND:     Logical AND operator.
-    - OR:      Logical OR operator.
+    - NONE: No logical operator.
+    - AND:  Logical AND operator.
+    - OR:   Logical OR operator.
     """
     NONE = 1
     AND  = 2
@@ -100,12 +113,11 @@ class ReactionGPR(enum.Enum):
 class GbaReactionType(enum.Enum):
     """
     Reaction direction enumeration.
-    - iMM  : Simple irreversible Michaelis-Menten reaction.
-    - iMMa : Irreversible Michaelis-Menten reaction with activation.
-    - iMMi : Irreversible Michaelis-Menten reaction with inhibition.
-    - iMMia: Irreversible Michaelis-Menten reaction with activation+inhibition.
-    - iMMr : Irreversible Michaelis-Menten reaction with regulation.
-    - rMM  : Reversible Michaelis-Menten reaction.
+    - IMM  : Simple irreversible Michaelis-Menten reaction.
+    - IMMA : Irreversible Michaelis-Menten reaction with activation.
+    - IMMI : Irreversible Michaelis-Menten reaction with inhibition.
+    - IMMIA: Irreversible Michaelis-Menten reaction with activation+inhibition.
+    - RMM  : Reversible Michaelis-Menten reaction.
     """
     IMM   = 1
     IMMA  = 2

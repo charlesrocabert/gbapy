@@ -1826,12 +1826,21 @@ class Builder:
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_proteins.csv"
         f        = open(filename, "w")
-        f.write("id;name;mass;sequence;length;gene;product\n")
+        f.write("id;name;mass;sequence;length;gene;product;essentiality\n")
         for p in self.proteins.values():
-            name    = ("" if p.name is None else p.name)
-            gene    = ("" if p.gene is None else p.gene)
-            product = ("" if p.product is None else p.product)
-            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+str(len(p.formula))+";"+gene+";"+product+"\n")
+            name         = ("" if p.name is None else p.name)
+            gene         = ("" if p.gene is None else p.gene)
+            product      = ("" if p.product is None else p.product)
+            essentiality = ""
+            if p.essentiality is not None and p.essentiality == GeneEssentiality.ESSENTIAL:
+                essentiality = "Essential"
+            elif p.essentiality is not None and p.essentiality == GeneEssentiality.QUASI_ESSENTIAL:
+                essentiality = "Quasi-essential"
+            elif p.essentiality is not None and p.essentiality == GeneEssentiality.NON_ESSENTIAL:
+                essentiality = "Non-essential"
+            else:
+                essentiality = "Unknown"
+            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+str(len(p.formula))+";"+gene+";"+product+";"+essentiality+"\n")
         f.close()
     
     def write_ribosomal_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:

@@ -232,7 +232,7 @@ class Reaction:
             assert p_id not in self.proteins, throw_message(MessageType.ERROR, f"Protein <code>{p_id}</code> already in the enzyme composition of reaction <code>{self.id}</code>.")
             assert proteins[p_id] > 0, throw_message(MessageType.ERROR, f"Stoichiometry of protein <code>{p_id}</code> must be positive.")
             self.proteins[p_id] = proteins[p_id]
-
+    
     def remove_metabolite( self, metabolite_id: str ) -> None:
         """
         Remove a metabolite from the stoichiometry of the reaction.
