@@ -38,7 +38,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
 	name                          = "gba",
-	version                       = "0.2.0",
+	version                       = "0.3.0",
 	license                       = "GNU General Public License v3 (GPLv3)",
 	description                   = "gbapy (Growth Balance Analysis for Python)",
 	long_description              = long_description,
@@ -57,9 +57,9 @@ setup(
 	],
 	keywords     = "constraint-based-modeling growth-balance-analysis self-replicating-model systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
 	packages     = find_packages(exclude=["contrib", "docs", "tests"]),
-	package_data = {
-        'gba.data': ['**/*.csv', '**/*.ods']
-    },
+	# package_data = {
+    #     'gba.data': ['**/*.csv', '**/*.ods']
+    # },
 	python_requires  = ">=3",
 	install_requires = ["argparse", "numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly", "openpyxl", "pyexcel_ods3", "pyexcel_xlsx"],
 	project_urls     = {
