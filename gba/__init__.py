@@ -68,7 +68,6 @@ from gba.Model import (
     get_toy_model_path,
     read_toy_model,
     backup_model,
-    load_model,
-    create_model
+    load_model
 )
 

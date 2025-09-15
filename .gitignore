@@ -2,6 +2,7 @@
 *.DS_Store
 *.Rhistory
 *.Rapp.history
+temp_*
 clean_folders.sh
 deprecated/**
 tutorials/MMSYN_tutorial/temp/**

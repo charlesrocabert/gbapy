@@ -832,9 +832,10 @@ class Model:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv",
-                     "conditions.csv", "q0.csv",
+                     "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
-                     "protein_contributions.csv"]
+                     "protein_contributions.csv",
+                     "q0.csv", "optimal_solutions.csv", "random_solutions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
@@ -931,12 +932,12 @@ class Model:
         # 12) Save the optimums per condition  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if not self.optima_data.empty:
-            self.optima_data.to_csv(model_path+"/optimal_solutions.csv", sep=';', index=False)
+            self.optima_data.to_csv(model_path+"/qopt.csv", sep=';', index=False)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 13) Save random initial solutions    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if not self.random_data.empty:
-            self.random_data.to_csv(model_path+"/random_solutions.csv", sep=';', index=False)
+            self.random_data.to_csv(model_path+"/qrandom.csv", sep=';', index=False)
     
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1032,11 +1033,11 @@ class Model:
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
             K_df.to_excel(writer, sheet_name="K")
-            conditions_df.to_excel(writer, sheet_name="conditions")
             if KA_df is not None:
               KA_df.to_excel(writer, sheet_name="KA")
             if KI_df is not None:
                 KI_df.to_excel(writer, sheet_name="KI")
+            conditions_df.to_excel(writer, sheet_name="conditions")
             if constant_rhs_df is not None:
                 constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
             if constant_reactions_df is not None:
@@ -1046,9 +1047,9 @@ class Model:
             if q0_df is not None:
                 q0_df.to_excel(writer, sheet_name="q0", index=False)
             if not self.optima_data.empty:
-                self.optima_data.to_excel(writer, sheet_name="optimal_solutions", index=False)
+                self.optima_data.to_excel(writer, sheet_name="qopt", index=False)
             if not self.random_data.empty:
-                self.random_data.to_excel(writer, sheet_name="random_solutions", index=False)
+                self.random_data.to_excel(writer, sheet_name="qrandom", index=False)
         data_xlsx = get_data(xls_path)
         save_data(ods_path, data_xlsx)
         os.system("rm "+xls_path)
@@ -1130,6 +1131,25 @@ class Model:
     # 3) Setters                         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+    def add_info( self, category: str, key: str, content: str ) -> None:
+        """
+        Add a piece of information to the model.
+
+        Parameters
+        ----------
+        category : str
+            Category of the information (e.g., "Description", "Units", "Sheets",
+            "Authors", ...)
+        key : str
+            Key of the information.
+        content : str
+            Content of the information.
+        """
+        if category not in self.info:
+            self.info[category] = {}
+        assert key not in self.info[category], throw_message(MessageType.ERROR, f"Info key <code>{key}</code> already exists in info category <code>{category}</code>.")
+        self.info[category][key] = content
+    
     def clear_conditions( self ) -> None:
         """
         Clear all external conditions from the model.
@@ -1661,9 +1681,9 @@ class Model:
         ----------
         condition_id : Optional[str], default="1"
             Condition identifier.
-        max_flux_fraction : Optional[float], default=10.0
+        max_flux_fraction : Optional[float], default=50.0
             Maximal flux fraction.
-        rhs_factor : Optional[float], default=10.0
+        rhs_factor : Optional[float], default=1000.0
             Factor dividing the rhs of the mass conservation constraint.
         """
         solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
@@ -1679,88 +1699,82 @@ class Model:
         else:
             throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
-    def find_initial_solution_all( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
+    def test_rhs_factor( self, rhs_factor: float, max_flux_fraction: Optional[float] = 50.0 ) -> tuple[bool, Optional[float]]:
         """
-        Generate an initial solution using a linear program and testing it for
-        all conditions.
+        Test if the model is consistent for all conditions at the initial
+        solution found with a given rhs factor, and return the maximal growth
+        rate.
 
         Parameters
         ----------
-        max_flux_fraction : Optional[float], default=10.0
-            Maximal flux fraction.
-        rhs_factor : Optional[float], default=10.0
+        rhs_factor : float
             Factor dividing the rhs of the mass conservation constraint.
+        max_flux_fraction : Optional[float], default=50.0
+            Maximal flux fraction.
 
         Returns
         -------
-        string
-            "consistent" if the model is consistent at the initial solution,
-            "inconsistent" if the model is inconsistent at the initial solution,
-            "no_solution" if no solution could be found.
+        tuple[bool, Optional[float]]
+            A tuple (all_consistent, max_mu) where all_consistent is True if the
+            model is consistent for all conditions, and max_mu is the maximal
+            growth rate found (None if the model is not consistent for all
+            conditions).
         """
-        solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+        solved         = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+        all_consistent = False
+        max_mu         = 0.0
         if solved:
-            mu_max = 0.0
+            all_consistent = True
             for condition_id in self.condition_ids:
                 self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
                 self.check_model_consistency()
                 if not self.consistent:
-                    return "inconsistent", None
+                    all_consistent = False
                 else:
-                    if self.mu > mu_max:
-                        mu_max = self.mu
-            return "consistent", mu_max
-        else:
-            return "no_solution", None
-
-    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, initial_rhs_factor: Optional[float] = 1000.0 ) -> None:
+                    if self.mu > max_mu:
+                        max_mu = self.mu
+        return all_consistent, float(max_mu)
+    
+    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, verbose: Optional[bool] = False ) -> bool:
         """
-        Find the best initial solution by maximizing the growth rate mu while
-        reducing the rhs factor.
+        Find the best initial solution by testing increasing rhs factors.
 
         Parameters
         ----------
         max_flux_fraction : Optional[float], default=50.0
             Maximal flux fraction.
-        initial_rhs_factor : Optional[float], default=1000.0
-            Initial factor dividing the rhs of the mass conservation constraint.
+        verbose : Optional[bool], default=False
+            Verbose mode.
+
+        Returns
+        -------
+        bool
+            True if a consistent initial solution was found.
         """
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Test the initial parameters   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=initial_rhs_factor)
-        if success == "no_solution":
-            throw_message(MessageType.ERROR, "No initial solution could be found, consider reducing the max flux fraction.")
-        if success == "inconsistent":
-            throw_message(MessageType.ERROR, "Model is inconsistent with the initial solution, consider reducing the max flux fraction.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Run mu maximization algorithm #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        rhs_factor       = initial_rhs_factor
-        stop             = False
-        best_rhs_factor  = rhs_factor
-        rhs_factor      -= 1.0
-        while not stop:
-            success, current_mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
-            if success != "consistent":
-                stop = True
-                continue
-            if current_mu > mu:
-                mu               = current_mu
-                best_rhs_factor  = rhs_factor
-                rhs_factor      -= 1.0
-                if rhs_factor < 1.0:
-                    stop = True
-                    continue
-            else:
-                stop = True
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Recover the best solution     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        success, mu = self.find_initial_solution_all(max_flux_fraction=max_flux_fraction, rhs_factor=best_rhs_factor)
-        throw_message(MessageType.INFO, f"Best initial solution found with mu = {round(mu, 5)}.")
+        current_rhs_factor = 10.0
+        current_mu         = 0.0
+        best_rhs_factor    = 10.0
+        best_mu            = 0.0
+        optimal_solution_found = False
+        while not optimal_solution_found:
+            consistent, current_mu = self.test_rhs_factor(current_rhs_factor, max_flux_fraction=max_flux_fraction)
+            if consistent and current_mu > best_mu:
+                best_rhs_factor = current_rhs_factor
+                best_mu         = current_mu
+            elif consistent and current_mu <= best_mu:
+                optimal_solution_found = True
+            elif not consistent:
+                current_rhs_factor += 10.0
+            if current_rhs_factor > 10000.0:
+                if verbose:
+                 throw_message(MessageType.WARNING, "Impossible to find a consistent initial solution (rhs factor > 10000).")
+                return False
+        if verbose:
+            throw_message(MessageType.INFO, f"Best initial solution found with rhs factor = {best_rhs_factor} and maximal mu = {best_mu}.")
+        self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=best_rhs_factor)
+        return True
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
@@ -1789,8 +1803,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize the random data frame #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        columns          = ["condition", "mu", "density"]
-        columns          = columns + self.reaction_ids
+        columns          = ["condition"] + self.reaction_ids + ["mu"]
         self.random_data = pd.DataFrame(columns=columns)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Find the random solutions        #
@@ -1812,7 +1825,7 @@ class Model:
             self.check_model_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 solutions += 1
-                data_dict  = {"condition": condition_id, "mu": self.mu, "density": self.density}
+                data_dict  = {"condition": condition_id, "mu": self.mu}
                 for reaction_id, fluxfraction in zip(self.reaction_ids, self.q):
                     data_dict[reaction_id] = fluxfraction
                 data_row                         = pd.Series(data=data_dict)
@@ -1825,7 +1838,7 @@ class Model:
     # 6) Optimization functions          #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def build_gbacpp_command_line( self, temporary_name: str, tol: float, stable_count: int, max_iter: float ):
+    def build_gbacpp_command_line( self, temporary_name: str, tol: float, stable_count: int, max_iter: float ) -> str:
         """
         Build the command line for the C++ solver gbacpp.
 
@@ -1968,7 +1981,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         return converged, run_time
     
-    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = True ) -> bool:
+    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = False ) -> bool:
         """
         Find the optimum of the model using the gbacpp solver.
 
@@ -1992,12 +2005,18 @@ class Model:
             Time taken by the solver in seconds.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Write the model in a temporary file with a unique key #
+        # 1) Initialize the random data frame                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        columns = ["condition"] + self.reaction_ids + ["mu"]
+        if self.optima_data.empty:
+            self.optima_data = pd.DataFrame(columns=columns)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write the model in a temporary file with a unique key #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         temporary_name = "temp_"+str(int(time.time()))
         self.write_to_csv(name=temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Run gbacpp solver                                     #
+        # 3) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         cmdline             = self.build_gbacpp_command_line(temporary_name, tol, stable, max_iter)
         solver_process      = subprocess.Popen([cmdline], stdout=subprocess.PIPE, shell=True)
@@ -2006,7 +2025,7 @@ class Model:
         run_time            = 0.0
         converged, run_time = self.read_solver_output(solver_output)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Remove the temporary files and folder                 #
+        # 4) Remove the temporary files and folder                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         assert temporary_name.startswith("temp_"), throw_message(MessageType.ERROR, "Temporary folder name must start with 'temp_'.")
         assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.ERROR, "Temporary folder name must contain a timestamp.")
@@ -2018,16 +2037,21 @@ class Model:
                     os.remove(file_path)
             os.rmdir(temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Print the result                                      #
+        # 5) Print the result                                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if converged is not None:
             if converged:
+                data_dict = {"condition": self.condition, "mu": self.mu}
+                for reaction_id, fluxfraction in zip(self.reaction_ids, self.q):
+                    data_dict[reaction_id] = fluxfraction
+                data_row                               = pd.Series(data=data_dict)
+                self.optima_data                       = pd.concat([self.optima_data, data_row.to_frame().T], ignore_index=True)
                 self.optimal_solutions[self.condition] = np.copy(self.q)
                 if verbose:
-                    throw_message(MessageType.INFO, f"Model converged with mu = {self.mu} after {run_time:.2f} seconds.")
+                    throw_message(MessageType.INFO, f"Condition {self.condition}: model converged with mu = {self.mu} after {run_time:.2f} seconds.")
             else:
                 if verbose:
-                    throw_message(MessageType.WARNING, f"Model did not converge after {run_time:.2f} seconds.")
+                    throw_message(MessageType.WARNING, f"Condition {self.condition}: model did not converge after {run_time:.2f} seconds.")
             return True
         else:
             return False
