@@ -148,16 +148,16 @@ class Model:
         Number of reactions.
     sM : list
         Columns sum of M.
-    e : list
-        Enzymatic reaction indices.
     s : list
         Transport reaction indices.
+    e : list
+        Enzymatic reaction indices.
     r : int
         Ribosome reaction index.
-    ne : int
-        Number of enzymatic reactions.
     ns : int
         Number of transport reactions.
+    ne : int
+        Number of enzymatic reactions.
     m : list
         Metabolite indices.
     a : int
@@ -296,11 +296,11 @@ class Model:
 
         ### Indices for reactions: s (transport), e (enzymatic), and ribosome r ###
         self.sM = []
-        self.e  = []
         self.s  = []
+        self.e  = []
         self.r  = 0
-        self.ne = 0
         self.ns = 0
+        self.ne = 0
 
         ### Indices: m (metabolite), a (all proteins) ###
         self.m = []
@@ -716,17 +716,15 @@ class Model:
         # 4) Indices: s (transport), e (enzymatic), r (ribosome) #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.sM = np.sum(self.M, axis=0)
-        is_e    = [self.sM[0:(self.nj-1)] == 0]
-        self.e  = []
-        self.s  = []
-        for i in range(self.nj-1):
-            if is_e[0][i] == True:
-                self.e.append(i)
-            else:
-                self.s.append(i)
         self.r  = self.nj-1
-        self.ne = len(self.e)
+        for j in range(self.nj-1):
+            for i in range(self.ni):
+                if self.Mx[i,j] != 0 and self.metabolite_ids[i] in self.x_ids:
+                    self.s.append(j)
+                    break
+        self.e  = [j for j in range(self.nj-1) if j not in self.s]
         self.ns = len(self.s)
+        self.ne = len(self.e)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Indices: m (metabolite), a (all proteins)           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2141,7 +2139,7 @@ class Model:
         }
         df1 = pd.DataFrame(df1)
         df2 = {
-            "Category": ["Nb reactions", "Nb exchange reactions", "Nb internal reactions"],
+            "Category": ["Nb reactions", "Nb transporters", "Nb internal reactions"],
             "Count": [self.nj, self.ns, self.ne]
         }
         df2 = pd.DataFrame(df2)

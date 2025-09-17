@@ -1183,7 +1183,10 @@ class Builder:
         """
         if enforced_reactions is not None:
             for r_id, value in enforced_reactions.items():
-                self.reactions[r_id].lb = value
+                if value > 0.0:
+                    self.reactions[r_id].lb = value
+                else:
+                    self.reactions[r_id].ub = value
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Create the cobra model            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

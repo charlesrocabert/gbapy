@@ -433,6 +433,24 @@ class Reaction:
         self.complete_kcat_values(kcat_value)
         self.complete_km_values(km_value)
     
+    def set_boundaries( self, lb: float, ub: float ) -> None:
+        """
+        Set the lower and upper bounds of the reaction.
+
+        Parameters
+        ----------
+        lb : float
+            Lower bound of the reaction.
+        ub : float
+            Upper bound of the reaction.
+        """
+        assert self.check_no_conversion(), throw_message(MessageType.ERROR, f"Reaction <code>{self.id}</code> has been converted to GBA format. Consider to reset the conversion.")
+        assert lb <= ub, throw_message(MessageType.ERROR, f"Lower bound must be lower or equal to the upper bound for reaction <code>{self.id}</code>.")
+        self.lb = lb
+        self.ub = ub
+        self.define_direction()
+        self.define_expression()
+        
     #~~~~~~~~~~~~~~~~~~~~~#
     # 2) General routines #
     #~~~~~~~~~~~~~~~~~~~~~#
