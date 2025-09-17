@@ -1771,7 +1771,7 @@ class Model:
                         max_mu = self.mu
         return all_consistent, float(max_mu)
     
-    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, verbose: Optional[bool] = False ) -> bool:
+    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, initial_rhs_factor: Optional[float] = 10.0, verbose: Optional[bool] = False ) -> bool:
         """
         Find the best initial solution by testing increasing rhs factors.
 
@@ -1779,6 +1779,8 @@ class Model:
         ----------
         max_flux_fraction : Optional[float], default=50.0
             Maximal flux fraction.
+        initial_rhs_factor : Optional[float], default=10.0
+            Initial factor dividing the rhs of the mass conservation constraint.
         verbose : Optional[bool], default=False
             Verbose mode.
 
@@ -1787,16 +1789,18 @@ class Model:
         bool
             True if a consistent initial solution was found.
         """
-        current_rhs_factor = 10.0
+        current_rhs_factor = initial_rhs_factor
         current_mu         = 0.0
-        best_rhs_factor    = 10.0
+        best_rhs_factor    = initial_rhs_factor
         best_mu            = 0.0
         optimal_solution_found = False
         while not optimal_solution_found:
             consistent, current_mu = self.test_rhs_factor(current_rhs_factor, max_flux_fraction=max_flux_fraction)
             if consistent and current_mu > best_mu:
-                best_rhs_factor = current_rhs_factor
-                best_mu         = current_mu
+                print("Current mu: ", current_mu, " at rhs factor: ", current_rhs_factor)
+                best_rhs_factor     = current_rhs_factor
+                best_mu             = current_mu
+                current_rhs_factor += 10.0
             elif consistent and current_mu <= best_mu:
                 optimal_solution_found = True
             elif not consistent:
