@@ -54,6 +54,8 @@ class Reaction:
         Identifier of the species.
     name : str
         Name of the species.
+    subsystem : str
+        Reaction's subsystem in metabolism.
     reaction_type : ReactionType
         Type of the reaction (metabolic, transport, spontaneous, exchange).
     lb : float
@@ -100,6 +102,7 @@ class Reaction:
     def __init__( self,
                   id: Optional[str] = None,
                   name: Optional[str] = None,
+                  subsystem: Optional[str] = None,
                   reaction_type: Optional[ReactionType] = None,
                   lb: Optional[float] = None,
                   ub: Optional[float] = None,
@@ -117,6 +120,8 @@ class Reaction:
             Identifier of the reaction.
         name : str
             Name of the reaction.
+        subsystem : str
+            Reaction's subsystem in metabolism.
         reaction_type : ReactionType
             Type of the reaction (metabolic, transport, spontaneous, exchange).
         lb : float
@@ -140,6 +145,7 @@ class Reaction:
         self._builder       = None
         self.id             = id
         self.name           = name
+        self.subsystem      = subsystem
         self.reaction_type  = reaction_type
         self.lb             = lb
         self.ub             = ub

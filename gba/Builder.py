@@ -166,7 +166,16 @@ class Builder:
         self.metabolites = {}
         self.reactions   = {}
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) FBA model reconstruction             #
+        # 2) Default kinetic parameters           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.default_kcat = {ReactionType.METABOLIC: 0.0, 
+                             ReactionType.TRANSPORT: 0.0, 
+                             ReactionType.SPONTANEOUS: 0.0}
+        self.default_km   = {ReactionType.METABOLIC: 0.0,
+                             ReactionType.TRANSPORT: 0.0,
+                             ReactionType.SPONTANEOUS: 0.0}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) FBA model reconstruction             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.FBA_biomass_reaction     = None
         self.FBA_wrapper_reactions    = {}
@@ -184,7 +193,7 @@ class Builder:
         self.FBA_inactive_reactions   = []
         self.FBA_is_built             = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) GBA reconstruction                   #
+        # 4) GBA reconstruction                   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.GBA_row_indices           = {}
         self.GBA_external_row_indices  = {}
@@ -1990,6 +1999,25 @@ class Builder:
             if r.protein_contributions is not None:
                 for p_id, contribution in r.protein_contributions.items():
                     f.write(r.id+";"+p_id+";"+str(contribution)+"\n")
+        f.close()
+    
+    def write_subsystems_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write list of reaction's subsystems into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
+        filename = path+"/"+(self.name if name == "" else name)+"_subsystems.csv"
+        f        = open(filename, "w")
+        f.write("reaction_id;subsystem\n")
+        for r in self.reactions.values():
+            f.write(r.id+";"+r.subsystem+"\n")
         f.close()
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

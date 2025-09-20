@@ -1644,7 +1644,7 @@ class Model:
         self.calculate_first_order_terms()
         self.calculate_second_order_terms()
 
-    def check_model_consistency( self ) -> None:
+    def check_consistency( self ) -> None:
         """
         Check the model state's consistency.
         """
@@ -1725,7 +1725,7 @@ class Model:
             self.set_condition(condition_id)
             self.set_q0(self.initial_solution)
             self.calculate()
-            self.check_model_consistency()
+            self.check_consistency()
             if self.consistent:
                 throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
             else:
@@ -1763,7 +1763,7 @@ class Model:
                 self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
-                self.check_model_consistency()
+                self.check_consistency()
                 if not self.consistent:
                     all_consistent = False
                 else:
@@ -1860,7 +1860,7 @@ class Model:
                 if self.q[0] >= 0.0:
                     negative_term = False
             self.calculate_state()
-            self.check_model_consistency()
+            self.check_consistency()
             if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
                 solutions += 1
                 data_dict  = {"condition": condition_id, "mu": self.mu}
