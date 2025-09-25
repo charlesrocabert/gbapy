@@ -1636,6 +1636,7 @@ class Builder:
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        M_df.replace(-0.0, 0.0, inplace=True)
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1644,6 +1645,7 @@ class Builder:
         kcat_df           = pd.DataFrame(self.GBA_kcat_f, index=self.GBA_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.GBA_kcat_b
         kcat_df           = kcat_df.transpose()
+        kcat_df.replace(-0.0, 0.0, inplace=True)
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1656,6 +1658,7 @@ class Builder:
                 if self.GBA_KM_b[i, j] != 0.0:
                     assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.ERROR, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        K_df.replace(-0.0, 0.0, inplace=True)
         K_df.to_csv(model_path+"/K.csv", sep=";")
         del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1663,16 +1666,19 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if np.any(self.GBA_KA):
             KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+            KA_df.replace(-0.0, 0.0, inplace=True)
             KA_df.to_csv(model_path+"/KA.csv", sep=";")
             del(KA_df)
         if np.any(self.GBA_KI):
             KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+            KI_df.replace(-0.0, 0.0, inplace=True)
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.GBA_conditions)
+        conditions_df.replace(-0.0, 0.0, inplace=True)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1739,12 +1745,14 @@ class Builder:
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        M_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.GBA_kcat_f, index=self.GBA_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.GBA_kcat_b
         kcat_df           = kcat_df.transpose()
+        kcat_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1755,10 +1763,12 @@ class Builder:
                 if self.GBA_KM_b[i, j] != 0.0:
                     assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.ERROR, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+        K_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.GBA_conditions)
+        conditions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1766,8 +1776,10 @@ class Builder:
         KI_df = None
         if np.any(self.GBA_KA):
             KA_df = pd.DataFrame(self.GBA_KA, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+            KA_df.replace(-0.0, 0.0, inplace=True)
         if np.any(self.GBA_KI):
             KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
+            KI_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant terms          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1775,8 +1787,10 @@ class Builder:
         constant_reactions_df = None
         if len(self.GBA_constant_rhs) > 0:
             constant_rhs_df = pd.DataFrame(list(self.GBA_constant_rhs.items()), columns=["metabolite", "value"])
+            constant_rhs_df.replace(-0.0, 0.0, inplace=True)
         if len(self.GBA_constant_reactions) > 0:
             constant_reactions_df = pd.DataFrame(list(self.GBA_constant_reactions.items()), columns=["reaction", "value"])
+            constant_reactions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Write the protein contributions   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1787,6 +1801,7 @@ class Builder:
                 for p_id, contribution in contributions.items():
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
+            protein_contributions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 10) Write the variables in xlsx      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

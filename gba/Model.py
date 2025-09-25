@@ -891,6 +891,7 @@ class Model:
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
+        M_df.replace(-0.0, 0.0, inplace=True)
         M_df.to_csv(model_path+"/M.csv", sep=";")
         del(M_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -899,12 +900,14 @@ class Model:
         kcat_df = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
         kcat_df["kcat_b"] = self.kcat_b
         kcat_df = kcat_df.transpose()
+        kcat_df.replace(-0.0, 0.0, inplace=True)
         kcat_df.to_csv(model_path+"/kcat.csv", sep=";")
         del(kcat_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the KM matrix               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        K_df.replace(-0.0, 0.0, inplace=True)
         K_df.to_csv(model_path+"/K.csv", sep=";")
         del(K_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -912,16 +915,19 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if np.any(self.KA):
             KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
+            KA_df.replace(-0.0, 0.0, inplace=True)
             KA_df.to_csv(model_path+"/KA.csv", sep=";")
             del(KA_df)
         if np.any(self.KI):
             KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+            KI_df.replace(-0.0, 0.0, inplace=True)
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
+        conditions_df.replace(-0.0, 0.0, inplace=True)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1008,16 +1014,19 @@ class Model:
         # 3) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
+        M_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
         kcat_df["kcat_b"] = self.kcat_b
         kcat_df           = kcat_df.transpose()
+        kcat_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
+        K_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 6) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1025,12 +1034,15 @@ class Model:
         KI_df = None
         if np.any(self.KA):
             KA_df = pd.DataFrame(self.KA, index=self.metabolite_ids, columns=self.reaction_ids)
+            KA_df.replace(-0.0, 0.0, inplace=True)
         if np.any(self.KI):
             KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
+            KI_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 7) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
+        conditions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant terms          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1038,8 +1050,10 @@ class Model:
         constant_reactions_df = None
         if len(self.constant_rhs) > 0:
             constant_rhs_df = pd.DataFrame(list(self.constant_rhs.items()), columns=["metabolite", "value"])
+            constant_rhs_df.replace(-0.0, 0.0, inplace=True)
         if len(self.constant_reactions) > 0:
             constant_reactions_df = pd.DataFrame(list(self.constant_reactions.items()), columns=["reaction", "value"])
+            constant_reactions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 9) Write the protein contributions   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1050,6 +1064,7 @@ class Model:
                 for p_id, contribution in contributions.items():
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
+            protein_contributions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 10) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
