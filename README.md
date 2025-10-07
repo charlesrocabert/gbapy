@@ -31,7 +31,7 @@ model.find_optimum()
 ```
 
 ## Copyright <a name="copyright"></a>
-Copyright © 2024-2025 Charles Rocabert, Furkan Mert. All rights reserved.
+Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
 
 ## License <a name="license"></a>
 
