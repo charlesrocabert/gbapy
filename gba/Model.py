@@ -1674,7 +1674,7 @@ class Model:
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
+    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
         """
         Solve the local linear problem to find the initial solution.
 
@@ -1697,10 +1697,12 @@ class Model:
         lb_vec = []
         for j in range(self.nj):
             if self.reversible[j]:
-                lb_vec.append(-max_flux_fraction)
+                lb_vec.append(-gp.GRB.INFINITY)
+                #lb_vec.append(-max_flux_fraction)
             else:
-                lb_vec.append(GbaConstants.TOL.value)
-        ub_vec = [max_flux_fraction]*self.nj
+                lb_vec.append(0.0)
+        ub_vec = [gp.GRB.INFINITY]*self.nj
+        #ub_vec = [max_flux_fraction]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
            lb_vec[r_index] = item[1]
@@ -1748,6 +1750,70 @@ class Model:
         else:
             throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
+    def solve_local_linear_problem_for_minimal_support( self, blocked_reactions: list[str], max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
+        """
+        Solve the local linear problem to find the initial solution
+        in the case of minimal support determination.
+
+        Parameters
+        ----------
+        max_flux_fraction : Optional[float], default=50.0
+            Maximal flux fraction.
+        rhs_factor : Optional[float], default=1000.0
+            Factor dividing the rhs of the mass conservation constraint.
+        """
+        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
+        assert rhs_factor > 0.0, throw_message(MessageType.ERROR, "RHS factor must be positive.")
+        lb_vec = []
+        ub_vec = []
+        for j in range(self.nj):
+            if self.reversible[j]:
+                lb_vec.append(-max_flux_fraction)
+                ub_vec.append(max_flux_fraction)
+            else:
+                lb_vec.append(GbaConstants.TOL.value)
+                ub_vec.append(max_flux_fraction)
+            if self.reaction_ids[j] in blocked_reactions:
+                lb_vec[-1] = 0.0
+                ub_vec[-1] = 0.0
+        gpmodel = gp.Model(env=env)
+        v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
+        min_b   = 1/rhs_factor
+        rhs     = np.repeat(min_b, self.nc)
+        gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
+        gpmodel.addConstr(self.M @ v >= rhs, name="c1")
+        gpmodel.addConstr(self.sM @ v == 1, name="c2")
+        gpmodel.optimize()
+        try:
+            self.initial_solution = np.copy(v.X)
+            return True
+        except:
+            return False
+    
+    def find_minimal_support( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
+        """
+        Find a minimal support initial solution using a linear program.
+
+        Parameters
+        ----------
+        max_flux_fraction : Optional[float], default=50.0
+            Maximal flux fraction.
+        rhs_factor : Optional[float], default=1000.0
+            Factor dividing the rhs of the mass conservation constraint.
+        """
+        useless = []
+        for j in range(self.nj):
+            blocked_reactions = [self.reaction_ids[j]]
+            solved            = self.solve_local_linear_problem_for_minimal_support(blocked_reactions=blocked_reactions, max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
+            if solved:
+                self.set_condition(condition_id)
+                self.set_q0(self.initial_solution)
+                self.calculate()
+                self.check_consistency()
+                if self.consistent:
+                    useless.append(self.reaction_ids[j])
+        return useless
+    
     def test_rhs_factor( self, rhs_factor: float, max_flux_fraction: Optional[float] = 50.0 ) -> tuple[bool, Optional[float]]:
         """
         Test if the model is consistent for all conditions at the initial
@@ -2108,7 +2174,10 @@ class Model:
             return True
         else:
             return False
-        
+    
+    def score( self, p1, p2 ) -> float:
+        return self.mu*(1.0+np.sum([p1 for c in self.c if c < 0.0]))*(1.0+np.sum([p2 for p in self.p if p < 0.0]))
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Summary functions               #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

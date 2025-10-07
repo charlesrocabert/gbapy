@@ -37,8 +37,6 @@ import pickle
 import numpy as np
 import pandas as pd
 from typing import Optional
-from pyexcel_xlsx import get_data
-from pyexcel_ods3 import save_data
 from IPython.display import display_html
 
 try:
@@ -207,6 +205,7 @@ class Builder:
         self.GBA_KM_b                  = None
         self.GBA_KA                    = None
         self.GBA_KI                    = None
+        self.GBA_rho                   = 0.0
         self.GBA_conditions            = {}
         self.GBA_constant_rhs          = {}
         self.GBA_constant_reactions    = {}
@@ -666,6 +665,19 @@ class Builder:
         r_index                       = self.GBA_col_indices[reaction_id]
         self.GBA_KI[m_index, r_index] = value
 
+    def set_rho( self, rho: float ) -> None:
+        """
+        Set the total density of the cell in the GBA converted model.
+
+        Parameters
+        ----------
+        rho : float
+            Total density of the cell (g/L).
+        """
+        assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
+        assert rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
+        self.GBA_rho = rho
+    
     def clear_conditions( self ) -> None:
         """
         Clear all external conditions from the GBA converted model.
@@ -1612,7 +1624,7 @@ class Builder:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv",
-                     "conditions.csv",
+                     "conditions.csv", "rho.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
@@ -1675,14 +1687,21 @@ class Builder:
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the conditions              #
+        # 7) Write rho                         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/rho.csv", "w")
+        f.write(";(g/L)\n")
+        f.write("rho;"+str(self.GBA_rho)+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.GBA_conditions)
         conditions_df.replace(-0.0, 0.0, inplace=True)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant RHS terms      #
+        # 9) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.GBA_constant_rhs) > 0:
             f = open(model_path+"/constant_rhs.csv", "w")
@@ -1691,7 +1710,7 @@ class Builder:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the constant reactions      #
+        # 10) Write the constant reactions     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.GBA_constant_reactions) > 0:
             f = open(model_path+"/constant_reactions.csv", "w")
@@ -1700,7 +1719,7 @@ class Builder:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save protein contributions       #
+        # 11) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
@@ -1724,12 +1743,7 @@ class Builder:
         assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Check the existence of the folder #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        xls_path = path+"/"+(name if name != "" else self.name)+".xlsx"
-        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the information             #
+        # 1) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         Info_df = None
         if len(self.info) > 0:
@@ -1742,19 +1756,19 @@ class Builder:
             Info_df         = pd.DataFrame(rows)
             Info_df.columns = ["", "", ""]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the mass fraction matrix    #
+        # 2) Write the mass fraction matrix    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         M_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the kcat vectors            #
+        # 3) Write the kcat vectors            #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.GBA_kcat_f, index=self.GBA_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.GBA_kcat_b
         kcat_df           = kcat_df.transpose()
         kcat_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the forward KM matrices     #
+        # 4) Write the forward KM matrices     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for i in self.GBA_row_indices.values():
             for j in self.GBA_col_indices.values():
@@ -1765,12 +1779,7 @@ class Builder:
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         K_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the conditions              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        conditions_df = pd.DataFrame(self.GBA_conditions)
-        conditions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the KA and KI matrices      #
+        # 5) Write the KA and KI matrices      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = None
         KI_df = None
@@ -1780,6 +1789,16 @@ class Builder:
         if np.any(self.GBA_KI):
             KI_df = pd.DataFrame(self.GBA_KI, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
             KI_df.replace(-0.0, 0.0, inplace=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Write rho                         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rho_df = pd.DataFrame([["rho", self.GBA_rho]], columns=["", "(g/L)"])
+        rho_df.replace(-0.0, 0.0, inplace=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) Write the conditions              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        conditions_df = pd.DataFrame(self.GBA_conditions)
+        conditions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Write the constant terms          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1803,30 +1822,29 @@ class Builder:
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
             protein_contributions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Write the variables in xlsx      #
+        # 10) Write the variables in ods       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        with pd.ExcelWriter(xls_path) as writer:
+        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
+        with pd.ExcelWriter(ods_path, engine="odf") as writer:
             if Info_df is not None:
                 Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
             kcat_df.to_excel(writer, sheet_name="kcat")
             K_df.to_excel(writer, sheet_name="K")
-            conditions_df.to_excel(writer, sheet_name="conditions")
             if KA_df is not None:
-              KA_df.to_excel(writer, sheet_name="KA")
+                KA_df.to_excel(writer, sheet_name="KA")
             if KI_df is not None:
                 KI_df.to_excel(writer, sheet_name="KI")
+            rho_df.to_excel(writer, sheet_name="rho", index=False, header=True)
+            conditions_df.to_excel(writer, sheet_name="conditions")
             if constant_rhs_df is not None:
                 constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
             if constant_reactions_df is not None:
                 constant_reactions_df.to_excel(writer, sheet_name="constant_reactions", index=False)
             if protein_contributions_df is not None:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
-        data_xlsx = get_data(xls_path)
-        save_data(ods_path, data_xlsx)
-        os.system("rm "+xls_path)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Free memory                      #
+        # 12) Free memory                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)
@@ -1834,6 +1852,7 @@ class Builder:
         del(K_df)
         del(KA_df)
         del(KI_df)
+        del(rho_df)
         del(conditions_df)
         del(constant_rhs_df)
         del(constant_reactions_df)
