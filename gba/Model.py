@@ -838,8 +838,8 @@ class Model:
         for sheet_name in xls.sheet_names:
             if os.path.exists("./temp/"+self.name+"/"+sheet_name+".csv"):
                os.remove("./temp/"+self.name+"/"+sheet_name+".csv")
-            if os.path.exists("./temp/"+self.name+"/q0.csv"):
-                os.remove("./temp/"+self.name+"/q0.csv")
+        if os.path.exists("./temp/"+self.name+"/q.csv"):
+            os.remove("./temp/"+self.name+"/q.csv")
         os.rmdir("./temp/"+self.name)
         os.rmdir("./temp/")
     
@@ -869,7 +869,7 @@ class Model:
                      "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv",
-                     "q0.csv", "optimal_solutions.csv", "random_solutions.csv"]
+                     "q.csv", "optimal_solutions.csv", "random_solutions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
@@ -963,7 +963,7 @@ class Model:
         # 11) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.initial_solution) > 0:
-            f = open(model_path+"/q0.csv", "w")
+            f = open(model_path+"/q.csv", "w")
             f.write("reaction;q0\n")
             for j in range(self.nj):
                 f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
@@ -1094,7 +1094,7 @@ class Model:
             if protein_contributions_df is not None:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
             if q0_df is not None:
-                q0_df.to_excel(writer, sheet_name="q0", index=False)
+                q0_df.to_excel(writer, sheet_name="q", index=False)
             if not self.optima_data.empty:
                 self.optima_data.to_excel(writer, sheet_name="qopt", index=False)
             if not self.random_data.empty:
