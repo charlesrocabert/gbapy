@@ -6,8 +6,6 @@
 
 <p align="center">
 <br />
-<a href="https://github.com/charlesrocabert/gbapy/releases/latest"><img src="https://img.shields.io/github/release/charlesrocabert/gbapy/all.svg" /></a>&nbsp;
-<a href="https://github.com/charlesrocabert/gbapy/actions/workflows/cmake-multi-platform.yml"><img src="https://github.com/charlesrocabert/gbapy/actions/workflows/cmake-multi-platform.yml/badge.svg" /></a>&nbsp;
 <a href="https://github.com/charlesrocabert/gbapy/LICENSE.html"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>&nbsp;
 <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff" />
 </p>
