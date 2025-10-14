@@ -61,7 +61,7 @@ setup(
     #     'gba.data': ['**/*.csv', '**/*.ods']
     # },
 	python_requires  = ">=3",
-	install_requires = ["argparse", "numpy", "scipy", "pandas", "gurobipy", "molmass", "Bio", "cobra", "plotly", "openpyxl", "pyexcel_ods3", "pyexcel_xlsx"],
+    install_requires = ["cobra", "molmass", "numpy", "pandas", "gurobipy", "Bio", "IPython"],
 	project_urls     = {
 	"Source": "https://github.com/charlesrocabert/gbapy"
 	},

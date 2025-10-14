@@ -30,11 +30,8 @@ License: GNU General Public License v3 (GPLv3)
 Copyright: © 2024-2025 Charles Rocabert.
 """
 
-import os
-import sys
 import molmass
 import pandas as pd
-from Bio import SeqIO
 from typing import Optional
 import Bio.SeqUtils as SeqUtils
 from IPython.display import display_html

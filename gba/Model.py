@@ -31,8 +31,6 @@ Copyright: © 2024-2025 Charles Rocabert, Furkan Mert.
 """
 
 import os
-import sys
-import csv
 import time
 import pickle
 import pkgutil
@@ -40,13 +38,9 @@ import subprocess
 import numpy as np
 import pandas as pd
 import gurobipy as gp
-from pathlib import Path
 from typing import Optional
-import plotly.express as px
-import plotly.graph_objects as go
 from pyexcel_xlsx import get_data
 from pyexcel_ods3 import save_data
-from plotly.subplots import make_subplots
 from IPython.display import display_html
 
 try:

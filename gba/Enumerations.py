@@ -30,8 +30,6 @@ License: GNU General Public License v3 (GPLv3)
 Copyright: © 2024-2025 Charles Rocabert.
 """
 
-import os
-import sys
 import enum
 
 class GeneEssentiality(enum.Enum):
