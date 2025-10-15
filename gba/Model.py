@@ -834,7 +834,7 @@ class Model:
         temporary_name = "temp_"+str(int(time.time()))
         assert os.path.exists(filename), throw_message(MessageType.ERROR, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
-        if not os.path.existstemporary_name):
+        if not os.path.exists(temporary_name):
             os.mkdir(temporary_name)
         if not os.path.exists(temporary_name+"/"+self.name):
             os.mkdir(temporary_name+"/"+self.name)
@@ -1695,7 +1695,8 @@ class Model:
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def solve_local_linear_problem( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
+    def solve_local_linear_problem_deprecated( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
+        throw_message(MessageType.ERROR, "Deprecated function")
         """
         Solve the local linear problem to find the initial solution.
 
@@ -1745,7 +1746,8 @@ class Model:
             throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
             return False
 
-    def find_initial_solution( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
+    def find_initial_solution_deprecated( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
+        throw_message(MessageType.ERROR, "Deprecated function")
         """
         Generate an initial solution using a linear program.
 
@@ -1771,150 +1773,154 @@ class Model:
         else:
             throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
-    def solve_local_linear_problem_for_minimal_support( self, blocked_reactions: list[str], max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
-        """
-        Solve the local linear problem to find the initial solution
-        in the case of minimal support determination.
+    ######################################
 
+    def solve_local_linear_problem( self, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
+        """
+        Find an initial solution.
+        
+        Description
+        -----------
+        Solution updated from Hugo Dourado.
+        
         Parameters
         ----------
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-        rhs_factor : Optional[float], default=1000.0
-            Factor dividing the rhs of the mass conservation constraint.
-        """
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
-        assert rhs_factor > 0.0, throw_message(MessageType.ERROR, "RHS factor must be positive.")
-        lb_vec = []
-        ub_vec = []
-        for j in range(self.nj):
-            if self.reversible[j]:
-                lb_vec.append(-max_flux_fraction)
-                ub_vec.append(max_flux_fraction)
-            else:
-                lb_vec.append(GbaConstants.TOL.value)
-                ub_vec.append(max_flux_fraction)
-            if self.reaction_ids[j] in blocked_reactions:
-                lb_vec[-1] = 0.0
-                ub_vec[-1] = 0.0
-        gpmodel = gp.Model(env=env)
-        v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
-        min_b   = 1/rhs_factor
-        rhs     = np.repeat(min_b, self.nc)
-        gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
-        gpmodel.addConstr(self.M @ v >= rhs, name="c1")
-        gpmodel.addConstr(self.sM @ v == 1, name="c2")
-        gpmodel.optimize()
-        try:
-            self.initial_solution = np.copy(v.X)
-            return True
-        except:
-            return False
-    
-    def find_minimal_support( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
-        """
-        Find a minimal support initial solution using a linear program.
-
-        Parameters
-        ----------
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-        rhs_factor : Optional[float], default=1000.0
-            Factor dividing the rhs of the mass conservation constraint.
-        """
-        useless = []
-        for j in range(self.nj):
-            blocked_reactions = [self.reaction_ids[j]]
-            solved            = self.solve_local_linear_problem_for_minimal_support(blocked_reactions=blocked_reactions, max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
-            if solved:
-                self.set_condition(condition_id)
-                self.set_q0(self.initial_solution)
-                self.calculate()
-                self.check_consistency()
-                if self.consistent:
-                    useless.append(self.reaction_ids[j])
-        return useless
-    
-    def test_rhs_factor( self, rhs_factor: float, max_flux_fraction: Optional[float] = 50.0 ) -> tuple[bool, Optional[float]]:
-        """
-        Test if the model is consistent for all conditions at the initial
-        solution found with a given rhs factor, and return the maximal growth
-        rate.
-
-        Parameters
-        ----------
-        rhs_factor : float
-            Factor dividing the rhs of the mass conservation constraint.
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-
-        Returns
-        -------
-        tuple[bool, Optional[float]]
-            A tuple (all_consistent, max_mu) where all_consistent is True if the
-            model is consistent for all conditions, and max_mu is the maximal
-            growth rate found (None if the model is not consistent for all
-            conditions).
-        """
-        solved         = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
-        all_consistent = False
-        max_mu         = 0.0
-        if solved:
-            all_consistent = True
-            for condition_id in self.condition_ids:
-                self.set_condition(condition_id)
-                self.set_q0(self.initial_solution)
-                self.calculate()
-                self.check_consistency()
-                if not self.consistent:
-                    all_consistent = False
-                else:
-                    if self.mu > max_mu:
-                        max_mu = self.mu
-        return all_consistent, float(max_mu)
-    
-    def find_best_initial_solution( self, max_flux_fraction: Optional[float] = 50.0, initial_rhs_factor: Optional[float] = 10.0, verbose: Optional[bool] = False ) -> bool:
-        """
-        Find the best initial solution by testing increasing rhs factors.
-
-        Parameters
-        ----------
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-        initial_rhs_factor : Optional[float], default=10.0
-            Initial factor dividing the rhs of the mass conservation constraint.
+        min_bp : Optional[float], default=0.2
+            Minimal protein production.
+        sat_act : Optional[float], default=1.0
+            Saturation of the metabolic enzymes.
+        slack : Optional[float], default=2.0
+            Slack variable for the minimal metabolite production.
         verbose : Optional[bool], default=False
             Verbose mode.
-
-        Returns
-        -------
-        bool
-            True if a consistent initial solution was found.
         """
-        current_rhs_factor = initial_rhs_factor
-        current_mu         = 0.0
-        best_rhs_factor    = initial_rhs_factor
-        best_mu            = 0.0
-        optimal_solution_found = False
-        while not optimal_solution_found:
-            consistent, current_mu = self.test_rhs_factor(current_rhs_factor, max_flux_fraction=max_flux_fraction)
-            if consistent and current_mu > best_mu:
-                print("Current mu: ", current_mu, " at rhs factor: ", current_rhs_factor)
-                best_rhs_factor     = current_rhs_factor
-                best_mu             = current_mu
-                current_rhs_factor += 10.0
-            elif consistent and current_mu <= best_mu:
-                optimal_solution_found = True
-            elif not consistent:
-                current_rhs_factor += 10.0
-            if current_rhs_factor > 10000.0:
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Define q boundaries     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        lb_vec = []
+        for j in range(self.nj):
+            if self.reversible[j]:
+                lb_vec.append(-gp.GRB.INFINITY)
+            else:
+                lb_vec.append(GbaConstants.TOL.value)
+        ub_vec = [gp.GRB.INFINITY]*self.nj
+        for item in self.constant_reactions.items():
+           r_index         = self.reaction_ids.index(item[0])
+           lb_vec[r_index] = item[1]
+           ub_vec[r_index] = item[1]
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Define RHS term         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        aKm             = self.K[self.nx:, :].sum(axis=1).astype(float)
+        aKm[aKm < 1e-4] = 1e-4
+        w               = aKm / aKm.sum()
+        min_bm          = (1.0 - min_bp) * w[:-1] / slack
+        act             = self.KA[self.nx:, :].sum(axis=1) * (sat_act / self.rho)
+        rhs             = np.concatenate([min_bm + act[:-1], [min_bp]])
+        for m_id, value in self.constant_rhs.items():
+            rhs[self.c_ids.index(m_id)] = value
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Run optimization        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        gpmodel = gp.Model(env=env)
+        q       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec, name="q")
+        obj     = (1.0/self.kcat_f) @ q
+        gpmodel.setObjective(obj, gp.GRB.MINIMIZE)
+        gpmodel.addConstr(self.M @ q >= lowerb, name="flux_balance")
+        gpmodel.addConstr(self.sM @ q == 1.0, name="density")
+        gpmodel.optimize()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Get the solution if any #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        try:
+            self.initial_solution = np.copy(q.X)
+            return True
+        except:
+            if verbose:
+                throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
+            return False
+                
+    def find_initial_solution( self, condition_id: Optional[str] = "1", min_bp: Optional[float] = 0.2, verbose: Optional[bool] = False ) -> bool:
+        """
+        Find an initial solution.
+        
+        Description
+        -----------
+        Solution developed by Hugo Dourado.
+        
+        Parameters
+        ----------
+        condition_id : Optional[str], default="1"
+            Condition identifier.
+        min_bp : Optional[float], default=0.2
+            Minimal protein production.
+        verbose : Optional[bool], default=False
+            Verbose mode.
+        """
+        sat_act = 1.0
+        slack   = 2.0
+        solved  = False
+        while slack < 20.0:
+            solved = self.solve_local_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
+            if solved:
+                break
+            else:
+                sat_act /= 1.1
+                slack   *= 1.1
+        if solved:
+            self.set_condition(condition_id)
+            self.set_q0(self.initial_solution)
+            self.calculate()
+            self.check_consistency()
+            if self.consistent:
                 if verbose:
-                 throw_message(MessageType.WARNING, "Impossible to find a consistent initial solution (rhs factor > 10000).")
+                    throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
+                return True
+            else:
+                if verbose:
+                    throw_message(MessageType.INFO, "Model is inconsistent.")
                 return False
-        if verbose:
-            throw_message(MessageType.INFO, f"Best initial solution found with rhs factor = {best_rhs_factor} and maximal mu = {best_mu}.")
-        self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=best_rhs_factor)
-        return True
+        else:
+            if verbose:
+                throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
+            return False
+
+    def find_best_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> None:
+        """
+        Generate the best initial solution by scanning the minimal protein production.
+        
+        Description
+        -----------
+        Solution developed by Hugo Dourado.
+
+        Parameters
+        ----------
+        condition_id : Optional[str], default="1"
+            Condition identifier.
+        verbose : Optional[bool], default=False
+            Verbose mode.
+        """
+        min_bp     = 0.1
+        step       = 0.001
+        mu_max     = 0.0
+        min_bp_max = min_bp
+        max_found  = False
+        while not max_found and min_bp < 1.0:
+            found = self.find_initial_solution(condition_id=condition_id, min_bp=min_bp, verbose=False)
+            if found:
+                if self.mu > mu_max:
+                    mu_max     = self.mu
+                    min_bp_max = min_bp
+                    min_bp     = min_bp + step
+                else:
+                    max_found = True
+            else:
+                min_bp = min_bp + step
+        if max_found:
+            self.find_initial_solution(condition_id=condition_id, min_bp=min_bp_max, verbose=verbose)
+        else:
+            if verbose:
+                throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         """
@@ -1978,7 +1984,7 @@ class Model:
     # 6) Optimization functions          #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def build_gbacpp_command_line( self, temporary_name: str, tol: float, stable_count: int, max_iter: float ) -> str:
+    def build_gbacpp_command_line( self, temporary_name: str, tol: float, mutol: float, stable_count: int, max_iter: float ) -> str:
         """
         Build the command line for the C++ solver gbacpp.
 
@@ -1987,7 +1993,9 @@ class Model:
         temporary_name : str
             Name of the temporary model.
         tol : float
-            Tolerance value
+            Tolerance value.
+        mutol : float
+            Tolerance value for mu relative change.
         stable_count : int
             Number of iteration with no significant mu change.
         max_iter : float
@@ -2003,8 +2011,9 @@ class Model:
         cmdline += "-name "+str(temporary_name)+" "
         cmdline += "-condition "+self.condition+" "
         cmdline += "-tol "+str(tol)+" "
+        cmdline += "-mutol "+str(mutol)+" "
         cmdline += "-stable "+str(stable_count)+" "
-        cmdline += "-maxt "+str(max_iter)+" "
+        cmdline += "-max "+str(max_iter)+" "
         cmdline += "-print\n"
         return(cmdline)
     
@@ -2031,8 +2040,8 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         ### 1.1) Check the dimensionality of the output ###
         tests = [len(lines[0].split(" ")) == 2,
-                 len(lines[1].split("\t")) == 6,
-                 len(lines[2].split("\t")) == 6,
+                 len(lines[1].split("\t")) == 5,
+                 len(lines[2].split("\t")) == 5,
                  len(lines[3].split("\t")) == self.nj+1,
                  len(lines[4].split("\t")) == self.nj+1,
                  len(lines[5].split("\t")) == self.nj+1,
@@ -2048,14 +2057,14 @@ class Model:
             return None, None
         ### 1.2) Check the content of the output ###
         tests = [lines[0].startswith("CONDITION "),
-                 lines[1] == "mu	doubling_time	density	consistent	converged	run_time"]
+                 lines[1] == "mu	density	consistent	converged	run_time"]
         if False in tests:
             throw_message(MessageType.WARNING, "Solver failed.")
             return None, None
         assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.ERROR, f"Condition mismatch: expected {self.condition}, got {lines[0].split(" ")[1]}.")
-        ### 1.3) Check f vector ###
+        ### 1.3) Check q vector ###
         tests = [lines[3].startswith("variable\t"),
-                 lines[4].startswith("f\t")]
+                 lines[4].startswith("q\t")]
         if False in tests:
             throw_message(MessageType.WARNING, "Solver failed.")
             return None, None
@@ -2103,11 +2112,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         line               = lines[2].split("\t")
         self.mu            = float(line[0])
-        self.doubling_time = float(line[1])
-        self.density       = float(line[2])
-        self.consistent    = bool(int(line[3]))
-        converged          = bool(int(line[4]))
-        run_time           = float(line[5])
+        self.density       = float(line[1])
+        self.consistent    = bool(int(line[2]))
+        converged          = bool(int(line[3]))
+        run_time           = float(line[4])
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Read the variables                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2121,7 +2129,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         return converged, run_time
     
-    def find_optimum( self, tol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = False ) -> bool:
+    def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = False ) -> bool:
         """
         Find the optimum of the model using the gbacpp solver.
 
@@ -2129,6 +2137,8 @@ class Model:
         ----------
         tol : Optional[float], default=1e-10
             Tolerance value for the solver.
+        mutol : Optional[float], default=1e-10
+            Tolerance value for the growth rate relative difference.
         stable : Optional[int], default=10000
             Number of iterations with no significant mu change to consider
             convergence.
@@ -2158,7 +2168,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        cmdline             = self.build_gbacpp_command_line(temporary_name, tol, stable, max_iter)
+        cmdline             = self.build_gbacpp_command_line(temporary_name, tol, mutol, stable, max_iter)
         solver_process      = subprocess.Popen([cmdline], stdout=subprocess.PIPE, shell=True)
         solver_output       = solver_process.stdout.read().decode('utf8')
         converged           = False
@@ -2176,6 +2186,7 @@ class Model:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
             os.rmdir(temporary_name)
+        os.remove(temporary_name+"_"+self.condition+"_q.bin")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 5) Print the result                                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

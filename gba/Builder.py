@@ -43,14 +43,10 @@ try:
     from .Enumerations import *
     from .Species import Protein, Metabolite
     from .Reaction import Reaction
-    from .Model import Model
-    from .Model import *
 except:
     from Enumerations import *
     from Species import Protein, Metabolite
     from Reaction import Reaction
-    from Model import Model
-    from Model import *
 
 
 class Builder:

@@ -31,6 +31,7 @@ Copyright: © 2024-2025 Charles Rocabert.
 """
 
 import enum
+from enum import auto
 
 class GeneEssentiality(enum.Enum):
     """
@@ -40,10 +41,10 @@ class GeneEssentiality(enum.Enum):
     - NON_ESSENTIAL  : Gene is non-essential.
     - UNKNOWN        : Gene essentiality is unknown.
     """
-    ESSENTIAL       = enum.auto()
-    QUASI_ESSENTIAL = enum.auto()
-    NON_ESSENTIAL   = enum.auto()
-    UNKNOWN         = enum.auto()
+    ESSENTIAL       = auto()
+    QUASI_ESSENTIAL = auto()
+    NON_ESSENTIAL   = auto()
+    UNKNOWN         = auto()
 
 class SpeciesType(enum.Enum):
     """
@@ -55,12 +56,12 @@ class SpeciesType(enum.Enum):
     - MACROMOLECULE: Macro-molecule species (chemical formula with radical).
     - UNKNOWN      : Species type is unknown.
     """
-    DNA           = enum.auto()
-    RNA           = enum.auto()
-    PROTEIN       = enum.auto()
-    SMALLMOLECULE = enum.auto()
-    MACROMOLECULE = enum.auto()
-    UNKNOWN       = enum.auto()
+    DNA           = auto()
+    RNA           = auto()
+    PROTEIN       = auto()
+    SMALLMOLECULE = auto()
+    MACROMOLECULE = auto()
+    UNKNOWN       = auto()
 
 class SpeciesLocation(enum.Enum):
     """
@@ -69,9 +70,9 @@ class SpeciesLocation(enum.Enum):
     - EXTERNAL: Species located outside the cell.
     - UNKNOWN : Species location is unknown.
     """
-    INTERNAL = enum.auto()
-    EXTERNAL = enum.auto()
-    UNKNOWN  = enum.auto()
+    INTERNAL = auto()
+    EXTERNAL = auto()
+    UNKNOWN  = auto()
 
 class ReactionType(enum.Enum):
     """
@@ -81,10 +82,10 @@ class ReactionType(enum.Enum):
     - SPONTANEOUS: Spontaneous (boundary) reaction.
     - EXCHANGE :   Exchange reaction (specific to FBA models).
     """
-    METABOLIC   = enum.auto()
-    TRANSPORT   = enum.auto()
-    SPONTANEOUS = enum.auto()
-    EXCHANGE    = enum.auto()
+    METABOLIC   = auto()
+    TRANSPORT   = auto()
+    SPONTANEOUS = auto()
+    EXCHANGE    = auto()
 
 class ReactionDirection(enum.Enum):
     """
@@ -93,9 +94,9 @@ class ReactionDirection(enum.Enum):
     - BACKWARD  : Backward reaction.
     - REVERSIBLE: Reversible reaction.
     """
-    FORWARD    = enum.auto()
-    BACKWARD   = enum.auto()
-    REVERSIBLE = enum.auto()
+    FORWARD    = auto()
+    BACKWARD   = auto()
+    REVERSIBLE = auto()
 
 class ReactionGPR(enum.Enum):
     """
@@ -104,9 +105,9 @@ class ReactionGPR(enum.Enum):
     - AND:  Logical AND operator.
     - OR:   Logical OR operator.
     """
-    NONE = enum.auto()
-    AND  = enum.auto()
-    OR   = enum.auto()
+    NONE = auto()
+    AND  = auto()
+    OR   = auto()
 
 class GbaReactionType(enum.Enum):
     """
@@ -117,11 +118,11 @@ class GbaReactionType(enum.Enum):
     - IMMIA: Irreversible Michaelis-Menten reaction with activation+inhibition.
     - RMM  : Reversible Michaelis-Menten reaction.
     """
-    IMM   = enum.auto()
-    IMMA  = enum.auto()
-    IMMI  = enum.auto()
-    IMMIA = enum.auto()
-    RMM   = enum.auto()
+    IMM   = auto()
+    IMMA  = auto()
+    IMMI  = auto()
+    IMMIA = auto()
+    RMM   = auto()
 
 class GbaConstants(float, enum.Enum):
     """
@@ -138,8 +139,8 @@ class MessageType(enum.Enum):
     - ERROR   : Throw an error message.
     - PLAIN   : Throw a plain message.
     """
-    INFO    = enum.auto()
-    WARNING = enum.auto()
-    ERROR   = enum.auto()
-    PLAIN   = enum.auto()
+    INFO    = auto()
+    WARNING = auto()
+    ERROR   = auto()
+    PLAIN   = auto()
 
