@@ -1624,7 +1624,7 @@ class Builder:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv",
-                     "conditions.csv", "rho.csv",
+                     "rho.csv", "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv"]
             for f in files:
@@ -1742,9 +1742,9 @@ class Builder:
         assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Write the information             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Write the information           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         Info_df = None
         if len(self.info) > 0:
             rows = []
@@ -1755,21 +1755,21 @@ class Builder:
                         rows.append(["", subkey, subvalue])
             Info_df         = pd.DataFrame(rows)
             Info_df.columns = ["", "", ""]
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the mass fraction matrix    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write the mass fraction matrix  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.GBA_M, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         M_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the kcat vectors            #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the kcat vectors          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.GBA_kcat_f, index=self.GBA_col_indices.keys(), columns=["kcat_f"])
         kcat_df["kcat_b"] = self.GBA_kcat_b
         kcat_df           = kcat_df.transpose()
         kcat_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the forward KM matrices     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Write the K matrix              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for i in self.GBA_row_indices.values():
             for j in self.GBA_col_indices.values():
                 if self.GBA_KM_f[i, j] != 0.0:
@@ -1778,9 +1778,9 @@ class Builder:
                     assert self.GBA_KM_f[i, j] == 0.0, throw_message(MessageType.ERROR, f"Forward KM value should be zero for metabolite <code>{list(self.GBA_row_indices.keys())[i]}</code> and reaction <code>{list(self.GBA_col_indices.keys())[j]}</code>.")
         K_df = pd.DataFrame(self.GBA_KM_f+self.GBA_KM_b, index=self.GBA_row_indices.keys(), columns=self.GBA_col_indices.keys())
         K_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the KA and KI matrices      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Write the KA and KI matrices    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = None
         KI_df = None
         if np.any(self.GBA_KA):
@@ -1810,9 +1810,9 @@ class Builder:
         if len(self.GBA_constant_reactions) > 0:
             constant_reactions_df = pd.DataFrame(list(self.GBA_constant_reactions.items()), columns=["reaction", "value"])
             constant_reactions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the protein contributions   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the protein contributions #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         protein_contributions_df = None
         if len(self.GBA_protein_contributions) > 0:
             rows = []

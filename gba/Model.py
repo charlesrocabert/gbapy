@@ -186,8 +186,6 @@ class Model:
         Cell's relative density.
     mu : float
         Growth rate.
-    doubling_time : float
-        Doubling time.
     consistent : bool
         Is the model consistent?
     adjust_concentrations : bool
@@ -198,9 +196,9 @@ class Model:
         Total density.
     q0 : np.array
         Initial LP solution.
-    dmu_q : np.array
+    dmu_dq : np.array
         Local mu derivatives with respect to q.
-    GCC_q : np.array
+    Gamma : np.array
         Local growth control coefficients with respect to q.
     q_trunc : np.array
         Truncated q vector (first element is removed).
@@ -254,6 +252,7 @@ class Model:
         self.KA                 = np.array([])
         self.KI                 = np.array([])
         self.rKI                = np.array([])
+        self.rho                = 0.0
         self.reversible         = []
         self.kinetic_model      = []
         self.directions         = []
@@ -324,7 +323,6 @@ class Model:
         self.b                     = np.array([])
         self.density               = 0.0
         self.mu                    = 0.0
-        self.doubling_time         = 0.0
         self.consistent            = False
         self.adjust_concentrations = False
 
@@ -332,10 +330,9 @@ class Model:
         # 5) Model dynamical variables     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.condition = ""
-        self.rho       = 0.0
         self.q0        = np.array([])
-        self.dmu_q     = np.array([])
-        self.GCC_q     = np.array([])
+        self.dmu_dq    = np.array([])
+        self.Gamma     = np.array([])
         self.q_trunc   = np.array([])
         self.q         = np.array([])
 
@@ -495,6 +492,24 @@ class Model:
             self.KI_loaded = True
             del(df)
 
+    def read_rho_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the total density from a CSV file.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        filename = path+"/"+self.name+"/rho.csv"
+        if os.path.exists(filename):
+            f = open(filename, "r")
+            l = f.readline()
+            l = f.readline()
+            l = l.strip("\n").split(";")
+            self.rho = float(l[1])
+            f.close()
+    
     def read_conditions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of conditions from a CSV file.
@@ -747,8 +762,8 @@ class Model:
         # 8) Evolutionary variables                              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.q0      = np.zeros(self.nj)
-        self.dmu_q   = np.zeros(self.nj)
-        self.GCC_q   = np.zeros(self.nj)
+        self.dmu_dq  = np.zeros(self.nj)
+        self.Gamma   = np.zeros(self.nj)
         self.q_trunc = np.zeros(self.nj-1)
         self.q       = np.zeros(self.nj)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -792,6 +807,7 @@ class Model:
         self.read_K_from_csv(path)
         self.read_KA_from_csv(path)
         self.read_KI_from_csv(path)
+        self.read_rho_from_csv(path)
         self.read_conditions_from_csv(path)
         self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
@@ -811,31 +827,36 @@ class Model:
         path : str, default="."
             Path to the ODS files.
         """
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Temporarily convert ODS to CSV files #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        filename = path+"/"+self.name+".ods"
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Temporarily convert ODS to CSV files        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        filename       = path+"/"+self.name+".ods"
+        temporary_name = "temp_"+str(int(time.time()))
         assert os.path.exists(filename), throw_message(MessageType.ERROR, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
-        if not os.path.exists("./temp/"):
-            os.mkdir("./temp/")
-        if not os.path.exists("./temp/"+self.name):
-            os.mkdir("./temp/"+self.name)
+        if not os.path.existstemporary_name):
+            os.mkdir(temporary_name)
+        if not os.path.exists(temporary_name+"/"+self.name):
+            os.mkdir(temporary_name+"/"+self.name)
         for sheet_name in xls.sheet_names:
             df = pd.read_excel(xls, sheet_name=sheet_name).fillna("")
-            df.to_csv("./temp/"+self.name+"/"+sheet_name+".csv", sep=";", index=False)
+            df.to_csv(temporary_name+"/"+self.name+"/"+sheet_name+".csv", sep=";", index=False)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Load the model from the temporary CSV files #
-        self.read_from_csv(path="./temp")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.read_from_csv(path=temporary_name)
         self.check_model_loading()
         self.initialize_model_mathematical_variables()
-        # 3) Delete the temporary files #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Delete the temporary files                  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for sheet_name in xls.sheet_names:
-            if os.path.exists("./temp/"+self.name+"/"+sheet_name+".csv"):
-               os.remove("./temp/"+self.name+"/"+sheet_name+".csv")
-        if os.path.exists("./temp/"+self.name+"/q.csv"):
-            os.remove("./temp/"+self.name+"/q.csv")
-        os.rmdir("./temp/"+self.name)
-        os.rmdir("./temp/")
+            if os.path.exists(temporary_name+"/"+self.name+"/"+sheet_name+".csv"):
+               os.remove(temporary_name+"/"+self.name+"/"+sheet_name+".csv")
+        if os.path.exists(temporary_name+"/"+self.name+"/q.csv"):
+            os.remove(temporary_name+"/"+self.name+"/q.csv")
+        os.rmdir(temporary_name+"/"+self.name)
+        os.rmdir(temporary_name+"/")
     
     def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -860,7 +881,7 @@ class Model:
             files = ["Info.csv",
                      "M.csv", "kcat.csv", "K.csv",
                      "KA.csv", "KI.csv",
-                     "conditions.csv",
+                     "rho.csv", "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv",
                      "q.csv", "optimal_solutions.csv", "random_solutions.csv"]
@@ -918,14 +939,21 @@ class Model:
             KI_df.to_csv(model_path+"/KI.csv", sep=";")
             del(KI_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the conditions              #
+        # 7) Write rho                         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        f = open(model_path+"/rho.csv", "w")
+        f.write(";(g/L)\n")
+        f.write("rho;"+str(self.rho)+"\n")
+        f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Write the conditions              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         conditions_df.replace(-0.0, 0.0, inplace=True)
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant RHS terms      #
+        # 9) Write the constant RHS terms      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.constant_rhs) > 0:
             f = open(model_path+"/constant_rhs.csv", "w")
@@ -934,7 +962,7 @@ class Model:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the constant reactions      #
+        # 10) Write the constant reactions     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.constant_reactions) > 0:
             f = open(model_path+"/constant_reactions.csv", "w")
@@ -943,7 +971,7 @@ class Model:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save protein contributions       #
+        # 11) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.protein_contributions) > 0:
             f = open(model_path+"/protein_contributions.csv", "w")
@@ -954,7 +982,7 @@ class Model:
                     f.write(r_id+";"+p_id+";"+str(val)+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Save the initial solution        #
+        # 12) Save the initial solution        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.initial_solution) > 0:
             f = open(model_path+"/q.csv", "w")
@@ -963,12 +991,12 @@ class Model:
                 f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 12) Save the optimums per condition  #
+        # 13) Save the optimums per condition  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if not self.optima_data.empty:
             self.optima_data.to_csv(model_path+"/qopt.csv", sep=';', index=False)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 13) Save random initial solutions    #
+        # 14) Save random initial solutions    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if not self.random_data.empty:
             self.random_data.to_csv(model_path+"/qrandom.csv", sep=';', index=False)
@@ -986,14 +1014,9 @@ class Model:
             will be used.
         """
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Check the existence of the folder #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        xls_path = path+"/"+(name if name != "" else self.name)+".xlsx"
-        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the information             #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Write the information           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         Info_df = None
         if len(self.info) > 0:
             rows = []
@@ -1004,26 +1027,26 @@ class Model:
                         rows.append(["", subkey, subvalue])
             Info_df         = pd.DataFrame(rows)
             Info_df.columns = ["", "", ""]
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Write the mass fraction matrix    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Write the mass fraction matrix  #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         M_df = pd.DataFrame(self.Mx, index=self.metabolite_ids, columns=self.reaction_ids)
         M_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Write the kcat vectors            #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Write the kcat vectors          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         kcat_df           = pd.DataFrame(self.kcat_f, index=self.reaction_ids, columns=["kcat_f"])
         kcat_df["kcat_b"] = self.kcat_b
         kcat_df           = kcat_df.transpose()
         kcat_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Write the forward KM matrices     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Write the K matrix              #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         K_df = pd.DataFrame(self.KM_f+self.KM_b, index=self.metabolite_ids, columns=self.reaction_ids)
         K_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Write the KA and KI matrices      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Write the KA and KI matrices    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         KA_df = None
         KI_df = None
         if np.any(self.KA):
@@ -1032,14 +1055,19 @@ class Model:
         if np.any(self.KI):
             KI_df = pd.DataFrame(self.KI, index=self.metabolite_ids, columns=self.reaction_ids)
             KI_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Write the conditions              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Write rho                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        rho_df = pd.DataFrame([["rho", self.rho]], columns=["", "(g/L)"])
+        rho_df.replace(-0.0, 0.0, inplace=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 7) Write the conditions            #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         conditions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant terms          #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Write the constant terms        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         constant_rhs_df       = None
         constant_reactions_df = None
         if len(self.constant_rhs) > 0:
@@ -1048,9 +1076,9 @@ class Model:
         if len(self.constant_reactions) > 0:
             constant_reactions_df = pd.DataFrame(list(self.constant_reactions.items()), columns=["reaction", "value"])
             constant_reactions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the protein contributions   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 9) Write the protein contributions #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         protein_contributions_df = None
         if len(self.protein_contributions) > 0:
             rows = []
@@ -1059,18 +1087,19 @@ class Model:
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
             protein_contributions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save the initial solution        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 10) Save the initial solution      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         q0_df = None
         if len(self.initial_solution) > 0:
             q0_df            = pd.DataFrame(self.initial_solution, index=self.reaction_ids, columns=["q0"])
             q0_df.index.name = "reaction"
             q0_df.reset_index(inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Write the variables in xlsx      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        with pd.ExcelWriter(xls_path) as writer:
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 11) Write the variables in xlsx    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        ods_path = path+"/"+(name if name != "" else self.name)+".ods"
+        with pd.ExcelWriter(ods_path, engine="odf") as writer:
             if Info_df is not None:
                 Info_df.to_excel(writer, sheet_name="Info", index=False, header=False)
             M_df.to_excel(writer, sheet_name="M")
@@ -1080,6 +1109,7 @@ class Model:
               KA_df.to_excel(writer, sheet_name="KA")
             if KI_df is not None:
                 KI_df.to_excel(writer, sheet_name="KI")
+            rho_df.to_excel(writer, sheet_name="rho", index=False, header=True)
             conditions_df.to_excel(writer, sheet_name="conditions")
             if constant_rhs_df is not None:
                 constant_rhs_df.to_excel(writer, sheet_name="constant_rhs", index=False)
@@ -1093,18 +1123,16 @@ class Model:
                 self.optima_data.to_excel(writer, sheet_name="qopt", index=False)
             if not self.random_data.empty:
                 self.random_data.to_excel(writer, sheet_name="qrandom", index=False)
-        data_xlsx = get_data(xls_path)
-        save_data(ods_path, data_xlsx)
-        os.system("rm "+xls_path)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Free memory                      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 12) Free memory                    #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)
         del(kcat_df)
         del(K_df)
         del(KA_df)
         del(KI_df)
+        del(rho_df)
         del(conditions_df)
         del(constant_rhs_df)
         del(constant_reactions_df)
@@ -1296,8 +1324,8 @@ class Model:
         self.p       = np.zeros(self.nj)
         self.b       = np.zeros(self.nc)
         self.q0      = np.zeros(self.nj)
-        self.dmu_q   = np.zeros(self.nj)
-        self.GCC_q   = np.zeros(self.nj)
+        self.dmu_dq  = np.zeros(self.nj)
+        self.Gamma   = np.zeros(self.nj)
         self.q_trunc = np.zeros(self.nj-1)
         self.q       = np.zeros(self.nj)
     
@@ -1358,24 +1386,9 @@ class Model:
         j : int
             Reaction index.
         """
-        term1         = np.prod(1.0+self.KM_f[:,j]/self.xc)
-        term2         = self.kcat_f[j]
-        self.tau_j[j] = term1/term2
-
-    def iMMa( self, j: int ) -> None:
-        """
-        Compute the turnover time tau for an irreversible Michaelis-Menten
-        reaction with activation (only one activator per reaction).
-
-        Parameters
-        ----------
-        j : int
-            Reaction index.
-        """
-        term1         = np.prod(1.0+self.KA[:,j]/self.xc)
-        term2         = np.prod(1.0+self.KM_f[:,j]/self.xc)
-        term3         = self.kcat_f[j]
-        self.tau_j[j] = term1*term2/term3
+        KM_prod       = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        kcatf         = self.kcat_f[j]
+        self.tau_j[j] = KM_prod/kcatf
 
     def iMMi( self, j: int ) -> None:
         """
@@ -1387,10 +1400,25 @@ class Model:
         j : int
             Reaction index.
         """
-        term1         = np.prod(1.0+self.xc*self.rKI[:,j])
-        term2         = np.prod(1.0+self.KM_f[:,j]/self.xc)
-        term3         = self.kcat_f[j]
-        self.tau_j[j] = term1*term2/term3
+        KI_prod       = np.prod(1.0+self.xc*self.rKI[:,j])
+        KM_prod       = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        kcatf         = self.kcat_f[j]
+        self.tau_j[j] = KI_prod*KM_prod/kcatf
+    
+    def iMMa( self, j: int ) -> None:
+        """
+        Compute the turnover time tau for an irreversible Michaelis-Menten
+        reaction with activation (only one activator per reaction).
+
+        Parameters
+        ----------
+        j : int
+            Reaction index.
+        """
+        KA_prod       = np.prod(1.0+self.KA[:,j]/self.xc)
+        KM_prod       = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        kcatf         = self.kcat_f[j]
+        self.tau_j[j] = KA_prod*KM_prod/kcatf
     
     def iMMia( self, j: int ) -> None:
         """
@@ -1403,11 +1431,11 @@ class Model:
         j : int
             Reaction index.
         """
-        term1         = np.prod(1.0+self.xc*self.rKI[:,j])
-        term2         = np.prod(1.0+self.KA[:,j]/self.xc)
-        term3         = np.prod(1.0+self.KM_f[:,j]/self.xc)
-        term4         = self.kcat_f[j]
-        self.tau_j[j] = term1*term2*term3/term4
+        KI_prod       = np.prod(1.0+self.xc*self.rKI[:,j])
+        KA_prod       = np.prod(1.0+self.KA[:,j]/self.xc)
+        KM_prod       = np.prod(1.0+self.KM_f[:,j]/self.xc)
+        kcatf         = self.kcat_f[j]
+        self.tau_j[j] = KI_prod*KA_prod*KM_prod/kcatf
     
     def rMM( self, j: int ) -> None:
         """
@@ -1419,11 +1447,11 @@ class Model:
         j : int
             Reaction index.
         """
-        kcatf         = self.kcat_f[j]
-        prodf         = np.prod(1+self.KM_f[:,j]/self.xc)
+        KMf_prod      = np.prod(1+self.KM_f[:,j]/self.xc)
+        KMb_prod      = np.prod(1+self.KM_b[:,j]/self.xc)
         kcatb         = self.kcat_b[j]
-        prodb         = np.prod(1+self.KM_b[:,j]/self.xc)
-        self.tau_j[j] = 1.0/(kcatf/prodf-kcatb/prodb)
+        kcatf         = self.kcat_f[j]
+        self.tau_j[j] = 1.0/(kcatf/KMf_prod-kcatb/KMb_prod)
 
     def compute_tau( self, j: int ) -> None:
         """
@@ -1436,10 +1464,10 @@ class Model:
         """
         if self.kinetic_model[j] == GbaReactionType.IMM:
             self.iMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.IMMA:
-            self.iMMa(j)
         elif self.kinetic_model[j] == GbaReactionType.IMMI:
             self.iMMi(j)
+        elif self.kinetic_model[j] == GbaReactionType.IMMA:
+            self.iMMa(j)
         elif self.kinetic_model[j] == GbaReactionType.IMMIA:
             self.iMMia(j)
         elif self.kinetic_model[j] == GbaReactionType.RMM:
@@ -1455,13 +1483,35 @@ class Model:
         j : int
             Reaction index.
         """
-        constant1 = self.kcat_f[j]
+        kcatf = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
             term1             = self.KM_f[y,j]/np.power(self.c[i], 2.0)
             term2             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-            self.ditau_j[j,i] = -term1*term2/constant1
+            self.ditau_j[j,i] = -term1*term2/kcatf
+
+    def diMMi( self, j: int ) -> None:
+        """
+        Compute the derivative of the turnover time tau for an irreversible
+        Michaelis-Menten reaction with inhibition with respect to metabolite
+        concentrations.
+
+        Parameters
+        ----------
+        j : int
+            Reaction index.
+        """
+        KI_prod = np.prod(1+self.xc*self.rKI[:,j])
+        KM_prod = np.prod(1+self.KM_f[:,j]/self.xc)
+        kcatf   = self.kcat_f[j]
+        for i in range(self.nc):
+            y                 = i+self.nx
+            indices           = np.arange(self.ni) != y
+            rKI               = self.rKI[y,j]
+            term1             = self.KM_f[y,j]/np.power(self.c[i], 2)
+            term2             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
+            self.ditau_j[j,i] = (rKI*KM_prod - KI_prod*term1*term2)/kcatf
 
     def diMMa( self, j: int ) -> None:
         """
@@ -1474,39 +1524,17 @@ class Model:
         j : int
             Reaction index.
         """
-        constant1 = np.prod(1+self.KM_f[:,j]/self.xc)
-        constant2 = np.prod(1+self.KA[:,j]/self.xc)
-        constant3 = self.kcat_f[j]
+        KA_prod = np.prod(1+self.KA[:,j]/self.xc)
+        KM_prod = np.prod(1+self.KM_f[:,j]/self.xc)
+        kcatf   = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
             term1             = self.KA[y,j]/np.power(self.c[i], 2.0)
             term2             = self.KM_f[y,j]/np.power(self.c[i], 2.0)
             term3             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-            self.ditau_j[j,i] = -(constant1*term1+constant2*term2*term3)/constant3
+            self.ditau_j[j,i] = -(term1*KM_prod + term2*KA_prod*term3)/kcatf
     
-    def diMMi( self, j: int ) -> None:
-        """
-        Compute the derivative of the turnover time tau for an irreversible
-        Michaelis-Menten reaction with inhibition with respect to metabolite
-        concentrations.
-
-        Parameters
-        ----------
-        j : int
-            Reaction index.
-        """
-        constant1 = np.prod(1+self.KM_f[:,j]/self.xc)
-        constant2 = np.prod(1+self.xc*self.rKI[:,j])
-        constant3 = self.kcat_f[j]
-        for i in range(self.nc):
-            y                 = i+self.nx
-            indices           = np.arange(self.ni) != y
-            term1             = self.rKI[y,j]*constant1
-            term2             = self.KM_f[y,j]/np.power(self.c[i], 2)
-            term3             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
-            self.ditau_j[j,i] = (term1-constant2*term2*term3)/constant3
-
     def diMMia( self, j: int ) -> None:
         """
         Compute the derivative of the turnover time tau for an irreversible
@@ -1518,19 +1546,18 @@ class Model:
         j : int
             Reaction index.
         """
-        constant1 = np.prod(1.0+self.c*self.rKI[:,j])
-        constant2 = np.prod(1.0+self.KA[:,j]/self.c)
-        constant3 = np.prod(1.0+self.KM_f[:,j]/self.c)
-        constant4 = self.kcat_f[j]
+        KI_prod = np.prod(1.0+self.c*self.rKI[:,j])
+        KA_prod = np.prod(1.0+self.KA[:,j]/self.c)
+        KM_prod = np.prod(1.0+self.KM_f[:,j]/self.c)
+        kcatf   = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
-            term1             = self.rKI[y,j]
+            rKI               = self.rKI[y,j]
             term2             = -self.KA[y,j]/np.power(self.c[i], 2.0)
             term3             = -self.KM_f[y,j]/np.power(self.c[i], 2.0)
             term4             = np.prod(1+self.KM_f[indices,j]/self.c[indices])
-            term5             = (term1*constant2*constant3)+(term2*constant1*constant3)+(term3*term4*constant1*constant2)
-            self.ditau_j[j,i] = term5/constant4
+            self.ditau_j[j,i] = (rKI*KA_prod*KM_prod + KI_prod*term2*KM_prod + KI_prod*KA_prod*term3*term4)/kcatf 
 
     def drMM( self, j: int ) -> None:
         """
@@ -1542,11 +1569,11 @@ class Model:
         j : int
             Reaction index.
         """
-        kcatf = self.kcat_f[j]
-        kcatb = self.kcat_b[j]
-        prodf = np.prod(1+self.KM_f[:,j]/self.xc)
-        prodb = np.prod(1+self.KM_b[:,j]/self.xc)
-        tau_j = 1.0/(kcatf/prodf-kcatb/prodb)
+        KMf_prod = np.prod(1+self.KM_f[:,j]/self.xc)
+        KMb_prod = np.prod(1+self.KM_b[:,j]/self.xc)
+        kcatf    = self.kcat_f[j]
+        kcatb    = self.kcat_b[j]
+        tau_j    = 1.0/(kcatf/KMf_prod-kcatb/KMb_prod)
         for i in range(self.nc):
             y                 = i+self.nx
             indices           = np.arange(self.ni) != y
@@ -1554,8 +1581,8 @@ class Model:
             prodb             = np.prod(1 + self.KM_b[indices,j]/self.xc[indices])
             term1             = self.KM_f[y,j] / np.power(self.c[i] + self.KM_f[y,j], 2.0)
             term2             = self.KM_b[y,j] / np.power(self.c[i] + self.KM_b[y,j], 2.0)
-            term3             = kcatf/prodf*term1 - kcatb/prodb*term2
-            self.ditau_j[j,i] = -term3*np.power(tau_j, 2.0)
+            ditauj            = (kcatf/prodf)*term1 - (kcatb/prodb)*term2
+            self.ditau_j[j,i] = -ditauj*np.power(tau_j, 2.0)
 
     def compute_dtau( self, j: int ) -> None:
         """
@@ -1568,10 +1595,10 @@ class Model:
         """
         if self.kinetic_model[j] == GbaReactionType.IMM:
             self.diMM(j)
-        elif self.kinetic_model[j] == GbaReactionType.IMMA:
-            self.diMMa(j)
         elif self.kinetic_model[j] == GbaReactionType.IMMI:
             self.diMMi(j)
+        elif self.kinetic_model[j] == GbaReactionType.IMMA:
+            self.diMMa(j)
         elif self.kinetic_model[j] == GbaReactionType.IMMIA:
             self.diMMia(j)
         elif self.kinetic_model[j] == GbaReactionType.RMM:
@@ -1608,21 +1635,21 @@ class Model:
         """
         self.density = self.sM.dot(self.q)
 
-    def compute_dmu_q( self ) -> None:
+    def compute_dmu_dq( self ) -> None:
         """
         Compute the local growth rate gradient with respect to q.
         """
-        term1      = np.power(self.mu, 2)/self.b[self.a]
-        term2      = self.M[self.a,:]/self.mu
-        term3      = self.q.T.dot(self.rho*self.ditau_j.dot(self.M))
-        term4      = self.tau_j
-        self.dmu_q = term1*(term2-term3-term4)
+        term1       = np.power(self.mu, 2)/self.b[self.a]
+        term2       = self.M[self.a,:]/self.mu
+        term3       = self.q.T.dot(self.rho*self.ditau_j.dot(self.M))
+        term4       = self.tau_j
+        self.dmu_dq = term1*(term2-term3-term4)
 
-    def compute_GCC_q( self ) -> None:
+    def compute_Gamma( self ) -> None:
         """
         Compute the local growth control coefficients with respect to q.
         """
-        self.GCC_q = self.dmu_q-self.dmu_q[0]*(self.sM/self.sM[0])
+        self.Gamma = self.dmu_dq-self.dmu_dq[0]*(self.sM/self.sM[0])
     
     def calculate_first_order_terms( self ) -> None:
         """
@@ -1643,8 +1670,8 @@ class Model:
         """
         for j in range(self.nj):
             self.compute_dtau(j)
-        self.compute_dmu_q()
-        self.compute_GCC_q()
+        self.compute_dmu_dq()
+        self.compute_Gamma()
     
     def calculate( self ) -> None:
         """
@@ -2322,43 +2349,6 @@ def read_ods_model( name: str, path: Optional[str] = "." ) -> Model:
     assert os.path.exists(path+"/"+name+".ods"), throw_message(MessageType.ERROR, "The folder "+path+"/"+name+".ods does not exist.")
     model = Model(name)
     model.read_from_ods(path=path)
-    return model
-
-def get_toy_model_path( model_name: str ) -> str:
-    """
-    Get the path of a toy model included in the Python package as CSV files.
-
-    Parameters
-    ----------
-    model_name : str
-        Name of the toy model.
-
-    Returns
-    -------
-    str
-        Path to the toy model.
-    """
-    model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
-    model_path = Path(model_dir , "toy_models/"+model_name)
-    return str(model_path)
-
-def read_toy_model( name: str ) -> Model:
-    """
-    Read a toy model included in the Python package as CSV files.
-
-    Parameters
-    ----------
-    name : str
-        Name of the toy model.
-
-    Returns
-    -------
-    Model
-        The loaded model.
-    """
-    model_dir  = Path(pkgutil.resolve_name("gba.data").__file__).parent
-    model_path = str(Path(model_dir , "toy_models/"))
-    model      = read_csv_model(name=name, path=model_path)
     return model
 
 def backup_model( model: Model, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
