@@ -1814,8 +1814,8 @@ class Model:
         aKm             = self.K[self.nx:, :].sum(axis=1).astype(float)
         aKm[aKm < 1e-4] = 1e-4
         w               = aKm / aKm.sum()
-        min_bm          = (1.0 - min_bp) * w[:-1] / slack
-        act             = self.KA[self.nx:, :].sum(axis=1) * (sat_act / self.rho)
+        min_bm          = (1.0-min_bp)*w[:-1]/slack
+        act             = self.KA[self.nx:, :].sum(axis=1)*(sat_act/self.rho)
         rhs             = np.concatenate([min_bm + act[:-1], [min_bp]])
         for m_id, value in self.constant_rhs.items():
             rhs[self.c_ids.index(m_id)] = value
@@ -1826,7 +1826,7 @@ class Model:
         q       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec, name="q")
         obj     = (1.0/self.kcat_f) @ q
         gpmodel.setObjective(obj, gp.GRB.MINIMIZE)
-        gpmodel.addConstr(self.M @ q >= lowerb, name="flux_balance")
+        gpmodel.addConstr(self.M @ q >= rhs, name="flux_balance")
         gpmodel.addConstr(self.sM @ q == 1.0, name="density")
         gpmodel.optimize()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
