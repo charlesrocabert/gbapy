@@ -49,7 +49,7 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 
 # 1) Installation <a name="installation"></a>
 
-The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PypI</a>:
+The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
 
 ```
 pip install gba
