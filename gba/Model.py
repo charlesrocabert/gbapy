@@ -205,6 +205,8 @@ class Model:
         Truncated q vector (first element is removed).
     q : np.array
         Flux fractions vector.
+    data : pd.DataFrame
+        Data from optimizations.
     """
 
     def __init__( self, name: str ) -> None:
@@ -220,9 +222,9 @@ class Model:
         self.name = name
         self.info = {}
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Model                         #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Model                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Identifier lists ###
         self.metabolite_ids   = []
@@ -269,9 +271,9 @@ class Model:
         self.initial_solution_loaded      = False
         self.optimal_solutions_loaded     = False
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Model constants               #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Model constants           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
         ### Vector lengths ###
         self.nx = 0
@@ -295,16 +297,16 @@ class Model:
         self.column_rank      = 0
         self.full_column_rank = False
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Solutions                     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Solutions                 #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.initial_solution  = np.array([])
         self.optimal_solutions = {}
         self.random_solutions  = {}
         
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Model variables               #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Model variables           #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j                 = np.array([])
         self.ditau_j               = np.array([])
         self.x                     = np.array([])
@@ -318,15 +320,20 @@ class Model:
         self.consistent            = False
         self.adjust_concentrations = False
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Model dynamical variables     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 5) Model dynamical variables #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.condition = ""
         self.q0        = np.array([])
         self.dmu_dq    = np.array([])
         self.Gamma     = np.array([])
         self.q_trunc   = np.array([])
         self.q         = np.array([])
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 6) Optimization data         #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.data = None
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Model loading methods           #
@@ -970,6 +977,11 @@ class Model:
                 for p_id, val in item[1].items():
                     f.write(r_id+";"+p_id+";"+str(val)+"\n")
             f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 13) Write optimization data          #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if self.data is not None:
+            self.data.to_csv(model_path+"/optimization_data.csv", sep=";")
     
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1093,6 +1105,8 @@ class Model:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
             if q_df is not None:
                 q_df.to_excel(writer, sheet_name="q", index=True)
+            if self.data is not None:
+                self.data.to_excel(writer, sheet_name="optimization_data", index=False)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 12) Free memory                    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1109,6 +1123,23 @@ class Model:
         del(constant_reactions_df)
         del(protein_contributions_df)
     
+    def export_optimization_data( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Export the optimization data to CSV.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the output file.
+        name : str, default=""
+            Name of the model. If not provided, the name of the model instance
+            will be used.
+        """
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
+        if self.data is not None:
+            filename = path+"/"+(name if name != "" else self.name)+"_optimization_data.csv"
+            self.data.to_csv(filename, sep=";")
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2005,19 +2036,38 @@ class Model:
         solver_output : str
             Output of the solver.
         """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Prepare and check filenames #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         state_filename = ""
         q_filename     = ""
+        v_filename     = ""
+        p_filename     = ""
+        b_filename     = ""
+        c_filename     = ""
         if condition_id == "all":
             state_filename = "./"+temporary_name+"/"+temporary_name+"_all_state_optimum.csv"
             q_filename     = "./"+temporary_name+"/"+temporary_name+"_all_q_optimum.csv"
+            v_filename     = "./"+temporary_name+"/"+temporary_name+"_all_v_optimum.csv"
+            p_filename     = "./"+temporary_name+"/"+temporary_name+"_all_p_optimum.csv"
+            b_filename     = "./"+temporary_name+"/"+temporary_name+"_all_b_optimum.csv"
+            c_filename     = "./"+temporary_name+"/"+temporary_name+"_all_c_optimum.csv"
         else:
             state_filename = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_state_optimum.csv"
             q_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_q_optimum.csv"
+            v_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_v_optimum.csv"
+            p_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_p_optimum.csv"
+            b_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_b_optimum.csv"
+            c_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_c_optimum.csv"
         assert os.path.exists(state_filename), throw_message(MessageType.ERROR, f"Solver state output file <code>{state_filename}</code> not found.")
         assert os.path.exists(q_filename), throw_message(MessageType.ERROR, f"Solver q output file <code>{q_filename}</code> not found.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Read the optimal q vector              #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        assert os.path.exists(v_filename), throw_message(MessageType.ERROR, f"Solver v output file <code>{v_filename}</code> not found.")
+        assert os.path.exists(p_filename), throw_message(MessageType.ERROR, f"Solver p output file <code>{p_filename}</code> not found.")
+        assert os.path.exists(b_filename), throw_message(MessageType.ERROR, f"Solver b output file <code>{b_filename}</code> not found.")
+        assert os.path.exists(c_filename), throw_message(MessageType.ERROR, f"Solver c output file <code>{c_filename}</code> not found.")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Read the optimal q vector   #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f      = open(q_filename, "r")
         header = f.readline().strip("\n").split(";")
         l      = f.readline()
@@ -2029,6 +2079,26 @@ class Model:
             self.q = self.optimal_solutions[condition]
             l      = f.readline()
         f.close()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Load optimization data      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        self.data              = pd.DataFrame(self.conditions.T, columns=self.condition_params)
+        self.data["condition"] = self.condition_ids
+        data_files             = [state_filename, q_filename, v_filename, p_filename, b_filename, c_filename]
+        suffixes               = ["state", "q", "v", "p", "b", "c"]
+        for i in range(len(data_files)):
+            file   = data_files[i]
+            suffix = suffixes[i]
+            df     = pd.read_csv(file, sep=";")
+            if suffix != "state":
+                new_columns = {"condition": "condition"}
+                for col in df.columns:
+                    if col != "condition":
+                        new_columns[col] = col+"_"+suffix
+                df = df.rename(columns=new_columns)
+            self.data["condition"] = self.data["condition"].astype(str)
+            df["condition"]        = df["condition"].astype(str)
+            self.data              = pd.merge(self.data, df, on="condition")
     
     def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 100000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
@@ -2068,6 +2138,7 @@ class Model:
         cmdline        = self.build_gbacpp_command_line(temporary_name, self.condition, False, tol, mutol, convergence_count, max_iter)
         solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         solver_process.wait()
+        #self.read_solver_output(temporary_name=temporary_name, condition_id=self.condition)
         try:
             self.read_solver_output(temporary_name=temporary_name, condition_id=self.condition)
         except:
@@ -2098,7 +2169,7 @@ class Model:
             if verbose:
                 throw_message(MessageType.INFO, f"Condition {self.condition}: model did not converge.")
         
-    def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = False, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
+    def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = True, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
         Find optimums for all conditions of the model using the gbacpp solver.
 
@@ -2139,6 +2210,7 @@ class Model:
         cmdline        = self.build_gbacpp_command_line(temporary_name, "all", use_previous_sol, tol, mutol, convergence_count, max_iter)
         solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         solver_process.wait()
+        #self.read_solver_output(temporary_name=temporary_name, condition_id="all")
         try:
             self.read_solver_output(temporary_name=temporary_name, condition_id="all")
         except:
