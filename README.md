@@ -50,7 +50,7 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 # 1) Installation <a name="installation"></a>
 
 > [!WARNING]
-> Module not deployed on pyPI yet
+> Module not deployed on PyPI yet
 
 The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
  
