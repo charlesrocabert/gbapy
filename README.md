@@ -22,8 +22,6 @@
 Documentation coming soon ...
 </p>
 
-# Build a model
-
 # Optimize a model
 
 ```python
@@ -31,8 +29,17 @@ import gba
 model = gba.read_ods_model(name="./models/A")
 model.find_initial_solution()
 model.find_optimum_by_condition()
-model.plot(x="x_G", y="mu", title="Growth rate", xlabel="External glucose", ylabel="μ", logx=True)
+model.plot(x="x_G", y="mu", title="Growth rate", logx=True)
 ```
+
+<p align="center">
+<img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/84d0c4ed-78c9-4da8-b3c9-73394715a58c" />
+</p>
+
+# Build a model
+
+
+
 
 ## Copyright <a name="copyright"></a>
 Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
