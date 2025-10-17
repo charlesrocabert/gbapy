@@ -22,12 +22,16 @@
 Documentation coming soon ...
 </p>
 
+# Build a model
+
+# Optimize a model
+
 ```python
 import gba
-model = gba.read_ods_model(name="my_model")
+model = gba.read_ods_model(name="A")
 model.find_initial_solution()
-model.set_condition("1")
-model.find_optimum()
+model.find_optimum_by_condition()
+model.plot(x="x_G", y="mu", title="Growth rate", xlabel="External glucose", ylabel="μ", logx=True)
 ```
 
 ## Copyright <a name="copyright"></a>
