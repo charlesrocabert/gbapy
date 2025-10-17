@@ -100,7 +100,8 @@ Documentation coming soon ...
 </p>
 
 # 4) Contributing <a name="contributing"></a>
-If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT rocabert AT hhu DOT de">the developer</href>.
+
+If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT rocabert AT hhu DOT de">the developer</a>.
 
 # 5) Copyright <a name="copyright"></a>
 
