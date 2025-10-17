@@ -28,7 +28,7 @@ Documentation coming soon ...
 
 ```python
 import gba
-model = gba.read_ods_model(name="A")
+model = gba.read_ods_model(name="./models/A")
 model.find_initial_solution()
 model.find_optimum_by_condition()
 model.plot(x="x_G", y="mu", title="Growth rate", xlabel="External glucose", ylabel="μ", logx=True)
