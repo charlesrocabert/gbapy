@@ -49,13 +49,17 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 
 # 1) Installation <a name="installation"></a>
 
-The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
+> [!WARNING]
+> Module not deployed on pyPI yet
 
+The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
+ 
 ```
 pip install gba
 ```
 
-<strong>⚠️ <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> software is required to run optimization tasks.</strong>
+> [!IMPORTANT]
+<a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> software is required to run optimization tasks.
 
 ### 1.1) Supported platforms <a name="supported_platforms"></a>
 <strong>gbapy</strong> software has been primilary developed for Unix/Linux and macOS systems.
@@ -85,7 +89,8 @@ If you want to install <strong>gbapy</strong> manually, download the <a href="ht
 sh install.sh
 ```
 
-(you can later uninstall the module using <code>sh uninstall.sh</code>).
+> [!TIP]
+> You can later uninstall the module using <code>sh uninstall.sh</code>.
 
 # 2) Tutorials <a name="tutorials"></a>
 
@@ -105,7 +110,7 @@ If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT 
 
 # 5) Copyright <a name="copyright"></a>
 
-Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
+Copyright © 2024-2025 @charlesrocabert, Furkan Mert.
 
 # 6) License <a name="license"></a>
 
