@@ -38,13 +38,67 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 
 # Build a model
 
+## Table of contents
+
+- [1) Installation instructions](#installation_instructions)
+  - [1.1) Supported platforms](#supported_platforms)
+  - [1.2) Dependencies](#dependencies)
+  - [1.3) Manual installation](#manual_installation)
+- [3) Tutorials](#tutorials)
+- [4) SRC model format tutorial](#src_model_format_tutorial)
+- [5) Units conversion tutorial](#units_conversion_tutorial)
+- [1) Contributing](#contributing)
+- [6) Copyright](#copyright)
+- [7) License](#license)
 
 
+## 1) Installation instructions <a name="installation_instructions"></a>
 
-## Copyright <a name="copyright"></a>
+The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PypI</a>:
+
+```
+pip install gba
+```
+
+<strong>⚠️ <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> software is required to run optimization tasks.</strong>
+
+### 1.1) Supported platforms <a name="supported_platforms"></a>
+<strong>gbapy</strong> software has been primilary developed for Unix/Linux and macOS systems.
+
+### 1.2) Dependencies <a name="dependencies"></a>
+
+#### • Software
+* <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> is required to run optimization tasks.
+
+#### • Licensed Python modules
+* The Python API of <a href="https://www.gurobi.com/" target="_blank">GUROBI optimizer</a> must be installed and requires a user license (<a href="https://www.gurobi.com/academia/academic-program-and-licenses/" target="_blank">free for academics</a>)
+
+#### • Other Python modules
+* <a href="https://numpy.org/" target="_blank">NumPy</a>
+* <a href="https://pandas.pydata.org/" target="_blank">pandas</a>
+* <a href="https://ipython.org/" target="_blank">IPython</a>
+* <a href="https://plotly.com/" target="_blank">plotly</a>
+* <a href="https://opencobra.github.io/cobrapy/" target="_blank">cobrapy</a>
+* <a href="https://github.com/cgohlke/molmass" target="_blank">molmass</a>
+* <a href="https://biopython.org/" target="_blank">Biopython</a>
+
+### 1.3) Manual installation <a name="manual_installation"></a>
+
+If you want to install <strong>gbapy</strong> manually, download the <a href="https://github.com/charlesrocabert/gbapy/releases/latest">latest release</a>, and save it to a directory of your choice. Open a terminal and use the <code>cd</code> command to navigate to this directory. Then follow the steps below to compile and build the executables.
+
+```
+sh install.sh
+```
+
+(you can later uninstall the module using <code>sh uninstall.sh</code>).
+
+# 1) Contributing <a name="contributing"></a>
+If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT rocabert AT hhu DOT de">the developer</href>.
+
+# 6) Copyright <a name="copyright"></a>
 Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
 
-## License <a name="license"></a>
+# 7) License <a name="license"></a>
 
 <p align="justify">
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
