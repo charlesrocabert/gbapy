@@ -19,11 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #***********************************************************************
 
-pip uninstall gba --break-system-packages
-rm -rf dist
-rm -rf build
-rm -rf gba.egg-info
-rm -rf gba/__pycache__
+sh uninstall.sh
 python -m build
 pip install --no-cache-dir . --break-system-packages
 
