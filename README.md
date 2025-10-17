@@ -26,14 +26,14 @@ Documentation coming soon ...
 
 ```python
 import gba
-model = gba.read_ods_model(name="./models/A")
+model = gba.read_ods_model(name="./models/G14")
 model.find_initial_solution()
 model.find_optimum_by_condition()
-model.plot(x="x_G", y="mu", title="Growth rate", logx=True)
+model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 ```
 
 <p align="center">
-<img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/84d0c4ed-78c9-4da8-b3c9-73394715a58c" />
+<img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/328ed880-6b7b-45e7-80b8-ea037dc31be7" />
 </p>
 
 # Build a model
