@@ -18,10 +18,6 @@
 
 -----------------
 
-<p align="center" style="font-size: 2.5em;">
-Documentation coming soon ...
-</p>
-
 # Optimize a model
 
 ```python
@@ -38,21 +34,19 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 
 # Build a model
 
-## Table of contents
+# Table of contents
 
-- [1) Installation instructions](#installation_instructions)
+- [1) Installation](#installation)
   - [1.1) Supported platforms](#supported_platforms)
   - [1.2) Dependencies](#dependencies)
   - [1.3) Manual installation](#manual_installation)
-- [3) Tutorials](#tutorials)
-- [4) SRC model format tutorial](#src_model_format_tutorial)
-- [5) Units conversion tutorial](#units_conversion_tutorial)
-- [1) Contributing](#contributing)
-- [6) Copyright](#copyright)
-- [7) License](#license)
+- [2) Tutorials](#tutorials)
+- [3) Documentation](#documentation)
+- [4) Contributing](#contributing)
+- [5) Copyright](#copyright)
+- [6) License](#license)
 
-
-## 1) Installation instructions <a name="installation_instructions"></a>
+# 1) Installation <a name="installation"></a>
 
 The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PypI</a>:
 
@@ -92,13 +86,26 @@ sh install.sh
 
 (you can later uninstall the module using <code>sh uninstall.sh</code>).
 
-# 1) Contributing <a name="contributing"></a>
+# 2) Tutorials <a name="tutorials"></a>
+
+<p align="center" style="font-size: 2.5em;">
+Tutorials coming soon ...
+</p>
+
+# 3) Documentation <a name="documentation"></a>
+
+<p align="center" style="font-size: 2.5em;">
+Documentation coming soon ...
+</p>
+
+# 4) Contributing <a name="contributing"></a>
 If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT rocabert AT hhu DOT de">the developer</href>.
 
-# 6) Copyright <a name="copyright"></a>
+# 5) Copyright <a name="copyright"></a>
+
 Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
 
-# 7) License <a name="license"></a>
+# 6) License <a name="license"></a>
 
 <p align="justify">
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
