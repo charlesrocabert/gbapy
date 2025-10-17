@@ -2249,7 +2249,7 @@ class Model:
         return self.mu*(1.0+np.sum([p1 for c in self.c if c < 0.0]))*(1.0+np.sum([p2 for p in self.p if p < 0.0]))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # Plotting functions                 #
+    # 7) Plotting functions              #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def plot( self, x: str, y: str, logx: Optional[bool] = False, logy: Optional[bool] = False, title: Optional[str] = None, xlabel: Optional[str] = None, ylabel: Optional[str] = None ) -> None:
@@ -2285,7 +2285,7 @@ class Model:
         fig.show()
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # 7) Summary functions               #
+    # 8) Summary functions               #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def information( self ) -> None:
