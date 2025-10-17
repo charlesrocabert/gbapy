@@ -39,9 +39,11 @@ import subprocess
 import numpy as np
 import pandas as pd
 import gurobipy as gp
+import plotly.express as px
 from typing import Optional
 from pyexcel_xlsx import get_data
 from pyexcel_ods3 import save_data
+
 from IPython.display import display_html
 
 try:
@@ -541,7 +543,7 @@ class Model:
                 self.initial_solution        = np.array(df["q0"])
                 self.initial_solution_loaded = True
             for c_name in df.columns:
-                if c_name not in ["q0"]:
+                if c_name in self.condition_ids:
                     self.optimal_solutions[str(int(c_name))] = np.array(df[c_name])
                     self.optimal_solutions_loaded            = True
             del(df)
@@ -1743,7 +1745,7 @@ class Model:
 
     ######################################
 
-    def solve_local_linear_problem( self, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
+    def solve_q0_linear_problem( self, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
         """
         Find an initial solution.
         
@@ -1809,7 +1811,7 @@ class Model:
                 throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
             return False
                 
-    def find_initial_solution( self, condition_id: Optional[str] = "1", param_exploration: Optional[bool] = True, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
+    def find_q0( self, condition_id: Optional[str] = "1", param_exploration: Optional[bool] = True, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
         """
         Find an initial solution.
         
@@ -1840,7 +1842,7 @@ class Model:
             slack   = 1.0
             solved  = False
             while slack < 100.0:
-                solved = self.solve_local_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
+                solved = self.solve_q0_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
                 if solved:
                     break
                 else:
@@ -1867,7 +1869,7 @@ class Model:
         # 2) Else direct optimization                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         else:
-            solved = self.solve_local_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
+            solved = self.solve_q0_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
             if solved:
                 self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
@@ -1886,7 +1888,7 @@ class Model:
                     throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
                 return False
 
-    def find_best_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> None:
+    def find_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> None:
         """
         Generate the best initial solution by scanning the minimal protein production.
         
@@ -1907,7 +1909,7 @@ class Model:
         min_bp_max = min_bp
         max_found  = False
         while not max_found and min_bp < 1.0:
-            found = self.find_initial_solution(condition_id=condition_id, min_bp=min_bp, verbose=False)
+            found = self.find_q0(condition_id=condition_id, min_bp=min_bp, verbose=False)
             if found:
                 if self.mu > mu_max:
                     mu_max     = self.mu
@@ -1918,7 +1920,7 @@ class Model:
             else:
                 min_bp = min_bp + step
         if max_found:
-            self.find_initial_solution(condition_id=condition_id, min_bp=min_bp_max, verbose=verbose)
+            self.find_q0(condition_id=condition_id, min_bp=min_bp_max, verbose=verbose)
         else:
             if verbose:
                 throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
@@ -2246,6 +2248,42 @@ class Model:
     def score( self, p1, p2 ) -> float:
         return self.mu*(1.0+np.sum([p1 for c in self.c if c < 0.0]))*(1.0+np.sum([p2 for p in self.p if p < 0.0]))
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # Plotting functions                 #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def plot( self, x: str, y: str, logx: Optional[bool] = False, logy: Optional[bool] = False, title: Optional[str] = None, xlabel: Optional[str] = None, ylabel: Optional[str] = None ) -> None:
+        """
+        Plot two parameters from the model data.
+
+        Parameters
+        ----------
+        x : str
+            Name of the x parameter.
+        y : str
+            Name of the y parameter.
+        logx : Optional[bool], default=False
+            Use a logarithmic scale for the x axis.
+        logy : Optional[bool], default=False
+            Use a logarithmic scale for the y axis.
+        title : Optional[str], default=None
+            Title of the plot.
+        """
+        assert x in self.data.columns, throw_message(MessageType.ERROR, f"Unknown x parameter <code>{x}</code>.")
+        assert y in self.data.columns, throw_message(MessageType.ERROR, f"Unknown y parameter <code>{y}</code>.")
+        if title is None:
+            title = y+" vs "+x
+        if xlabel is None:
+            xlabel = x
+        if ylabel is None:
+            ylabel = y
+        fig = px.line(self.data, x=x, y=y, title=title, labels={x: xlabel, y: ylabel}, template="plotly_white")
+        if logx:
+            fig.update_xaxes(type="log")
+        if logy:
+            fig.update_yaxes(type="log")
+        fig.show()
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Summary functions               #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
