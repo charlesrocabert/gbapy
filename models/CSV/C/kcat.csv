@@ -1,0 +1,3 @@
+;G transport;CO2 excretion;AA production;Ribosome
+kcat_f;10.0;100.0;8.0;4.55
+kcat_b;0.0;0.0;0.0;0.0

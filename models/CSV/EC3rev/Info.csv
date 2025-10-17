@@ -1,0 +1,14 @@
+General;;
+;Name;EC3rev
+;Description;Model with three reactions
+Units;;
+;Km;g/L
+;kcat;1/h ([mass of products]/[mass of protein]/h)
+;rho;g/L
+Sheets;;
+;M;Mass fraction matrix
+;K;Michaelis constant matrix
+;kcat;Turnover numbers
+;conditions;Value of rho and external concentrations at different growth conditions
+;q0;Initial flux fraction vector
+;qopt;Optimal solutions per condition

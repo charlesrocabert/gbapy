@@ -32,6 +32,7 @@ Copyright: © 2024-2025 Charles Rocabert, Furkan Mert.
 
 import os
 import time
+import random
 import pickle
 import pkgutil
 import subprocess
@@ -204,16 +205,6 @@ class Model:
         Truncated q vector (first element is removed).
     q : np.array
         Flux fractions vector.
-    random_data : pd.DataFrame
-        Random solution data for all conditions.
-    optima_data : pd.DataFrame
-        Optima dataframe for all conditions.
-    GA_tracker : pd.DataFrame
-        Gradient ascent trajectory tracker.
-    MC_tracker : pd.DataFrame
-        Monte Carlo with genetic drift tracker.
-    MCMC_tracker : pd.DataFrame
-        MCMC trajectory tracker.
     """
 
     def __init__( self, name: str ) -> None:
@@ -276,6 +267,7 @@ class Model:
         self.constant_reactions_loaded    = False
         self.protein_contributions_loaded = False
         self.initial_solution_loaded      = False
+        self.optimal_solutions_loaded     = False
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Model constants               #
@@ -335,15 +327,6 @@ class Model:
         self.Gamma     = np.array([])
         self.q_trunc   = np.array([])
         self.q         = np.array([])
-
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Trackers                      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.random_data  = pd.DataFrame()
-        self.optima_data  = pd.DataFrame()
-        self.GA_tracker   = pd.DataFrame()
-        self.MC_tracker   = pd.DataFrame()
-        self.MCMC_tracker = pd.DataFrame()
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 1) Model loading methods           #
@@ -532,6 +515,30 @@ class Model:
         self.conditions_loaded = True
         del(df)
 
+    def read_q_from_csv( self, path: Optional[str] = "." ) -> None:
+        """
+        Read the initial and optimal q solution from a CSV file.
+
+        Parameters
+        ----------
+        path : str, default="."
+            Path to the CSV file.
+        """
+        self.initial_solution_loaded  = False
+        self.optimal_solutions_loaded = False
+        filename                      = path+"/"+self.name+"/q.csv"
+        if os.path.exists(filename):
+            df = pd.read_csv(filename, sep=";", index_col=0)
+            df = df.T
+            if "q0" in df.columns:
+                self.initial_solution        = np.array(df["q0"])
+                self.initial_solution_loaded = True
+            for c_name in df.columns:
+                if c_name not in ["q0"]:
+                    self.optimal_solutions[str(int(c_name))] = np.array(df[c_name])
+                    self.optimal_solutions_loaded            = True
+            del(df)
+
     def read_constant_rhs_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the list of constant RHS terms from a CSV file.
@@ -607,40 +614,6 @@ class Model:
             f.close()
             self.protein_contributions_loaded = True
     
-    def read_initial_solution_from_csv( self, path: Optional[str] = "." ) -> None:
-        """
-        Read the initial solution from a CSV file (on request).
-
-        Parameters
-        ----------
-        path : str, default="."
-            Path to the CSV file.
-        """
-        self.initial_solution_loaded = False
-        filename                     = path+"/"+self.name+"/q0.csv"
-        if os.path.exists(filename):
-            df                           = pd.read_csv(filename, sep=";")
-            self.initial_solution        = np.array(df["q0"])
-            self.initial_solution_loaded = True
-            del(df)
-
-    def read_optimal_solutions_from_csv( self, path: Optional[str] = "." ) -> None:
-        """
-        Read the optimal solutions from a CSV file (on request).
-
-        Parameters
-        ----------
-        path : str, default="."
-            Path to the CSV file.
-        """
-        filename = path+"/"+self.name+"/qopt.csv"
-        if os.path.exists(filename):
-            self.optima_data       = pd.read_csv(filename, sep=";")
-            self.optimal_solutions = {
-                str(int(row['condition'])): row.drop(['condition', 'mu']).to_numpy()
-                for _, row in self.optima_data.iterrows()
-            }
-
     def read_random_solutions_from_csv( self, path: Optional[str] = "." ) -> None:
         """
         Read the random solutions from a CSV file (on request).
@@ -681,6 +654,8 @@ class Model:
             throw_message(MessageType.INFO, "Protein contributions are missing.")
         if not self.initial_solution_loaded and verbose:
             throw_message(MessageType.INFO, "The initial solution is missing.")
+        if not self.optimal_solutions_loaded and verbose:
+            throw_message(MessageType.INFO, "No optimal solutions.")
     
     def initialize_model_mathematical_variables( self ) -> None:
         """
@@ -809,11 +784,10 @@ class Model:
         self.read_KI_from_csv(path)
         self.read_rho_from_csv(path)
         self.read_conditions_from_csv(path)
+        self.read_q_from_csv(path)
         self.read_constant_rhs_from_csv(path)
         self.read_constant_reactions_from_csv(path)
         self.read_protein_contributions_from_csv(path)
-        self.read_initial_solution_from_csv(path)
-        self.read_optimal_solutions_from_csv(path)
         self.read_random_solutions_from_csv(path)
         self.check_model_loading()
         self.initialize_model_mathematical_variables()
@@ -830,8 +804,10 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Temporarily convert ODS to CSV files        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        random.seed(int(time.time()))
         filename       = path+"/"+self.name+".ods"
-        temporary_name = "temp_"+str(int(time.time()))
+        random_number  = random.randint(0, 100)
+        temporary_name = "temp_"+str(random_number)
         assert os.path.exists(filename), throw_message(MessageType.ERROR, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
         if not os.path.exists(temporary_name):
@@ -853,8 +829,8 @@ class Model:
         for sheet_name in xls.sheet_names:
             if os.path.exists(temporary_name+"/"+self.name+"/"+sheet_name+".csv"):
                os.remove(temporary_name+"/"+self.name+"/"+sheet_name+".csv")
-        if os.path.exists(temporary_name+"/"+self.name+"/q.csv"):
-            os.remove(temporary_name+"/"+self.name+"/q.csv")
+        #if os.path.exists(temporary_name+"/"+self.name+"/q.csv"):
+        #    os.remove(temporary_name+"/"+self.name+"/q.csv")
         os.rmdir(temporary_name+"/"+self.name)
         os.rmdir(temporary_name+"/")
     
@@ -884,7 +860,7 @@ class Model:
                      "rho.csv", "conditions.csv",
                      "constant_reactions.csv", "constant_rhs.csv", 
                      "protein_contributions.csv",
-                     "q.csv", "optimal_solutions.csv", "random_solutions.csv"]
+                     "q.csv", "random_solutions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
                     os.system(f"rm {model_path}/{f}")
@@ -953,7 +929,20 @@ class Model:
         conditions_df.to_csv(model_path+"/conditions.csv", sep=";")
         del(conditions_df)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the constant RHS terms      #
+        # 9) Save q data                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if len(self.initial_solution) > 0 or len(self.optimal_solutions) > 0:
+            data = {}
+            if len(self.initial_solution) > 0:
+                data["q0"] = self.initial_solution
+            for key, val in self.optimal_solutions.items():
+                data[str(int(key))] = val
+            q_df = pd.DataFrame(data, index=self.reaction_ids).T
+            q_df.replace(-0.0, 0.0, inplace=True)
+            q_df.to_csv(model_path+"/q.csv", sep=";")
+            del(q_df)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 10) Write the constant RHS terms     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.constant_rhs) > 0:
             f = open(model_path+"/constant_rhs.csv", "w")
@@ -962,7 +951,7 @@ class Model:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Write the constant reactions     #
+        # 11) Write the constant reactions     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.constant_reactions) > 0:
             f = open(model_path+"/constant_reactions.csv", "w")
@@ -971,7 +960,7 @@ class Model:
                 f.write(item[0]+";"+str(item[1])+"\n")
             f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Save protein contributions       #
+        # 12) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         if len(self.protein_contributions) > 0:
             f = open(model_path+"/protein_contributions.csv", "w")
@@ -981,25 +970,6 @@ class Model:
                 for p_id, val in item[1].items():
                     f.write(r_id+";"+p_id+";"+str(val)+"\n")
             f.close()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 12) Save the initial solution        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if len(self.initial_solution) > 0:
-            f = open(model_path+"/q.csv", "w")
-            f.write("reaction;q0\n")
-            for j in range(self.nj):
-                f.write(self.reaction_ids[j]+";"+str(self.initial_solution[j])+"\n")
-            f.close()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 13) Save the optimums per condition  #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if not self.optima_data.empty:
-            self.optima_data.to_csv(model_path+"/qopt.csv", sep=';', index=False)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 14) Save random initial solutions    #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if not self.random_data.empty:
-            self.random_data.to_csv(model_path+"/qrandom.csv", sep=';', index=False)
     
     def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
         """
@@ -1065,8 +1035,20 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         conditions_df = pd.DataFrame(self.conditions, index=self.condition_params, columns=self.condition_ids)
         conditions_df.replace(-0.0, 0.0, inplace=True)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 8) Save q data                       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        q_df = None
+        if len(self.initial_solution) > 0 or len(self.optimal_solutions) > 0:
+            data = {}
+            if len(self.initial_solution) > 0:
+                data["q0"] = self.initial_solution
+            for key, val in self.optimal_solutions.items():
+                data[str(int(key))] = val
+            q_df = pd.DataFrame(data, index=self.reaction_ids).T
+            q_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Write the constant terms        #
+        # 9) Write the constant terms        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         constant_rhs_df       = None
         constant_reactions_df = None
@@ -1077,7 +1059,7 @@ class Model:
             constant_reactions_df = pd.DataFrame(list(self.constant_reactions.items()), columns=["reaction", "value"])
             constant_reactions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Write the protein contributions #
+        # 10) Write protein contributions    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         protein_contributions_df = None
         if len(self.protein_contributions) > 0:
@@ -1087,14 +1069,6 @@ class Model:
                     rows.append([r_id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
             protein_contributions_df.replace(-0.0, 0.0, inplace=True)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 10) Save the initial solution      #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        q0_df = None
-        if len(self.initial_solution) > 0:
-            q0_df            = pd.DataFrame(self.initial_solution, index=self.reaction_ids, columns=["q0"])
-            q0_df.index.name = "reaction"
-            q0_df.reset_index(inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 11) Write the variables in xlsx    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1117,12 +1091,8 @@ class Model:
                 constant_reactions_df.to_excel(writer, sheet_name="constant_reactions", index=False)
             if protein_contributions_df is not None:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
-            if q0_df is not None:
-                q0_df.to_excel(writer, sheet_name="q", index=False)
-            if not self.optima_data.empty:
-                self.optima_data.to_excel(writer, sheet_name="qopt", index=False)
-            if not self.random_data.empty:
-                self.random_data.to_excel(writer, sheet_name="qrandom", index=False)
+            if q_df is not None:
+                q_df.to_excel(writer, sheet_name="q", index=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 12) Free memory                    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1134,10 +1104,10 @@ class Model:
         del(KI_df)
         del(rho_df)
         del(conditions_df)
+        del(q_df)
         del(constant_rhs_df)
         del(constant_reactions_df)
         del(protein_contributions_df)
-        del(q0_df)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 2) Getters                         #
@@ -1164,39 +1134,6 @@ class Model:
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
-
-    def get_vector( self, source: str, variable: str ) -> np.array:
-        """
-        Get the vector of a variable in a data-frame.
-
-        Parameters
-        ----------
-        source : str
-            Source of the vector.
-        variable : str
-            Variable name.
-
-        Returns
-        -------
-        np.array
-            Vector of the variable.
-        """
-        assert source in ["random", "optima", "GA", "MC", "MCMC"], throw_message(MessageType.ERROR, "Source must be <code>random</code>, <code>optima</code>, <code>GA</code>, <code>MC</code> or <code>MCMC</code>.")
-        if source == "random":
-            assert not self.random_data.empty, throw_message(MessageType.ERROR, "No data available for random solutions.")
-            return self.random_data[variable].values
-        elif source == "optima":
-            assert not self.optima_data.empty, throw_message(MessageType.ERROR, "No data available for optima.")
-            return self.optima_data[variable].values
-        elif source == "GA":
-            assert not self.GA_tracker.empty, throw_message(MessageType.ERROR, "No data available for gradient ascent.")
-            return self.GA_tracker[variable].values
-        elif source == "MC":
-            assert not self.MC_tracker.empty, throw_message(MessageType.ERROR, "No data available for Monte Carlo.")
-            return self.MC_tracker[variable].values
-        elif source == "MCMC":
-            assert not self.MCMC_tracker.empty, throw_message(MessageType.ERROR, "No data available for MCMC.")
-            return self.MCMC_tracker[variable].values
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Setters                         #
@@ -1684,9 +1621,9 @@ class Model:
         """
         Check the model state's consistency.
         """
-        test1 = (np.abs(self.density-1.0) < GbaConstants.TOL.value)
-        test2 = (sum(1 for x in self.c if x < -GbaConstants.TOL.value) == 0)
-        test3 = (sum(1 for x in self.p if x < -GbaConstants.TOL.value) == 0)
+        test1           = (np.abs(self.density-1.0) < GbaConstants.TOL.value)
+        test2           = (sum(1 for x in self.c if x < 0.0) == 0)
+        test3           = (sum(1 for x in self.p if x < 0.0) == 0)
         self.consistent = True
         if not (test1 and test2 and test3):
             self.consistent = False
@@ -1803,6 +1740,7 @@ class Model:
                 lb_vec.append(-gp.GRB.INFINITY)
             else:
                 lb_vec.append(GbaConstants.TOL.value)
+        lb_vec = [GbaConstants.TOL.value]*self.nj    
         ub_vec = [gp.GRB.INFINITY]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
@@ -1840,13 +1778,13 @@ class Model:
                 throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
             return False
                 
-    def find_initial_solution( self, condition_id: Optional[str] = "1", min_bp: Optional[float] = 0.2, verbose: Optional[bool] = False ) -> bool:
+    def find_initial_solution( self, condition_id: Optional[str] = "1", param_exploration: Optional[bool] = True, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
         """
         Find an initial solution.
         
         Description
         -----------
-        Solution developed by Hugo Dourado.
+        Inspired from the solution developed by Hugo Dourado.
         
         Parameters
         ----------
@@ -1854,36 +1792,68 @@ class Model:
             Condition identifier.
         min_bp : Optional[float], default=0.2
             Minimal protein production.
+        param_exploration : Optional[bool], default=True
+            Parameter exploration mode.
+        sat_act : Optional[float], default=1.0
+            Saturation of the metabolic enzymes.
+        slack : Optional[float], default=2.0
+            Slack variable for the minimal metabolite production.
         verbose : Optional[bool], default=False
             Verbose mode.
         """
-        sat_act = 1.0
-        slack   = 2.0
-        solved  = False
-        while slack < 20.0:
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Explore saturation and slack if required #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if param_exploration:
+            sat_act = 1.0
+            slack   = 1.0
+            solved  = False
+            while slack < 100.0:
+                solved = self.solve_local_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
+                if solved:
+                    break
+                else:
+                    sat_act /= 1.1
+                    slack   *= 1.1
+            if solved:
+                self.set_condition(condition_id)
+                self.set_q0(self.initial_solution)
+                self.calculate()
+                self.check_consistency()
+                if self.consistent:
+                    if verbose:
+                        throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
+                    return True
+                else:
+                    if verbose:
+                        throw_message(MessageType.INFO, "Model is inconsistent.")
+                    return False
+            else:
+                if verbose:
+                    throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
+                return False
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Else direct optimization                 #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        else:
             solved = self.solve_local_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
             if solved:
-                break
+                self.set_condition(condition_id)
+                self.set_q0(self.initial_solution)
+                self.calculate()
+                self.check_consistency()
+                if self.consistent:
+                    if verbose:
+                        throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
+                    return True
+                else:
+                    if verbose:
+                        throw_message(MessageType.INFO, "Model is inconsistent.")
+                    return False
             else:
-                sat_act /= 1.1
-                slack   *= 1.1
-        if solved:
-            self.set_condition(condition_id)
-            self.set_q0(self.initial_solution)
-            self.calculate()
-            self.check_consistency()
-            if self.consistent:
                 if verbose:
-                    throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
-                return True
-            else:
-                if verbose:
-                    throw_message(MessageType.INFO, "Model is inconsistent.")
+                    throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
                 return False
-        else:
-            if verbose:
-                throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
-            return False
 
     def find_best_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> None:
         """
@@ -1900,8 +1870,8 @@ class Model:
         verbose : Optional[bool], default=False
             Verbose mode.
         """
-        min_bp     = 0.1
-        step       = 0.001
+        min_bp     = 0.01
+        step       = 0.01
         mu_max     = 0.0
         min_bp_max = min_bp
         max_found  = False
@@ -1923,6 +1893,7 @@ class Model:
                 throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
 
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
+        throw_message(MessageType.ERROR, "Deprecated function")
         """
         Generate random initial solutions.
 
@@ -1984,7 +1955,7 @@ class Model:
     # 6) Optimization functions          #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def build_gbacpp_command_line( self, temporary_name: str, tol: float, mutol: float, stable_count: int, max_iter: float ) -> str:
+    def build_gbacpp_command_line( self, temporary_name: str, condition_id: str, use_previous_sol: bool, tol: float, mutol: float, convergence_count: int, max_iter: float ) -> str:
         """
         Build the command line for the C++ solver gbacpp.
 
@@ -1992,12 +1963,17 @@ class Model:
         ----------
         temporary_name : str
             Name of the temporary model.
+        condition_id : str
+            Condition identifier.
+        use_previous_sol : bool
+            Use the previous solution as initial solution.
         tol : float
             Tolerance value.
         mutol : float
             Tolerance value for mu relative change.
-        stable_count : int
-            Number of iteration with no significant mu change.
+        convergence_count : int
+            Number of iteration with no significant mu change to assume
+            convergence.
         max_iter : float
             Maximum number of iterations.
         
@@ -2009,15 +1985,18 @@ class Model:
         cmdline  = "find_model_optimum "
         cmdline += "-path . "
         cmdline += "-name "+str(temporary_name)+" "
-        cmdline += "-condition "+self.condition+" "
+        cmdline += "-condition "+condition_id+" "
+        cmdline += "-output "+str(temporary_name)+" "
         cmdline += "-tol "+str(tol)+" "
         cmdline += "-mutol "+str(mutol)+" "
-        cmdline += "-stable "+str(stable_count)+" "
+        cmdline += "-conv "+str(convergence_count)+" "
         cmdline += "-max "+str(max_iter)+" "
-        cmdline += "-print\n"
+        if use_previous_sol:
+            cmdline += "-previous "
+        cmdline += "-optimum\n"
         return(cmdline)
     
-    def read_solver_output( self, solver_output: str ) -> None:
+    def read_solver_output( self, temporary_name: str, condition_id: str ) -> None:
         """
         Read the output of the solver and update the model state.
 
@@ -2025,111 +2004,33 @@ class Model:
         ----------
         solver_output : str
             Output of the solver.
-
-        Returns
-        -------
-        converged, runtime
-            Tuple containing the convergence status and the runtime.
         """
-        lines = solver_output.split("\n")
-        if len(lines) < 14:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
+        state_filename = ""
+        q_filename     = ""
+        if condition_id == "all":
+            state_filename = "./"+temporary_name+"/"+temporary_name+"_all_state_optimum.csv"
+            q_filename     = "./"+temporary_name+"/"+temporary_name+"_all_q_optimum.csv"
+        else:
+            state_filename = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_state_optimum.csv"
+            q_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_q_optimum.csv"
+        assert os.path.exists(state_filename), throw_message(MessageType.ERROR, f"Solver state output file <code>{state_filename}</code> not found.")
+        assert os.path.exists(q_filename), throw_message(MessageType.ERROR, f"Solver q output file <code>{q_filename}</code> not found.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Check the solver output format         #
+        # 2) Read the optimal q vector              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        ### 1.1) Check the dimensionality of the output ###
-        tests = [len(lines[0].split(" ")) == 2,
-                 len(lines[1].split("\t")) == 5,
-                 len(lines[2].split("\t")) == 5,
-                 len(lines[3].split("\t")) == self.nj+1,
-                 len(lines[4].split("\t")) == self.nj+1,
-                 len(lines[5].split("\t")) == self.nj+1,
-                 len(lines[6].split("\t")) == self.nj+1,
-                 len(lines[7].split("\t")) == self.nj+1,
-                 len(lines[8].split("\t")) == self.nj+1,
-                 len(lines[9].split("\t")) == self.nc+1,
-                 len(lines[10].split("\t")) == self.nc+1,
-                 len(lines[11].split("\t")) == self.nc+1,
-                 len(lines[12].split("\t")) == self.nc+1]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        ### 1.2) Check the content of the output ###
-        tests = [lines[0].startswith("CONDITION "),
-                 lines[1] == "mu	density	consistent	converged	run_time"]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        assert self.condition == lines[0].split(" ")[1], throw_message(MessageType.ERROR, f"Condition mismatch: expected {self.condition}, got {lines[0].split(" ")[1]}.")
-        ### 1.3) Check q vector ###
-        tests = [lines[3].startswith("variable\t"),
-                 lines[4].startswith("q\t")]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        r_ids = lines[3].split("\t")[1:]
-        for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
-        ### 1.4) Check v vector ###
-        tests = [lines[5].startswith("variable\t"),
-                 lines[6].startswith("v\t")]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        r_ids = lines[5].split("\t")[1:]
-        for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
-        ### 1.5) Check p vector ###
-        tests = [lines[7].startswith("variable\t"),
-                 lines[8].startswith("p\t")]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        r_ids = lines[7].split("\t")[1:]
-        for i in range(self.nj):
-            assert r_ids[i] == self.reaction_ids[i], throw_message(MessageType.ERROR, f"Reaction ID mismatch: expected {self.reaction_ids[i]}, got {r_ids[i]}.")
-        ### 1.6) Check b vector ###
-        tests = [lines[9].startswith("variable\t"),
-                 lines[10].startswith("b\t")]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        met_ids = lines[9].split("\t")[1:]
-        for i in range(self.nc):
-            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.ERROR, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
-        ### 1.7) Check c vector ###
-        tests = [lines[11].startswith("variable\t"),
-                 lines[12].startswith("c\t")]
-        if False in tests:
-            throw_message(MessageType.WARNING, "Solver failed.")
-            return None, None
-        met_ids = lines[11].split("\t")[1:]
-        for i in range(self.nc):
-            assert met_ids[i] == self.c_ids[i], throw_message(MessageType.ERROR, f"Metabolite ID mismatch: expected {self.c_ids[i]}, got {met_ids[i]}.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Read the model state                   #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        line               = lines[2].split("\t")
-        self.mu            = float(line[0])
-        self.density       = float(line[1])
-        self.consistent    = bool(int(line[2]))
-        converged          = bool(int(line[3]))
-        run_time           = float(line[4])
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Read the variables                     #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.q = np.array([float(x) for x in lines[4].split("\t")[1:]])
-        self.v = np.array([float(x) for x in lines[6].split("\t")[1:]])
-        self.p = np.array([float(x) for x in lines[8].split("\t")[1:]])
-        self.b = np.array([float(x) for x in lines[10].split("\t")[1:]])
-        self.c = np.array([float(x) for x in lines[12].split("\t")[1:]])
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Returns convergence status and runtime #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        return converged, run_time
+        f      = open(q_filename, "r")
+        header = f.readline().strip("\n").split(";")
+        l      = f.readline()
+        while l:
+            l         = l.strip("\n").split(";")
+            condition = l[0]
+            values    = l[1:]
+            self.optimal_solutions[condition] = np.array([float(v) for v in values])
+            self.q = self.optimal_solutions[condition]
+            l      = f.readline()
+        f.close()
     
-    def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, stable: Optional[int] = 10000, max_iter: Optional[int] = 1000000, verbose: Optional[bool] = False ) -> bool:
+    def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 100000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
         Find the optimum of the model using the gbacpp solver.
 
@@ -2139,73 +2040,136 @@ class Model:
             Tolerance value for the solver.
         mutol : Optional[float], default=1e-10
             Tolerance value for the growth rate relative difference.
-        stable : Optional[int], default=10000
-            Number of iterations with no significant mu change to consider
-            convergence.
-        max_iter : Optional[int], default=1000000
+        convergence_count : Optional[int], default=10000
+            Number of iterations with no significant mu change to
+            assume convergence.
+        max_iter : Optional[int], default=100000000
             Maximum number of iterations for the solver.
+        delete : Optional[bool], default=True
+            Delete temporary files.
         verbose : Optional[bool], default=True
             Verbose mode.
         
         Returns
         -------
-        converged : bool
-            True if the model converged, False otherwise.
-        run_time : float
-            Time taken by the solver in seconds.
+        consistent : bool
+            True if the model is consistent, False otherwise.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the random data frame                      #
+        # 1) Write the model in a temporary file with a unique key #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        columns = ["condition"] + self.reaction_ids + ["mu"]
-        if self.optima_data.empty:
-            self.optima_data = pd.DataFrame(columns=columns)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Write the model in a temporary file with a unique key #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        temporary_name = "temp_"+str(int(time.time()))
+        random.seed(int(time.time()))
+        random_number  = random.randint(0, 100000000)
+        temporary_name = "temp_"+str(int(random_number))
         self.write_to_csv(name=temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Run gbacpp solver                                     #
+        # 2) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        cmdline             = self.build_gbacpp_command_line(temporary_name, tol, mutol, stable, max_iter)
-        solver_process      = subprocess.Popen([cmdline], stdout=subprocess.PIPE, shell=True)
-        solver_output       = solver_process.stdout.read().decode('utf8')
-        converged           = False
-        run_time            = 0.0
-        converged, run_time = self.read_solver_output(solver_output)
+        cmdline        = self.build_gbacpp_command_line(temporary_name, self.condition, False, tol, mutol, convergence_count, max_iter)
+        solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+        solver_process.wait()
+        try:
+            self.read_solver_output(temporary_name=temporary_name, condition_id=self.condition)
+        except:
+            throw_message(MessageType.WARNING, "Impossible to read the solver output.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Remove the temporary files and folder                 #
+        # 3) Remove the temporary files and folder                 #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert temporary_name.startswith("temp_"), throw_message(MessageType.ERROR, "Temporary folder name must start with 'temp_'.")
-        assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.ERROR, "Temporary folder name must contain a timestamp.")
-        while os.path.exists(temporary_name):
-            files = os.listdir(temporary_name)
-            for file in files:
-                file_path = os.path.join(temporary_name, file)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-            os.rmdir(temporary_name)
-        os.remove(temporary_name+"_"+self.condition+"_q.bin")
+        if delete:
+            assert temporary_name.startswith("temp_"), throw_message(MessageType.ERROR, "Temporary folder name must start with 'temp_'.")
+            assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.ERROR, "Temporary folder name must contain a timestamp.")
+            while os.path.exists(temporary_name):
+                files = os.listdir(temporary_name)
+                for file in files:
+                    file_path = os.path.join(temporary_name, file)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                os.rmdir(temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Print the result                                      #
+        # 4) Update the model                                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        if converged is not None:
-            if converged:
-                data_dict = {"condition": self.condition, "mu": self.mu}
-                for reaction_id, fluxfraction in zip(self.reaction_ids, self.q):
-                    data_dict[reaction_id] = fluxfraction
-                data_row                               = pd.Series(data=data_dict)
-                self.optima_data                       = pd.concat([self.optima_data, data_row.to_frame().T], ignore_index=True)
-                self.optimal_solutions[self.condition] = np.copy(self.q)
+        self.set_q0(self.optimal_solutions[self.condition])
+        self.calculate()
+        self.check_consistency()
+        if self.consistent:
+            if verbose:
+                throw_message(MessageType.INFO, f"Condition {self.condition}: model converged with mu = {self.mu}.")
+        else:
+            if verbose:
+                throw_message(MessageType.INFO, f"Condition {self.condition}: model did not converge.")
+        
+    def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = False, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
+        """
+        Find optimums for all conditions of the model using the gbacpp solver.
+
+        Parameters
+        ----------
+        use_previous_sol : Optional[bool], default=False
+            Use the previous solution as initial solution for the next
+            condition.
+        tol : Optional[float], default=1e-10
+            Tolerance value for the solver.
+        mutol : Optional[float], default=1e-10
+            Tolerance value for the growth rate relative difference.
+        convergence_count : Optional[int], default=10000
+            Number of iterations with no significant mu change to
+            assume convergence.
+        max_iter : Optional[int], default=1000000
+            Maximum number of iterations for the solver.
+        delete : Optional[bool], default=True
+            Delete temporary files.
+        verbose : Optional[bool], default=True
+            Verbose mode.
+        
+        Returns
+        -------
+        consistent : bool
+            True if the model is consistent, False otherwise.
+        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Write the model in a temporary file with a unique key #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        random.seed(int(time.time()))
+        random_number  = random.randint(0, 100000000)
+        temporary_name = "temp_"+str(int(random_number))
+        self.write_to_csv(name=temporary_name)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Run gbacpp solver                                     #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        cmdline        = self.build_gbacpp_command_line(temporary_name, "all", use_previous_sol, tol, mutol, convergence_count, max_iter)
+        solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+        solver_process.wait()
+        try:
+            self.read_solver_output(temporary_name=temporary_name, condition_id="all")
+        except:
+            throw_message(MessageType.WARNING, "Impossible to read the solver output.")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Remove the temporary files and folder                 #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        if delete:
+            assert temporary_name.startswith("temp_"), throw_message(MessageType.ERROR, "Temporary folder name must start with 'temp_'.")
+            assert temporary_name.split("_")[1].isdigit(), throw_message(MessageType.ERROR, "Temporary folder name must contain a timestamp.")
+            while os.path.exists(temporary_name):
+                files = os.listdir(temporary_name)
+                for file in files:
+                    file_path = os.path.join(temporary_name, file)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                os.rmdir(temporary_name)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 4) Update the model                                      #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        for cond_id in self.optimal_solutions.keys():
+            self.set_q0(self.optimal_solutions[cond_id])
+            self.set_condition(cond_id)
+            self.calculate()
+            self.check_consistency()
+            if self.consistent:
                 if verbose:
-                    throw_message(MessageType.INFO, f"Condition {self.condition}: model converged with mu = {self.mu} after {run_time:.2f} seconds.")
+                    throw_message(MessageType.INFO, f"Condition {cond_id}: model converged with mu = {self.mu}.")
             else:
                 if verbose:
-                    throw_message(MessageType.WARNING, f"Condition {self.condition}: model did not converge after {run_time:.2f} seconds.")
-            return True
-        else:
-            return False
+                    throw_message(MessageType.INFO, f"Condition {cond_id}: model did not converge.")
     
     def score( self, p1, p2 ) -> float:
         return self.mu*(1.0+np.sum([p1 for c in self.c if c < 0.0]))*(1.0+np.sum([p2 for p in self.p if p < 0.0]))
