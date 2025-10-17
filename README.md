@@ -6,7 +6,7 @@
 
 <p align="center">
 <br />
-<a href="https://badge.fury.io/py/MetEvolSim"><img src="https://badge.fury.io/py/gba.svg" alt="PyPI version"></a>&nbsp;
+<a href="https://badge.fury.io/py/gba"><img src="https://badge.fury.io/py/gba.svg" alt="PyPI version"></a>&nbsp;
 <a href="https://github.com/charlesrocabert/gbapy/actions"><img src="https://github.com/charlesrocabert/gbapy/workflows/Upload Python Package/badge.svg" /></a>&nbsp;
 <a href="https://github.com/charlesrocabert/gbapy/LICENSE.html"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
 </p>
