@@ -46,10 +46,10 @@ The module offers two core components:
 ```python
 import gba
 
-builder = gba.Builder(name="A")
+builder = gba.Builder(name="my_model")
 
 ### Add model information (ODS sheet 'Info')
-builder.add_info(category="General", key="Name", content="A")
+builder.add_info(category="General", key="Name", content="my_model")
 builder.add_info(category="General", key="Description", content="Toy model")
 
 ### Create and add proteins (one protein per enzyme per reaction)
@@ -113,7 +113,7 @@ builder.write_to_ods()
 
 ```python
 ### Load the ODS model
-model = gba.read_ods_model(name="A")
+model = gba.read_ods_model(name="my_model")
 
 ### Find a valid initial solution
 model.find_initial_solution()
