@@ -25,10 +25,11 @@
 
 ```python
 import gba
-model = gba.read_ods_model(name="./models/G14")
+model = gba.read_ods_model(name="./models/A")
 model.find_initial_solution()
 model.find_optimum_by_condition()
 model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
+model.export_optimization_data()
 ```
 
 <p align="center">
