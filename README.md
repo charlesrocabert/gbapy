@@ -27,7 +27,7 @@ pip install gba
 <strong>gbapy</strong> is a Python package that provides tools for building and analyzing <strong>self-replicating cell (SRC)</strong> models based on the <strong>growth balance analysis (GBA)</strong> mathematical formalism (<a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al. 2023</a>).
 </p>
 
-#### Features
+### Features
 
 <p align="justify">
 The module offers two core components:
@@ -137,7 +137,7 @@ model.export_optimization_data()
 
 # 1) Installation <a name="installation"></a>
 
-> [!WARNING]
+> [!CAUTION]
 > Module not deployed on PyPI yet
 
 The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
@@ -150,7 +150,7 @@ pip install gba
 <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> software is required to run optimization tasks.
 
 ### 1.1) Supported platforms <a name="supported_platforms"></a>
-<strong>gbapy</strong> software has been primilary developed for Unix/Linux and macOS systems.
+<strong>gbapy</strong> has been primilary developed for Unix/Linux and macOS systems.
 
 ### 1.2) Dependencies <a name="dependencies"></a>
 
@@ -198,7 +198,7 @@ If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT 
 
 # 5) Copyright <a name="copyright"></a>
 
-Copyright © 2024-2025 @charlesrocabert, Furkan Mert.
+Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
 
 # 6) License <a name="license"></a>
 
