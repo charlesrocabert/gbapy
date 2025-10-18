@@ -23,6 +23,16 @@
 pip install gba
 ```
 
+<p align="justify">
+<strong>gbapy</strong> is a Python module providing tools to build and manipulate <strong>self-replicating cell (SRC)</strong> models following the growth balance analysis mathematical formalism (GBA; <a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al. 2023</a>).
+</p>
+
+<p align="justify">
+The module provides to main tools:
+  - A builder tool, to build models of any size from first principles
+  - A model tool, to manipulate and optimize constructed models.
+</p>
+
 <p align="center">
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/710fecd4-0381-41a2-ae6e-d952eb8c40ad" />
 </p>
