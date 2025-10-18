@@ -24,7 +24,77 @@ pip install gba
 ```
 
 <p align="center">
-<img width="500" height="566" alt="image" src="https://github.com/user-attachments/assets/f1f8c4be-c9f1-46cf-b0f5-83a6bb596bd2" />
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/710fecd4-0381-41a2-ae6e-d952eb8c40ad" />
+</p>
+
+```python
+import gba
+
+builder = gba.Builder(name="A")
+
+### Add model information (ODS sheet 'Info')
+builder.add_info(category="General", key="Name", content="A")
+builder.add_info(category="General", key="Description", content="Toy model")
+
+### Create and add proteins (one protein per enzyme per reaction)
+### - Masses in Da.
+p1 = gba.Protein(id="p1", mass=1000000.0)
+p2 = gba.Protein(id="p2", mass=1000000.0)
+builder.add_proteins([p1, p2])
+
+### Create and add metabolites:
+### - External and internal glucose
+### - One generic Protein product
+### - Masses in Da.
+x_G     = gba.Metabolite(id="x_G", species_location=gba.SpeciesLocation.EXTERNAL, mass=180.0)
+G       = gba.Metabolite(id="G", species_location=gba.SpeciesLocation.INTERNAL, mass=180.0)
+Protein = gba.Metabolite(id="Protein", species_location=gba.SpeciesLocation.INTERNAL,mass=180.0)
+builder.add_metabolites([x_G, G, Protein])
+
+### Create and add transporter to import glucose:
+### - Enzyme is composed of one protein p1
+### - Reaction is irreversible
+### - kcat values in 1/h
+### - km values in g/L
+rxn1 = gba.Reaction(id="rxn1", lb=0.0, ub=1000.0,
+                    reaction_type=gba.ReactionType.TRANSPORT,
+                    metabolites={"x_G":-1.0, "G": 1.0}, proteins={"p1": 1.0})
+rxn1.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
+rxn1.add_km_value(metabolite_id="x_G", km_value=0.0013)
+rxn1.complete_kcat_values(kcat_value=0.0)
+rxn1.complete_km_values(km_value=0.0)
+builder.add_reaction(rxn1)
+
+### Create and add ribosome reaction to produce proteins:
+### - Enzyme is composed of one protein p2
+### - Reaction is irreversible
+ribosome = gba.Reaction(id="Ribosome", lb=0.0, ub=1000.0,
+                        reaction_type=gba.ReactionType.METABOLIC,
+                    metabolites={"G":-1.0, "Protein": 1.0}, proteins={"p2": 1.0})
+ribosome.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
+ribosome.add_km_value(metabolite_id="G", km_value=0.0013)
+ribosome.complete_kcat_values(kcat_value=0.0)
+ribosome.complete_km_values(km_value=0.0)
+builder.add_reaction(ribosome)
+
+### Convert the model to GBA formalism
+builder.build_GBA_model()
+
+### Set total density (g/L)
+builder.set_rho(340.0)
+
+### Create external conditions (g/L)
+x_G_conc = 100.0
+for i in range(25):
+    builder.add_condition(condition_id=str(i+1), metabolites={"x_G": x_G_conc})
+    x_G_conc *= 2/3
+
+### Save the model to an ODS file
+builder.write_to_ods()
+```
+
+<p align="center">
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/d90ce2bb-b66c-4f05-87c8-264421937f61" />
 </p>
 
 ```python
@@ -37,7 +107,7 @@ model.export_optimization_data()
 ```
 
 <p align="center">
-<img width="550" height="1198" alt="image" src="https://github.com/user-attachments/assets/88b91aa3-b7d4-49fc-8bb1-c46762c27014" />
+<img width="550" alt="image" src="https://github.com/user-attachments/assets/88b91aa3-b7d4-49fc-8bb1-c46762c27014" />
 </p>
 
 # Table of contents
