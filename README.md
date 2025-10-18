@@ -19,6 +19,10 @@
 
 -----------------
 
+```
+pip install gba
+```
+
 <p align="center">
 <img width="500" height="566" alt="image" src="https://github.com/user-attachments/assets/f1f8c4be-c9f1-46cf-b0f5-83a6bb596bd2" />
 </p>
