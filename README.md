@@ -167,7 +167,7 @@ pip install gba
 * <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> is required to run optimization tasks.
 
 #### • Licensed Python modules
-* The Python API of <a href="https://www.gurobi.com/" target="_blank">GUROBI optimizer</a> must be installed and requires a user license (<a href="https://www.gurobi.com/academia/academic-program-and-licenses/" target="_blank">free for academics</a>)
+* The Python API of <a href="https://www.gurobi.com/" target="_blank">GUROBI optimizer</a> must be installed and requires a user license (<a href="https://www.gurobi.com/academia/academic-program-and-licenses/" target="_blank">free for academics</a>).
 
 #### • Other Python modules
 * <a href="https://numpy.org/" target="_blank">NumPy</a>
