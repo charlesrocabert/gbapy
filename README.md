@@ -21,7 +21,6 @@
 
 <p align="center">
 <img width="500" height="566" alt="image" src="https://github.com/user-attachments/assets/f1f8c4be-c9f1-46cf-b0f5-83a6bb596bd2" />
-
 </p>
 
 ```python
@@ -33,7 +32,8 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 ```
 
 <p align="center">
-<img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/328ed880-6b7b-45e7-80b8-ea037dc31be7" />
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/10f65693-dd47-46b4-9f81-57fef35455ce" />
+
 </p>
 
 # Build a model
