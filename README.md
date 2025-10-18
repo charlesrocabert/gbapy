@@ -32,7 +32,7 @@ model.plot(x="x_C", y="mu", title="Growth rate", logx=True)
 ```
 
 <p align="center">
-<img width="600" alt="image" src="https://github.com/user-attachments/assets/10f65693-dd47-46b4-9f81-57fef35455ce" />
+<img width="550" alt="image" src="https://github.com/user-attachments/assets/10f65693-dd47-46b4-9f81-57fef35455ce" />
 
 </p>
 
