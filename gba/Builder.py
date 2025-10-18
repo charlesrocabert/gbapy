@@ -316,7 +316,7 @@ class Builder:
         assert reaction.id not in self.reactions, throw_message(MessageType.ERROR, f"Reaction <code>{reaction.id}</code> already exists.")
         reaction.set_builder(self)
         self.reactions[reaction.id] = reaction
-        if reaction.proteins not in [None, {}] and reaction.GPR is not None:
+        if reaction.proteins not in [None, {}]:# and reaction.GPR is not None:
             reaction.calculate_enzyme_mass()
     
     def add_reactions( self, reactions_list: list[Reaction] ) -> None:
@@ -680,7 +680,7 @@ class Builder:
         """
         self.GBA_conditions = {}
     
-    def add_condition( self, condition_id: str, rho: float, default_concentration: float, metabolites: Optional[dict[str, float]] = None ) -> None:
+    def add_condition( self, condition_id: str, default_concentration: Optional[float] = 1.0, metabolites: Optional[dict[str, float]] = None ) -> None:
         """
         Add an external condition to the GBA converted model.
 
@@ -688,8 +688,6 @@ class Builder:
         ----------
         condition_id : str
             Identifier of the condition.
-        rho : float
-            Total density of the cell (g/L).
         default_concentration : float
             Default concentration of metabolites (g/L).
         metabolites : dict[str, float]
@@ -700,7 +698,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         assert self.GBA_is_built, throw_message(MessageType.ERROR, "GBA converted model is not built.")
         assert condition_id not in self.GBA_conditions, throw_message(MessageType.ERROR, f"Condition <code>{condition_id}</code> already exists.")
-        assert rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
+        assert self.GBA_rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
         assert default_concentration >= 0.0, throw_message(MessageType.ERROR, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
@@ -709,7 +707,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.GBA_conditions[condition_id] = {"rho": rho}
+        self.GBA_conditions[condition_id] = {"rho": self.GBA_rho}
         self.GBA_conditions[condition_id].update({m_id: default_concentration for m_id in self.metabolites if self.metabolites[m_id].species_location == SpeciesLocation.EXTERNAL})
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
@@ -1538,7 +1536,8 @@ class Builder:
         """
         Build the GBA converted model.
         """
-        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
+        if not self.check_conversion():
+            self.convert()
         self.build_GBA_indices()
         self.build_GBA_mass_fraction_matrix()
         self.build_GBA_kcat_vectors()

@@ -815,7 +815,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         random.seed(int(time.time()))
         filename       = path+"/"+self.name+".ods"
-        random_number  = random.randint(0, 100)
+        random_number  = random.randint(0, 100000000)
         temporary_name = "temp_"+str(random_number)
         assert os.path.exists(filename), throw_message(MessageType.ERROR, "Folder "+filename+" does not exist.")
         xls = pd.ExcelFile(filename, engine="odf")
