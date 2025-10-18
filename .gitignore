@@ -5,7 +5,6 @@
 temp_*
 clean_folders.sh
 deprecated/**
-tutorials/**
 examples/**
 
 # Byte-compiled / optimized / DLL files
