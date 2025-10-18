@@ -33,7 +33,8 @@ model.export_optimization_data()
 ```
 
 <p align="center">
-<img width="550" alt="image" src="https://github.com/user-attachments/assets/10f65693-dd47-46b4-9f81-57fef35455ce" />
+<img width="550" height="1198" alt="image" src="https://github.com/user-attachments/assets/88b91aa3-b7d4-49fc-8bb1-c46762c27014" />
+
 
 </p>
 
