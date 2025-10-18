@@ -28,10 +28,14 @@ pip install gba
 </p>
 
 <p align="justify">
-The module provides to main tools:
-  - A builder tool, to build models of any size from first principles
-  - A model tool, to manipulate and optimize constructed models.
+The module provides two main tools:
+  
+- A <strong>builder class</strong>, to build models of any size from first principles,
+- A <strong>model class</strong>, to manipulate and optimize constructed models.
+
 </p>
+
+# Typical workflow
 
 <p align="center">
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/710fecd4-0381-41a2-ae6e-d952eb8c40ad" />
