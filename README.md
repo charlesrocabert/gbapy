@@ -96,7 +96,6 @@ builder.write_to_ods()
 </p>
 
 ```python
-import gba
 model = gba.read_ods_model(name="A")
 model.find_initial_solution()
 model.find_optimum_by_condition()
