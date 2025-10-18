@@ -55,14 +55,13 @@ builder.add_metabolites([x_G, G, Protein])
 ### - Enzyme is composed of one protein p1
 ### - Reaction is irreversible
 ### - kcat values in 1/h
-### - km values in g/L
+### - KM values in g/L
 rxn1 = gba.Reaction(id="rxn1", lb=0.0, ub=1000.0,
                     reaction_type=gba.ReactionType.TRANSPORT,
                     metabolites={"x_G":-1.0, "G": 1.0}, proteins={"p1": 1.0})
 rxn1.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
-rxn1.add_km_value(metabolite_id="x_G", km_value=0.0013)
-rxn1.complete_kcat_values(kcat_value=0.0)
-rxn1.complete_km_values(km_value=0.0)
+rxn1.add_km_value(metabolite_id="x_G", km_value=0.001)
+rxn1.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(rxn1)
 
 ### Create and add ribosome reaction to produce proteins:
@@ -72,18 +71,17 @@ ribosome = gba.Reaction(id="Ribosome", lb=0.0, ub=1000.0,
                         reaction_type=gba.ReactionType.METABOLIC,
                     metabolites={"G":-1.0, "Protein": 1.0}, proteins={"p2": 1.0})
 ribosome.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
-ribosome.add_km_value(metabolite_id="G", km_value=0.0013)
-ribosome.complete_kcat_values(kcat_value=0.0)
-ribosome.complete_km_values(km_value=0.0)
+ribosome.add_km_value(metabolite_id="G", km_value=0.001)
+ribosome.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(ribosome)
 
-### Convert the model to GBA formalism
+### Convert the model to GBA formalism (cf. Dourado et al. 2023)
 builder.build_GBA_model()
 
-### Set total density (g/L)
+### Set cell's total density (g/L)
 builder.set_rho(340.0)
 
-### Create external conditions (g/L)
+### Create external conditions (in g/L)
 x_G_conc = 100.0
 for i in range(25):
     builder.add_condition(condition_id=str(i+1), metabolites={"x_G": x_G_conc})
@@ -99,7 +97,7 @@ builder.write_to_ods()
 
 ```python
 import gba
-model = gba.read_ods_model(name="./models/A")
+model = gba.read_ods_model(name="A")
 model.find_initial_solution()
 model.find_optimum_by_condition()
 model.plot(x="x_G", y="mu", title="Growth rate", logx=True)
