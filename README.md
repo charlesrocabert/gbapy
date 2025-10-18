@@ -132,6 +132,12 @@ model.export_optimization_data()
 <img width="550" alt="image" src="https://github.com/user-attachments/assets/16b7eb56-81d8-429c-b7f8-9aa4cac48de5" />
 </p>
 
+### Reference files
+
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/my_toy_model.ipynb" target="_blank">Toy model tutorial</a>,
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy.ods" target="_blank">ODS file</a>,
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy_optimization_data.csv" target="_blank">CSV optimization data</a>.
+
 # Table of contents
 
 - [1) Installation](#installation)
