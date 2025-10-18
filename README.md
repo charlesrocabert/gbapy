@@ -112,10 +112,19 @@ builder.write_to_ods()
 </p>
 
 ```python
+### Load the ODS model
 model = gba.read_ods_model(name="A")
+
+### Find a valid initial solution
 model.find_initial_solution()
+
+### Optimize the model for all conditions
 model.find_optimum_by_condition()
+
+### Make a plot
 model.plot(x="x_G", y="mu", title="Growth rate", logx=True)
+
+### Export optimization data in CSV
 model.export_optimization_data()
 ```
 
