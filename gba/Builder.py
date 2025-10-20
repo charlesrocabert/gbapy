@@ -774,7 +774,8 @@ class Builder:
         if test_structure:
             self.detect_unproduced_metabolites(True)
             self.detect_infeasible_loops(True)
-            self.detect_isolated_metabolites(True)
+            self.detect_dead_end_metabolites(True)
+            self.detect_isolated_transporters(True)
     
     def detect_missing_mass( self, verbose: Optional[bool] = False ) -> dict[str, list[str]]:
         """
@@ -1028,6 +1029,63 @@ class Builder:
                 throw_message(MessageType.WARNING, f"Infeasible loop between <code>{m_id}</code> and <code>{c_id}</code>.")
         return pairs
 
+    def detect_dead_end_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
+        """
+        Detect dead-end metabolites in the model.
+
+        Parameters
+        ----------
+        verbose : bool
+            Display messages if True.
+        """
+        met_to_rea_connectivity = {m_id: {"reactant": [], "product": []} for m_id in self.metabolites}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 1) Build the connectivity dictionary #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        for reaction in self.reactions.values():
+            ### 1.1) If the reaction is forward irreversible ###
+            if ReactionDirection.FORWARD:
+                ### Classify reactants
+                for m_id in reaction.reactants:
+                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                ### Classify products
+                for m_id in reaction.products:
+                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+            ### 1.2) If the reaction is backward irreversible ###
+            elif ReactionDirection.BACKWARD:
+                ### Classify reactants
+                for m_id in reaction.products:
+                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                ### Classify products
+                for m_id in reaction.reactants:
+                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+            ### 1.3) If the reaction is reversible ###
+            elif ReactionDirection.REVERSIBLE:
+                ### Classify reactants
+                for m_id in reaction.reactants:
+                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+                ### Classify products
+                for m_id in reaction.products:
+                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 2) Detect dead-end metabolites       #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        dead_end = []
+        for m_id in met_to_rea_connectivity:
+            if self.metabolites[m_id].species_location == SpeciesLocation.EXTERNAL:
+                continue
+            if len(met_to_rea_connectivity[m_id]["reactant"]) == 0 and len(met_to_rea_connectivity[m_id]["product"]) == 1:
+                r_id = met_to_rea_connectivity[m_id]["product"][0]
+                if self.reactions[r_id].reaction_type == ReactionType.METABOLIC:
+                    dead_end.append(m_id)
+                    if verbose:
+                        throw_message(MessageType.WARNING, f"Metabolite <code>{m_id}</code> is a dead-end metabolite.")
+        if verbose and len(dead_end) == 0:
+            throw_message(MessageType.INFO, "No dead-end metabolites in the model.")
+        return dead_end
+
     def detect_isolated_transporters( self, verbose: Optional[bool] = False ) -> list[str]:
         """
         Detect isolated transporters in the model (imported but not used).
@@ -1084,63 +1142,6 @@ class Builder:
         if verbose and len(isolated) == 0:
             throw_message(MessageType.INFO, "No isolated transporters in the model.")
         return isolated
-
-    def detect_dead_end_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
-        """
-        Detect dead-end metabolites in the model.
-
-        Parameters
-        ----------
-        verbose : bool
-            Display messages if True.
-        """
-        met_to_rea_connectivity = {m_id: {"reactant": [], "product": []} for m_id in self.metabolites}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Build the connectivity dictionary #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        for reaction in self.reactions.values():
-            ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.FORWARD:
-                ### Classify reactants
-                for m_id in reaction.reactants:
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-                ### Classify products
-                for m_id in reaction.products:
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-            ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.BACKWARD:
-                ### Classify reactants
-                for m_id in reaction.products:
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-                ### Classify products
-                for m_id in reaction.reactants:
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-            ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.REVERSIBLE:
-                ### Classify reactants
-                for m_id in reaction.reactants:
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-                ### Classify products
-                for m_id in reaction.products:
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Detect dead-end metabolites       #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        dead_end = []
-        for m_id in met_to_rea_connectivity:
-            if self.metabolites[m_id].species_location == SpeciesLocation.EXTERNAL:
-                continue
-            if len(met_to_rea_connectivity[m_id]["reactant"]) == 0 and len(met_to_rea_connectivity[m_id]["product"]) == 1:
-                r_id = met_to_rea_connectivity[m_id]["product"][0]
-                if self.reactions[r_id].reaction_type == ReactionType.METABOLIC:
-                    dead_end.append(m_id)
-                    if verbose:
-                        throw_message(MessageType.WARNING, f"Metabolite <code>{m_id}</code> is a dead-end.")
-        if verbose and len(dead_end) == 0:
-            throw_message(MessageType.INFO, "No dead-end metabolites in the model.")
-        return dead_end
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 4) FBA model reconstruction #
