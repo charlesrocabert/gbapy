@@ -864,7 +864,7 @@ class Builder:
                 p_to_r_vec.append(p_id)
                 # connectivity_error = True
                 #if verbose:
-                #    print(f"> Warning: Protein '{p_id}' ({self.proteins[p_id].product}) has no associated reaction")
+                #    throw_message(MessageType.WARNING, f"Protein <code>{p_id}</code> has no associated reaction.")
         for m_id in metabolite_to_reaction_map:
             if len(metabolite_to_reaction_map[m_id]) == 0:
                 m_to_r_vec.append(m_id)
