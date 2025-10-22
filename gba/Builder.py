@@ -1666,7 +1666,7 @@ class Builder:
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def write_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
+    def export_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in CSV format.
 
@@ -1794,7 +1794,7 @@ class Builder:
                 f.write(r_id+";"+p_id+";"+str(contribution)+"\n")
         f.close()
 
-    def write_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
+    def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in ODS format.
 

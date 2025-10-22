@@ -844,7 +844,7 @@ class Model:
         os.rmdir(temporary_name+"/"+self.name)
         os.rmdir(temporary_name+"/")
     
-    def write_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
+    def export_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Write the model to CSV files.
 
@@ -986,7 +986,7 @@ class Model:
         if self.data is not None:
             self.data.to_csv(model_path+"/optimization_data.csv", sep=";")
     
-    def write_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
+    def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in ODS format.
 
@@ -1991,7 +1991,7 @@ class Model:
                 inactive_reactions.append(self.reaction_ids[j])
         return inactive_reactions
 
-    def detect_non_essential_reactions( self, min_bp: Optional[float] = None, verbose: Optional[bool] = False ) -> list[str]:
+    def detect_non_essential_reactions( self, min_bp: Optional[float] = None, verbose: Optional[bool] = False ) -> dict[str, float]:
         """
         Detect non-essential reactions in the model.
 
@@ -2004,8 +2004,8 @@ class Model:
             Verbose mode.
         Returns
         -------
-        list[str]
-            List of non-essential reaction identifiers.
+        dict[str, float]
+            Dictionary of non-essential reactions with their corresponding mu.
         """
         non_essential_reactions = {}
         for j in range(self.nj-1):
@@ -2019,9 +2019,9 @@ class Model:
                 solution_exists = my_model.find_initial_solution()
             else:
                 solution_exists = my_model.find_q0(min_bp=min_bp)
-            if solution_exists:
+            if solution_exists and my_model.mu > GbaConstants.TOL.value:
                 if verbose:
-                    throw_message(MessageType.INFO, f"Reaction {reaction_id} is non-essential (mu = {my_model.mu})")
+                    throw_message(MessageType.INFO, f"Reaction <code>{reaction_id}</code> is non-essential (mu = {my_model.mu})")
                 non_essential_reactions[self.reaction_ids[j]] = my_model.mu
             del(my_model)
         if verbose and len(non_essential_reactions) == 0:
