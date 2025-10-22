@@ -32,6 +32,7 @@ Copyright: © 2024-2025 Charles Rocabert, Furkan Mert.
 
 import os
 import time
+import copy
 import random
 import pickle
 import pkgutil
@@ -44,7 +45,7 @@ from typing import Optional
 from pyexcel_xlsx import get_data
 from pyexcel_ods3 import save_data
 
-from IPython.display import display_html
+from IPython.display import display_html, clear_output
 
 try:
     from .Enumerations import *
@@ -843,17 +844,17 @@ class Model:
         os.rmdir(temporary_name+"/"+self.name)
         os.rmdir(temporary_name+"/")
     
-    def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Write the model to CSV files.
 
         Parameters
         ----------
-        path : str, default="."
-            Path to the CSV files.
         name : str, default=""
             Name of the model. If not provided, the name of the model instance
             will be used.
+        path : str, default="."
+            Path to the CSV files.
         """
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -985,17 +986,17 @@ class Model:
         if self.data is not None:
             self.data.to_csv(model_path+"/optimization_data.csv", sep=";")
     
-    def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in ODS format.
 
         Parameters
         ----------
-        path : Optional[str], default="."
-            Path to the folder.
         name : Optional[str], default=""
             Name of the model. If not provided, the name of the model instance
             will be used.
+        path : Optional[str], default="."
+            Path to the folder.
         """
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1125,7 +1126,7 @@ class Model:
         del(constant_reactions_df)
         del(protein_contributions_df)
     
-    def export_optimization_data( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def export_optimization_data( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the optimization data to CSV.
 
@@ -1167,7 +1168,7 @@ class Model:
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
-    
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 3) Setters                         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1745,6 +1746,34 @@ class Model:
 
     ######################################
 
+    def delete_reaction( self, reaction_id: str ) -> None:
+        """
+        Delete a reaction from the model.
+
+        Parameters
+        ----------
+        reaction_id : str
+            Identifier of the reaction to delete.
+        """
+        position    = self.reaction_ids.index(reaction_id)
+        self.Mx     = np.delete(self.Mx, position, axis=1)
+        self.M      = np.delete(self.M, position, axis=1)
+        self.kcat_f = np.delete(self.kcat_f, position)
+        self.kcat_b = np.delete(self.kcat_b, position)
+        self.K      = np.delete(self.K, position, axis=1)
+        self.KM_f   = np.delete(self.KM_f, position, axis=1)
+        self.KM_b   = np.delete(self.KM_b, position, axis=1)
+        self.KA     = np.delete(self.KA, position, axis=1)
+        self.KI     = np.delete(self.KI, position, axis=1)
+        self.rKI    = np.delete(self.rKI, position, axis=1)
+        self.reaction_ids.pop(position)
+        self.reversible.pop(position)
+        self.kinetic_model.pop(position)
+        self.directions.pop(position)
+        if reaction_id in self.constant_reactions:
+            self.constant_reactions.pop(reaction_id)
+        self.initialize_model_mathematical_variables()
+        
     def solve_q0_linear_problem( self, min_bp: Optional[float] = 0.2, sat_act: Optional[float] = 1.0, slack: Optional[float] = 2.0, verbose: Optional[bool] = False ) -> bool:
         """
         Find an initial solution.
@@ -1763,6 +1792,11 @@ class Model:
             Slack variable for the minimal metabolite production.
         verbose : Optional[bool], default=False
             Verbose mode.
+        
+        Returns
+        -------
+        bool
+            True if a consistent solution is found, False otherwise.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Define q boundaries     #
@@ -1833,6 +1867,11 @@ class Model:
             Slack variable for the minimal metabolite production.
         verbose : Optional[bool], default=False
             Verbose mode.
+        
+        Returns
+        -------
+        bool
+            True if a consistent solution is found, False otherwise.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Explore saturation and slack if required #
@@ -1887,8 +1926,8 @@ class Model:
                 if verbose:
                     throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
                 return False
-
-    def find_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> None:
+    
+    def find_initial_solution( self, condition_id: Optional[str] = "1", verbose: Optional[bool] = False ) -> bool:
         """
         Generate the best initial solution by scanning the minimal protein production.
         
@@ -1902,6 +1941,11 @@ class Model:
             Condition identifier.
         verbose : Optional[bool], default=False
             Verbose mode.
+        
+        Returns
+        -------
+        bool
+            True if a consistent solution is found, False otherwise.
         """
         min_bp     = 0.01
         step       = 0.01
@@ -1921,10 +1965,55 @@ class Model:
                 min_bp = min_bp + step
         if max_found:
             self.find_q0(condition_id=condition_id, min_bp=min_bp_max, verbose=verbose)
+            return True
         else:
             if verbose:
                 throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
+            return False
 
+    def detect_inactive_reactions( self, threshold: Optional[float] = GbaConstants.TOL.value ) -> list[str]:
+        """
+        Detect inactive reactions in the initial solution.
+
+        Parameters
+        ----------
+        threshold : Optional[float], default=1e-6
+            Threshold below which a reaction is considered inactive.
+
+        Returns
+        -------
+        list[str]
+            List of inactive reaction identifiers.
+        """
+        inactive_reactions = []
+        for j in range(self.nj):
+            if abs(self.q0[j]) <= threshold:
+                inactive_reactions.append(self.reaction_ids[j])
+        return inactive_reactions
+
+    def detect_non_essential_reactions( self, min_bp: Optional[float] = 0.2, verbose: Optional[bool] = False ) -> list[str]:
+        """
+        Detect non-essential reactions in the model.
+        
+        Returns
+        -------
+        list[str]
+            List of non-essential reaction identifiers.
+        """
+        non_essential_reactions = {}
+        for j in range(self.nj-1):
+            print(f"> Testing reaction {self.reaction_ids[j]}...")
+            my_model = copy.deepcopy(self)
+            my_model.delete_reaction(self.reaction_ids[j])
+            # solution_exists = my_model.find_q0(min_bp=min_bp)
+            solution_exists = my_model.find_initial_solution()
+            if solution_exists:
+                if verbose:
+                    throw_message(MessageType.INFO, f"Reaction {self.reaction_ids[j]} is non-essential (mu = {my_model.mu})")
+                non_essential_reactions[self.reaction_ids[j]] = my_model.mu
+            del(my_model)
+        return non_essential_reactions
+    
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
         throw_message(MessageType.ERROR, "Deprecated function")
         """

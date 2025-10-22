@@ -1649,20 +1649,33 @@ class Builder:
             elif r_id in self.reactions and f_val < 0.0:
                 self.convert_GBA_reaction_to_forward_irreversible(r_id, ReactionDirection.BACKWARD)
     
+    def column_rank( self ) -> None:
+        """
+        Display the column rank of the GBA mass fraction matrix.
+        """
+        x1 = self.GBA_column_rank
+        x2 = self.GBA_intM.shape[1]
+        throw_message(MessageType.PLAIN, "internal M shape : "+str(self.GBA_intM.shape))
+        if self.GBA_is_full_column_rank:
+            throw_message(MessageType.PLAIN, "Internal M is full column rank")
+        else:
+            throw_message(MessageType.PLAIN, "Internal M column rank {}/{} (diff = {})".format(x1, x2, x2-x1))
+            throw_message(MessageType.PLAIN, "Dependent reactions : "+str(self.GBA_dependent_reactions))
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Export functions         #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def write_to_csv( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_csv( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in CSV format.
 
         Parameters
         ----------
-        path : Optional[str], default="."
-            Path to the folder.
         name : Optional[str], default=""
             Name of the model. If empty, the model name is used.
+        path : Optional[str], default="."
+            Path to the folder.
         """
         assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
@@ -1781,16 +1794,16 @@ class Builder:
                 f.write(r_id+";"+p_id+";"+str(contribution)+"\n")
         f.close()
 
-    def write_to_ods( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+    def write_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
         Export the model to a folder in ODS format.
 
         Parameters
         ----------
-        path : Optional[str], default="."
-            Path to the folder.
         name : Optional[str], default=""
             Name of the model. If empty, the model name is used.
+        path : Optional[str], default="."
+            Path to the folder.
         """
         assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         assert self.GBA_is_built, throw_message(MessageType.ERROR, f"The model <code>{self.name}</code> is not built")
