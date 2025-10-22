@@ -74,7 +74,8 @@ builder.add_metabolites([x_G, G, Protein])
 ### - KM values in g/L
 rxn1 = gba.Reaction(id="rxn1", lb=0.0, ub=1000.0,
                     reaction_type=gba.ReactionType.TRANSPORT,
-                    metabolites={"x_G":-1.0, "G": 1.0}, proteins={"p1": 1.0})
+                    metabolites={"x_G":-1.0, "G": 1.0},
+                    proteins={"p1": 1.0})
 rxn1.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
 rxn1.add_km_value(metabolite_id="x_G", km_value=0.001)
 rxn1.complete(kcat_value=0.0, km_value=0.0)
@@ -85,7 +86,8 @@ builder.add_reaction(rxn1)
 ### - Reaction is irreversible
 ribosome = gba.Reaction(id="Ribosome", lb=0.0, ub=1000.0,
                         reaction_type=gba.ReactionType.METABOLIC,
-                    metabolites={"G":-1.0, "Protein": 1.0}, proteins={"p2": 1.0})
+                        metabolites={"G":-1.0, "Protein": 1.0},
+                        proteins={"p2": 1.0})
 ribosome.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
 ribosome.add_km_value(metabolite_id="G", km_value=0.001)
 ribosome.complete(kcat_value=0.0, km_value=0.0)
