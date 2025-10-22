@@ -1985,6 +1985,7 @@ class Model:
         list[str]
             List of inactive reaction identifiers.
         """
+        self.find_initial_solution()
         inactive_reactions = []
         for j in range(self.nj):
             if abs(self.q0[j]) <= threshold:
@@ -2230,6 +2231,7 @@ class Model:
         consistent : bool
             True if the model is consistent, False otherwise.
         """
+        assert os.path.exists("find_model_optimum"), throw_message(MessageType.ERROR, "The gbacpp solver 'find_model_optimum' is not available. Please check your installation, or your PATH variable.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write the model in a temporary file with a unique key #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
