@@ -1991,10 +1991,17 @@ class Model:
                 inactive_reactions.append(self.reaction_ids[j])
         return inactive_reactions
 
-    def detect_non_essential_reactions( self, min_bp: Optional[float] = 0.2, verbose: Optional[bool] = False ) -> list[str]:
+    def detect_non_essential_reactions( self, min_bp: Optional[float] = None, verbose: Optional[bool] = False ) -> list[str]:
         """
         Detect non-essential reactions in the model.
-        
+
+        Parameters
+        ----------
+        min_bp : Optional[float], default=None
+            Minimal protein production to consider when finding the initial
+            solution. If None, the standard initial solution method is used.
+        verbose : Optional[bool], default=False
+            Verbose mode.
         Returns
         -------
         list[str]
@@ -2002,16 +2009,23 @@ class Model:
         """
         non_essential_reactions = {}
         for j in range(self.nj-1):
-            print(f"> Testing reaction {self.reaction_ids[j]}...")
+            reaction_id = self.reaction_ids[j]
+            #if verbose:
+            #    throw_message(MessageType.PLAIN, f"> Testing reaction {reaction_id}... ({j+1}/{self.nj-1})...")
             my_model = copy.deepcopy(self)
-            my_model.delete_reaction(self.reaction_ids[j])
-            # solution_exists = my_model.find_q0(min_bp=min_bp)
-            solution_exists = my_model.find_initial_solution()
+            my_model.delete_reaction(reaction_id)
+            solution_exists = False
+            if min_bp is None:
+                solution_exists = my_model.find_initial_solution()
+            else:
+                solution_exists = my_model.find_q0(min_bp=min_bp)
             if solution_exists:
                 if verbose:
-                    throw_message(MessageType.INFO, f"Reaction {self.reaction_ids[j]} is non-essential (mu = {my_model.mu})")
+                    throw_message(MessageType.INFO, f"Reaction {reaction_id} is non-essential (mu = {my_model.mu})")
                 non_essential_reactions[self.reaction_ids[j]] = my_model.mu
             del(my_model)
+        if verbose and len(non_essential_reactions) == 0:
+            throw_message(MessageType.INFO, "No non-essential reaction was found.")
         return non_essential_reactions
     
     def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
