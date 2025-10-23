@@ -1419,7 +1419,7 @@ class Builder:
     
     def convert( self, ribosome_byproducts: Optional[bool] = False,
                  ribosome_mass_kcat: Optional[float] = 4.55,
-                 ribosome_mass_km: Optional[float] = 8.3 ) -> None:
+                 ribosome_mass_km: Optional[float] = None ) -> None:
         """
         Convert the model to GBA format.
 
