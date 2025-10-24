@@ -6,6 +6,7 @@
 
 <p align="center">
 <br />
+<a href="https://github.com/charlesrocabert/gbapy/releases/latest"><img src="https://img.shields.io/github/release/charlesrocabert/gbapy/all.svg" /></a>&nbsp;
 <a href="https://badge.fury.io/py/gba"><img src="https://badge.fury.io/py/gba.svg" alt="PyPI version"></a>&nbsp;
 <a href="https://github.com/charlesrocabert/gbapy/actions"><img src="https://github.com/charlesrocabert/gbapy/workflows/Upload Python Package/badge.svg" /></a>&nbsp;
 <a href="https://github.com/charlesrocabert/gbapy/LICENSE.html"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
