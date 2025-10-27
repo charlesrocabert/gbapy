@@ -45,8 +45,8 @@ The module offers two core components:
 </p>
 
 ```python
-import gba
-from gba import Builder, Model, Protein, Metabolite, Reaction, SpeciesLocation, ReactionType, ReactionDirection
+from gba import Builder, Model, Protein, Metabolite, Reaction
+from gba import SpeciesLocation, ReactionType, ReactionDirection
 
 builder = Builder(name="toy")
 
