@@ -1644,13 +1644,6 @@ class Model:
         self.compute_dmu_dq()
         self.compute_Gamma()
     
-    def calculate( self ) -> None:
-        """
-        Calculate the model state.
-        """
-        self.calculate_first_order_terms()
-        self.calculate_second_order_terms()
-
     def check_consistency( self ) -> None:
         """
         Check the model state's consistency.
@@ -1662,90 +1655,19 @@ class Model:
         if not (test1 and test2 and test3):
             self.consistent = False
 
+    def calculate( self ) -> None:
+        """
+        Calculate the model state.
+        """
+        self.calculate_first_order_terms()
+        self.calculate_second_order_terms()
+        self.check_consistency()
+
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 5) Generation of initial solutions #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-    def solve_local_linear_problem_deprecated( self, max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> bool:
-        throw_message(MessageType.ERROR, "Deprecated function")
-        """
-        Solve the local linear problem to find the initial solution.
-
-        Description
-        -----------
-        The local linear problem consists in finding the maximal ribosome flux
-        fraction q^r, with a minimal production of each metabolite. The
-        constraints are mass conservation (M*q = b) and surface flux balance
-        (sM*q = 1).
-
-        Parameters
-        ----------
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-        rhs_factor : Optional[float], default=1000.0
-            Factor dividing the rhs of the mass conservation constraint.
-        """
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
-        assert rhs_factor > 0.0, throw_message(MessageType.ERROR, "RHS factor must be positive.")
-        lb_vec = []
-        for j in range(self.nj):
-            if self.reversible[j]:
-                lb_vec.append(-gp.GRB.INFINITY)
-                #lb_vec.append(-max_flux_fraction)
-            else:
-                lb_vec.append(0.0)
-        ub_vec = [gp.GRB.INFINITY]*self.nj
-        #ub_vec = [max_flux_fraction]*self.nj
-        for item in self.constant_reactions.items():
-           r_index         = self.reaction_ids.index(item[0])
-           lb_vec[r_index] = item[1]
-           ub_vec[r_index] = item[1]
-        gpmodel = gp.Model(env=env)
-        v       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec)
-        min_b   = 1/rhs_factor
-        rhs     = np.repeat(min_b, self.nc)
-        for m_id, value in self.constant_rhs.items():
-            rhs[self.c_ids.index(m_id)] = value
-        gpmodel.setObjective(v[-1], gp.GRB.MAXIMIZE)
-        gpmodel.addConstr(self.M @ v >= rhs, name="c1")
-        gpmodel.addConstr(self.sM @ v == 1, name="c2")
-        gpmodel.optimize()
-        try:
-            self.initial_solution = np.copy(v.X)
-            return True
-        except:
-            throw_message(MessageType.ERROR, "Local linear problem could not be solved.")
-            return False
-
-    def find_initial_solution_deprecated( self, condition_id: Optional[str] = "1", max_flux_fraction: Optional[float] = 50.0, rhs_factor: Optional[float] = 1000.0 ) -> None:
-        throw_message(MessageType.ERROR, "Deprecated function")
-        """
-        Generate an initial solution using a linear program.
-
-        Parameters
-        ----------
-        condition_id : Optional[str], default="1"
-            Condition identifier.
-        max_flux_fraction : Optional[float], default=50.0
-            Maximal flux fraction.
-        rhs_factor : Optional[float], default=1000.0
-            Factor dividing the rhs of the mass conservation constraint.
-        """
-        solved = self.solve_local_linear_problem(max_flux_fraction=max_flux_fraction, rhs_factor=rhs_factor)
-        if solved:
-            self.set_condition(condition_id)
-            self.set_q0(self.initial_solution)
-            self.calculate()
-            self.check_consistency()
-            if self.consistent:
-                throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
-            else:
-                throw_message(MessageType.INFO, "Model is inconsistent.")
-        else:
-            throw_message(MessageType.WARNING, "Impossible to find an initial solution.")
-
-    ######################################
-
+    
     def delete_reaction( self, reaction_id: str ) -> None:
         """
         Delete a reaction from the model.
@@ -1891,7 +1813,6 @@ class Model:
                 self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
-                self.check_consistency()
                 if self.consistent:
                     if verbose:
                         throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
@@ -1913,7 +1834,6 @@ class Model:
                 self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
-                self.check_consistency()
                 if self.consistent:
                     if verbose:
                         throw_message(MessageType.INFO, f"Model is consistent with mu = {self.mu}.")
@@ -2029,65 +1949,6 @@ class Model:
             throw_message(MessageType.INFO, "No non-essential reaction was found.")
         return non_essential_reactions
     
-    def generate_random_initial_solutions( self, condition_id: str, nb_solutions: int, max_trials: int, max_flux_fraction: Optional[float] = 10.0, min_mu: Optional[float] = 1e-3, verbose: Optional[bool] = False ) -> None:
-        throw_message(MessageType.ERROR, "Deprecated function")
-        """
-        Generate random initial solutions.
-
-        Parameters
-        ----------
-        condition_id : str
-            Condition identifier.
-        nb_solutions : int
-            Number of solutions to generate.
-        max_trials : int
-            Maximum number of trials.
-        max_flux_fraction : Optional[float], default=10.0
-            Maximal flux fraction.
-        min_mu : Optional[float], default=1e-3
-            Minimal growth rate.
-        verbose : Optional[bool], default=False
-            Verbose mode.
-        """
-        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier (<code>{condition_id}</code>).")
-        assert nb_solutions > 0, throw_message(MessageType.ERROR, f"Number of solutions must be greater than 0.")
-        assert max_trials >= nb_solutions, throw_message(MessageType.ERROR, f"Number of trials must be greater than the number of solutions.")
-        assert max_flux_fraction > GbaConstants.TOL.value, throw_message(MessageType.ERROR, f"Maximal flux fraction must be greater than {GbaConstants.TOL.value}.")
-        assert min_mu >= 0.0, throw_message(MessageType.ERROR, f"Minimal growth rate must be positive.")
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Initialize the random data frame #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        columns          = ["condition"] + self.reaction_ids + ["mu"]
-        self.random_data = pd.DataFrame(columns=columns)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Find the random solutions        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.set_condition(condition_id)
-        self.random_solutions.clear()
-        solutions = 0
-        trials    = 0
-        while solutions < nb_solutions and trials < max_trials:
-            trials        += 1
-            negative_term  = True
-            while negative_term:
-                self.q_trunc = np.random.rand(self.nj-1)
-                self.q_trunc = self.q_trunc*(max_flux_fraction-GbaConstants.TOL)+GbaConstants.TOL
-                self.set_q_from_q_trunc()
-                if self.q[0] >= 0.0:
-                    negative_term = False
-            self.calculate_state()
-            self.check_consistency()
-            if self.consistent and np.isfinite(self.mu) and self.mu > min_mu:
-                solutions += 1
-                data_dict  = {"condition": condition_id, "mu": self.mu}
-                for reaction_id, fluxfraction in zip(self.reaction_ids, self.q):
-                    data_dict[reaction_id] = fluxfraction
-                data_row                         = pd.Series(data=data_dict)
-                self.random_data                 = pd.concat([self.random_data, data_row.to_frame().T], ignore_index=True)
-                self.random_solutions[solutions] = np.copy(self.q)
-                if verbose:
-                    throw_message(MessageType.PLAIN, f"{solutions} solutions were found after {trials} trials (last mu = {round(self.mu,5)}).")
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 6) Optimization functions          #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2268,7 +2129,6 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.set_q0(self.optimal_solutions[self.condition])
         self.calculate()
-        self.check_consistency()
         if self.consistent:
             if verbose:
                 throw_message(MessageType.INFO, f"Condition {self.condition}: model converged with mu = {self.mu}.")
@@ -2342,7 +2202,6 @@ class Model:
             self.set_q0(self.optimal_solutions[cond_id])
             self.set_condition(cond_id)
             self.calculate()
-            self.check_consistency()
             if self.consistent:
                 if verbose:
                     throw_message(MessageType.INFO, f"Condition {cond_id}: model converged with mu = {self.mu}.")
