@@ -46,8 +46,9 @@ The module offers two core components:
 
 ```python
 import gba
+from gba import Builder, Model, Protein, Metabolite, Reaction, SpeciesLocation, ReactionType, ReactionDirection
 
-builder = gba.Builder(name="toy")
+builder = Builder(name="toy")
 
 ### Add model information (ODS sheet 'Info')
 builder.add_info(category="General", key="Name", content="toy")
@@ -55,17 +56,17 @@ builder.add_info(category="General", key="Description", content="Toy model")
 
 ### Create and add proteins (one protein per enzyme per reaction)
 ### - Masses in Da.
-p1 = gba.Protein(id="p1", mass=1000000.0)
-p2 = gba.Protein(id="p2", mass=1000000.0)
+p1 = Protein(id="p1", mass=1000000.0)
+p2 = Protein(id="p2", mass=1000000.0)
 builder.add_proteins([p1, p2])
 
 ### Create and add metabolites:
 ### - External and internal glucose
 ### - One generic Protein product
 ### - Masses in Da.
-x_G     = gba.Metabolite(id="x_G", species_location=gba.SpeciesLocation.EXTERNAL, mass=180.0)
-G       = gba.Metabolite(id="G", species_location=gba.SpeciesLocation.INTERNAL, mass=180.0)
-Protein = gba.Metabolite(id="Protein", species_location=gba.SpeciesLocation.INTERNAL,mass=180.0)
+x_G     = Metabolite(id="x_G", species_location=SpeciesLocation.EXTERNAL, mass=180.0)
+G       = Metabolite(id="G", species_location=SpeciesLocation.INTERNAL, mass=180.0)
+Protein = Metabolite(id="Protein", species_location=SpeciesLocation.INTERNAL,mass=180.0)
 builder.add_metabolites([x_G, G, Protein])
 
 ### Create and add transporter to import glucose:
@@ -73,11 +74,11 @@ builder.add_metabolites([x_G, G, Protein])
 ### - Reaction is irreversible
 ### - kcat values in 1/h
 ### - KM values in g/L
-rxn1 = gba.Reaction(id="rxn1", lb=0.0, ub=1000.0,
-                    reaction_type=gba.ReactionType.TRANSPORT,
-                    metabolites={"x_G":-1.0, "G": 1.0},
-                    proteins={"p1": 1.0})
-rxn1.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
+rxn1 = Reaction(id="rxn1", lb=0.0, ub=1000.0,
+                reaction_type=ReactionType.TRANSPORT,
+                metabolites={"x_G":-1.0, "G": 1.0},
+                proteins={"p1": 1.0})
+rxn1.add_kcat_value(direction=ReactionDirection.FORWARD, kcat_value=45000.0)
 rxn1.add_km_value(metabolite_id="x_G", km_value=0.00013)
 rxn1.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(rxn1)
@@ -85,11 +86,11 @@ builder.add_reaction(rxn1)
 ### Create and add ribosome reaction to produce proteins:
 ### - Enzyme is composed of one protein p2
 ### - Reaction is irreversible
-ribosome = gba.Reaction(id="Ribosome", lb=0.0, ub=1000.0,
-                        reaction_type=gba.ReactionType.METABOLIC,
+ribosome = Reaction(id="Ribosome", lb=0.0, ub=1000.0,
+                    reaction_type=ReactionType.METABOLIC,
                     metabolites={"G":-1.0, "Protein": 1.0},
                     proteins={"p2": 1.0})
-ribosome.add_kcat_value(direction=gba.ReactionDirection.FORWARD, kcat_value=45000.0)
+ribosome.add_kcat_value(direction=ReactionDirection.FORWARD, kcat_value=45000.0)
 ribosome.add_km_value(metabolite_id="G", km_value=0.00013)
 ribosome.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(ribosome)
@@ -116,8 +117,10 @@ builder.export_to_ods()
 </p>
 
 ```python
+from gba import read_ods_model
+
 ### Load the ODS model
-model = gba.read_ods_model(name="toy")
+model = read_ods_model(name="toy")
 
 ### Find a valid initial solution
 model.find_initial_solution()
