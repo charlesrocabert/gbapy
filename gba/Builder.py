@@ -1594,8 +1594,7 @@ class Builder:
         """
         Build the GBA converted model.
         """
-        if not self.check_conversion():
-            self.convert()
+        assert self.check_conversion(), throw_message(MessageType.ERROR, "The model is not converted to GBA units. Convert the model before building GBA variables.")
         self.build_GBA_indices()
         self.build_GBA_mass_fraction_matrix()
         self.build_GBA_kcat_vectors()

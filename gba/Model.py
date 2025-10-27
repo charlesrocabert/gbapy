@@ -2238,7 +2238,7 @@ class Model:
         random.seed(int(time.time()))
         random_number  = random.randint(0, 100000000)
         temporary_name = "temp_"+str(int(random_number))
-        self.write_to_csv(name=temporary_name)
+        self.export_to_csv(name=temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2310,7 +2310,7 @@ class Model:
         random.seed(int(time.time()))
         random_number  = random.randint(0, 100000000)
         temporary_name = "temp_"+str(int(random_number))
-        self.write_to_csv(name=temporary_name)
+        self.export_to_csv(name=temporary_name)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
