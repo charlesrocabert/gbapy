@@ -1788,9 +1788,10 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
         f.write("reaction;protein;contribution\n")
-        for r_id, contributions in self.GBA_protein_contributions.items():
-            for p_id, contribution in contributions.items():
-                f.write(r_id+";"+p_id+";"+str(contribution)+"\n")
+        for r in self.reactions.values():
+            if r.protein_contributions is not None:
+                for p_id, contribution in r.protein_contributions.items():
+                    f.write(r.id+";"+p_id+";"+str(contribution)+"\n")
         f.close()
 
     def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
@@ -1879,11 +1880,10 @@ class Builder:
         # 9) Write the protein contributions #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         protein_contributions_df = None
-        if len(self.GBA_protein_contributions) > 0:
-            rows = []
-            for r_id, contributions in self.GBA_protein_contributions.items():
-                for p_id, contribution in contributions.items():
-                    rows.append([r_id, p_id, contribution])
+        for r in self.reactions.values():
+            if r.protein_contributions is not None:
+                for p_id, contribution in r.protein_contributions.items():
+                    rows.append([r.id, p_id, contribution])
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
             protein_contributions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2118,6 +2118,25 @@ class Builder:
         for r in self.reactions.values():
             f.write(r.id+";"+r.subsystem+"\n")
         f.close()
+    
+    def write_model_data( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
+        """
+        Write all model data into CSV format.
+
+        Parameters
+        ----------
+        path : Optional[str], default="."
+            Path to the folder.
+        name : Optional[str], default=""
+            Name of the folder.
+        """
+        self.write_proteins_list(path, name)
+        self.write_ribosomal_proteins_list(path, name)
+        self.write_metabolites_list(path, name)
+        self.write_reactions_list(path, name)
+        self.write_kinetic_parameters_list(path, name)
+        self.write_protein_contributions_list(path, name)
+        self.write_subsystems_list(path, name)
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 7) Utility functions        #
