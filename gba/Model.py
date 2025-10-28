@@ -1953,7 +1953,7 @@ class Model:
     # 6) Optimization functions          #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    def build_gbacpp_command_line( self, temporary_name: str, condition_id: str, use_previous_sol: bool, tol: float, mutol: float, convergence_count: int, max_iter: float ) -> str:
+    def build_gbacpp_command_line( self, temporary_name: str, condition_id: str, use_previous_sol: bool, tol: float, mutol: float, qtol: float, convergence_count: int, max_iter: float ) -> str:
         """
         Build the command line for the C++ solver gbacpp.
 
@@ -1969,6 +1969,8 @@ class Model:
             Tolerance value.
         mutol : float
             Tolerance value for mu relative change.
+        qtol : float
+            Tolerance value for q relative change.
         convergence_count : int
             Number of iteration with no significant mu change to assume
             convergence.
@@ -1987,6 +1989,7 @@ class Model:
         cmdline += "-output "+str(temporary_name)+" "
         cmdline += "-tol "+str(tol)+" "
         cmdline += "-mutol "+str(mutol)+" "
+        cmdline += "-qtol "+str(qtol)+" "
         cmdline += "-conv "+str(convergence_count)+" "
         cmdline += "-max "+str(max_iter)+" "
         if use_previous_sol:
@@ -2067,7 +2070,7 @@ class Model:
             df["condition"]        = df["condition"].astype(str)
             self.data              = pd.merge(self.data, df, on="condition")
     
-    def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 100000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
+    def find_optimum( self, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, qtol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 100000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
         Find the optimum of the model using the gbacpp solver.
 
@@ -2077,6 +2080,8 @@ class Model:
             Tolerance value for the solver.
         mutol : Optional[float], default=1e-10
             Tolerance value for the growth rate relative difference.
+        qtol : Optional[float], default=1e-10
+            Tolerance value for the q vector relative difference.
         convergence_count : Optional[int], default=10000
             Number of iterations with no significant mu change to
             assume convergence.
@@ -2103,7 +2108,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        cmdline        = self.build_gbacpp_command_line(temporary_name, self.condition, False, tol, mutol, convergence_count, max_iter)
+        cmdline        = self.build_gbacpp_command_line(temporary_name, self.condition, False, tol, mutol, qtol, convergence_count, max_iter)
         solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         solver_process.wait()
         #self.read_solver_output(temporary_name=temporary_name, condition_id=self.condition)
@@ -2136,7 +2141,7 @@ class Model:
             if verbose:
                 throw_message(MessageType.INFO, f"Condition {self.condition}: model did not converge.")
         
-    def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = True, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
+    def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = True, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, qtol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
         Find optimums for all conditions of the model using the gbacpp solver.
 
@@ -2149,6 +2154,8 @@ class Model:
             Tolerance value for the solver.
         mutol : Optional[float], default=1e-10
             Tolerance value for the growth rate relative difference.
+        qtol : Optional[float], default=1e-10
+            Tolerance value for the q vector relative difference.
         convergence_count : Optional[int], default=10000
             Number of iterations with no significant mu change to
             assume convergence.
@@ -2174,7 +2181,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Run gbacpp solver                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        cmdline        = self.build_gbacpp_command_line(temporary_name, "all", use_previous_sol, tol, mutol, convergence_count, max_iter)
+        cmdline        = self.build_gbacpp_command_line(temporary_name, "all", use_previous_sol, tol, mutol, qtol, convergence_count, max_iter)
         solver_process = subprocess.Popen([cmdline], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         solver_process.wait()
         #self.read_solver_output(temporary_name=temporary_name, condition_id="all")
