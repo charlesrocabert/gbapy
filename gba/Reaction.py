@@ -4,7 +4,7 @@
 #***********************************************************************
 # gbapy (growth balance analysis for Python)
 # Web: https://github.com/charlesrocabert/gbapy
-# Copyright © 2024-2025 Charles Rocabert.
+# Copyright © 2024-2026 Charles Rocabert.
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ Date: 2024-17-12
 Description:
     Reaction class of the gbapy module.
 License: GNU General Public License v3 (GPLv3)
-Copyright: © 2024-2025 Charles Rocabert.
+Copyright: © 2024-2026 Charles Rocabert.
 """
 
 import numpy as np

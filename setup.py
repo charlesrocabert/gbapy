@@ -4,7 +4,7 @@
 #***********************************************************************
 # gbapy (growth balance analysis for Python)
 # Web: https://github.com/charlesrocabert/gbapy
-# Copyright © 2024-2025 Charles Rocabert
+# Copyright © 2024-2026 Charles Rocabert
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

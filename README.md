@@ -220,7 +220,7 @@ If you wish to contribute, do not hesitate to reach <a href="mailto:charles DOT 
 
 # 5) Copyright <a name="copyright"></a>
 
-Copyright © 2024-2025 Charles Rocabert, Furkan Mert.
+Copyright © 2024-2026 Charles Rocabert, Furkan Mert.
 
 # 6) License <a name="license"></a>
 
