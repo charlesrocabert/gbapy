@@ -159,9 +159,6 @@ model.export_optimization_data()
 
 # 1) Installation <a name="installation"></a>
 
-> [!CAUTION]
-> Module not deployed on PyPI yet
-
 The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
  
 ```
