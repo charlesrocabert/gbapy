@@ -354,7 +354,7 @@ class Model:
         self.Info_loaded = False
         filename         = path+"/"+self.name+"/Info.csv"
         if os.path.exists(filename):
-            f = open(path+"/"+self.name+"/info.csv", "r")
+            f = open(filename, "r")
             for line in f:
                 parts = line.strip().split(";")
                 parts += [""] * (3 - len(parts))  # pad to ensure 3 elements

@@ -1880,6 +1880,7 @@ class Builder:
         # 9) Write the protein contributions #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         protein_contributions_df = None
+        rows = []
         for r in self.reactions.values():
             if r.protein_contributions is not None:
                 for p_id, contribution in r.protein_contributions.items():
