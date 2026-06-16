@@ -20,6 +20,6 @@
 #***********************************************************************
 
 sh uninstall.sh
-python -m build
-pip install --no-cache-dir . --break-system-packages
+python3 -m build
+python3 -m pip install --no-cache-dir . --break-system-packages
 

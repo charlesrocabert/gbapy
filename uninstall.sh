@@ -19,7 +19,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #***********************************************************************
 
-pip uninstall gba --break-system-packages
-python -m build --clean
+python3 -m pip uninstall -y gba --break-system-packages
 rm -rf -- ./build/ ./dist/ ./*.egg-info
 
