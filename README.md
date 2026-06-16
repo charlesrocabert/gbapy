@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/7837a1e3-32d8-4979-a895-51f881b6351c" width=300 />
+  <img src="https://github.com/user-attachments/assets/af2b654a-b3d7-48d7-82d9-cc3334a43a84"" width=300 />
 
 </p>
 <h3 align="center">Growth Balance Analysis for Python</h3>
