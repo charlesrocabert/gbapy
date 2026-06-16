@@ -28,6 +28,10 @@ pip install gba
 <strong>gbapy</strong> is a Python package that provides tools for building and analyzing <strong>self-replicating cell (SRC)</strong> models based on the <strong>growth balance analysis (GBA)</strong> mathematical formalism (<a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al. 2023</a>).
 </p>
 
+<p align="justify">
+This approach, built exclusively on the first principles of fitness maximization, mass conservation, nonlinear reaction kinetics, and constant cell density, allows to study resource allocation in models of whole self-replicating cells (<a href="https://doi.org/10.1101/2025.06.24.661369" target="_blank">Dourado et al. 2025</a>).
+</p>
+
 ### Features
 
 <p align="justify">
