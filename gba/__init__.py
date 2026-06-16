@@ -58,9 +58,11 @@ from gba.Reaction import (
 )
 from gba.Builder import (
     Builder,
-    throw_message,
     backup_builder,
     load_builder
+)
+from gba.Messages import (
+    throw_message
 )
 from gba.Model import (
     Model,
