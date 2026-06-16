@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/cb2ea68d-7cb8-4094-8e69-d0c84af8bbbf" width=200 />
+  <img src="https://github.com/user-attachments/assets/e801eb01-4108-4fe0-a5ef-763002dd583f" width=250 />
 </p>
 
 -----------------
 
-Self-replicating cell (SRC) models must comply to a standard format. Please refer to <a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al. (2023)</a> and the tutorial available on <a href="https://cellgrowthsim.com/" target="_blank">https://cellgrowthsim.com/</a> for other detailed sources.
+Self-replicating cell (SRC) models must comply to a standard format. Please refer to <a href="https://doi.org/10.1371/journal.pcbi.1011156">Dourado et al. (2023)</a> and the tutorial available on <a href="https://cellgrowthsim.com/">https://cellgrowthsim.com/</a> for other detailed sources.
 
 Two formats are used to distribute SRC models: the OpenDocument Spreadsheet format ODS and the text format CSV. Data organization is strictly identical in both formats. ODS models are prefered for diffusion.
 
@@ -88,14 +88,14 @@ For example:
 
 ### 2.2) Mass fraction matrix $\mathbf{M}$ (<code>M</code>) <img src="https://img.shields.io/badge/mandatory-red" /> <a name="M"></a>
 
-The sheet `M` contains the mass fraction matrix $\mathbf{M}$, which is the pendant of the stoichiometric matrix in normalized mass units (see <a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al., 2023</a>). This sheet is mandatory to have minimal kinetics:
+The sheet `M` contains the mass fraction matrix $\mathbf{M}$, which is the pendant of the stoichiometric matrix in normalized mass units (see <a href="https://doi.org/10.1371/journal.pcbi.1011156">Dourado et al., 2023</a>). This sheet is mandatory to have minimal kinetics:
 - Metabolites are in row, reactions in columns.
 - The last row corresponds to total protein amount (`Protein`).
 - The last column corresponds to the ribosome reaction (`Ribosome`), producing the total protein amount.
 - All metabolites starting with `x_` are external metabolites with constant concentration.
 
 > [!WARNING]  
-> Stoichiometric coefficients must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbacpp/blob/main/tutorials/units_conversion_tutorial.ipynb" target="_blank">units conversion tutorial</a>).
+> Stoichiometric coefficients must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/units_conversion_tutorial.ipynb">Units conversion tutorial</a>).
 
 For example, the model below has three reactions and four metabolites (three internal, one external):
 
@@ -114,7 +114,7 @@ The sheet `kcat` contains the vectors of forward (`kcat_f`) and backward (`kcat_
 - For forward irreversible reactions, backward values will be zero.
 
 > [!WARNING]  
-> $k_\text{cat}$ values must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbacpp/blob/main/tutorials/units_conversion_tutorial.ipynb" target="_blank">units conversion tutorial</a>).
+> $k_\text{cat}$ values must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/units_conversion_tutorial.ipynb">Units conversion tutorial</a>).
 
 For example, the model below has three irreversible reactions (`kcat_b = 0`):
 
@@ -130,7 +130,7 @@ The sheet `K` contains the matrix of Michaelis constants $\mathbf{K}$ (usually, 
 - The matrix maps Michaelis constants from reactions to substrates and products, therefore including forward and backward $K_\text{M}$ values.
 
 > [!WARNING]
-> $K_\text{M}$ values must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbacpp/blob/main/tutorials/units_conversion_tutorial.ipynb" target="_blank">units conversion tutorial</a>).
+> $K_\text{M}$ values must be converted following GBA formalism (see the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/units_conversion_tutorial.ipynb">Units conversion tutorial</a>).
 
 For example, the model below has three irreversible reactions and four metabolites (three internal, one external):
 
