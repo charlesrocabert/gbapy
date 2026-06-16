@@ -23,7 +23,7 @@
 """
 Filename: Enumerations.py
 Author: Charles Rocabert
-Date: 2024-16-12
+Date: 2024-12-16
 Description:
     List of enumerations of the gbapy module.
 License: GNU General Public License v3 (GPLv3)

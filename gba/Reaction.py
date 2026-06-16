@@ -23,7 +23,7 @@
 """
 Filename: Reaction.py
 Author: Charles Rocabert
-Date: 2024-17-12
+Date: 2024-12-17
 Description:
     Reaction class of the gbapy module.
 License: GNU General Public License v3 (GPLv3)

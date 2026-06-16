@@ -33,6 +33,7 @@ Copyright: © 2024-2026 Charles Rocabert, Furkan Mert.
 import os
 import time
 import copy
+import shutil
 import random
 import pickle
 import pkgutil
@@ -2107,7 +2108,7 @@ class Model:
         consistent : bool
             True if the model is consistent, False otherwise.
         """
-        assert os.path.exists("find_model_optimum"), throw_message(MessageType.ERROR, "The gbacpp solver 'find_model_optimum' is not available. Please check your installation, or your PATH variable.")
+        assert shutil.which("find_model_optimum") is not None, throw_message(MessageType.ERROR, "The gbacpp solver 'find_model_optimum' is not available. Please check your installation, or your PATH variable.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write the model in a temporary file with a unique key #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
