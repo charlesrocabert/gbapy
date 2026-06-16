@@ -37,7 +37,7 @@ from IPython.display import display_html
 try:
     from .Enumerations import *
     from .Species import *
-except:
+except ImportError:
     from Enumerations import *
     from Species import *
 

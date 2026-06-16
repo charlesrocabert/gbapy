@@ -51,7 +51,7 @@ from IPython.display import display_html, clear_output
 
 try:
     from .Enumerations import *
-except:
+except ImportError:
     from Enumerations import *
 
 # Setting gurobi environment

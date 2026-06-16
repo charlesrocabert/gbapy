@@ -39,7 +39,7 @@ from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
 try:
     from .Enumerations import *
-except:
+except ImportError:
     from Enumerations import *
 
 

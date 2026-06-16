@@ -43,7 +43,7 @@ try:
     from .Enumerations import *
     from .Species import Protein, Metabolite
     from .Reaction import Reaction
-except:
+except ImportError:
     from Enumerations import *
     from Species import Protein, Metabolite
     from Reaction import Reaction
