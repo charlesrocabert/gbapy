@@ -22,3 +22,4 @@
 pip uninstall gba --break-system-packages
 python -m build --clean
 rm -rf -- ./build/ ./dist/ ./*.egg-info
+
