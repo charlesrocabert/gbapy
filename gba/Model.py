@@ -38,7 +38,6 @@ import random
 import pickle
 import pkgutil
 import subprocess
-import warnings
 import numpy as np
 import pandas as pd
 import gurobipy as gp
@@ -63,11 +62,11 @@ try:
     env.setParam("OutputFlag", 0)
     env.start()
 except Exception as err:
-    warnings.warn(
-        "Gurobi environment could not be started. A valid Gurobi license is required to use optimization features. "
+    throw_message(
+        MessageType.WARNING,
+        "Gurobi environment could not be started. "
+        "A valid Gurobi license is required to use optimization features. "
         + f"Original error: {err}",
-        RuntimeWarning,
-        stacklevel=2,
     )
 
 
