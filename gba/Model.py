@@ -1715,6 +1715,9 @@ class Model:
         Description
         -----------
         Solution updated from Hugo Dourado.
+        For numerical stability, this LP enforces non-negative q variables.
+        This implies a model pre-processing step where reversible reactions
+        are transformed into irreversible reactions before solving q0.
         
         Parameters
         ----------
