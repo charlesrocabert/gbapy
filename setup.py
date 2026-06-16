@@ -46,7 +46,7 @@ setup(
 	url                           = "https://github.com/charlesrocabert/gbapy",
 	author                        = "Charles Rocabert",
 	author_email                  = "charles.rocabert@hhu.de",
-	maintainer                    = "Furkan Mert",
+	maintainer                    = "Furkan Mert and Jérémie Muller-Prokob",
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Programming Language :: Python :: 3",

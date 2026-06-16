@@ -6,6 +6,7 @@ temp_*
 clean_folders.sh
 deprecated/**
 examples/**
+doc/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
