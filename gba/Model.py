@@ -884,7 +884,7 @@ class Model:
                      "q.csv", "random_solutions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
-                    os.system(f"rm {model_path}/{f}")
+                    os.remove(model_path+"/"+f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1760,6 +1760,7 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Run optimization        #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        assert env is not None, throw_message(MessageType.ERROR, "Gurobi environment is not available. A valid Gurobi license is required to run optimization.")
         gpmodel = gp.Model(env=env)
         q       = gpmodel.addMVar(self.nj, lb=lb_vec, ub=ub_vec, name="q")
         obj     = (1.0/self.kcat_f) @ q

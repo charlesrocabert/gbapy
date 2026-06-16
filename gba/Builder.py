@@ -1694,7 +1694,7 @@ class Builder:
                      "protein_contributions.csv"]
             for f in files:
                 if os.path.exists(model_path+"/"+f):
-                    os.system(f"rm {model_path}/{f}")
+                    os.remove(model_path+"/"+f)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Write the information             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
