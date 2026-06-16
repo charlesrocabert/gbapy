@@ -1529,9 +1529,9 @@ class Model:
         j : int
             Reaction index.
         """
-        KI_prod = np.prod(1.0+self.c*self.rKI[:,j])
-        KA_prod = np.prod(1.0+self.KA[:,j]/self.c)
-        KM_prod = np.prod(1.0+self.KM_f[:,j]/self.c)
+        KI_prod = np.prod(1.0+self.xc*self.rKI[:,j])
+        KA_prod = np.prod(1.0+self.KA[:,j]/self.xc)
+        KM_prod = np.prod(1.0+self.KM_f[:,j]/self.xc)
         kcatf   = self.kcat_f[j]
         for i in range(self.nc):
             y                 = i+self.nx
