@@ -38,7 +38,7 @@ The module offers two core components:
 
 > [!TIP]
 > Start by reading the <a href="https://doi.org/10.1371/journal.pcbi.1011156">complete description of GBA formalism</a>, then follow the tutorials below to learn the required format:
-> - SRC models must comply to a standardized format. Guidelines are available in the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/src_model_format_tutorial.md">🔗 Toy model tutorial</a>.
+> - SRC models must comply to a standardized format. Guidelines are available in the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/src_model_format_tutorial.md">🔗 SRC model format tutorial</a>.
 > - When building a SRC model, stoichiometric coefficients, and kinetic parameters must be converted following GBA formalism. See the <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/units_conversion_tutorial.ipynb">🔗 Units conversion tutorial</a>.
 
 # Table of contents
