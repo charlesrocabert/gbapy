@@ -156,20 +156,20 @@ model.export_optimization_data()
 
 ### Reference files
 
-- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/my_toy_model.ipynb" target="_blank">Toy model tutorial</a>,
-- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy.ods" target="_blank">ODS file</a>,
-- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy_optimization_data.csv" target="_blank">CSV optimization data</a>.
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/my_toy_model.ipynb">Toy model tutorial</a>,
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy.ods">ODS file</a>,
+- 🔗 <a href="https://github.com/charlesrocabert/gbapy/blob/main/tutorials/toy_optimization_data.csv">CSV optimization data</a>.
 
 # Installation <a name="installation"></a>
 
-The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/" target="_blank">PyPI</a>:
+The easiest way to install <strong>gbapy</strong> is from <a href="https://pypi.org/project/gba/">PyPI</a>:
  
 ```
 pip install gba
 ```
 
 > [!IMPORTANT]
-<a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> software is required to run optimization tasks.
+<a href="https://github.com/charlesrocabert/gbacpp">gbacpp</a> software is required to run optimization tasks.
 
 ## Supported platforms <a name="supported_platforms"></a>
 <strong>gbapy</strong> has been primilary developed for Unix/Linux and macOS systems.
@@ -177,19 +177,19 @@ pip install gba
 ## Dependencies <a name="dependencies"></a>
 
 ### • Software
-* <a href="https://github.com/charlesrocabert/gbacpp" target="_blank">gbacpp</a> is required to run optimization tasks.
+* <a href="https://github.com/charlesrocabert/gbacpp">gbacpp</a> is required to run optimization tasks.
 
 ### • Licensed Python modules
-* The Python API of <a href="https://www.gurobi.com/" target="_blank">GUROBI optimizer</a> must be installed and requires a user license (<a href="https://www.gurobi.com/academia/academic-program-and-licenses/" target="_blank">free for academics</a>).
+* The Python API of <a href="https://www.gurobi.com/">GUROBI optimizer</a> must be installed and requires a user license (<a href="https://www.gurobi.com/academia/academic-program-and-licenses/" >free for academics</a>).
 
 ### • Other Python modules
-* <a href="https://numpy.org/" target="_blank">NumPy</a>
-* <a href="https://pandas.pydata.org/" target="_blank">pandas</a>
-* <a href="https://ipython.org/" target="_blank">IPython</a>
-* <a href="https://plotly.com/" target="_blank">plotly</a>
-* <a href="https://opencobra.github.io/cobrapy/" target="_blank">cobrapy</a>
-* <a href="https://github.com/cgohlke/molmass" target="_blank">molmass</a>
-* <a href="https://biopython.org/" target="_blank">Biopython</a>
+* <a href="https://numpy.org/">NumPy</a>
+* <a href="https://pandas.pydata.org/">pandas</a>
+* <a href="https://ipython.org/">IPython</a>
+* <a href="https://plotly.com/">plotly</a>
+* <a href="https://opencobra.github.io/cobrapy/">cobrapy</a>
+* <a href="https://github.com/cgohlke/molmass">molmass</a>
+* <a href="https://biopython.org/">Biopython</a>
 
 ## Manual installation <a name="manual_installation"></a>
 
