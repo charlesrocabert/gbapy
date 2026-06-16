@@ -39,7 +39,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
 	name                          = "gba",
 	version                       = "0.6.4",
-	license                       = "GNU General Public License v3 (GPLv3)",
+	license                       = "GPL-3.0-or-later",
 	description                   = "gbapy (Growth Balance Analysis for Python)",
 	long_description              = long_description,
 	long_description_content_type = "text/markdown",
@@ -50,7 +50,6 @@ setup(
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Programming Language :: Python :: 3",
-		"License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 		"Operating System :: OS Independent",
 		"Intended Audience :: Science/Research",
 		"Topic :: Scientific/Engineering :: Mathematics",
@@ -61,7 +60,7 @@ setup(
     #     'gba.data': ['**/*.csv', '**/*.ods']
     # },
 	python_requires  = ">=3",
-    install_requires = ["cobra", "molmass", "numpy", "pandas", "gurobipy", "Bio", "IPython", "plotly"],
+    install_requires = ["cobra", "molmass", "numpy", "pandas", "gurobipy", "biopython", "IPython", "plotly", "pyexcel_xlsx", "pyexcel_ods3"],
 	project_urls     = {
 	"Source": "https://github.com/charlesrocabert/gbapy"
 	},

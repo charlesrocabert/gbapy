@@ -21,5 +21,5 @@
 include *.md
 
 # Include the license file
-include LICENSE.txt
+include LICENSE
 
