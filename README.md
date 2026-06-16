@@ -69,30 +69,31 @@ from gba import SpeciesLocation, ReactionType, ReactionDirection
 
 builder = Builder(name="toy")
 
-### Add model information (ODS sheet 'Info')
+### Add general information to the model (stored in the ODS sheet named 'Info')
 builder.add_info(category="General", key="Name", content="toy")
 builder.add_info(category="General", key="Description", content="Toy model")
 
-### Create and add proteins (one protein per enzyme per reaction)
-### - Masses in Da.
+### Create and add the proteins used by the enzymes in the model (one protein per enzyme):
+### - Protein masses are given in Da.
 p1 = Protein(id="p1", mass=1000000.0)
 p2 = Protein(id="p2", mass=1000000.0)
 builder.add_proteins([p1, p2])
 
-### Create and add metabolites:
-### - External and internal glucose
-### - One generic Protein product
-### - Masses in Da.
+### Create and add the metabolites used in the model:
+### - x_G is external glucose
+### - G is internal glucose
+### - Protein is a generic protein product
+### - Metabolite masses are given in Da
 x_G     = Metabolite(id="x_G", species_location=SpeciesLocation.EXTERNAL, mass=180.0)
 G       = Metabolite(id="G", species_location=SpeciesLocation.INTERNAL, mass=180.0)
 Protein = Metabolite(id="Protein", species_location=SpeciesLocation.INTERNAL,mass=180.0)
 builder.add_metabolites([x_G, G, Protein])
 
-### Create and add transporter to import glucose:
-### - Enzyme is composed of one protein p1
-### - Reaction is irreversible
-### - kcat values in 1/h
-### - KM values in g/L
+### Create a transport reaction that imports glucose into the cell:
+### - The enzyme is composed of one protein p1
+### - The reaction is irreversible
+### - kcat values are given in 1/h
+### - KM values are given in g/L
 rxn1 = Reaction(id="rxn1", lb=0.0, ub=1000.0,
                 reaction_type=ReactionType.TRANSPORT,
                 metabolites={"x_G":-1.0, "G": 1.0},
@@ -102,9 +103,9 @@ rxn1.add_km_value(metabolite_id="x_G", km_value=0.00013)
 rxn1.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(rxn1)
 
-### Create and add ribosome reaction to produce proteins:
-### - Enzyme is composed of one protein p2
-### - Reaction is irreversible
+### Create a ribosome-like reaction that uses internal glucose to produce protein:
+### - The enzyme is composed of one protein p2
+### - The reaction is irreversible
 ribosome = Reaction(id="Ribosome", lb=0.0, ub=1000.0,
                     reaction_type=ReactionType.METABOLIC,
                     metabolites={"G":-1.0, "Protein": 1.0},
@@ -114,20 +115,20 @@ ribosome.add_km_value(metabolite_id="G", km_value=0.00013)
 ribosome.complete(kcat_value=0.0, km_value=0.0)
 builder.add_reaction(ribosome)
 
-### Convert the model to GBA formalism (cf. Dourado et al. 2023)
+### Convert the model quantities to the GBA formalism (see Dourado et al. 2023)
 builder.convert(ribosome_mass_kcat=4.55, ribosome_mass_km=8.3)
 builder.build_GBA_model()
 
-### Set cell's total density (g/L)
+### Set the total cell density in g/L (here, the dry weight density)
 builder.set_rho(340.0)
 
-### Create external conditions (in g/L)
+### Create a series of external conditions with decreasing external glucose concentration (g/L)
 x_G_conc = 1.0
 for i in range(25):
     builder.add_condition(condition_id=str(i+1), metabolites={"x_G": x_G_conc})
     x_G_conc *= 2/3
 
-### Save the model to an ODS file
+### Export the model to an ODS file
 builder.export_to_ods()
 ```
 
@@ -142,19 +143,19 @@ In the second step, the exported ODS file is loaded back as a <code>Model</code>
 ```python
 from gba import read_ods_model
 
-### Load the ODS model
+### Load the ODS model file created in the previous step
 model = read_ods_model(name="toy")
 
-### Find a valid initial solution
+### Find an initial feasible solution before running the optimization
 model.find_initial_solution()
 
-### Optimize the model for all conditions
+### Compute the optimal solution for each external condition
 model.find_optimum_by_condition()
 
-### Make a plot
+### Plot the growth rate mu as a function of external glucose concentration x_G
 model.plot(x="x_G", y="mu", title="Growth rate", logx=True)
 
-### Export optimization data in CSV
+### Export the optimization results to a CSV file
 model.export_optimization_data()
 ```
 
