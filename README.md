@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://www.cs.hhu.de/en/research-groups/computational-cell-biology" target="_blank"><img src="https://github.com/user-attachments/assets/4e4b3b79-0d6a-4328-9c3f-3497401887e4" width=200 /></a>
+  <a href="https://www.cs.hhu.de/en/research-groups/computational-cell-biology"><img src="https://github.com/user-attachments/assets/4e4b3b79-0d6a-4328-9c3f-3497401887e4" width=200 /></a>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.hhu.de/en/" target="_blank"><img src="https://github.com/user-attachments/assets/7db5c8f7-e37a-415f-88c3-1b06a49e1f28" width=200 /></a>
+  <a href="https://www.hhu.de/en/"><img src="https://github.com/user-attachments/assets/7db5c8f7-e37a-415f-88c3-1b06a49e1f28" width=200 /></a>
 </p>
 
 -----------------
@@ -25,22 +25,22 @@ pip install gba
 ```
 
 <p align="justify">
-<strong>gbapy</strong> is a Python package that provides tools for building and analyzing <strong>self-replicating cell (SRC)</strong> models based on the <strong>growth balance analysis (GBA)</strong> mathematical formalism (<a href="https://doi.org/10.1371/journal.pcbi.1011156" target="_blank">Dourado et al. 2023</a>).
+<strong>gbapy</strong> is a Python package that provides tools for building and analyzing <strong>self-replicating cell (SRC)</strong> models based on the <strong>growth balance analysis (GBA)</strong> mathematical formalism (<a href="https://doi.org/10.1371/journal.pcbi.1011156">Dourado et al. 2023</a>).
+This approach, built exclusively on the first principles of fitness maximization, mass conservation, nonlinear reaction kinetics, and constant cell density, allows to study resource allocation in models of whole self-replicating cells (<a href="https://doi.org/10.1101/2025.06.24.661369">Dourado et al. 2025</a>).
 </p>
 
-<p align="justify">
-This approach, built exclusively on the first principles of fitness maximization, mass conservation, nonlinear reaction kinetics, and constant cell density, allows to study resource allocation in models of whole self-replicating cells (<a href="https://doi.org/10.1101/2025.06.24.661369" target="_blank">Dourado et al. 2025</a>).
-</p>
+> [!NOTE]
+> The module offers two core components:
+>  
+> - :wrench: A <strong>builder class</strong>, to construct SRC models of any size from first principles,
+> - :chart_with_upwards_trend: A <strong>model class</strong>, to manipulate and optimize models once they are built.
+>
+> <strong>Follow the typical workflow below to get started with gbapy!</strong>
 
-### Features
-
-<p align="justify">
-The module offers two core components:
-  
-- :wrench: A <strong>builder class</strong>, to construct SRC models of any size from first principles,
-- :chart_with_upwards_trend: A <strong>model class</strong>, to manipulate and optimize models once they are built.
-
-</p>
+> [!TIP]
+> Start by reading the <a href="https://doi.org/10.1371/journal.pcbi.1011156">complete description of GBA formalism</a>, then follow the tutorials below to learn the required format:
+> - SRC models must comply to a standardized format. Guidelines are available in the <a href="">SRC model format tutorial</a>.
+> - When building a SRC model, stoichiometric coefficients, and kinetic parameters must be converted following GBA formalism. See the <a href="">units conversion tutorial</a>.
 
 # Typical workflow
 
