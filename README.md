@@ -59,6 +59,10 @@ The module offers two core components:
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/710fecd4-0381-41a2-ae6e-d952eb8c40ad" />
 </p>
 
+<p align="justify">
+In this first step, you build the structure of a simple SRC model from scratch. The <code>Builder</code> object is used to declare the main biological entities of the system, define how they interact through reactions, and specify the external conditions that will later be tested during optimization.
+</p>
+
 ```python
 from gba import Builder, Model, Protein, Metabolite, Reaction
 from gba import SpeciesLocation, ReactionType, ReactionDirection
@@ -131,6 +135,10 @@ builder.export_to_ods()
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/7d0ec598-2fb2-497f-8d89-f15e27e24d43" />
 </p>
 
+<p align="justify">
+In the second step, the exported ODS file is loaded back as a <code>Model</code> object so that numerical computations can be performed. The workflow first finds a feasible initial state, then solves the optimization problem for each glucose concentration.
+</p>
+
 ```python
 from gba import read_ods_model
 
@@ -152,6 +160,10 @@ model.export_optimization_data()
 
 <p align="center">
 <img width="550" alt="image" src="https://github.com/user-attachments/assets/16b7eb56-81d8-429c-b7f8-9aa4cac48de5" />
+</p>
+
+<p align="justify">
+The final figure shows the predicted growth rate as a function of external glucose concentration.
 </p>
 
 ### Reference files
@@ -193,7 +205,7 @@ pip install gba
 
 ## Manual installation <a name="manual_installation"></a>
 
-If you want to install <strong>gbapy</strong> manually, download the <a href="https://github.com/charlesrocabert/gbapy/releases/latest">latest release</a>, and save it to a directory of your choice. Open a terminal and use the <code>cd</code> command to navigate to this directory. Then follow the steps below to compile and build the executables.
+If you want to install <strong>gbapy</strong> manually, download the <a href="https://github.com/charlesrocabert/gbapy/releases/latest">latest release</a>, and save it to a directory of your choice. Open a terminal, navigate to the <code>gbapy/</code> directory and run:
 
 ```
 sh install.sh
