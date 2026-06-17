@@ -1539,7 +1539,7 @@ class Model:
             rKI               = self.rKI[y,j]
             term2             = -self.KA[y,j]/np.power(self.c[i], 2.0)
             term3             = -self.KM_f[y,j]/np.power(self.c[i], 2.0)
-            term4             = np.prod(1+self.KM_f[indices,j]/self.c[indices])
+            term4             = np.prod(1+self.KM_f[indices,j]/self.xc[indices])
             self.ditau_j[j,i] = (rKI*KA_prod*KM_prod + KI_prod*term2*KM_prod + KI_prod*KA_prod*term3*term4)/kcatf 
 
     def drMM( self, j: int ) -> None:
