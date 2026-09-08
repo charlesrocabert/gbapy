@@ -182,7 +182,7 @@ pip install gba
 ```
 
 > [!IMPORTANT]
-<a href="https://github.com/charlesrocabert/gbacpp">gbacpp</a> software is required to run optimization tasks.
+<a href="https://github.com/charlesrocabert/gbacpp">gbacpp</a> software is required to run optimization tasks on large models.
 
 ## Supported platforms <a name="supported_platforms"></a>
 <strong>gbapy</strong> has been primilary developed for Unix/Linux and macOS systems.
