@@ -32,7 +32,7 @@ This approach, built exclusively on the first principles of fitness maximization
 <p align="justify">
 The module offers two core components:
   
-- :wrench: A <strong>builder class</strong>, to construct SRC models of any size from first principles,
+- :wrench: A <strong>builder class</strong>, to construct SRC models of any size,
 - :chart_with_upwards_trend: A <strong>model class</strong>, to manipulate and optimize models once they are built.
 </p>
 
