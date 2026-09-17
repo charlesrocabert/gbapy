@@ -827,8 +827,14 @@ class Builder:
                 metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.METABOLIC])*100
                 throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
             if len(missing_km) > 0:
-                perc = len(missing_km)/len(self.reactions)*100
-                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing KM values.")
+                transporter_count = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.TRANSPORT])
+                spontaneous_count = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.SPONTANEOUS])
+                metabolic_count   = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.METABOLIC])
+                perc              = len(missing_km)/len(self.reactions)*100
+                transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.TRANSPORT])*100
+                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.SPONTANEOUS])*100
+                metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.METABOLIC])*100
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing KM values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
             if len(missing_kcat)==0 and len(missing_km)==0:
                 throw_message(MessageType.INFO, "No missing kinetic parameters in the model.")
         return {"kcat": missing_kcat, "km": missing_km}
