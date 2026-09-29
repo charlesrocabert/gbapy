@@ -32,6 +32,7 @@ Copyright: © 2024-2026 Charles Rocabert.
 
 import enum
 
+
 class GeneEssentiality(enum.Enum):
     """
     Gene essentiality enumeration.

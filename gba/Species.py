@@ -118,9 +118,9 @@ class Species:
                 formula   = self.formula.replace("R", "")
                 self.mass = (molmass.Formula(formula).mass if formula != "" else 0.0)
             except:
-                throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
+                throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of {self.id}.")
         else:
-            throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of <code>{self.id}</code>.")
+            throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of {self.id}.")
 
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """
@@ -133,7 +133,7 @@ class Species:
         """
         if self.mass == None or self.mass == 0.0:
             if verbose:
-                throw_message(MessageType.WARNING, f"Mass of species <code>{self.id}</code> is missing.")
+                throw_message(MessageType.WARNING, f"Mass of species {self.id} is missing.")
             return True
         return False
     

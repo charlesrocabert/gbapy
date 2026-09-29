@@ -782,8 +782,8 @@ class Model:
                 self.kinetic_model.append(GbaReactionType.IMMIA)
                 self.directions.append(ReactionDirection.FORWARD)
             elif (self.kcat_b[j] > 0):
-                assert self.KA[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have activation (reaction <code>{j}</code>).")
-                assert self.KI[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction <code>{j}</code>).")
+                assert self.KA[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have activation (reaction {j}).")
+                assert self.KI[:,j].sum() == 0, throw_message(MessageType.ERROR, f"Reversible Michaelis-Menten reaction cannot have inhibition (reaction {j}).")
                 self.kinetic_model.append(GbaReactionType.RMM)
                 self.directions.append(ReactionDirection.REVERSIBLE)
     
@@ -868,7 +868,7 @@ class Model:
         path : str, default="."
             Path to the CSV files.
         """
-        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path {path} does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Check the existence of the folder #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1010,7 +1010,7 @@ class Model:
         path : Optional[str], default="."
             Path to the folder.
         """
-        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path {path} does not exist")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write the information           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1150,7 +1150,7 @@ class Model:
             Name of the model. If not provided, the name of the model instance
             will be used.
         """
-        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path <code>{path}</code> does not exist")
+        assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path {path} does not exist")
         if self.data is not None:
             filename = path+"/"+(name if name != "" else self.name)+"_optimization_data.csv"
             self.data.to_csv(filename, sep=";")
@@ -1175,8 +1175,8 @@ class Model:
         float
             Condition parameter value.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier <code>{condition_id}</code>.")
-        assert condition_param in self.condition_params, throw_message(MessageType.ERROR, f"Unknown condition parameter <code>{condition_param}</code>.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier {condition_id}.")
+        assert condition_param in self.condition_params, throw_message(MessageType.ERROR, f"Unknown condition parameter {condition_param}.")
         i = self.condition_params.index(condition_param)
         j = self.condition_ids.index(condition_id)
         return self.conditions[i,j]
@@ -1201,7 +1201,7 @@ class Model:
         """
         if category not in self.info:
             self.info[category] = {}
-        assert key not in self.info[category], throw_message(MessageType.ERROR, f"Info key <code>{key}</code> already exists in info category <code>{category}</code>.")
+        assert key not in self.info[category], throw_message(MessageType.ERROR, f"Info key{key} already exists in info category {category}.")
         self.info[category][key] = content
     
     def clear_conditions( self ) -> None:
@@ -1230,14 +1230,14 @@ class Model:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Assertions                             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        assert condition_id not in self.condition_ids, throw_message(MessageType.ERROR, f"Condition <code>{condition_id}</code> already exists.")
+        assert condition_id not in self.condition_ids, throw_message(MessageType.ERROR, f"Condition {condition_id} already exists.")
         assert rho > 0.0, throw_message(MessageType.ERROR, "The total density must be positive.")
         assert default_concentration >= 0.0, throw_message(MessageType.ERROR, "The default concentration must be positive.")
         if metabolites is not None:
             for m_id, concentration in metabolites.items():
-                assert m_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> does not exist.")
-                assert m_id in self.condition_params, throw_message(MessageType.ERROR, f"Metabolite <code>{m_id}</code> is not a condition parameter.")
-                assert concentration >= 0.0, throw_message(MessageType.ERROR, f"The concentration of metabolite <code>{m_id}</code> must be positive.")
+                assert m_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Metabolite {m_id} does not exist.")
+                assert m_id in self.condition_params, throw_message(MessageType.ERROR, f"Metabolite {m_id} is not a condition parameter.")
+                assert concentration >= 0.0, throw_message(MessageType.ERROR, f"The concentration of metabolite {m_id} must be positive.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Set the condition                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1270,7 +1270,7 @@ class Model:
         value : float
             Flux value.
         """
-        assert metabolite_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Unknown metabolite identifier <code>{metabolite_id}</code>.")
+        assert metabolite_id in self.metabolite_ids, throw_message(MessageType.ERROR, f"Unknown metabolite identifier {metabolite_id}.")
         assert value >= 0.0, throw_message(MessageType.ERROR, "The constant value must be positive.")
         self.constant_rhs[metabolite_id] = value
     
@@ -1291,7 +1291,7 @@ class Model:
         value : float
             Flux value.
         """
-        assert reaction_id in self.reaction_ids, throw_message(MessageType.ERROR, f"Unknown reaction identifier <code>{reaction_id}</code>.")
+        assert reaction_id in self.reaction_ids, throw_message(MessageType.ERROR, f"Unknown reaction identifier {reaction_id}.")
         self.constant_reactions[reaction_id] = value
     
     def reset_variables( self ) -> None:
@@ -1322,7 +1322,7 @@ class Model:
         condition_id : str
             External condition identifier.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, "Unknown condition identifier <code>{condition_id}</code>.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, "Unknown condition identifier {condition_id}.")
         self.condition = condition_id
         self.rho       = self.get_condition(self.condition, "rho")
         for i in range(self.nx):
@@ -1958,7 +1958,7 @@ class Model:
                 solution_exists = my_model.find_q0(min_bp=min_bp)
             if solution_exists and my_model.mu > GbaConstants.TOL.value:
                 if verbose:
-                    throw_message(MessageType.INFO, f"Reaction <code>{reaction_id}</code> is non-essential (mu = {my_model.mu})")
+                    throw_message(MessageType.INFO, f"Reaction {reaction_id} is non-essential (mu = {my_model.mu})")
                 non_essential_reactions[self.reaction_ids[j]] = my_model.mu
             del(my_model)
         if verbose and len(non_essential_reactions) == 0:
@@ -2045,12 +2045,12 @@ class Model:
             p_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_p_optimum.csv"
             b_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_b_optimum.csv"
             c_filename     = "./"+temporary_name+"/"+temporary_name+"_"+condition_id+"_c_optimum.csv"
-        assert os.path.exists(state_filename), throw_message(MessageType.ERROR, f"Solver state output file <code>{state_filename}</code> not found.")
-        assert os.path.exists(q_filename), throw_message(MessageType.ERROR, f"Solver q output file <code>{q_filename}</code> not found.")
-        assert os.path.exists(v_filename), throw_message(MessageType.ERROR, f"Solver v output file <code>{v_filename}</code> not found.")
-        assert os.path.exists(p_filename), throw_message(MessageType.ERROR, f"Solver p output file <code>{p_filename}</code> not found.")
-        assert os.path.exists(b_filename), throw_message(MessageType.ERROR, f"Solver b output file <code>{b_filename}</code> not found.")
-        assert os.path.exists(c_filename), throw_message(MessageType.ERROR, f"Solver c output file <code>{c_filename}</code> not found.")
+        assert os.path.exists(state_filename), throw_message(MessageType.ERROR, f"Solver state output file {state_filename} not found.")
+        assert os.path.exists(q_filename), throw_message(MessageType.ERROR, f"Solver q output file {q_filename} not found.")
+        assert os.path.exists(v_filename), throw_message(MessageType.ERROR, f"Solver v output file {v_filename} not found.")
+        assert os.path.exists(p_filename), throw_message(MessageType.ERROR, f"Solver p output file {p_filename} not found.")
+        assert os.path.exists(b_filename), throw_message(MessageType.ERROR, f"Solver b output file {b_filename} not found.")
+        assert os.path.exists(c_filename), throw_message(MessageType.ERROR, f"Solver c output file {c_filename} not found.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Read the optimal q vector   #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2256,8 +2256,8 @@ class Model:
         title : Optional[str], default=None
             Title of the plot.
         """
-        assert x in self.data.columns, throw_message(MessageType.ERROR, f"Unknown x parameter <code>{x}</code>.")
-        assert y in self.data.columns, throw_message(MessageType.ERROR, f"Unknown y parameter <code>{y}</code>.")
+        assert x in self.data.columns, throw_message(MessageType.ERROR, f"Unknown x parameter {x}.")
+        assert y in self.data.columns, throw_message(MessageType.ERROR, f"Unknown y parameter {y}.")
         if title is None:
             title = y+" vs "+x
         if xlabel is None:

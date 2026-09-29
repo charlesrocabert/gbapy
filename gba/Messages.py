@@ -30,6 +30,7 @@ License: GNU General Public License v3 (GPLv3)
 Copyright: © 2024-2026 Charles Rocabert.
 """
 
+from html import escape
 from IPython.display import display_html
 
 try:
@@ -38,30 +39,29 @@ except ImportError:
     from Enumerations import MessageType
 
 
-def throw_message(type: MessageType, message: str) -> None:
+def throw_message(message_type: MessageType, message: str) -> None:
     """
     Throw a message to the user.
 
     Parameters
     ----------
-    type : MessageType
+    message_type : MessageType
         Type of message (MessageType.INFO, MessageType.WARNING,
         MessageType.ERROR, MessageType.PLAIN).
     message : str
         Content of the message.
     """
     html_str = "<table>"
-    html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
-    if type == MessageType.PLAIN:
-        html_str += "<td><strong>&#10095;</strong></td>"
-    elif type == MessageType.INFO:
-        html_str += "<td style='color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
-    elif type == MessageType.WARNING:
-        html_str += "<td style='color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
-    elif type == MessageType.ERROR:
-        html_str += "<td style='color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
-    html_str += "<td>" + message + "</td>"
+    html_str += "<tr style='text-align:left'>"
+    if message_type == MessageType.PLAIN:
+        html_str += "<td style='vertical-align:top'><strong>&#10095;</strong></td>"
+    elif message_type == MessageType.INFO:
+        html_str += "<td style='vertical-align:top;color:rgba(0,85,194);'><strong>&#10095; Info</strong></td>"
+    elif message_type == MessageType.WARNING:
+        html_str += "<td style='vertical-align:top;color:rgba(240,147,1);'><strong>&#9888; Warning</strong></td>"
+    elif message_type == MessageType.ERROR:
+        html_str += "<td style='vertical-align:top;color:rgba(236,3,3);'><strong>&#10006; Error</strong></td>"
+    html_str += "<td style='vertical-align:top'>" + escape(message) + "</td>"
     html_str += "</tr>"
     html_str += "</table>"
     display_html(html_str, raw=True)
-
