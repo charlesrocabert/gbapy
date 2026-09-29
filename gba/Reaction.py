@@ -162,7 +162,7 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.proteins    = None
         self.GPR         = GPR
-        self.enzyme_mass = enzyme_mass
+        self.enzyme_mass = None
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 4) Proteomics               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -186,6 +186,7 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.add_metabolites(metabolites)
         self.add_proteins(proteins)
+        self.enzyme_mass = enzyme_mass
         self.define_direction()
         self.define_expression()
     
@@ -218,6 +219,7 @@ class Reaction:
             elif self.metabolites[m_id] > 0:
                 assert m_id not in self.products, throw_message(MessageType.ERROR, f"Metabolite {m_id} already in the list of products.")
                 self.products.append(m_id)
+        self.define_expression()
     
     def add_proteins( self, proteins: dict[str,float] ) -> None:
         """
@@ -238,6 +240,9 @@ class Reaction:
             assert p_id not in self.proteins, throw_message(MessageType.ERROR, f"Protein {p_id} already in the enzyme composition of reaction {self.id}.")
             assert proteins[p_id] > 0, throw_message(MessageType.ERROR, f"Stoichiometry of protein {p_id} must be positive.")
             self.proteins[p_id] = proteins[p_id]
+        if len(proteins) > 0:
+            self.enzyme_mass           = None
+            self.protein_contributions = None
     
     def remove_metabolite( self, metabolite_id: str ) -> None:
         """
@@ -264,6 +269,7 @@ class Reaction:
                 throw_message(MessageType.WARNING, f"Reaction {self.id} has no products.")
         if not self.km is None and metabolite_id in self.km:
             del self.km[metabolite_id]
+        self.define_expression()
     
     def remove_protein( self, protein_id: str ) -> None:
         """
@@ -279,6 +285,8 @@ class Reaction:
         assert protein_id in self.proteins, throw_message(MessageType.ERROR, f"Protein {protein_id} not in the enzyme composition of reaction {self.id}.")
         assert len(self.proteins) > 1, throw_message(MessageType.ERROR, f"Reaction {self.id} must have at least one protein.")
         del self.proteins[protein_id]
+        self.enzyme_mass           = None
+        self.protein_contributions = None
     
     def clear_proteins( self ) -> None:
         """
@@ -287,7 +295,7 @@ class Reaction:
         assert self.check_no_conversion(), throw_message(MessageType.ERROR, f"Reaction {self.id} has been converted to GBA format. Consider to reset the conversion.")
         self.proteins              = {}
         self.enzyme_mass           = None
-        self.protein_contributions = {}
+        self.protein_contributions = None
     
     def rename_metabolite( self, previous_id: str, new_id: str ) -> None:
         """
@@ -323,6 +331,7 @@ class Reaction:
         if not self.km is None and previous_id in self.km:
             self.km[new_id] = self.km[previous_id]
             del self.km[previous_id]
+        self.define_expression()
         
     def add_kcat_value( self, direction: ReactionDirection, kcat_value: float ) -> None:
         """
@@ -483,6 +492,7 @@ class Reaction:
         stoichiometry and the direction.
         """
         if self.metabolites == None or len(self.metabolites) == 0 or not isinstance(self.direction, ReactionDirection):
+            self.expression = None
             return
         self.expression = ""
         self.expression = " + ".join([(str(np.abs(self.metabolites[m_id])) if np.abs(self.metabolites[m_id]) > 1 else "")+" "+m_id for m_id in self.metabolites if self.metabolites[m_id] < 0])
@@ -846,4 +856,3 @@ class Reaction:
         df       = self.build_dataframe()
         html_str = df.to_html(escape=True)
         display_html(html_str,raw=True)
-

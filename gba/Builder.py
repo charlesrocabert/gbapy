@@ -1174,7 +1174,6 @@ class Builder:
                 self.FBA_biomass_reaction.add_metabolites({m_id: coeff})
         self.FBA_biomass_reaction.add_proteins({"average_protein": 1.0})
         self.FBA_biomass_reaction.define_direction()
-        self.FBA_biomass_reaction.define_expression()
         self.FBA_biomass_reaction.calculate_enzyme_mass()
     
     def build_FBA_indices( self ) -> None:
