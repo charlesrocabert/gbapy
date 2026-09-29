@@ -344,15 +344,22 @@ class Builder:
         """
         assert protein_id in self.proteins, throw_message(MessageType.ERROR, f"Protein {protein_id} does not exist.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Remove the protein from the main dictionary #
+        # 1) Validate protein removal                    #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        del self.proteins[protein_id]
+        affected_reactions = [reaction for reaction in self.reactions.values()
+                              if reaction.proteins is not None and protein_id in reaction.proteins]
+        for reaction in affected_reactions:
+            assert reaction.check_no_conversion(), throw_message(MessageType.ERROR, f"Reaction {reaction.id} has been converted to GBA format. Consider to reset the conversion.")
+            assert len(reaction.proteins) > 1, throw_message(MessageType.ERROR, f"Reaction {reaction.id} must have at least one protein.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Remove the protein from reactions           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        for reaction in self.reactions.values():
-            if protein_id in reaction.proteins:
-                reaction.remove_protein(protein_id)
+        for reaction in affected_reactions:
+            reaction.remove_protein(protein_id)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        # 3) Remove the protein from the main dictionary #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        del self.proteins[protein_id]
     
     def remove_proteins( self, proteins_list: list[str] ) -> None:
         """
@@ -442,7 +449,7 @@ class Builder:
         reactions = self.which_reaction(previous_id)
         for r_id in reactions:
             self.reactions[r_id].rename_metabolite(previous_id, new_id)
-        if previous_id in self.FBA_biomass_reaction.metabolites:
+        if self.FBA_biomass_reaction is not None and previous_id in self.FBA_biomass_reaction.metabolites:
             self.FBA_biomass_reaction.rename_metabolite(previous_id, new_id)
         #~~~~~~~~~~~~~~~~~~~~~~~#
         # 3) Manage metabolites #
@@ -814,6 +821,14 @@ class Builder:
         verbose : bool
             Display messages if True.
         """
+        def missing_percentage( missing_count: int, total_count: int ) -> str:
+            if total_count == 0:
+                return "N/A"
+            return f"{missing_count/total_count*100:.2f}%"
+        reaction_type_counts = {
+            reaction_type: len([r for r in self.reactions.values() if r.reaction_type == reaction_type])
+            for reaction_type in [ReactionType.TRANSPORT, ReactionType.SPONTANEOUS, ReactionType.METABOLIC]
+        }
         missing_kcat = [r.id for r in self.reactions.values() if r.has_missing_kcat_value()]
         missing_km   = [r.id for r in self.reactions.values() if r.has_missing_km_value()]
         if verbose:
@@ -822,19 +837,19 @@ class Builder:
                 spontaneous_count = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.SPONTANEOUS])
                 metabolic_count   = len([r_id for r_id in missing_kcat if self.reactions[r_id].reaction_type == ReactionType.METABOLIC])
                 perc              = len(missing_kcat)/len(self.reactions)*100
-                transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.TRANSPORT])*100
-                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.SPONTANEOUS])*100
-                metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.METABOLIC])*100
-                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
+                transporter_perc  = missing_percentage(transporter_count, reaction_type_counts[ReactionType.TRANSPORT])
+                spontaneous_perc  = missing_percentage(spontaneous_count, reaction_type_counts[ReactionType.SPONTANEOUS])
+                metabolic_perc    = missing_percentage(metabolic_count, reaction_type_counts[ReactionType.METABOLIC])
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing kcat values ({transporter_perc} transporters, {spontaneous_perc} spontaneous, {metabolic_perc} metabolic).")
             if len(missing_km) > 0:
                 transporter_count = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.TRANSPORT])
                 spontaneous_count = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.SPONTANEOUS])
                 metabolic_count   = len([r_id for r_id in missing_km if self.reactions[r_id].reaction_type == ReactionType.METABOLIC])
                 perc              = len(missing_km)/len(self.reactions)*100
-                transporter_perc  = transporter_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.TRANSPORT])*100
-                spontaneous_perc  = spontaneous_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.SPONTANEOUS])*100
-                metabolic_perc    = metabolic_count/len([r.id for r in self.reactions.values() if r.reaction_type == ReactionType.METABOLIC])*100
-                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing KM values ({transporter_perc:.2f}% transporters, {spontaneous_perc:.2f}% spontaneous, {metabolic_perc:.2f}% metabolic).")
+                transporter_perc  = missing_percentage(transporter_count, reaction_type_counts[ReactionType.TRANSPORT])
+                spontaneous_perc  = missing_percentage(spontaneous_count, reaction_type_counts[ReactionType.SPONTANEOUS])
+                metabolic_perc    = missing_percentage(metabolic_count, reaction_type_counts[ReactionType.METABOLIC])
+                throw_message(MessageType.WARNING, f"{perc:.2f}% of reactions with missing KM values ({transporter_perc} transporters, {spontaneous_perc} spontaneous, {metabolic_perc} metabolic).")
             if len(missing_kcat)==0 and len(missing_km)==0:
                 throw_message(MessageType.INFO, "No missing kinetic parameters in the model.")
         return {"kcat": missing_kcat, "km": missing_km}
@@ -848,7 +863,10 @@ class Builder:
         verbose : bool
             Display messages if True.
         """
-        p_to_r_vec = m_to_r_vec = r_to_p_vec = r_to_m_vec = []
+        p_to_r_vec         = []
+        m_to_r_vec         = []
+        r_to_p_vec         = []
+        r_to_m_vec         = []
         connectivity_error = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Initialize mappings                  #
@@ -913,7 +931,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.FORWARD:
+            if reaction.direction == ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -923,7 +941,7 @@ class Builder:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.BACKWARD:
+            elif reaction.direction == ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -933,7 +951,7 @@ class Builder:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.REVERSIBLE:
+            elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
@@ -973,7 +991,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.FORWARD:
+            if reaction.direction == ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -985,7 +1003,7 @@ class Builder:
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.BACKWARD:
+            elif reaction.direction == ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
@@ -997,7 +1015,7 @@ class Builder:
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.REVERSIBLE:
+            elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
@@ -1052,7 +1070,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.FORWARD:
+            if reaction.direction == ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1060,7 +1078,7 @@ class Builder:
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.BACKWARD:
+            elif reaction.direction == ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1068,7 +1086,7 @@ class Builder:
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.REVERSIBLE:
+            elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1109,7 +1127,7 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for reaction in self.reactions.values():
             ### 1.1) If the reaction is forward irreversible ###
-            if ReactionDirection.FORWARD:
+            if reaction.direction == ReactionDirection.FORWARD:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1117,7 +1135,7 @@ class Builder:
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
-            elif ReactionDirection.BACKWARD:
+            elif reaction.direction == ReactionDirection.BACKWARD:
                 ### Classify reactants
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1125,7 +1143,7 @@ class Builder:
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
-            elif ReactionDirection.REVERSIBLE:
+            elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
@@ -1329,8 +1347,8 @@ class Builder:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 8) Collect active/inactive reactions #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        sol = self.FBA_solution.fluxes.to_dict()
-        self.inactive_reactions = [r_id for r_id in sol if sol[r_id] == 0.0 and not r_id.startswith("EX_")]
+        sol                         = self.FBA_solution.fluxes.to_dict()
+        self.FBA_inactive_reactions = [r_id for r_id in sol if sol[r_id] == 0.0 and not r_id.startswith("EX_")]
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # 5) Model reconstruction     #
@@ -1948,6 +1966,7 @@ class Builder:
         f.write("id;name;mass;sequence;length;gene;product;essentiality\n")
         for p in self.proteins.values():
             name         = ("" if p.name is None else p.name)
+            sequence     = ("" if p.formula is None else p.formula)
             gene         = ("" if p.gene is None else p.gene)
             product      = ("" if p.product is None else p.product)
             essentiality = ""
@@ -1959,7 +1978,7 @@ class Builder:
                 essentiality = "Non-essential"
             else:
                 essentiality = "Unknown"
-            f.write(p.id+";"+name+";"+str(p.mass)+";"+p.formula+";"+str(len(p.formula))+";"+gene+";"+product+";"+essentiality+"\n")
+            f.write(p.id+";"+name+";"+str(p.mass)+";"+sequence+";"+str(len(sequence))+";"+gene+";"+product+";"+essentiality+"\n")
         f.close()
     
     def write_ribosomal_proteins_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -2017,11 +2036,12 @@ class Builder:
                 category = "large molecule"
             elif m.species_type == SpeciesType.UNKNOWN:
                 category = "unknown"
-            formula = m.formula
+            name    = ("" if m.name is None else m.name)
+            formula = ("" if m.formula is None else m.formula)
             kegg_id = ""
             if "kegg.compound" in m.annotation:
                 kegg_id = m.annotation["kegg.compound"]
-            f.write(m.id+";"+m.name+";"+location+";"+category+";"+str(m.mass)+";"+formula+";"+kegg_id+"\n")
+            f.write(m.id+";"+name+";"+location+";"+category+";"+str(m.mass)+";"+formula+";"+kegg_id+"\n")
         f.close()
     
     def write_reactions_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -2049,9 +2069,11 @@ class Builder:
                 r_type = "spontaneous"
             elif r.reaction_type == ReactionType.EXCHANGE:
                 r_type = "exchange"
-            proteins = " + ".join([f"{r.proteins[p_id]} {p_id}" for p_id in r.proteins])
+            name     = ("" if r.name is None else r.name)
+            expression = ("" if r.expression is None else r.expression)
+            proteins = ("" if r.proteins is None else " + ".join([f"{r.proteins[p_id]} {p_id}" for p_id in r.proteins]))
             GPR      = ("and" if r.GPR == ReactionGPR.AND else "or" if r.GPR == ReactionGPR.OR else "none")
-            f.write(r.id+";"+r.name+";"+r_type+";"+str(r.lb)+";"+str(r.ub)+";"+r.expression+";"+proteins+";"+GPR+";"+str(r.enzyme_mass)+"\n")
+            f.write(r.id+";"+name+";"+r_type+";"+str(r.lb)+";"+str(r.ub)+";"+expression+";"+proteins+";"+GPR+";"+str(r.enzyme_mass)+"\n")
         f.close()
     
     def write_kinetic_parameters_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -2124,7 +2146,8 @@ class Builder:
         f        = open(filename, "w")
         f.write("reaction_id;subsystem\n")
         for r in self.reactions.values():
-            f.write(r.id+";"+r.subsystem+"\n")
+            subsystem = ("" if r.subsystem is None else r.subsystem)
+            f.write(r.id+";"+subsystem+"\n")
         f.close()
     
     def write_model_data( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
@@ -2184,7 +2207,7 @@ class Builder:
                 continue
             for p_ID in r_proteins:
                 f.write(r_ID+";"+r_expression+";forward;"+",".join(substrates.keys())+";"+",".join(products.keys())+";"+p_ID+";"+",".join(substrates.values())+";"+",".join(products.values())+";"+r_sequences[p_ID]+"\n")
-                f.write(r_ID+";"+r_expression+";backward;"+";"+",".join(products.keys())+";"+",".join(substrates.keys())+p_ID+";"+",".join(products.values())+";"+",".join(substrates.values())+";"+r_sequences[p_ID]+"\n")
+                f.write(r_ID+";"+r_expression+";backward;"+",".join(products.keys())+";"+",".join(substrates.keys())+";"+p_ID+";"+",".join(products.values())+";"+",".join(substrates.values())+";"+r_sequences[p_ID]+"\n")
         f.close()
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Generate KM prediction table #
@@ -2245,7 +2268,7 @@ class Builder:
             html_str += "<table>"
             html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
             html_str += "<h2 style='text-align: left;'>"+category+"</h2>"
-            html_str += df.to_html(escape=False, index=False, header=False)
+            html_str += df.to_html(escape=True, index=False, header=False)
             html_str += "</td></tr>"
             html_str += "</table>"
         display_html(html_str,raw=True)
@@ -2324,19 +2347,19 @@ class Builder:
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>General</h2>"
-        html_str += df1.to_html(escape=False, index=False)
+        html_str += df1.to_html(escape=True, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
-        html_str += df2.to_html(escape=False, index=False)
+        html_str += df2.to_html(escape=True, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Reaction types</h2>"
-        html_str += df3.to_html(escape=False, index=False)
+        html_str += df3.to_html(escape=True, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Reaction directions</h2>"
-        html_str += df4.to_html(escape=False, index=False)
+        html_str += df4.to_html(escape=True, index=False)
         html_str += "</td></tr>"
         html_str += "</table>"
         display_html(html_str,raw=True)
@@ -2385,4 +2408,3 @@ def load_builder( path: str ) -> Builder:
     builder = pickle.load(ifile)
     ifile.close()
     return builder
-
