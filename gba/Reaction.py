@@ -277,8 +277,8 @@ class Reaction:
         assert self.check_no_conversion(), throw_message(MessageType.ERROR, f"Reaction {self.id} has been converted to GBA format. Consider to reset the conversion.")
         assert self.proteins != None, throw_message(MessageType.ERROR, f"Reaction {self.id} has no proteins.")
         assert protein_id in self.proteins, throw_message(MessageType.ERROR, f"Protein {protein_id} not in the enzyme composition of reaction {self.id}.")
+        assert len(self.proteins) > 1, throw_message(MessageType.ERROR, f"Reaction {self.id} must have at least one protein.")
         del self.proteins[protein_id]
-        assert len(self.proteins) > 0, throw_message(MessageType.ERROR, f"Reaction {self.id} must have at least one protein.")
     
     def clear_proteins( self ) -> None:
         """
@@ -340,7 +340,7 @@ class Reaction:
             return
         if self.kcat == None:
             self.kcat = {}
-        assert direction in [ReactionDirection.FORWARD, ReactionDirection.BACKWARD], throw_message(MessageType.ERROR, f"Direction {dir} not recognized for reaction {self.id}.")
+        assert direction in [ReactionDirection.FORWARD, ReactionDirection.BACKWARD], throw_message(MessageType.ERROR, f"Direction {direction} not recognized for reaction {self.id}.")
         assert kcat_value >= 0.0, throw_message(MessageType.ERROR, f"kcat value must be positive or null (reaction {self.id}).")
         self.kcat[direction] = kcat_value
     
@@ -649,7 +649,7 @@ class Reaction:
             converted = True
         if self.stoichiometry_is_converted:
             converted = True
-        if verbose:
+        if converted and verbose:
             throw_message(MessageType.WARNING, f"A GBA conversion exists for reaction {self.id}. Consider to reset the conversion.")
         return not converted
     
@@ -844,6 +844,6 @@ class Reaction:
         """
         self.define_expression()
         df       = self.build_dataframe()
-        html_str = df.to_html(escape=False)
+        html_str = df.to_html(escape=True)
         display_html(html_str,raw=True)
 
