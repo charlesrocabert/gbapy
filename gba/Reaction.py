@@ -31,6 +31,7 @@ Copyright: © 2024-2026 Charles Rocabert.
 """
 
 import numpy as np
+import pandas as pd
 from typing import Optional
 from IPython.display import display_html
 
