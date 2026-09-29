@@ -8,6 +8,7 @@ deprecated/**
 examples/**
 doc/**
 .copilot/**
+.github/copilot-instructions.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

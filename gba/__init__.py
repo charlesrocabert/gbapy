@@ -25,7 +25,7 @@ Filename: __init__.py
 Author: Charles Rocabert
 Date: 2025-05-03
 Description:
-    __init__ file of the gbapy module.
+    Initializer file of the gbapy module.
 License: GNU General Public License v3 (GPLv3)
 Copyright: © 2024-2026 Charles Rocabert.
 """
