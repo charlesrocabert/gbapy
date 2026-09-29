@@ -143,4 +143,3 @@ class MessageType(enum.Enum):
     WARNING = 2
     ERROR   = 3
     PLAIN   = 4
-
