@@ -527,9 +527,11 @@ class Model:
         self.conditions_loaded = False
         filename               = path+"/"+self.name+"/conditions.csv"
         assert os.path.exists(filename), throw_message(MessageType.ERROR, "The file conditions.csv does not exist in the specified path: "+filename)
-        df                     = pd.read_csv(filename, sep=";")
-        self.condition_params  = list(df["Unnamed: 0"])
-        self.condition_ids     = list(df.columns)[1:df.shape[1]]
+        df                    = pd.read_csv(filename, sep=";")
+        self.condition_params = list(df["Unnamed: 0"])
+        self.condition_ids    = list(df.columns)[1:df.shape[1]]
+        for name in self.condition_ids:
+            assert name.isdigit(), throw_message(MessageType.ERROR, "Condition names must be integers. Found: "+name)
         self.condition_ids     = [str(int(name)) for name in self.condition_ids]
         df                     = df.drop(["Unnamed: 0"], axis=1)
         df.index               = self.condition_params
@@ -722,6 +724,7 @@ class Model:
         # 4) Indices: s (transport), e (enzymatic), r (ribosome) #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.sM = np.sum(self.M, axis=0)
+        self.s  = []
         self.r  = self.nj-1
         for j in range(self.nj-1):
             for i in range(self.ni):
@@ -1251,7 +1254,7 @@ class Model:
                 else:
                     vec.append(default_concentration)
         self.condition_ids.append(condition_id)
-        self.conditions = np.column_stack([self.conditions, np.array(vec)]) if self.conditions.size else np.array(vec)
+        self.conditions = np.column_stack([self.conditions, np.array(vec)]) if self.conditions.size else np.array(vec).reshape(-1, 1)
     
     def clear_constant_rhs( self ) -> None:
         """
@@ -1322,7 +1325,7 @@ class Model:
         condition_id : str
             External condition identifier.
         """
-        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, "Unknown condition identifier {condition_id}.")
+        assert condition_id in self.condition_ids, throw_message(MessageType.ERROR, f"Unknown condition identifier {condition_id}.")
         self.condition = condition_id
         self.rho       = self.get_condition(self.condition, "rho")
         for i in range(self.nx):
@@ -1744,7 +1747,7 @@ class Model:
                 lb_vec.append(-gp.GRB.INFINITY)
             else:
                 lb_vec.append(GbaConstants.TOL.value)
-        lb_vec = [GbaConstants.TOL.value]*self.nj    
+        #lb_vec = [GbaConstants.TOL.value]*self.nj    
         ub_vec = [gp.GRB.INFINITY]*self.nj
         for item in self.constant_reactions.items():
            r_index         = self.reaction_ids.index(item[0])
@@ -1811,6 +1814,7 @@ class Model:
         bool
             True if a consistent solution is found, False otherwise.
         """
+        self.set_condition(condition_id)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Explore saturation and slack if required #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1826,7 +1830,6 @@ class Model:
                     sat_act /= 1.1
                     slack   *= 1.1
             if solved:
-                self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
                 if self.consistent:
@@ -1847,7 +1850,6 @@ class Model:
         else:
             solved = self.solve_q0_linear_problem(min_bp=min_bp, sat_act=sat_act, slack=slack)
             if solved:
-                self.set_condition(condition_id)
                 self.set_q0(self.initial_solution)
                 self.calculate()
                 if self.consistent:
@@ -2302,7 +2304,7 @@ class Model:
             html_str += "<table>"
             html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
             html_str += "<h2 style='text-align: left;'>"+category+"</h2>"
-            html_str += df.to_html(escape=False, index=False)
+            html_str += df.to_html(escape=True, index=False)
             html_str += "</td></tr>"
             html_str += "</table>"
         display_html(html_str,raw=True)
@@ -2336,18 +2338,18 @@ class Model:
         html_str += "<table>"
         html_str += "<tr style='text-align:left'><td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Metabolites</h2>"
-        html_str += df1.to_html(escape=False, index=False)
+        html_str += df1.to_html(escape=True, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Reactions</h2>"
-        html_str += df2.to_html(escape=False, index=False)
+        html_str += df2.to_html(escape=True, index=False)
         html_str += "</td>"
         html_str += "<td style='vertical-align:top'>"
         html_str += "<h2 style='text-align: left;'>Matrix rank</h2>"
-        html_str += df3.to_html(escape=False, index=False)
+        html_str += df3.to_html(escape=True, index=False)
         html_str += "</td></tr>"
         html_str += "</table>"
-        display_html(html_str,raw=True)
+        display_html(html_str, raw=True)
 
 #~~~~~~~~~~~~~~~~~~~#
 # Utility functions #
@@ -2433,4 +2435,3 @@ def load_model( path: str ) -> Model:
     model = pickle.load(ifile)
     ifile.close()
     return model
-
