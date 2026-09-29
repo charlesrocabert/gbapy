@@ -78,8 +78,8 @@ class Model:
     ----------
     name : str
         Name of the model.
-    info : str
-        Info about the model.
+    info : dict
+        Information about the model.
     metabolite_ids : list
         List of all metabolite ids.
     x_ids : list
@@ -697,13 +697,13 @@ class Model:
                 elif self.Mx[i,j] > 0:
                     self.KM_b[i,j] = self.K[i,j]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 1) Inverse of KI                                       #
+        # 2) Inverse of KI                                       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         with np.errstate(divide='ignore'):
             self.rKI                     = 1.0/self.KI
             self.rKI[np.isinf(self.rKI)] = 0.0
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Vector lengths                                      #
+        # 3) Vector lengths                                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.nx = len(self.x_ids)
         self.nc = len(self.c_ids)
@@ -713,7 +713,7 @@ class Model:
         self.c  = np.zeros(self.nc)
         self.xc = np.zeros(self.ni)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Create M matrix                                     #
+        # 4) Create M matrix                                     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.M = np.zeros((self.nc, self.nj))
         for i in range(self.nc):
@@ -721,7 +721,7 @@ class Model:
             for j in range(self.nj):
                 self.M[i,j] = self.Mx[self.metabolite_ids.index(met_id),j]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 4) Indices: s (transport), e (enzymatic), r (ribosome) #
+        # 5) Indices: s (transport), e (enzymatic), r (ribosome) #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.sM = np.sum(self.M, axis=0)
         self.s  = []
@@ -735,12 +735,12 @@ class Model:
         self.ns = len(self.s)
         self.ne = len(self.e)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 5) Indices: m (metabolite), a (all proteins)           #
+        # 6) Indices: m (metabolite), a (all proteins)           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.m = list(range(self.nc-1))
         self.a = self.nc-1
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 6) Matrix column rank                                  #
+        # 7) Matrix column rank                                  #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.column_rank = np.linalg.matrix_rank(self.M)
         if self.column_rank == self.nj:
@@ -748,7 +748,7 @@ class Model:
         else:
             self.full_column_rank = False
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 7) Model dynamical variables                           #
+        # 8) Model dynamical variables                           #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.tau_j   = np.zeros(self.nj)
         self.ditau_j = np.zeros((self.nj, self.nc))
@@ -759,7 +759,7 @@ class Model:
         self.p       = np.zeros(self.nj)
         self.b       = np.zeros(self.nc)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 8) Evolutionary variables                              #
+        # 9) Evolutionary variables                              #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.q0      = np.zeros(self.nj)
         self.dmu_dq  = np.zeros(self.nj)
@@ -767,7 +767,7 @@ class Model:
         self.q_trunc = np.zeros(self.nj-1)
         self.q       = np.zeros(self.nj)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 9) Define the kinetic model of each reaction           #
+        # 10) Define the kinetic model of each reaction          #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.kinetic_model.clear()
         self.directions.clear()
@@ -819,12 +819,12 @@ class Model:
 
     def read_from_ods( self, path: Optional[str] = "." ) -> None:
         """
-        Read the model from ODS files.
+        Read the model from an ODS file.
 
         Parameters
         ----------
         path : str, default="."
-            Path to the ODS files.
+            Path to the ODS file.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Temporarily convert ODS to CSV files        #
@@ -1003,7 +1003,7 @@ class Model:
     
     def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
-        Export the model to a folder in ODS format.
+        Export the model to an ODS file.
 
         Parameters
         ----------
@@ -1100,7 +1100,7 @@ class Model:
             protein_contributions_df = pd.DataFrame(rows, columns=["reaction", "protein", "contribution"])
             protein_contributions_df.replace(-0.0, 0.0, inplace=True)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 11) Write the variables in xlsx    #
+        # 11) Write the variables in ods     #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         ods_path = path+"/"+(name if name != "" else self.name)+".ods"
         with pd.ExcelWriter(ods_path, engine="odf") as writer:
@@ -1915,7 +1915,7 @@ class Model:
 
         Parameters
         ----------
-        threshold : Optional[float], default=1e-6
+        threshold : Optional[float], default=1e-10
             Threshold below which a reaction is considered inactive.
 
         Returns
@@ -2021,8 +2021,10 @@ class Model:
 
         Parameters
         ----------
-        solver_output : str
-            Output of the solver.
+        temporary_name : str
+            Name of the temporary model directory.
+        condition_id : str
+            Identifier of the optimized condition, or ``"all"``.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Prepare and check filenames #
@@ -2107,13 +2109,8 @@ class Model:
             Maximum number of iterations for the solver.
         delete : Optional[bool], default=True
             Delete temporary files.
-        verbose : Optional[bool], default=True
+        verbose : Optional[bool], default=False
             Verbose mode.
-        
-        Returns
-        -------
-        consistent : bool
-            True if the model is consistent, False otherwise.
         """
         assert shutil.which("find_model_optimum") is not None, throw_message(MessageType.ERROR, "The gbacpp solver 'find_model_optimum' is not available. Please check your installation, or your PATH variable.")
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2161,11 +2158,11 @@ class Model:
         
     def find_optimum_by_condition( self, use_previous_sol: Optional[bool] = True, tol: Optional[float] = 1e-10, mutol: Optional[float] = 1e-10, qtol: Optional[float] = 1e-10, convergence_count: Optional[int] = 10000, max_iter: Optional[int] = 10000000, delete: Optional[bool] = True, verbose: Optional[bool] = False ) -> None:
         """
-        Find optimums for all conditions of the model using the gbacpp solver.
+        Find optima for all conditions of the model using the gbacpp solver.
 
         Parameters
         ----------
-        use_previous_sol : Optional[bool], default=False
+        use_previous_sol : Optional[bool], default=True
             Use the previous solution as initial solution for the next
             condition.
         tol : Optional[float], default=1e-10
@@ -2177,17 +2174,12 @@ class Model:
         convergence_count : Optional[int], default=10000
             Number of iterations with no significant mu change to
             assume convergence.
-        max_iter : Optional[int], default=1000000
+        max_iter : Optional[int], default=10000000
             Maximum number of iterations for the solver.
         delete : Optional[bool], default=True
             Delete temporary files.
-        verbose : Optional[bool], default=True
+        verbose : Optional[bool], default=False
             Verbose mode.
-        
-        Returns
-        -------
-        consistent : bool
-            True if the model is consistent, False otherwise.
         """
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Write the model in a temporary file with a unique key #
@@ -2235,6 +2227,21 @@ class Model:
                     throw_message(MessageType.INFO, f"Condition {cond_id}: model did not converge.")
     
     def score( self, p1, p2 ) -> float:
+        """
+        Compute a score penalizing negative metabolite and protein concentrations.
+
+        Parameters
+        ----------
+        p1 : float
+            Penalty multiplier for negative metabolite concentrations.
+        p2 : float
+            Penalty multiplier for negative protein concentrations.
+
+        Returns
+        -------
+        float
+            Growth rate adjusted by concentration penalties.
+        """
         return self.mu*(1.0+np.sum([p1 for c in self.c if c < 0.0]))*(1.0+np.sum([p2 for p in self.p if p < 0.0]))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -2257,6 +2264,10 @@ class Model:
             Use a logarithmic scale for the y axis.
         title : Optional[str], default=None
             Title of the plot.
+        xlabel : Optional[str], default=None
+            Label for the x axis.
+        ylabel : Optional[str], default=None
+            Label for the y axis.
         """
         assert x in self.data.columns, throw_message(MessageType.ERROR, f"Unknown x parameter {x}.")
         assert y in self.data.columns, throw_message(MessageType.ERROR, f"Unknown y parameter {y}.")

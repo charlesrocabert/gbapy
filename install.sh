@@ -20,7 +20,7 @@
 #***********************************************************************
 
 echo "\n************************************************************************"
-echo "* gbacpp (growth balance analysis for Python)"
+echo "* gbapy (growth balance analysis for Python)"
 echo "* Web: https://github.com/charlesrocabert/gbapy"
 echo "* Copyright © 2024-2026 Charles Rocabert."
 echo "*"

@@ -289,7 +289,7 @@ class Metabolite(Species):
         formula : str
             Chemical formula of the species.
         mass : float
-            Molecular mass of the protein.
+            Molecular mass of the metabolite.
         annotation : dict
             Annotation of the metabolite (dictionary of references).
         """

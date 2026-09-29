@@ -34,35 +34,35 @@ here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-	long_description = f.read()
+    long_description = f.read()
 
 setup(
-	name                          = "gba",
-	version                       = "0.6.6",
-	license                       = "GPL-3.0-or-later",
-	description                   = "gbapy (Growth Balance Analysis for Python)",
-	long_description              = long_description,
-	long_description_content_type = "text/markdown",
-	url                           = "https://github.com/charlesrocabert/gbapy",
-	author                        = "Charles Rocabert",
-	author_email                  = "charles.rocabert@hhu.de",
-	maintainer                    = "Furkan Mert and Jérémie Muller-Prokob",
-	classifiers = [
-		"Development Status :: 4 - Beta",
-		"Programming Language :: Python :: 3",
-		"Operating System :: OS Independent",
-		"Intended Audience :: Science/Research",
-		"Topic :: Scientific/Engineering :: Mathematics",
-	],
-	keywords     = "constraint-based-modeling growth-balance-analysis self-replicating-model systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-prnciples simulation evolutionary-algorithms predictive-evolution",
-	packages     = find_packages(exclude=["contrib", "docs", "tests"]),
-	# package_data = {
+    name                          = "gba",
+    version                       = "0.6.7",
+    license                       = "GPL-3.0-or-later",
+    description                   = "gbapy (Growth Balance Analysis for Python)",
+    long_description              = long_description,
+    long_description_content_type = "text/markdown",
+    url                           = "https://github.com/charlesrocabert/gbapy",
+    author                        = "Charles Rocabert",
+    author_email                  = "charles.rocabert@hhu.de",
+    maintainer                    = "Furkan Mert and Jérémie Muller-Prokob",
+    classifiers = [
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Mathematics",
+    ],
+    keywords     = "constraint-based-modeling growth-balance-analysis self-replicating-model systems-biology metabolic-network resource-allocation cellular-economics kinetic-modeling first-principles simulation evolutionary-algorithms predictive-evolution",
+    packages     = find_packages(exclude=["contrib", "docs", "tests"]),
+    # package_data = {
     #     'gba.data': ['**/*.csv', '**/*.ods']
     # },
-	python_requires  = ">=3",
+    python_requires  = ">=3.9",
     install_requires = ["cobra", "molmass", "numpy", "pandas", "gurobipy", "biopython", "IPython", "plotly", "pyexcel_xlsx", "pyexcel_ods3"],
-	project_urls     = {
-	"Source": "https://github.com/charlesrocabert/gbapy"
-	},
+    project_urls     = {
+    "Source": "https://github.com/charlesrocabert/gbapy"
+    },
 )
 

@@ -452,7 +452,7 @@ class Builder:
         if self.FBA_biomass_reaction is not None and previous_id in self.FBA_biomass_reaction.metabolites:
             self.FBA_biomass_reaction.rename_metabolite(previous_id, new_id)
         #~~~~~~~~~~~~~~~~~~~~~~~#
-        # 3) Manage metabolites #
+        # 2) Manage metabolites #
         #~~~~~~~~~~~~~~~~~~~~~~~#
         self.metabolites[new_id]    = self.metabolites.pop(previous_id)
         self.metabolites[new_id].id = new_id
@@ -1257,8 +1257,8 @@ class Builder:
     
     def compute_stoichiometric_matrix_metrics( self ) -> None:
         """
-        Compute the mass fraction matrix metrics:
-        - Rank of the mass fraction matrix
+        Compute the stoichiometric matrix metrics:
+        - Rank of the stoichiometric matrix
         - List of dependent reactions
         """
         self.FBA_column_rank = np.linalg.matrix_rank(self.FBA_intS)
@@ -1465,7 +1465,7 @@ class Builder:
             for p in products:
                 self.reactions["Ribosome"].remove_metabolite(p)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 2) Convert every reactions               #
+        # 2) Convert every reaction                #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         for r in self.reactions.values():
             r.convert()
@@ -1821,7 +1821,7 @@ class Builder:
 
     def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
         """
-        Export the model to a folder in ODS format.
+        Export the model to an ODS file.
 
         Parameters
         ----------
@@ -1935,7 +1935,7 @@ class Builder:
             if protein_contributions_df is not None:
                 protein_contributions_df.to_excel(writer, sheet_name="protein_contributions", index=False)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        # 12) Free memory                      #
+        # 11) Free memory                      #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         del(Info_df)
         del(M_df)

@@ -52,9 +52,9 @@ class Reaction:
     Attributes
     ----------
     id : str
-        Identifier of the species.
+        Identifier of the reaction.
     name : str
-        Name of the species.
+        Name of the reaction.
     subsystem : str
         Reaction's subsystem in metabolism.
     reaction_type : ReactionType
@@ -203,7 +203,7 @@ class Reaction:
         ----------
         metabolites : dict[str,float]
             Dictionary containing the metabolite IDs and their
-            stoichiomety.
+            stoichiometry.
         """
         assert self.check_no_conversion(), f"Reaction '{self.id}' has been converted to GBA format. Consider to reset the conversion."
         if metabolites == None:
@@ -230,7 +230,7 @@ class Reaction:
         ----------
         proteins : dict[str,float]
             Dictionary containing the protein IDs and their
-            stoichiomety.
+            stoichiometry.
         """
         assert self.check_no_conversion(), throw_message(MessageType.ERROR, f"Reaction {self.id} has been converted to GBA format. Consider to reset the conversion.")
         if proteins == None:
@@ -604,7 +604,7 @@ class Reaction:
         verbose : bool
             Verbosity of the output.
         threshold : float
-            Threshold for the mass balance (in Da).
+            Threshold for normalized mass stoichiometry.
         """
         reactants_mass = 0.0
         products_mass  = 0.0
