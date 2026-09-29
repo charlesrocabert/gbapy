@@ -105,21 +105,25 @@ class Species:
         """
         Calculate the molecular mass of the species.
         """
-        if self.species_type == SpeciesType.DNA and self.formula not in ["", None]:
-            self.mass = SeqUtils.molecular_weight(self.formula, "DNA")
-        elif self.species_type == SpeciesType.RNA and self.formula not in ["", None]:
-            self.mass = SeqUtils.molecular_weight(self.formula, "RNA")
-        elif self.species_type == SpeciesType.PROTEIN and self.formula not in ["", None]:
-            self.mass = ProteinAnalysis(self.formula).molecular_weight()
-        elif self.species_type == SpeciesType.SMALLMOLECULE and self.formula not in ["", None]:
-            self.mass = molmass.Formula(self.formula).mass
-        elif self.species_type in [SpeciesType.MACROMOLECULE, SpeciesType.UNKNOWN] and self.formula not in ["", None]:
-            try:
+        if self.formula in ["", None]:
+            throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of {self.id}.")
+            return
+        try:
+            if self.species_type == SpeciesType.DNA:
+                self.mass = SeqUtils.molecular_weight(self.formula, "DNA")
+            elif self.species_type == SpeciesType.RNA:
+                self.mass = SeqUtils.molecular_weight(self.formula, "RNA")
+            elif self.species_type == SpeciesType.PROTEIN:
+                self.mass = ProteinAnalysis(self.formula).molecular_weight()
+            elif self.species_type == SpeciesType.SMALLMOLECULE:
+                self.mass = molmass.Formula(self.formula).mass
+            elif self.species_type in [SpeciesType.MACROMOLECULE, SpeciesType.UNKNOWN]:
                 formula   = self.formula.replace("R", "")
                 self.mass = (molmass.Formula(formula).mass if formula != "" else 0.0)
-            except:
+            else:
                 throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of {self.id}.")
-        else:
+        except (ValueError, TypeError, molmass.FormulaError):
+            self.mass = None
             throw_message(MessageType.WARNING, f"Could not calculate the molecular mass of {self.id}.")
 
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
@@ -194,7 +198,7 @@ class Species:
         Print a summary of the species.
         """
         df       = self.build_dataframe()
-        html_str = df.to_html(escape=False)
+        html_str = df.to_html(escape=True)
         display_html(html_str,raw=True)
 
 class Protein(Species):
@@ -281,7 +285,7 @@ class Metabolite(Species):
             Location of the species in the cell (INTERNAL, EXTERNAL, UNKNOWN).
         species_type : SpeciesType
             Type of the species (DNA, RNA, PROTEIN, SMALLMOLECULE,
-            MACROMOLECULE, UNKNWON).
+            MACROMOLECULE, UNKNOWN).
         formula : str
             Chemical formula of the species.
         mass : float
@@ -290,5 +294,4 @@ class Metabolite(Species):
             Annotation of the metabolite (dictionary of references).
         """
         super().__init__(id, name, species_location, species_type, formula, mass)
-        self.annotation = annotation
-
+        self.annotation = {} if annotation is None else annotation
