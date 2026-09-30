@@ -37,6 +37,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from typing import Optional
+from scipy.optimize import linprog
 from IPython.display import display_html
 
 try:
@@ -942,28 +943,28 @@ class Builder:
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
             ### 1.2) If the reaction is backward irreversible ###
             elif reaction.direction == ReactionDirection.BACKWARD:
-                ### Classify reactants
-                for m_id in reaction.products:
-                    current_list = met_to_met_connectivity[m_id]["next"].copy()
-                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
                 ### Classify products
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
+                ### Classify reactants
+                for m_id in reaction.products:
+                    current_list = met_to_met_connectivity[m_id]["next"].copy()
+                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
             ### 1.3) If the reaction is reversible ###
             elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
-                    current_list = met_to_met_connectivity[m_id]["previous"].copy()
-                    met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
+                    #current_list = met_to_met_connectivity[m_id]["previous"].copy()
+                    #met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
                     met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.products if m_id not in current_list]
                 ### Classify products
                 for m_id in reaction.products:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
-                    current_list = met_to_met_connectivity[m_id]["next"].copy()
-                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
+                    #current_list = met_to_met_connectivity[m_id]["next"].copy()
+                    #met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect unproduced metabolites       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1004,23 +1005,23 @@ class Builder:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
             ### 1.2) If the reaction is backward irreversible ###
             elif reaction.direction == ReactionDirection.BACKWARD:
-                ### Classify reactants
-                for m_id in reaction.products:
-                    current_list = met_to_met_connectivity[m_id]["next"].copy()
-                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
                 ### Classify products
                 for m_id in reaction.reactants:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+                ### Classify reactants
+                for m_id in reaction.products:
+                    current_list = met_to_met_connectivity[m_id]["next"].copy()
+                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
+                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
             ### 1.3) If the reaction is reversible ###
             elif reaction.direction == ReactionDirection.REVERSIBLE:
                 ### Classify reactants
                 for m_id in reaction.reactants:
-                    current_list = met_to_met_connectivity[m_id]["previous"].copy()
-                    met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                    #current_list = met_to_met_connectivity[m_id]["previous"].copy()
+                    #met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.products if m_id not in current_list]
+                    #met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
                     current_list = met_to_met_connectivity[m_id]["next"].copy()
                     met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.products if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
@@ -1029,9 +1030,9 @@ class Builder:
                     current_list = met_to_met_connectivity[m_id]["previous"].copy()
                     met_to_met_connectivity[m_id]["previous"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-                    current_list = met_to_met_connectivity[m_id]["next"].copy()
-                    met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                    #current_list = met_to_met_connectivity[m_id]["next"].copy()
+                    #met_to_met_connectivity[m_id]["next"] += [m_id for m_id in reaction.reactants if m_id not in current_list]
+                    #met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect infeasible loops             #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1054,7 +1055,7 @@ class Builder:
             for m_id, c_id in pairs:
                 throw_message(MessageType.WARNING, f"Infeasible loop between {m_id} and {c_id}.")
         return pairs
-
+    
     def detect_dead_end_metabolites( self, verbose: Optional[bool] = False ) -> list[str]:
         """
         Detect dead-end metabolites in the model.
@@ -1090,11 +1091,11 @@ class Builder:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+                    #met_to_rea_connectivity[m_id]["product"].append(reaction.id)
                 ### Classify products
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                    #met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect dead-end metabolites       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -1147,11 +1148,11 @@ class Builder:
                 ### Classify reactants
                 for m_id in reaction.reactants:
                     met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["product"].append(reaction.id)
+                    #met_to_rea_connectivity[m_id]["product"].append(reaction.id)
                 ### Classify products
                 for m_id in reaction.products:
                     met_to_rea_connectivity[m_id]["product"].append(reaction.id)
-                    met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
+                    #met_to_rea_connectivity[m_id]["reactant"].append(reaction.id)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 2) Detect isolated metabolites       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
