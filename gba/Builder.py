@@ -1813,11 +1813,14 @@ class Builder:
         # 11) Save protein contributions       #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         f = open(model_path+"/protein_contributions.csv", "w")
-        f.write("reaction;protein;contribution\n")
+        f.write("reaction;protein;contribution;subsystem;gpr_logic;reaction_type\n")
         for r in self.reactions.values():
+            subsystem     = r.subsystem if r.subsystem is not None else ""
+            gpr_logic     = "and" if r.GPR==ReactionGPR.AND else "or" if r.GPR==ReactionGPR.OR else ""
+            reaction_type = "metabolic" if r.reaction_type==ReactionType.METABOLIC else "transport" if r.reaction_type==ReactionType.TRANSPORT else "spontaneous" if r.reaction_type==ReactionType.SPONTANEOUS else "exchange" if r.reaction_type==ReactionType.EXCHANGE else ""
             if r.protein_contributions is not None:
                 for p_id, contribution in r.protein_contributions.items():
-                    f.write(r.id+";"+p_id+";"+str(contribution)+"\n")
+                    f.write(r.id+";"+p_id+";"+str(contribution)+";"+subsystem+";"+gpr_logic+";"+reaction_type+"\n")
         f.close()
 
     def export_to_ods( self, name: Optional[str] = "", path: Optional[str] = "." ) -> None:
@@ -2124,11 +2127,14 @@ class Builder:
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path {path} does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_protein_contributions.csv"
         f        = open(filename, "w")
-        f.write("reaction;protein;contribution\n")
+        f.write("reaction;protein;contribution;subsystem;gpr_logic;reaction_type\n")
         for r in self.reactions.values():
+            subsystem     = r.subsystem if r.subsystem is not None else ""
+            gpr_logic     = "and" if r.GPR==ReactionGPR.AND else "or" if r.GPR==ReactionGPR.OR else ""
+            reaction_type = "metabolic" if r.reaction_type==ReactionType.METABOLIC else "transport" if r.reaction_type==ReactionType.TRANSPORT else "spontaneous" if r.reaction_type==ReactionType.SPONTANEOUS else "exchange" if r.reaction_type==ReactionType.EXCHANGE else ""
             if r.protein_contributions is not None:
                 for p_id, contribution in r.protein_contributions.items():
-                    f.write(r.id+";"+p_id+";"+str(contribution)+"\n")
+                    f.write(r.id+";"+p_id+";"+str(contribution)+";"+subsystem+";"+gpr_logic+";"+reaction_type+"\n")
         f.close()
     
     def write_subsystems_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:

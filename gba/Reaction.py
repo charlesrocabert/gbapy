@@ -531,7 +531,11 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # [p] = [E] * (m_p * stoic_p / m_E) (in g/L)
         self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
-    
+        #if self.GPR == ReactionGPR.NONE or self.GPR == ReactionGPR.AND:
+            #self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
+        #elif self.GPR == ReactionGPR.OR:
+            #self.protein_contributions = {p_id: self.proteins[p_id] for p_id in self.proteins}
+        
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """
         Does the reaction have a missing enzyme mass (None or zero)?
