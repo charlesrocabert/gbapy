@@ -519,8 +519,7 @@ class Reaction:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # 1) Calculate the molecular mass of the enzyme               #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.enzyme_mass           = 0.0
-        self.protein_contributions = {}
+        self.enzyme_mass = 0.0
         for p_id in self.proteins:
             assert p_id in self._builder.proteins, throw_message(MessageType.ERROR, f"Protein {p_id} not found in the list of proteins.")
             self.enzyme_mass += self._builder.proteins[p_id].mass*self.proteins[p_id]
@@ -530,12 +529,12 @@ class Reaction:
         # 2) Calculate the contribution of each protein to proteomics #
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         # [p] = [E] * (m_p * stoic_p / m_E) (in g/L)
-        self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
-        #if self.GPR == ReactionGPR.NONE or self.GPR == ReactionGPR.AND:
-            #self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
-        #elif self.GPR == ReactionGPR.OR:
-            #self.protein_contributions = {p_id: self.proteins[p_id] for p_id in self.proteins}
-        
+        self.protein_contributions = {}
+        if self.GPR == ReactionGPR.NONE or self.GPR == ReactionGPR.AND:
+            self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]/self.enzyme_mass for p_id in self.proteins}
+        elif self.GPR == ReactionGPR.OR:
+            self.protein_contributions = {p_id: self._builder.proteins[p_id].mass*self.proteins[p_id]*len(self.proteins)/self.enzyme_mass for p_id in self.proteins}
+    
     def has_missing_mass( self, verbose: Optional[bool] = False ) -> bool:
         """
         Does the reaction have a missing enzyme mass (None or zero)?
