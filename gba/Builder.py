@@ -1999,9 +1999,10 @@ class Builder:
         assert os.path.exists(path), throw_message(MessageType.ERROR, f"The path {path} does not exist")
         filename = path+"/"+(self.name if name == "" else name)+"_ribosomal_proteins.csv"
         f        = open(filename, "w")
-        f.write("id;contribution\n")
-        for p_id, contrib in self.reactions["Ribosome"].protein_contributions.items():
-            f.write(p_id+";"+str(contrib)+"\n")
+        f.write("id\n")
+        for p in self.proteins.values():
+            if not p.product is None and "ribosom" in p.product.lower():
+                f.write(p.id+"\n")
         f.close()
     
     def write_metabolites_list( self, path: Optional[str] = ".", name: Optional[str] = "" ) -> None:
